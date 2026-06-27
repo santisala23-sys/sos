@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Bell, BellOff } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Bell, BellOff, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -11,36 +11,67 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
 }
 
-export function PushNotificationSetup() {
+async function getVapidPublicKey(): Promise<string | null> {
+  if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
+    return process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  }
+  const keyRes = await fetch("/api/push/vapid-public-key");
+  const { publicKey } = await keyRes.json();
+  return publicKey ?? null;
+}
+
+async function registerServiceWorker() {
+  const reg = await navigator.serviceWorker.register("/sw.js");
+  await navigator.serviceWorker.ready;
+  return reg;
+}
+
+async function detectPushSubscription(): Promise<boolean> {
+  if (Notification.permission !== "granted") return false;
+  const reg = await navigator.serviceWorker.getRegistration();
+  const sub = await reg?.pushManager.getSubscription();
+  return Boolean(sub);
+}
+
+export type PushNotificationsState = {
+  supported: boolean;
+  checking: boolean;
+  subscribed: boolean;
+  loading: boolean;
+  message: string | null;
+  subscribe: () => Promise<void>;
+  unsubscribe: () => Promise<void>;
+};
+
+export function usePushNotifications(): PushNotificationsState {
   const [supported, setSupported] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    setSupported(
-      "serviceWorker" in navigator &&
-        "PushManager" in window &&
-        "Notification" in window,
-    );
+  const refreshStatus = useCallback(async () => {
+    const active = await detectPushSubscription();
+    setSubscribed(active);
+    return active;
   }, []);
 
-  async function registerServiceWorker() {
-    const reg = await navigator.serviceWorker.register("/sw.js");
-    await navigator.serviceWorker.ready;
-    return reg;
-  }
+  useEffect(() => {
+    const ok =
+      "serviceWorker" in navigator &&
+      "PushManager" in window &&
+      "Notification" in window;
+    setSupported(ok);
 
-  async function getVapidPublicKey(): Promise<string | null> {
-    if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
-      return process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    if (!ok) {
+      setChecking(false);
+      return;
     }
-    const keyRes = await fetch("/api/push/vapid-public-key");
-    const { publicKey } = await keyRes.json();
-    return publicKey ?? null;
-  }
 
-  async function handleSubscribe() {
+    refreshStatus().finally(() => setChecking(false));
+  }, [refreshStatus]);
+
+  async function subscribe() {
     setLoading(true);
     setMessage(null);
 
@@ -55,21 +86,22 @@ export function PushNotificationSetup() {
       const publicKey = await getVapidPublicKey();
 
       if (!publicKey) {
-        setMessage(
-          "Push no configurado: faltan NEXT_PUBLIC_VAPID_PUBLIC_KEY y VAPID_PRIVATE_KEY en el servidor. En Vercel → Settings → Environment Variables, o reiniciá npm run dev si acabás de editar .env.local.",
-        );
+        setMessage("Push no configurado en el servidor (VAPID).");
         return;
       }
 
-      const subscription = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey),
-      });
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+      }
 
       const res = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(subscription.toJSON()),
+        body: JSON.stringify(sub.toJSON()),
       });
 
       if (!res.ok) {
@@ -78,7 +110,7 @@ export function PushNotificationSetup() {
       }
 
       setSubscribed(true);
-      setMessage("Alertas push activadas en este dispositivo.");
+      setMessage(null);
     } catch {
       setMessage("Error al activar notificaciones.");
     } finally {
@@ -86,7 +118,7 @@ export function PushNotificationSetup() {
     }
   }
 
-  async function handleUnsubscribe() {
+  async function unsubscribe() {
     setLoading(true);
     try {
       const reg = await navigator.serviceWorker.getRegistration();
@@ -100,55 +132,84 @@ export function PushNotificationSetup() {
         await sub.unsubscribe();
       }
       setSubscribed(false);
-      setMessage("Notificaciones desactivadas.");
+      setMessage("Notificaciones desactivadas en este dispositivo.");
     } finally {
       setLoading(false);
     }
   }
 
-  if (!supported) return null;
+  return {
+    supported,
+    checking,
+    subscribed,
+    loading,
+    message,
+    subscribe,
+    unsubscribe,
+  };
+}
+
+type PushProps = { push: PushNotificationsState };
+
+export function PushNotificationAlert({ push }: PushProps) {
+  if (!push.supported || push.checking || push.subscribed) return null;
 
   return (
-    <section className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+    <section className="rounded-xl border-2 border-blue-300 bg-blue-50 p-4 shadow-sm">
       <div className="flex items-start gap-3">
         <Bell className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" aria-hidden />
         <div className="flex-1">
-          <p className="font-semibold text-blue-900">Alertas push en el celular</p>
-          <p className="mt-1 text-sm text-blue-800/80">
-            Recibí avisos al instante cuando escaneen el QR, haya SOS o una nota
-            nueva.
+          <p className="font-bold text-blue-900">Activá las alertas push</p>
+          <p className="mt-1 text-sm text-blue-800/90">
+            Recibí avisos al instante cuando escaneen el QR, haya SOS o un mensaje
+            nuevo. Solo tenés que hacerlo una vez en este dispositivo.
           </p>
-          <div className="mt-3">
-            {subscribed ? (
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                disabled={loading}
-                onClick={handleUnsubscribe}
-                className="gap-1"
-              >
-                <BellOff className="h-4 w-4" aria-hidden />
-                Desactivar
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                size="sm"
-                disabled={loading}
-                onClick={handleSubscribe}
-                className="gap-1"
-              >
-                <Bell className="h-4 w-4" aria-hidden />
-                {loading ? "Activando..." : "Activar alertas push"}
-              </Button>
-            )}
-          </div>
-          {message && (
-            <p className="mt-2 text-sm text-blue-900">{message}</p>
+          <Button
+            type="button"
+            size="sm"
+            disabled={push.loading}
+            onClick={push.subscribe}
+            className="mt-3 gap-1"
+          >
+            <Bell className="h-4 w-4" aria-hidden />
+            {push.loading ? "Activando..." : "Activar alertas push"}
+          </Button>
+          {push.message && (
+            <p className="mt-2 text-sm text-red-700" role="alert">
+              {push.message}
+            </p>
           )}
         </div>
       </div>
+    </section>
+  );
+}
+
+export function PushNotificationFooter({ push }: PushProps) {
+  if (!push.supported || push.checking || !push.subscribed) return null;
+
+  return (
+    <section className="rounded-xl border border-green-200 bg-green-50/80 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm text-green-900">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600" aria-hidden />
+          <span>
+            <strong>Alertas push activas</strong> en este dispositivo
+          </span>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={push.loading}
+          onClick={push.unsubscribe}
+          className="gap-1 text-green-800 hover:bg-green-100"
+        >
+          <BellOff className="h-4 w-4" aria-hidden />
+          Desactivar
+        </Button>
+      </div>
+      {push.message && <p className="mt-2 text-xs text-green-800">{push.message}</p>}
     </section>
   );
 }

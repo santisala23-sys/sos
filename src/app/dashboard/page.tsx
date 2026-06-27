@@ -7,7 +7,11 @@ import { LogOut, Plus, UserCircle2 } from "lucide-react";
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
-import { PushNotificationSetup } from "@/components/dashboard/PushNotificationSetup";
+import {
+  PushNotificationAlert,
+  PushNotificationFooter,
+  usePushNotifications,
+} from "@/components/dashboard/PushNotificationSetup";
 import { ScanLogsList } from "@/components/dashboard/ScanLogsList";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
 import { Button } from "@/components/ui/Button";
@@ -19,6 +23,7 @@ export default function DashboardPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const push = usePushNotifications();
 
   const loadData = useCallback(async () => {
     const [profilesRes, logsRes] = await Promise.all([
@@ -85,7 +90,7 @@ export default function DashboardPage() {
           />
         )}
 
-        <PushNotificationSetup />
+        <PushNotificationAlert push={push} />
 
         <section id="perfiles">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -165,6 +170,8 @@ export default function DashboardPage() {
             <ScanLogsList logs={logs} />
           )}
         </section>
+
+        <PushNotificationFooter push={push} />
       </main>
     </div>
   );
