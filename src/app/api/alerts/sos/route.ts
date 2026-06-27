@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import {
-  buildSosMessage,
+  buildAlertMessage,
   sendFamilyAlert,
 } from "@/lib/alerts/send-alert";
 import {
@@ -41,6 +41,14 @@ export async function POST(request: Request) {
       longitude: longitude ?? null,
     });
 
+    const { message, dashboardUrl, mapsUrl } = buildAlertMessage({
+      type: "sos",
+      beneficiaryName: profile.beneficiary_name,
+      scanLogId: scanLog.id,
+      latitude,
+      longitude,
+    });
+
     await sendFamilyAlert({
       type: "sos",
       beneficiaryName: profile.beneficiary_name,
@@ -50,7 +58,9 @@ export async function POST(request: Request) {
       latitude,
       longitude,
       scanLogId: scanLog.id,
-      message: buildSosMessage(profile.beneficiary_name),
+      message,
+      dashboardUrl,
+      mapsUrl,
     });
 
     return NextResponse.json({ scanLogId: scanLog.id });

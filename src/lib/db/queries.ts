@@ -1,4 +1,4 @@
-import type { AlertType, QrProfile, ScanLog, User } from "@/types/database";
+import type { AlertType, QrProfile, ScanLog, ScanLogWithProfile, User } from "@/types/database";
 import { getSql } from "@/lib/db/index";
 
 type UserRow = User & { password_hash: string };
@@ -175,7 +175,107 @@ export async function createScanLog(data: {
     )
     RETURNING id, scanned_at
   `;
-  return rows[0] as Pick<ScanLog, "id" | "scanned_at">;
+  return (rows[0] as Pick<ScanLog, "id" | "scanned_at">);
+}
+
+export async function listScanLogsByTutor(
+  tutorId: string,
+  limit = 50,
+): Promise<ScanLogWithProfile[]> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      sl.*,
+      qp.beneficiary_name,
+      qp.slug
+    FROM scan_logs sl
+    JOIN qr_profiles qp ON qp.id = sl.profile_id
+    WHERE qp.tutor_id = ${tutorId}
+    ORDER BY sl.scanned_at DESC
+    LIMIT ${limit}
+  `;
+  return rows as ScanLogWithProfile[];
+}
+
+export async function countUnreadScanLogs(tutorId: string): Promise<number> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT COUNT(*)::int AS count
+    FROM scan_logs sl
+    JOIN qr_profiles qp ON qp.id = sl.profile_id
+    WHERE qp.tutor_id = ${tutorId}
+      AND sl.read_at IS NULL
+  `;
+  return (rows[0] as { count: number }).count;
+}
+
+export async function findScanLogForTutor(
+  scanLogId: string,
+  tutorId: string,
+): Promise<ScanLogWithProfile | null> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT sl.*, qp.beneficiary_name, qp.slug
+    FROM scan_logs sl
+    JOIN qr_profiles qp ON qp.id = sl.profile_id
+    WHERE sl.id = ${scanLogId} AND qp.tutor_id = ${tutorId}
+    LIMIT 1
+  `;
+  return (rows[0] as ScanLogWithProfile | undefined) ?? null;
+}
+
+export async function markScanLogRead(
+  scanLogId: string,
+  tutorId: string,
+): Promise<boolean> {
+  const sql = getSql();
+  const rows = await sql`
+    UPDATE scan_logs sl
+    SET read_at = NOW()
+    FROM qr_profiles qp
+    WHERE sl.id = ${scanLogId}
+      AND sl.profile_id = qp.id
+      AND qp.tutor_id = ${tutorId}
+    RETURNING sl.id
+  `;
+  return rows.length > 0;
+}
+
+export async function findScanLogById(
+  scanLogId: string,
+): Promise<(ScanLog & { beneficiary_name: string }) | null> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT sl.*, qp.beneficiary_name
+    FROM scan_logs sl
+    JOIN qr_profiles qp ON qp.id = sl.profile_id
+    WHERE sl.id = ${scanLogId}
+    LIMIT 1
+  `;
+  return (rows[0] as (ScanLog & { beneficiary_name: string }) | undefined) ?? null;
+}
+
+export async function addScannerNote(
+  scanLogId: string,
+  note: string,
+): Promise<(ScanLog & { beneficiary_name: string; emergency_contact_name: string; emergency_contact_phone: string }) | null> {
+  const sql = getSql();
+  await sql`
+    UPDATE scan_logs
+    SET
+      scanner_note = ${note.trim()},
+      note_added_at = NOW(),
+      read_at = NULL
+    WHERE id = ${scanLogId}
+  `;
+  const rows = await sql`
+    SELECT sl.*, qp.beneficiary_name, qp.emergency_contact_name, qp.emergency_contact_phone
+    FROM scan_logs sl
+    JOIN qr_profiles qp ON qp.id = sl.profile_id
+    WHERE sl.id = ${scanLogId}
+    LIMIT 1
+  `;
+  return (rows[0] as (ScanLog & { beneficiary_name: string; emergency_contact_name: string; emergency_contact_phone: string }) | undefined) ?? null;
 }
 
 export async function updateScanLogLocation(
@@ -192,7 +292,7 @@ export async function updateScanLogLocation(
   const sql = getSql();
   const rows = await sql`
     UPDATE scan_logs
-    SET latitude = ${latitude}, longitude = ${longitude}
+    SET latitude = ${latitude}, longitude = ${longitude}, read_at = NULL
     WHERE id = ${scanLogId}
     RETURNING id, scanned_at, profile_id
   `;

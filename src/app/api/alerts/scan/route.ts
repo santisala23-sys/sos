@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import {
-  buildScanMessage,
+  buildAlertMessage,
   sendFamilyAlert,
 } from "@/lib/alerts/send-alert";
 import {
@@ -37,6 +37,12 @@ export async function POST(request: Request) {
       alert_type: "scan",
     });
 
+    const { message, dashboardUrl, mapsUrl } = buildAlertMessage({
+      type: "scan",
+      beneficiaryName: profile.beneficiary_name,
+      scanLogId: scanLog.id,
+    });
+
     await sendFamilyAlert({
       type: "scan",
       beneficiaryName: profile.beneficiary_name,
@@ -44,7 +50,9 @@ export async function POST(request: Request) {
       emergencyContactPhone: profile.emergency_contact_phone,
       scannedAt: scanLog.scanned_at,
       scanLogId: scanLog.id,
-      message: buildScanMessage(profile.beneficiary_name, false),
+      message,
+      dashboardUrl,
+      mapsUrl,
     });
 
     return NextResponse.json({ scanLogId: scanLog.id });

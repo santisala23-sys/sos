@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import {
-  buildLocationUpdateMessage,
+  buildAlertMessage,
   sendFamilyAlert,
 } from "@/lib/alerts/send-alert";
-import { updateScanLogLocation } from "@/lib/db/queries";
+import { findScanLogById, updateScanLogLocation } from "@/lib/db/queries";
 
 export async function PATCH(request: Request) {
   try {
@@ -29,6 +29,17 @@ export async function PATCH(request: Request) {
       );
     }
 
+    const fullLog = await findScanLogById(scanLogId);
+
+    const { message, dashboardUrl, mapsUrl } = buildAlertMessage({
+      type: "location",
+      beneficiaryName: result.beneficiary_name,
+      scanLogId,
+      latitude,
+      longitude,
+      scannerNote: fullLog?.scanner_note,
+    });
+
     await sendFamilyAlert({
       type: "location",
       beneficiaryName: result.beneficiary_name,
@@ -38,7 +49,10 @@ export async function PATCH(request: Request) {
       latitude,
       longitude,
       scanLogId,
-      message: buildLocationUpdateMessage(result.beneficiary_name),
+      scannerNote: fullLog?.scanner_note,
+      message,
+      dashboardUrl,
+      mapsUrl,
     });
 
     return NextResponse.json({ ok: true });

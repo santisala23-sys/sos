@@ -29,7 +29,15 @@ export interface ScanLog {
   longitude: number | null;
   user_agent: string | null;
   alert_type: AlertType;
+  scanner_note: string | null;
+  read_at: string | null;
+  note_added_at: string | null;
 }
+
+export type ScanLogWithProfile = ScanLog & {
+  beneficiary_name: string;
+  slug: string;
+};
 
 export type QrProfileInsert = Pick<
   QrProfile,

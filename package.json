@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "node scripts/migrate.mjs",
+    "db:migrate:002": "node scripts/migrate-002.mjs",
     "db:seed": "node scripts/seed.mjs"
   },
   "dependencies": {
