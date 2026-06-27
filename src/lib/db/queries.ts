@@ -92,7 +92,8 @@ export async function createQrProfile(
   const rows = await sql`
     INSERT INTO qr_profiles (
       tutor_id, slug, beneficiary_name, emergency_contact_name,
-      emergency_contact_phone, instructions, medical_notes, is_active
+      emergency_contact_phone, secondary_contact_name, secondary_contact_phone,
+      instructions, medical_notes, is_active
     )
     VALUES (
       ${data.tutor_id},
@@ -100,6 +101,8 @@ export async function createQrProfile(
       ${data.beneficiary_name},
       ${data.emergency_contact_name},
       ${data.emergency_contact_phone},
+      ${data.secondary_contact_name ?? null},
+      ${data.secondary_contact_phone ?? null},
       ${data.instructions},
       ${data.medical_notes ?? ""},
       ${data.is_active ?? true}
@@ -113,11 +116,13 @@ export async function updateQrProfile(
   id: string,
   tutorId: string,
   data: Partial<
-    Pick<
+      Pick<
       QrProfile,
       | "beneficiary_name"
       | "emergency_contact_name"
       | "emergency_contact_phone"
+      | "secondary_contact_name"
+      | "secondary_contact_phone"
       | "instructions"
       | "medical_notes"
       | "is_active"
@@ -134,6 +139,8 @@ export async function updateQrProfile(
       beneficiary_name = ${data.beneficiary_name ?? existing.beneficiary_name},
       emergency_contact_name = ${data.emergency_contact_name ?? existing.emergency_contact_name},
       emergency_contact_phone = ${data.emergency_contact_phone ?? existing.emergency_contact_phone},
+      secondary_contact_name = ${data.secondary_contact_name !== undefined ? data.secondary_contact_name : existing.secondary_contact_name},
+      secondary_contact_phone = ${data.secondary_contact_phone !== undefined ? data.secondary_contact_phone : existing.secondary_contact_phone},
       instructions = ${data.instructions ?? existing.instructions},
       medical_notes = ${data.medical_notes ?? existing.medical_notes ?? ""},
       is_active = ${data.is_active ?? existing.is_active}
@@ -321,4 +328,45 @@ export async function updateScanLogLocation(
     profile_id: log.profile_id,
     ...profile,
   };
+}
+
+export async function savePushSubscription(
+  userId: string,
+  subscription: { endpoint: string; keys: { p256dh: string; auth: string } },
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth)
+    VALUES (
+      ${userId},
+      ${subscription.endpoint},
+      ${subscription.keys.p256dh},
+      ${subscription.keys.auth}
+    )
+    ON CONFLICT (endpoint) DO UPDATE
+      SET user_id = EXCLUDED.user_id,
+          p256dh = EXCLUDED.p256dh,
+          auth = EXCLUDED.auth
+  `;
+}
+
+export async function deletePushSubscription(
+  userId: string,
+  endpoint: string,
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    DELETE FROM push_subscriptions
+    WHERE user_id = ${userId} AND endpoint = ${endpoint}
+  `;
+}
+
+export async function listPushSubscriptionsByUser(userId: string) {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT endpoint, p256dh, auth
+    FROM push_subscriptions
+    WHERE user_id = ${userId}
+  `;
+  return rows as { endpoint: string; p256dh: string; auth: string }[];
 }

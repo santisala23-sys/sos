@@ -28,6 +28,12 @@ export function QrProfileForm({
   const [emergencyContactPhone, setEmergencyContactPhone] = useState(
     profile?.emergency_contact_phone ?? "",
   );
+  const [secondaryContactName, setSecondaryContactName] = useState(
+    profile?.secondary_contact_name ?? "",
+  );
+  const [secondaryContactPhone, setSecondaryContactPhone] = useState(
+    profile?.secondary_contact_phone ?? "",
+  );
   const [instructions, setInstructions] = useState(profile?.instructions ?? "");
   const [medicalNotes, setMedicalNotes] = useState(profile?.medical_notes ?? "");
   const [isActive, setIsActive] = useState(profile?.is_active ?? true);
@@ -41,6 +47,8 @@ export function QrProfileForm({
       beneficiary_name: beneficiaryName,
       emergency_contact_name: emergencyContactName,
       emergency_contact_phone: emergencyContactPhone,
+      secondary_contact_name: secondaryContactName.trim() || null,
+      secondary_contact_phone: secondaryContactPhone.trim() || null,
       instructions,
       medical_notes: medicalNotes || null,
       ...(isEditing ? { is_active: isActive } : {}),
@@ -108,6 +116,36 @@ export function QrProfileForm({
           placeholder="+54911..."
         />
       </label>
+
+      <fieldset className="rounded-xl border border-neutral-200 p-4">
+        <legend className="px-1 text-sm font-semibold text-neutral-800">
+          Contacto secundario (opcional)
+        </legend>
+        <p className="mb-3 text-xs text-neutral-500">
+          Padre, hermano u otro familiar. También recibe llamada y WhatsApp.
+        </p>
+        <div className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">Nombre</span>
+            <input
+              value={secondaryContactName}
+              onChange={(e) => setSecondaryContactName(e.target.value)}
+              className={inputClass}
+              placeholder="Ej: Carlos García (padre)"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">Teléfono / WhatsApp</span>
+            <input
+              type="tel"
+              value={secondaryContactPhone}
+              onChange={(e) => setSecondaryContactPhone(e.target.value)}
+              className={inputClass}
+              placeholder="+54911..."
+            />
+          </label>
+        </div>
+      </fieldset>
 
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">

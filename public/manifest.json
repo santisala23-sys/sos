@@ -1,0 +1,17 @@
+{
+  "name": "SOS — Asistencia QR",
+  "short_name": "SOS",
+  "description": "Perfiles de asistencia y emergencia QR",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1d4ed8",
+  "icons": [
+    {
+      "src": "/globe.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

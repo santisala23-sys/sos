@@ -9,7 +9,9 @@
     "lint": "eslint",
     "db:migrate": "node scripts/migrate.mjs",
     "db:migrate:002": "node scripts/migrate-002.mjs",
-    "db:seed": "node scripts/seed.mjs"
+    "db:migrate:003": "node scripts/migrate-003.mjs",
+    "db:seed": "node scripts/seed.mjs",
+    "vapid:generate": "node scripts/generate-vapid-keys.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -21,6 +23,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-qr-code": "^2.2.0",
+    "web-push": "^3.6.7",
     "ws": "^8.21.0"
   },
   "devDependencies": {
@@ -30,6 +33,7 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",

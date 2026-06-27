@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { notifyTutor } from "@/lib/alerts/notify-tutor";
 import {
-  buildAlertMessage,
-  sendFamilyAlert,
-} from "@/lib/alerts/send-alert";
-import { findScanLogById, updateScanLogLocation } from "@/lib/db/queries";
+  findQrProfileById,
+  findScanLogById,
+  updateScanLogLocation,
+} from "@/lib/db/queries";
 
 export async function PATCH(request: Request) {
   try {
@@ -30,29 +31,22 @@ export async function PATCH(request: Request) {
     }
 
     const fullLog = await findScanLogById(scanLogId);
+    const profile = await findQrProfileById(result.profile_id);
+    if (!profile) {
+      return NextResponse.json({ ok: true });
+    }
 
-    const { message, dashboardUrl, mapsUrl } = buildAlertMessage({
-      type: "location",
-      beneficiaryName: result.beneficiary_name,
-      scanLogId,
-      latitude,
-      longitude,
-      scannerNote: fullLog?.scanner_note,
-    });
-
-    await sendFamilyAlert({
+    await notifyTutor({
+      tutorId: profile.tutor_id,
       type: "location",
       beneficiaryName: result.beneficiary_name,
       emergencyContactName: result.emergency_contact_name,
       emergencyContactPhone: result.emergency_contact_phone,
       scannedAt: result.scanned_at,
+      scanLogId,
       latitude,
       longitude,
-      scanLogId,
       scannerNote: fullLog?.scanner_note,
-      message,
-      dashboardUrl,
-      mapsUrl,
     });
 
     return NextResponse.json({ ok: true });

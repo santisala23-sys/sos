@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { buildAlertMessage, sendFamilyAlert } from "@/lib/alerts/send-alert";
+import { notifyTutor } from "@/lib/alerts/notify-tutor";
 import { addScannerNote } from "@/lib/db/queries";
+import { findQrProfileById } from "@/lib/db/queries";
 
 export async function PATCH(request: Request) {
   try {
@@ -25,28 +26,22 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const { message, dashboardUrl, mapsUrl } = buildAlertMessage({
-      type: "note",
-      beneficiaryName: updated.beneficiary_name,
-      scanLogId,
-      latitude: updated.latitude,
-      longitude: updated.longitude,
-      scannerNote: updated.scanner_note,
-    });
+    const profile = await findQrProfileById(updated.profile_id);
+    if (!profile) {
+      return NextResponse.json({ ok: true });
+    }
 
-    await sendFamilyAlert({
+    await notifyTutor({
+      tutorId: profile.tutor_id,
       type: "note",
       beneficiaryName: updated.beneficiary_name,
       emergencyContactName: updated.emergency_contact_name,
       emergencyContactPhone: updated.emergency_contact_phone,
       scannedAt: updated.scanned_at,
+      scanLogId,
       latitude: updated.latitude,
       longitude: updated.longitude,
-      scanLogId,
       scannerNote: updated.scanner_note,
-      message,
-      dashboardUrl,
-      mapsUrl,
     });
 
     return NextResponse.json({ ok: true });

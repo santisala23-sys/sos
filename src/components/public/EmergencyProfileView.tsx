@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Phone, AlertTriangle, MapPin, X, MessageSquare } from "lucide-react";
+import { AlertTriangle, MapPin, X, MessageSquare } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
+import { ContactActions } from "@/components/public/ContactActions";
 
 type EmergencyProfileViewProps = {
   profile: QrProfile;
@@ -40,6 +41,10 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   const [note, setNote] = useState("");
   const [noteSending, setNoteSending] = useState(false);
   const [noteSent, setNoteSent] = useState(false);
+  const [coords, setCoords] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   const triggerScanAlert = useCallback(async () => {
     if (scanTriggered.current) return;
@@ -89,6 +94,8 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
       });
     }
 
+    setCoords(coords);
+
     setGeoStatus("granted");
     setShowGeoBanner(false);
   }
@@ -100,19 +107,24 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
 
   async function handleSos() {
     setSosLoading(true);
-    const coords = await requestGeolocation();
+    const location = coords ?? (await requestGeolocation());
+    if (location) setCoords(location);
 
     try {
-      await fetch("/api/alerts/sos", {
+      const res = await fetch("/api/alerts/sos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           profileId: profile.id,
           userAgent: navigator.userAgent,
-          latitude: coords?.latitude ?? null,
-          longitude: coords?.longitude ?? null,
+          latitude: location?.latitude ?? null,
+          longitude: location?.longitude ?? null,
         }),
       });
+      if (res.ok) {
+        const data = await res.json();
+        setScanLogId(data.scanLogId);
+      }
       setSosSent(true);
     } finally {
       setSosLoading(false);
@@ -133,8 +145,6 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
       setNoteSending(false);
     }
   }
-
-  const phoneHref = `tel:${profile.emergency_contact_phone.replace(/\s/g, "")}`;
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-lg flex-col bg-black text-white">
@@ -204,18 +214,14 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
       </header>
 
       <main className="flex flex-1 flex-col gap-6 px-4 py-6">
-        <a
-          href={phoneHref}
-          className="flex min-h-[72px] items-center justify-center gap-3 rounded-2xl bg-green-600 px-6 py-5 text-center text-xl font-black text-white shadow-lg ring-4 ring-green-400/30 transition-transform active:scale-[0.98]"
-        >
-          <Phone className="h-8 w-8 shrink-0" aria-hidden />
-          <span>
-            Llamar a {profile.emergency_contact_name}
-            <span className="mt-1 block text-base font-semibold opacity-90">
-              {profile.emergency_contact_phone}
-            </span>
-          </span>
-        </a>
+        <ContactActions
+          profile={profile}
+          alertType="scan"
+          latitude={coords?.latitude}
+          longitude={coords?.longitude}
+          scannerNote={noteSent ? note : null}
+          scanLogId={scanLogId}
+        />
 
         <section aria-labelledby="instructions-heading">
           <h2

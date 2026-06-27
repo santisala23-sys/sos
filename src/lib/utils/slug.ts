@@ -20,3 +20,10 @@ export function getPublicProfileUrl(slug: string): string {
     "http://localhost:3000";
   return `${base}/p/${slug}`;
 }
+
+export function getSosOnlyUrl(slug: string): string {
+  const base =
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
+    "http://localhost:3000";
+  return `${base}/p/${slug}/sos`;
+}

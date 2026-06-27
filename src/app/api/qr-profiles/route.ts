@@ -25,12 +25,16 @@ export async function POST(request: Request) {
       beneficiary_name,
       emergency_contact_name,
       emergency_contact_phone,
+      secondary_contact_name,
+      secondary_contact_phone,
       instructions,
       medical_notes,
     } = body as {
       beneficiary_name?: string;
       emergency_contact_name?: string;
       emergency_contact_phone?: string;
+      secondary_contact_name?: string | null;
+      secondary_contact_phone?: string | null;
       instructions?: string;
       medical_notes?: string;
     };
@@ -53,6 +57,8 @@ export async function POST(request: Request) {
       beneficiary_name,
       emergency_contact_name,
       emergency_contact_phone,
+      secondary_contact_name: secondary_contact_name?.trim() || null,
+      secondary_contact_phone: secondary_contact_phone?.trim() || null,
       instructions,
       medical_notes: medical_notes ?? "",
     });

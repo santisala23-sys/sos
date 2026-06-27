@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  buildAlertMessage,
-  sendFamilyAlert,
-} from "@/lib/alerts/send-alert";
+import { notifyTutor } from "@/lib/alerts/notify-tutor";
 import {
   createScanLog,
   findActiveQrProfileById,
@@ -41,26 +38,16 @@ export async function POST(request: Request) {
       longitude: longitude ?? null,
     });
 
-    const { message, dashboardUrl, mapsUrl } = buildAlertMessage({
-      type: "sos",
-      beneficiaryName: profile.beneficiary_name,
-      scanLogId: scanLog.id,
-      latitude,
-      longitude,
-    });
-
-    await sendFamilyAlert({
+    await notifyTutor({
+      tutorId: profile.tutor_id,
       type: "sos",
       beneficiaryName: profile.beneficiary_name,
       emergencyContactName: profile.emergency_contact_name,
       emergencyContactPhone: profile.emergency_contact_phone,
       scannedAt: scanLog.scanned_at,
+      scanLogId: scanLog.id,
       latitude,
       longitude,
-      scanLogId: scanLog.id,
-      message,
-      dashboardUrl,
-      mapsUrl,
     });
 
     return NextResponse.json({ scanLogId: scanLog.id });

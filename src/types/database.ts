@@ -15,6 +15,8 @@ export interface QrProfile {
   beneficiary_name: string;
   emergency_contact_name: string;
   emergency_contact_phone: string;
+  secondary_contact_name: string | null;
+  secondary_contact_phone: string | null;
   instructions: string;
   medical_notes: string | null;
   is_active: boolean;
@@ -56,8 +58,19 @@ export type QrProfileUpdate = Partial<
     | "beneficiary_name"
     | "emergency_contact_name"
     | "emergency_contact_phone"
+    | "secondary_contact_name"
+    | "secondary_contact_phone"
     | "instructions"
     | "medical_notes"
     | "is_active"
   >
 >;
+
+export interface PushSubscriptionRow {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  created_at: string;
+}

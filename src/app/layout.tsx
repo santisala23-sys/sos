@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   description:
     "Perfiles de asistencia accesibles por QR para personas con discapacidad. Alertas automáticas para familias.",
   applicationName: "SOS",
+  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {
