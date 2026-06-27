@@ -21,7 +21,7 @@ export function getGoogleMapsEmbedUrl(
 }
 
 export type AlertPayload = {
-  type: "scan" | "sos" | "location" | "note";
+  type: "scan" | "sos" | "location" | "note" | "message";
   beneficiaryName: string;
   emergencyContactName: string;
   emergencyContactPhone: string;
@@ -92,6 +92,9 @@ export function buildAlertMessage(params: {
       break;
     case "note":
       headline = `Nueva nota sobre ${params.beneficiaryName} tras un escaneo.`;
+      break;
+    case "message":
+      headline = `Nuevo mensaje sobre ${params.beneficiaryName}.`;
       break;
   }
 

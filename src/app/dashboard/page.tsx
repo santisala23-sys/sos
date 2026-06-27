@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Plus, UserCircle2 } from "lucide-react";
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
-import { DashboardQrHero } from "@/components/dashboard/DashboardQrHero";
+import { ProfileCard } from "@/components/dashboard/ProfileCard";
+import { PushNotificationSetup } from "@/components/dashboard/PushNotificationSetup";
 import { ScanLogsList } from "@/components/dashboard/ScanLogsList";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
 import { Button } from "@/components/ui/Button";
@@ -17,6 +18,7 @@ export default function DashboardPage() {
   const [logs, setLogs] = useState<ScanLogWithProfile[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const loadData = useCallback(async () => {
     const [profilesRes, logsRes] = await Promise.all([
@@ -50,7 +52,6 @@ export default function DashboardPage() {
     router.refresh();
   }
 
-  const primaryProfile = profiles.find((p) => p.is_active) ?? profiles[0];
   const latestUnread = logs.find((l) => !l.read_at);
 
   return (
@@ -84,23 +85,75 @@ export default function DashboardPage() {
           />
         )}
 
-        {loading ? (
-          <p className="text-neutral-500">Cargando...</p>
-        ) : primaryProfile ? (
-          <DashboardQrHero profile={primaryProfile} />
-        ) : (
-          <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-            <h1 className="text-2xl font-bold text-neutral-900">
-              Creá tu primer perfil
-            </h1>
-            <p className="mt-1 text-sm text-neutral-600">
-              Completá los datos para generar el QR de emergencia.
-            </p>
-            <div className="mt-6">
-              <QrProfileForm onSuccess={loadData} />
+        <PushNotificationSetup />
+
+        <section id="perfiles">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <UserCircle2 className="h-5 w-5 text-neutral-500" aria-hidden />
+              <h2 className="text-xl font-bold text-neutral-900">Mis perfiles</h2>
             </div>
-          </section>
-        )}
+            {!loading && profiles.length > 0 && (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setShowAddForm((v) => !v)}
+                className="gap-1"
+              >
+                <Plus className="h-4 w-4" aria-hidden />
+                {showAddForm ? "Cancelar" : "Agregar perfil"}
+              </Button>
+            )}
+          </div>
+
+          {loading ? (
+            <p className="text-neutral-500">Cargando...</p>
+          ) : profiles.length === 0 ? (
+            <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-neutral-900">
+                Creá tu primer perfil
+              </h3>
+              <p className="mt-1 text-sm text-neutral-600">
+                Completá los datos para generar el QR de emergencia.
+              </p>
+              <div className="mt-6">
+                <QrProfileForm
+                  onSuccess={() => {
+                    loadData();
+                    setShowAddForm(false);
+                  }}
+                />
+              </div>
+            </section>
+          ) : (
+            <>
+              {showAddForm && (
+                <section className="mb-4 rounded-2xl border border-blue-200 bg-blue-50/50 p-5">
+                  <h3 className="mb-4 font-semibold text-neutral-900">
+                    Nuevo perfil QR
+                  </h3>
+                  <QrProfileForm
+                    onSuccess={() => {
+                      loadData();
+                      setShowAddForm(false);
+                    }}
+                    onCancel={() => setShowAddForm(false)}
+                  />
+                </section>
+              )}
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {profiles.map((profile) => (
+                  <ProfileCard
+                    key={profile.id}
+                    profile={profile}
+                    onRefresh={loadData}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </section>
 
         <section id="actividad">
           <h2 className="mb-4 text-xl font-bold text-neutral-900">

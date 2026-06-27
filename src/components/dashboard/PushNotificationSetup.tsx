@@ -31,6 +31,15 @@ export function PushNotificationSetup() {
     return reg;
   }
 
+  async function getVapidPublicKey(): Promise<string | null> {
+    if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
+      return process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    }
+    const keyRes = await fetch("/api/push/vapid-public-key");
+    const { publicKey } = await keyRes.json();
+    return publicKey ?? null;
+  }
+
   async function handleSubscribe() {
     setLoading(true);
     setMessage(null);
@@ -43,11 +52,12 @@ export function PushNotificationSetup() {
       }
 
       const reg = await registerServiceWorker();
-      const keyRes = await fetch("/api/push/vapid-public-key");
-      const { publicKey } = await keyRes.json();
+      const publicKey = await getVapidPublicKey();
 
       if (!publicKey) {
-        setMessage("Push no configurado en el servidor (VAPID).");
+        setMessage(
+          "Push no configurado: faltan NEXT_PUBLIC_VAPID_PUBLIC_KEY y VAPID_PRIVATE_KEY en el servidor. En Vercel → Settings → Environment Variables, o reiniciá npm run dev si acabás de editar .env.local.",
+        );
         return;
       }
 

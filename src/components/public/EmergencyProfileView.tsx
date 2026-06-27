@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertTriangle, MapPin, X, MessageSquare } from "lucide-react";
+import { AlertTriangle, MapPin, X } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
+import { ScanMessageThread } from "@/components/shared/ScanMessageThread";
 
 type EmergencyProfileViewProps = {
   profile: QrProfile;
@@ -38,9 +39,6 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   >("idle");
   const [sosLoading, setSosLoading] = useState(false);
   const [sosSent, setSosSent] = useState(false);
-  const [note, setNote] = useState("");
-  const [noteSending, setNoteSending] = useState(false);
-  const [noteSent, setNoteSent] = useState(false);
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
@@ -131,21 +129,6 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
     }
   }
 
-  async function handleSubmitNote() {
-    if (!scanLogId || !note.trim()) return;
-    setNoteSending(true);
-    try {
-      await fetch("/api/alerts/note", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scanLogId, note: note.trim() }),
-      });
-      setNoteSent(true);
-    } finally {
-      setNoteSending(false);
-    }
-  }
-
   return (
     <div className="mx-auto flex min-h-dvh max-w-lg flex-col bg-black text-white">
       {showGeoBanner && (
@@ -219,9 +202,17 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           alertType="scan"
           latitude={coords?.latitude}
           longitude={coords?.longitude}
-          scannerNote={noteSent ? note : null}
           scanLogId={scanLogId}
         />
+
+        {scanLogId && (
+          <ScanMessageThread
+            scanLogId={scanLogId}
+            slug={profile.slug}
+            mode="public"
+            dark
+          />
+        )}
 
         <section aria-labelledby="instructions-heading">
           <h2
@@ -249,47 +240,6 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           </section>
         )}
 
-        {scanLogId && (
-          <section
-            aria-labelledby="note-heading"
-            className="rounded-xl border-2 border-neutral-700 bg-neutral-900 p-4"
-          >
-            <h2
-              id="note-heading"
-              className="mb-2 inline-flex items-center gap-2 text-base font-bold text-neutral-200"
-            >
-              <MessageSquare className="h-4 w-4" aria-hidden />
-              Mensaje para la familia (opcional)
-            </h2>
-            <p className="mb-3 text-sm text-neutral-400">
-              Ej: &quot;Estoy con él en la esquina de Corrientes y Pueyrredón&quot;
-            </p>
-            {noteSent ? (
-              <p className="rounded-lg bg-green-900/50 px-4 py-3 text-sm text-green-100">
-                Mensaje enviado. La familia fue notificada.
-              </p>
-            ) : (
-              <>
-                <textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  rows={3}
-                  className="w-full rounded-lg border border-neutral-600 bg-neutral-950 px-4 py-3 text-base text-white placeholder:text-neutral-500 focus:border-blue-500 focus:outline-none"
-                  placeholder="Escribí una nota breve..."
-                />
-                <Button
-                  type="button"
-                  size="md"
-                  disabled={noteSending || !note.trim()}
-                  onClick={handleSubmitNote}
-                  className="mt-3 w-full bg-neutral-200 text-neutral-900 hover:bg-white"
-                >
-                  {noteSending ? "Enviando..." : "Enviar nota a la familia"}
-                </Button>
-              </>
-            )}
-          </section>
-        )}
       </main>
 
       <footer className="sticky bottom-0 border-t-2 border-red-800 bg-neutral-950 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">

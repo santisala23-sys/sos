@@ -5,6 +5,7 @@ import { AlertTriangle, MapPin } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
+import { ScanMessageThread } from "@/components/shared/ScanMessageThread";
 
 type SosOnlyViewProps = {
   profile: QrProfile;
@@ -125,6 +126,15 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
           scanLogId={scanLogId}
           compact
         />
+
+        {scanLogId && (
+          <ScanMessageThread
+            scanLogId={scanLogId}
+            slug={profile.slug}
+            mode="public"
+            dark
+          />
+        )}
       </main>
     </div>
   );

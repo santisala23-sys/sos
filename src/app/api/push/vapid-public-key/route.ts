@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
-  return NextResponse.json({
-    publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null,
-  });
+  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null;
+  const configured = Boolean(
+    publicKey && process.env.VAPID_PRIVATE_KEY,
+  );
+
+  return NextResponse.json({ publicKey, configured });
 }

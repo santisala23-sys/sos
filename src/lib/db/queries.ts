@@ -1,4 +1,12 @@
-import type { AlertType, QrProfile, ScanLog, ScanLogWithProfile, User } from "@/types/database";
+import type {
+  AlertType,
+  MessageSender,
+  QrProfile,
+  ScanLog,
+  ScanMessage,
+  ScanLogWithProfile,
+  User,
+} from "@/types/database";
 import { getSql } from "@/lib/db/index";
 
 type UserRow = User & { password_hash: string };
@@ -369,4 +377,81 @@ export async function listPushSubscriptionsByUser(userId: string) {
     WHERE user_id = ${userId}
   `;
   return rows as { endpoint: string; p256dh: string; auth: string }[];
+}
+
+export async function listScanMessages(scanLogId: string): Promise<ScanMessage[]> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT * FROM scan_messages
+    WHERE scan_log_id = ${scanLogId}
+    ORDER BY created_at ASC
+  `;
+  return rows as ScanMessage[];
+}
+
+export async function findScanLogBySlugAccess(
+  scanLogId: string,
+  slug: string,
+): Promise<(ScanLog & { beneficiary_name: string; tutor_id: string }) | null> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT sl.*, qp.beneficiary_name, qp.tutor_id
+    FROM scan_logs sl
+    JOIN qr_profiles qp ON qp.id = sl.profile_id
+    WHERE sl.id = ${scanLogId} AND qp.slug = ${slug} AND qp.is_active = TRUE
+    LIMIT 1
+  `;
+  return (rows[0] as (ScanLog & { beneficiary_name: string; tutor_id: string }) | undefined) ?? null;
+}
+
+export async function addScanMessage(
+  scanLogId: string,
+  sender: MessageSender,
+  body: string,
+): Promise<ScanMessage | null> {
+  const sql = getSql();
+  const rows = await sql`
+    INSERT INTO scan_messages (scan_log_id, sender, body)
+    VALUES (${scanLogId}, ${sender}, ${body.trim()})
+    RETURNING *
+  `;
+  const message = rows[0] as ScanMessage | undefined;
+  if (!message) return null;
+
+  if (sender === "public") {
+    await sql`
+      UPDATE scan_logs
+      SET
+        scanner_note = ${body.trim()},
+        note_added_at = NOW(),
+        read_at = NULL
+      WHERE id = ${scanLogId}
+    `;
+  }
+
+  return message;
+}
+
+export async function getScanLogContextForNotify(scanLogId: string) {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      sl.*,
+      qp.beneficiary_name,
+      qp.tutor_id,
+      qp.emergency_contact_name,
+      qp.emergency_contact_phone
+    FROM scan_logs sl
+    JOIN qr_profiles qp ON qp.id = sl.profile_id
+    WHERE sl.id = ${scanLogId}
+    LIMIT 1
+  `;
+  return (rows[0] as
+    | (ScanLog & {
+        beneficiary_name: string;
+        tutor_id: string;
+        emergency_contact_name: string;
+        emergency_contact_phone: string;
+      })
+    | undefined) ?? null;
 }

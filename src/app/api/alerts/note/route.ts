@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { notifyTutor } from "@/lib/alerts/notify-tutor";
-import { addScannerNote } from "@/lib/db/queries";
-import { findQrProfileById } from "@/lib/db/queries";
+import { addScanMessage, findScanLogBySlugAccess } from "@/lib/db/queries";
 
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { scanLogId, note } = body as {
+    const { scanLogId, note, slug } = body as {
       scanLogId?: string;
       note?: string;
+      slug?: string;
     };
 
     if (!scanLogId || !note?.trim()) {
@@ -18,30 +18,28 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const updated = await addScannerNote(scanLogId, note);
-    if (!updated) {
-      return NextResponse.json(
-        { error: "Registro no encontrado" },
-        { status: 404 },
-      );
+    if (!slug) {
+      return NextResponse.json({ error: "slug requerido" }, { status: 400 });
     }
 
-    const profile = await findQrProfileById(updated.profile_id);
-    if (!profile) {
-      return NextResponse.json({ ok: true });
+    const access = await findScanLogBySlugAccess(scanLogId, slug);
+    if (!access) {
+      return NextResponse.json({ error: "Registro no encontrado" }, { status: 404 });
     }
+
+    await addScanMessage(scanLogId, "public", note);
 
     await notifyTutor({
-      tutorId: profile.tutor_id,
-      type: "note",
-      beneficiaryName: updated.beneficiary_name,
-      emergencyContactName: updated.emergency_contact_name,
-      emergencyContactPhone: updated.emergency_contact_phone,
-      scannedAt: updated.scanned_at,
+      tutorId: access.tutor_id,
+      type: "message",
+      beneficiaryName: access.beneficiary_name,
+      emergencyContactName: "",
+      emergencyContactPhone: "",
+      scannedAt: access.scanned_at,
       scanLogId,
-      latitude: updated.latitude,
-      longitude: updated.longitude,
-      scannerNote: updated.scanner_note,
+      latitude: access.latitude,
+      longitude: access.longitude,
+      scannerNote: note.trim(),
     });
 
     return NextResponse.json({ ok: true });

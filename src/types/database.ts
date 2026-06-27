@@ -66,6 +66,16 @@ export type QrProfileUpdate = Partial<
   >
 >;
 
+export type MessageSender = "public" | "tutor";
+
+export interface ScanMessage {
+  id: string;
+  scan_log_id: string;
+  sender: MessageSender;
+  body: string;
+  created_at: string;
+}
+
 export interface PushSubscriptionRow {
   id: string;
   user_id: string;

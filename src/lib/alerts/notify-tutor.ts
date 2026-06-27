@@ -47,8 +47,8 @@ export async function notifyTutor(params: NotifyTutorParams): Promise<void> {
   const pushTitle =
     params.type === "sos"
       ? `🆘 SOS — ${params.beneficiaryName}`
-      : params.type === "note"
-        ? `💬 Nota — ${params.beneficiaryName}`
+      : params.type === "note" || params.type === "message"
+        ? `💬 Mensaje — ${params.beneficiaryName}`
         : `📱 Alerta — ${params.beneficiaryName}`;
 
   const subscriptions = await listPushSubscriptionsByUser(params.tutorId);

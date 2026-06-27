@@ -7,12 +7,12 @@ import {
   ArrowLeft,
   ExternalLink,
   MapPin,
-  MessageSquare,
   AlertTriangle,
 } from "lucide-react";
 import type { ScanLogWithProfile } from "@/types/database";
 import { getGoogleMapsEmbedUrl, getGoogleMapsUrl } from "@/lib/alerts/send-alert";
 import { alertTypeLabel, formatDateTime } from "@/lib/utils/format";
+import { ScanMessageThread } from "@/components/shared/ScanMessageThread";
 import { Button } from "@/components/ui/Button";
 
 type LogDetailViewProps = {
@@ -71,6 +71,8 @@ export function LogDetailView({ log }: LogDetailViewProps) {
           </p>
         </section>
 
+        <ScanMessageThread scanLogId={log.id} mode="tutor" />
+
         {hasLocation && (
           <section className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
             <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3">
@@ -105,27 +107,6 @@ export function LogDetailView({ log }: LogDetailViewProps) {
           <section className="rounded-xl border border-dashed border-neutral-300 bg-white px-4 py-6 text-center text-sm text-neutral-500">
             <MapPin className="mx-auto mb-2 h-6 w-6 text-neutral-400" aria-hidden />
             No se compartió ubicación GPS en este evento.
-          </section>
-        )}
-
-        {log.scanner_note?.trim() ? (
-          <section className="rounded-xl border border-amber-200 bg-amber-50 p-5">
-            <p className="inline-flex items-center gap-2 font-semibold text-amber-900">
-              <MessageSquare className="h-4 w-4" aria-hidden />
-              Nota de quien escaneó
-            </p>
-            <p className="mt-3 whitespace-pre-wrap text-neutral-800">
-              {log.scanner_note}
-            </p>
-            {log.note_added_at && (
-              <p className="mt-2 text-xs text-amber-800/70">
-                Enviada: {formatDateTime(log.note_added_at)}
-              </p>
-            )}
-          </section>
-        ) : (
-          <section className="rounded-xl border border-neutral-200 bg-white px-4 py-5 text-sm text-neutral-500">
-            Sin nota del escaneador en este evento.
           </section>
         )}
 
