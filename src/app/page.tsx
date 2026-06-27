@@ -1,65 +1,94 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Shield, QrCode, Bell, Phone } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="flex min-h-dvh flex-col bg-white text-neutral-900">
+      <header className="border-b border-neutral-200 px-4 py-4">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
+          <span className="text-xl font-black tracking-tight text-blue-800">
+            SOS
+          </span>
+          <nav className="flex gap-2">
+            <Link href="/login">
+              <Button variant="ghost" size="sm">
+                Ingresar
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button size="sm">Registrarse</Button>
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      <main className="mx-auto flex max-w-5xl flex-1 flex-col px-4 py-12">
+        <section className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">
+            Asistencia y emergencia QR
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          <h1 className="mt-4 text-4xl font-black leading-tight text-neutral-900 sm:text-5xl">
+            Ayuda inmediata para personas con discapacidad
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-neutral-600">
+            Configurá un perfil de asistencia accesible mediante un código QR
+            físico. Fuerzas de seguridad y personal de emergencia pueden
+            escanearlo y saber al instante cómo actuar y a quién llamar.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href="/register">
+              <Button size="lg">Crear mi perfil gratis</Button>
+            </Link>
+            <Link href="/login">
+              <Button variant="secondary" size="lg">
+                Ya tengo cuenta
+              </Button>
+            </Link>
+          </div>
+        </section>
+
+        <section className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            {
+              icon: QrCode,
+              title: "QR imprimible",
+              text: "Descargá el código en PNG para plastificarlo o llevarlo donde haga falta.",
+            },
+            {
+              icon: Phone,
+              title: "Llamada directa",
+              text: "Un toque conecta con el contacto de emergencia de la familia.",
+            },
+            {
+              icon: Shield,
+              title: "Instrucciones claras",
+              text: "Indicaciones de manejo visibles con alto contraste para situaciones de estrés.",
+            },
+            {
+              icon: Bell,
+              title: "Alertas automáticas",
+              text: "La familia recibe aviso al escanear el QR o activar SOS.",
+            },
+          ].map(({ icon: Icon, title, text }) => (
+            <article
+              key={title}
+              className="rounded-2xl border border-neutral-200 p-6"
+            >
+              <Icon
+                className="h-8 w-8 text-blue-700"
+                aria-hidden
+              />
+              <h2 className="mt-4 font-bold">{title}</h2>
+              <p className="mt-2 text-sm text-neutral-600">{text}</p>
+            </article>
+          ))}
+        </section>
       </main>
+
+      <footer className="border-t border-neutral-200 px-4 py-6 text-center text-sm text-neutral-500">
+        SOS — Sistema de Asistencia y Emergencia QR
+      </footer>
     </div>
   );
 }

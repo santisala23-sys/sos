@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SOS — Sistema de Asistencia y Emergencia QR
 
-## Getting Started
+Web app responsive para que familias configuren perfiles de asistencia accesibles mediante código QR. Al escanear, personal de emergencia ve instrucciones claras y puede llamar al contacto; la familia recibe alertas automáticas.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + TypeScript
+- **Tailwind CSS** (mobile-first, alto contraste)
+- **Neon PostgreSQL** + `@neondatabase/serverless`
+- **Auth propia** (JWT en cookie httpOnly + bcrypt)
+- **Lucide React** · **react-qr-code**
+
+## Inicio rápido
+
+### 1. Variables de entorno
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.local.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Completá en [Neon Console](https://console.neon.tech):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `DATABASE_URL` — preferí el **pooler host** para serverless
+- `AUTH_SECRET` — string aleatorio largo (ej. `openssl rand -base64 32`)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. Base de datos
 
-## Learn More
+```bash
+npm run db:migrate
+```
 
-To learn more about Next.js, take a look at the following resources:
+Aplica `db/migrations/001_initial_schema.sql` en tu proyecto Neon.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3. Desarrollo
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+npm run dev
+```
 
-## Deploy on Vercel
+## Rutas
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Ruta | Descripción |
+|------|-------------|
+| `/` | Landing |
+| `/login`, `/register` | Auth tutores |
+| `/dashboard` | CRUD perfiles + descarga QR |
+| `/p/[slug]` | Vista pública de emergencia |
+| `/api/auth/*` | Login, registro, logout |
+| `/api/qr-profiles` | CRUD perfiles (autenticado) |
+| `/api/alerts/*` | Escaneos, GPS y SOS |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Modelo de datos (Neon)
+
+- **`users`** — tutores (email, password_hash, full_name)
+- **`qr_profiles`** — perfiles QR públicos
+- **`scan_logs`** — historial de escaneos y SOS
+
+## Alertas (MVP)
+
+Las alertas se registran en consola del servidor. Configurá `ALERT_WEBHOOK_URL` para integrar n8n, Make, email, etc.
+
+## Despliegue (Vercel)
+
+1. Conectá el repo en Vercel
+2. Agregá `DATABASE_URL`, `AUTH_SECRET`, `NEXT_PUBLIC_APP_URL`
+3. Ejecutá `npm run db:migrate` una vez contra la DB de producción

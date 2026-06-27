@@ -1,0 +1,55 @@
+export type AlertType = "scan" | "sos";
+
+export interface User {
+  id: string;
+  email: string;
+  full_name: string | null;
+  updated_at: string;
+  created_at: string;
+}
+
+export interface QrProfile {
+  id: string;
+  tutor_id: string;
+  slug: string;
+  beneficiary_name: string;
+  emergency_contact_name: string;
+  emergency_contact_phone: string;
+  instructions: string;
+  medical_notes: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface ScanLog {
+  id: string;
+  profile_id: string;
+  scanned_at: string;
+  latitude: number | null;
+  longitude: number | null;
+  user_agent: string | null;
+  alert_type: AlertType;
+}
+
+export type QrProfileInsert = Pick<
+  QrProfile,
+  | "beneficiary_name"
+  | "emergency_contact_name"
+  | "emergency_contact_phone"
+  | "instructions"
+  | "medical_notes"
+  | "slug"
+  | "tutor_id"
+>;
+
+export type QrProfileUpdate = Partial<
+  Pick<
+    QrProfile,
+    | "beneficiary_name"
+    | "emergency_contact_name"
+    | "emergency_contact_phone"
+    | "instructions"
+    | "medical_notes"
+    | "is_active"
+  >
+>;
