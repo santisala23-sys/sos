@@ -23,7 +23,9 @@ export function ScanMessageThread({
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const prevCountRef = useRef(0);
+  const shouldStickToBottomRef = useRef(true);
 
   const loadMessages = useCallback(async () => {
     const url =
@@ -34,7 +36,16 @@ export function ScanMessageThread({
     const res = await fetch(url);
     if (res.ok) {
       const data = await res.json();
-      setMessages(data.messages ?? []);
+      const next = (data.messages ?? []) as ScanMessage[];
+      setMessages((prev) => {
+        if (
+          prev.length === next.length &&
+          prev.every((msg, index) => msg.id === next[index]?.id)
+        ) {
+          return prev;
+        }
+        return next;
+      });
     }
   }, [scanLogId, slug, mode]);
 
@@ -45,8 +56,25 @@ export function ScanMessageThread({
   }, [loadMessages]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = listRef.current;
+    if (!el) return;
+
+    const stick = shouldStickToBottomRef.current;
+    const grew = messages.length > prevCountRef.current;
+    prevCountRef.current = messages.length;
+
+    if (!stick && !grew) return;
+
+    el.scrollTop = el.scrollHeight;
   }, [messages]);
+
+  function handleListScroll() {
+    const el = listRef.current;
+    if (!el) return;
+    const distanceFromBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight;
+    shouldStickToBottomRef.current = distanceFromBottom < 80;
+  }
 
   async function handleSend() {
     if (!draft.trim()) return;
@@ -70,6 +98,7 @@ export function ScanMessageThread({
 
     setDraft("");
     setSending(false);
+    shouldStickToBottomRef.current = true;
     await loadMessages();
   }
 
@@ -100,7 +129,9 @@ export function ScanMessageThread({
       </div>
 
       <div
-        className={`flex max-h-64 min-h-[120px] flex-col gap-2 overflow-y-auto px-3 py-3 ${
+        ref={listRef}
+        onScroll={handleListScroll}
+        className={`flex max-h-64 min-h-[120px] flex-col gap-2 overflow-y-auto overscroll-y-contain px-3 py-3 ${
           dark ? "bg-neutral-950/50" : "bg-neutral-50"
         }`}
       >
@@ -137,7 +168,6 @@ export function ScanMessageThread({
             );
           })
         )}
-        <div ref={bottomRef} />
       </div>
 
       <div className={`flex gap-2 border-t border-inherit p-3 ${dark ? "bg-neutral-900" : "bg-white"}`}>

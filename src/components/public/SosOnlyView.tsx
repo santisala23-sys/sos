@@ -77,7 +77,7 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-lg flex-col bg-neutral-950 text-white">
+    <div className="mx-auto flex min-h-dvh max-w-lg flex-col overflow-x-hidden overscroll-y-none bg-neutral-950 text-white">
       <header className="px-4 py-6 text-center">
         <p className="text-sm font-bold uppercase tracking-widest text-red-400">
           Modo SOS directo

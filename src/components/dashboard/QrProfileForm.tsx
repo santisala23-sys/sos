@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FileText, Trash2 } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 
@@ -17,7 +18,11 @@ export function QrProfileForm({
 }: QrProfileFormProps) {
   const isEditing = Boolean(profile);
   const [loading, setLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [clinicalPdfFilename, setClinicalPdfFilename] = useState(
+    profile?.clinical_pdf_filename ?? null,
+  );
 
   const [beneficiaryName, setBeneficiaryName] = useState(
     profile?.beneficiary_name ?? "",
@@ -35,6 +40,7 @@ export function QrProfileForm({
     profile?.secondary_contact_phone ?? "",
   );
   const [instructions, setInstructions] = useState(profile?.instructions ?? "");
+  const [allergies, setAllergies] = useState(profile?.allergies ?? "");
   const [medicalNotes, setMedicalNotes] = useState(profile?.medical_notes ?? "");
   const [isActive, setIsActive] = useState(profile?.is_active ?? true);
 
@@ -50,6 +56,7 @@ export function QrProfileForm({
       secondary_contact_name: secondaryContactName.trim() || null,
       secondary_contact_phone: secondaryContactPhone.trim() || null,
       instructions,
+      allergies: allergies.trim() || null,
       medical_notes: medicalNotes || null,
       ...(isEditing ? { is_active: isActive } : {}),
     };
@@ -76,6 +83,66 @@ export function QrProfileForm({
 
     setLoading(false);
     onSuccess();
+  }
+
+  async function handlePdfUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !profile) return;
+
+    if (file.type !== "application/pdf") {
+      setError("Solo se permiten archivos PDF.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("El PDF no puede superar 5 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setPdfLoading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`/api/qr-profiles/${profile.id}/clinical-pdf`, {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.error ?? "Error al subir el PDF");
+      setPdfLoading(false);
+      e.target.value = "";
+      return;
+    }
+
+    setClinicalPdfFilename(data.profile?.clinical_pdf_filename ?? file.name);
+    setPdfLoading(false);
+    e.target.value = "";
+  }
+
+  async function handlePdfDelete() {
+    if (!profile) return;
+    setPdfLoading(true);
+    setError(null);
+
+    const res = await fetch(`/api/qr-profiles/${profile.id}/clinical-pdf`, {
+      method: "DELETE",
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.error ?? "Error al eliminar el PDF");
+      setPdfLoading(false);
+      return;
+    }
+
+    setClinicalPdfFilename(null);
+    setPdfLoading(false);
   }
 
   const inputClass =
@@ -162,15 +229,82 @@ export function QrProfileForm({
       </label>
 
       <label className="flex flex-col gap-1">
+        <span className="text-sm font-medium">Alergias (opcional)</span>
+        <textarea
+          rows={2}
+          value={allergies}
+          onChange={(e) => setAllergies(e.target.value)}
+          className={inputClass}
+          placeholder="Ej: Penicilina, maní, látex..."
+        />
+        <span className="text-xs text-neutral-500">
+          Se muestra en rojo y bien visible en la vista de emergencia.
+        </span>
+      </label>
+
+      <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">Notas médicas (opcional)</span>
         <textarea
           rows={3}
           value={medicalNotes}
           onChange={(e) => setMedicalNotes(e.target.value)}
           className={inputClass}
-          placeholder="Alergias, medicación, condiciones relevantes..."
+          placeholder="Medicación, condiciones, observaciones para el personal de salud..."
         />
       </label>
+
+      {isEditing && (
+        <fieldset className="rounded-xl border border-neutral-200 p-4">
+          <legend className="px-1 text-sm font-semibold text-neutral-800">
+            Historial clínico PDF (opcional)
+          </legend>
+          <p className="mb-3 text-xs text-neutral-500">
+            El médico o quien escanee el QR puede descargarlo si lo necesita.
+            Máximo 5 MB.
+          </p>
+          {clinicalPdfFilename ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <a
+                href={`/api/qr-profiles/${profile!.id}/clinical-pdf`}
+                className="inline-flex items-center gap-2 text-sm font-medium text-blue-700 hover:underline"
+              >
+                <FileText className="h-4 w-4" aria-hidden />
+                {clinicalPdfFilename}
+              </a>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={pdfLoading}
+                onClick={handlePdfDelete}
+                className="gap-1 text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" aria-hidden />
+                Quitar
+              </Button>
+            </div>
+          ) : (
+            <label className="flex flex-col gap-1">
+              <input
+                type="file"
+                accept="application/pdf"
+                disabled={pdfLoading}
+                onChange={handlePdfUpload}
+                className="text-sm text-neutral-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+              />
+              {pdfLoading && (
+                <span className="text-xs text-neutral-500">Subiendo PDF...</span>
+              )}
+            </label>
+          )}
+        </fieldset>
+      )}
+
+      {!isEditing && (
+        <p className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-900">
+          Después de crear el perfil podés subir un PDF con el historial clínico.
+        </p>
+      )}
 
       {isEditing && (
         <label className="flex items-center gap-2">

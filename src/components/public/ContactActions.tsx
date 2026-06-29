@@ -50,23 +50,32 @@ function ContactRow({
 
   if (compact) {
     return (
-      <div className="grid grid-cols-2 gap-2">
-        <a
-          href={telHref}
-          className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-4 text-sm font-bold text-white"
-        >
-          <Phone className="h-5 w-5" aria-hidden />
-          Llamar
-        </a>
-        <a
-          href={waHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-4 text-sm font-bold text-white"
-        >
-          <WhatsAppIcon className="h-5 w-5" />
-          WhatsApp
-        </a>
+      <div className="flex flex-col gap-2">
+        {label && (
+          <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+            {label}
+          </p>
+        )}
+        <p className="text-base font-bold text-white">{name}</p>
+        <p className="text-sm text-neutral-400">{phone}</p>
+        <div className="grid grid-cols-2 gap-2">
+          <a
+            href={telHref}
+            className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-4 text-sm font-bold text-white"
+          >
+            <Phone className="h-5 w-5" aria-hidden />
+            Llamar
+          </a>
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-4 text-sm font-bold text-white"
+          >
+            <WhatsAppIcon className="h-5 w-5" />
+            WhatsApp
+          </a>
+        </div>
       </div>
     );
   }

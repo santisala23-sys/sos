@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertTriangle, MapPin, X } from "lucide-react";
+import { AlertTriangle, FileDown, MapPin } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
+import { LocationPrompt } from "@/components/public/LocationPrompt";
 import { ScanMessageThread } from "@/components/shared/ScanMessageThread";
 
 type EmergencyProfileViewProps = {
@@ -32,17 +33,20 @@ async function requestGeolocation(): Promise<{
 
 export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   const scanTriggered = useRef(false);
+  const scanLogIdRef = useRef<string | null>(null);
   const [scanLogId, setScanLogId] = useState<string | null>(null);
-  const [showGeoBanner, setShowGeoBanner] = useState(true);
-  const [geoStatus, setGeoStatus] = useState<
-    "idle" | "loading" | "granted" | "denied"
-  >("idle");
+  const [geoPhase, setGeoPhase] = useState<
+    "pending" | "loading" | "granted" | "skipped" | "denied"
+  >("pending");
   const [sosLoading, setSosLoading] = useState(false);
   const [sosSent, setSosSent] = useState(false);
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
+
+  const locationResolved = geoPhase === "granted" || geoPhase === "skipped";
+  const hasClinicalPdf = Boolean(profile.clinical_pdf_filename);
 
   const triggerScanAlert = useCallback(async () => {
     if (scanTriggered.current) return;
@@ -59,6 +63,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
       });
       if (res.ok) {
         const data = await res.json();
+        scanLogIdRef.current = data.scanLogId;
         setScanLogId(data.scanLogId);
       }
     } catch {
@@ -70,43 +75,57 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
     triggerScanAlert();
   }, [triggerScanAlert]);
 
-  async function handleShareLocation() {
-    setGeoStatus("loading");
-    const coords = await requestGeolocation();
+  async function sendLocationToServer(
+    logId: string,
+    location: { latitude: number; longitude: number },
+  ) {
+    await fetch("/api/alerts/location", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        scanLogId: logId,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      }),
+    });
+  }
 
-    if (!coords) {
-      setGeoStatus("denied");
-      setShowGeoBanner(false);
+  async function handleShareLocation() {
+    setGeoPhase("loading");
+    const location = await requestGeolocation();
+
+    if (!location) {
+      setGeoPhase("denied");
       return;
     }
 
-    if (scanLogId) {
-      await fetch("/api/alerts/location", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          scanLogId,
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        }),
-      });
+    setCoords(location);
+
+    for (let attempt = 0; attempt < 8 && !scanLogIdRef.current; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, 400));
     }
 
-    setCoords(coords);
+    if (scanLogIdRef.current) {
+      await sendLocationToServer(scanLogIdRef.current, location);
+    }
 
-    setGeoStatus("granted");
-    setShowGeoBanner(false);
+    setGeoPhase("granted");
   }
 
-  function dismissGeoBanner() {
-    setGeoStatus("denied");
-    setShowGeoBanner(false);
+  function handleSkipLocation() {
+    setGeoPhase("skipped");
   }
 
   async function handleSos() {
     setSosLoading(true);
     const location = coords ?? (await requestGeolocation());
-    if (location) setCoords(location);
+    if (location) {
+      setCoords(location);
+      const logId = scanLogIdRef.current;
+      if (logId) {
+        await sendLocationToServer(logId, location);
+      }
+    }
 
     try {
       const res = await fetch("/api/alerts/sos", {
@@ -121,6 +140,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
       });
       if (res.ok) {
         const data = await res.json();
+        scanLogIdRef.current = data.scanLogId;
         setScanLogId(data.scanLogId);
       }
       setSosSent(true);
@@ -130,63 +150,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-lg flex-col bg-black text-white">
-      {showGeoBanner && (
-        <div
-          className="border-b-2 border-amber-500 bg-amber-950 px-4 py-4"
-          role="dialog"
-          aria-labelledby="geo-title"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex gap-3">
-              <MapPin className="mt-0.5 h-6 w-6 shrink-0 text-amber-400" aria-hidden />
-              <div>
-                <p id="geo-title" className="font-bold text-amber-100">
-                  Compartir ubicación
-                </p>
-                <p className="mt-1 text-sm text-amber-200/90">
-                  Ayudá a la familia indicando dónde ocurre esta situación.
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={dismissGeoBanner}
-              className="rounded p-1 text-amber-300 hover:bg-amber-900"
-              aria-label="Cerrar aviso de ubicación"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleShareLocation}
-              disabled={geoStatus === "loading"}
-              className="bg-amber-500 text-black hover:bg-amber-400"
-            >
-              {geoStatus === "loading" ? "Obteniendo GPS..." : "Compartir ubicación"}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={dismissGeoBanner}
-              className="text-amber-200 hover:bg-amber-900"
-            >
-              Ahora no
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {geoStatus === "granted" && (
-        <p className="bg-green-900 px-4 py-2 text-center text-sm font-medium text-green-100">
-          Ubicación compartida con la familia.
-        </p>
-      )}
-
+    <div className="mx-auto flex min-h-dvh max-w-lg flex-col overflow-x-hidden overscroll-y-none bg-black text-white">
       <header className="border-b-4 border-red-600 bg-red-700 px-4 py-6 text-center">
         <p className="text-sm font-bold uppercase tracking-widest text-red-100">
           Perfil de asistencia
@@ -196,16 +160,40 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         </h1>
       </header>
 
-      <main className="flex flex-1 flex-col gap-6 px-4 py-6">
-        <ContactActions
-          profile={profile}
-          alertType="scan"
-          latitude={coords?.latitude}
-          longitude={coords?.longitude}
-          scanLogId={scanLogId}
+      {!locationResolved && (
+        <LocationPrompt
+          beneficiaryName={profile.beneficiary_name}
+          status={
+            geoPhase === "loading"
+              ? "loading"
+              : geoPhase === "denied"
+                ? "denied"
+                : "idle"
+          }
+          onShare={handleShareLocation}
+          onSkip={handleSkipLocation}
         />
+      )}
 
-        {scanLogId && (
+      {geoPhase === "granted" && (
+        <p className="flex items-center justify-center gap-2 bg-green-900 px-4 py-2 text-center text-sm font-medium text-green-100">
+          <MapPin className="h-4 w-4 shrink-0" aria-hidden />
+          Ubicación compartida con la familia
+        </p>
+      )}
+
+      <main className="flex flex-1 flex-col gap-6 px-4 py-6 pb-36">
+        {locationResolved && (
+          <ContactActions
+            profile={profile}
+            alertType="scan"
+            latitude={coords?.latitude}
+            longitude={coords?.longitude}
+            scanLogId={scanLogId}
+          />
+        )}
+
+        {locationResolved && scanLogId && (
           <ScanMessageThread
             scanLogId={scanLogId}
             slug={profile.slug}
@@ -214,19 +202,35 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           />
         )}
 
-        <section aria-labelledby="instructions-heading">
-          <h2
-            id="instructions-heading"
-            className="mb-3 text-lg font-bold uppercase tracking-wide text-yellow-400"
-          >
-            Cosas a tener en cuenta
-          </h2>
-          <div className="rounded-xl border-2 border-yellow-500 bg-yellow-950 px-5 py-4 text-lg leading-relaxed text-yellow-50">
-            {profile.instructions}
-          </div>
-        </section>
+        {locationResolved && profile.allergies?.trim() && (
+          <section aria-labelledby="allergies-heading">
+            <h2
+              id="allergies-heading"
+              className="mb-3 text-lg font-bold uppercase tracking-wide text-red-400"
+            >
+              ⚠️ Alergias
+            </h2>
+            <div className="rounded-xl border-2 border-red-500 bg-red-950 px-5 py-4 text-lg font-semibold leading-relaxed text-red-50">
+              {profile.allergies}
+            </div>
+          </section>
+        )}
 
-        {profile.medical_notes && (
+        {locationResolved && (
+          <section aria-labelledby="instructions-heading">
+            <h2
+              id="instructions-heading"
+              className="mb-3 text-lg font-bold uppercase tracking-wide text-yellow-400"
+            >
+              Cosas a tener en cuenta
+            </h2>
+            <div className="rounded-xl border-2 border-yellow-500 bg-yellow-950 px-5 py-4 text-lg leading-relaxed text-yellow-50">
+              {profile.instructions}
+            </div>
+          </section>
+        )}
+
+        {locationResolved && profile.medical_notes?.trim() && (
           <section aria-labelledby="medical-heading">
             <h2
               id="medical-heading"
@@ -240,9 +244,27 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           </section>
         )}
 
+        {locationResolved && hasClinicalPdf && (
+          <section aria-labelledby="clinical-pdf-heading">
+            <h2
+              id="clinical-pdf-heading"
+              className="mb-2 text-base font-bold uppercase tracking-wide text-neutral-400"
+            >
+              Historial clínico
+            </h2>
+            <a
+              href={`/api/p/${profile.slug}/clinical-pdf`}
+              download={profile.clinical_pdf_filename ?? "historial-clinico.pdf"}
+              className="flex min-h-[56px] items-center justify-center gap-3 rounded-xl border-2 border-blue-500 bg-blue-950 px-4 py-4 text-base font-bold text-blue-100 active:scale-[0.98]"
+            >
+              <FileDown className="h-6 w-6 shrink-0" aria-hidden />
+              Descargar PDF — {profile.clinical_pdf_filename}
+            </a>
+          </section>
+        )}
       </main>
 
-      <footer className="sticky bottom-0 border-t-2 border-red-800 bg-neutral-950 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <footer className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-lg border-t-2 border-red-800 bg-neutral-950 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <Button
           type="button"
           variant="danger"

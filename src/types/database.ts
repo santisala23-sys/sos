@@ -19,6 +19,9 @@ export interface QrProfile {
   secondary_contact_phone: string | null;
   instructions: string;
   medical_notes: string | null;
+  allergies: string | null;
+  clinical_pdf_filename: string | null;
+  clinical_pdf_uploaded_at: string | null;
   is_active: boolean;
   created_at: string;
 }
@@ -46,9 +49,10 @@ export type QrProfileInsert = Pick<
   | "beneficiary_name"
   | "emergency_contact_name"
   | "emergency_contact_phone"
-  | "instructions"
-  | "medical_notes"
-  | "slug"
+    | "instructions"
+    | "medical_notes"
+    | "allergies"
+    | "slug"
   | "tutor_id"
 >;
 
@@ -62,6 +66,7 @@ export type QrProfileUpdate = Partial<
     | "secondary_contact_phone"
     | "instructions"
     | "medical_notes"
+    | "allergies"
     | "is_active"
   >
 >;
