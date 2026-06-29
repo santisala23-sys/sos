@@ -252,26 +252,25 @@ export default function HomePage() {
             <ol className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
               {HOW_IT_WORKS.map(({ step, title, text, image, imageAlt }) => (
                 <li key={step} className="flex flex-col">
-                  <div className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-lg shadow-violet-500/10">
+                  <h3 className="text-lg font-bold text-neutral-900">
+                    <span className="text-violet-600">{step}</span>
+                    <span className="mx-2 text-neutral-300" aria-hidden>
+                      —
+                    </span>
+                    {title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                    {text}
+                  </p>
+                  <div className="mt-4 overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-lg shadow-violet-500/10">
                     <Image
                       src={image}
                       alt={imageAlt}
                       width={390}
                       height={844}
                       className="h-auto w-full"
-                      sizes="(max-width: 1024px) 100vw, 33vw"
+                      sizes="(max-width: 1024px) 100vw, 25vw"
                     />
-                  </div>
-                  <div className="mt-5 flex items-start gap-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-sm font-black text-white">
-                      {step}
-                    </span>
-                    <div>
-                      <h3 className="font-bold text-neutral-900">{title}</h3>
-                      <p className="mt-1 text-sm leading-relaxed text-neutral-600">
-                        {text}
-                      </p>
-                    </div>
                   </div>
                 </li>
               ))}
