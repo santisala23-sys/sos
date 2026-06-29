@@ -1,43 +1,41 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   Bell,
-  Briefcase,
   MapPin,
   MessageCircle,
-  PawPrint,
   Phone,
   QrCode,
   Sparkles,
-  UserRound,
 } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { Button } from "@/components/ui/Button";
 
 const USE_CASES = [
   {
-    icon: UserRound,
     title: "Personas",
     description:
       "Asistencia, alergias, datos médicos y contactos de emergencia para situaciones de estrés.",
-    accent: "from-rose-500/15 to-orange-500/10 text-rose-700",
-    iconBg: "bg-rose-100 text-rose-600",
+    accent: "from-rose-500/15 to-orange-500/10",
+    image: "/images/landing/use-case-personas.png",
+    imageAlt: "Tarjeta con código QR guardada en el bolsillo de una chaqueta",
   },
   {
-    icon: PawPrint,
     title: "Mascotas",
     description:
       "Collar o chapita con QR: quien la encuentre llama al dueño al instante.",
-    accent: "from-amber-500/15 to-yellow-500/10 text-amber-800",
-    iconBg: "bg-amber-100 text-amber-700",
+    accent: "from-amber-500/15 to-yellow-500/10",
+    image: "/images/landing/use-case-mascotas.png",
+    imageAlt: "Perro con collar y chapita que muestra un código QR",
   },
   {
-    icon: Briefcase,
     title: "Objetos y valijas",
     description:
       "Notebook, equipaje o billetera: instrucciones claras y contacto si alguien lo encuentra.",
-    accent: "from-sky-500/15 to-indigo-500/10 text-sky-800",
-    iconBg: "bg-sky-100 text-sky-700",
+    accent: "from-sky-500/15 to-indigo-500/10",
+    image: "/images/landing/use-case-valijas.png",
+    imageAlt: "Valija de viaje con un sticker de código QR en el aeropuerto",
   },
 ] as const;
 
@@ -127,59 +125,81 @@ export default function HomePage() {
 
       <main>
         <section className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:pt-24">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="inline-flex items-center gap-2 rounded-full border border-violet-200/80 bg-white/80 px-4 py-1.5 text-sm font-medium text-violet-800 shadow-sm backdrop-blur-sm">
-              <QrCode className="h-4 w-4" aria-hidden />
-              Tu QR personal, para lo que más importa
-            </p>
-            <h1 className="mt-6 text-4xl font-black leading-[1.1] tracking-tight text-neutral-900 sm:text-6xl">
-              Cuando alguien escanea,{" "}
-              <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                sabe cómo ayudarte
-              </span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-neutral-600 sm:text-xl">
-              <BrandLogo href="" size="sm" className="align-baseline" /> conecta
-              al instante a quien encuentra tu QR con vos: familia, dueño o
-              contacto de confianza. Personas, mascotas, valijas, equipos — lo
-              que necesites proteger.
-            </p>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-              <Link href="/register">
-                <Button
-                  size="lg"
-                  className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 px-8 shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
-                >
-                  Crear mi perfil gratis
-                  <ArrowRight className="h-5 w-5" aria-hidden />
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="secondary" size="lg">
-                  Ya tengo cuenta
-                </Button>
-              </Link>
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            <div className="text-center lg:text-left">
+              <p className="inline-flex items-center gap-2 rounded-full border border-violet-200/80 bg-white/80 px-4 py-1.5 text-sm font-medium text-violet-800 shadow-sm backdrop-blur-sm">
+                <QrCode className="h-4 w-4" aria-hidden />
+                Tu QR personal, para lo que más importa
+              </p>
+              <h1 className="mt-6 text-4xl font-black leading-[1.1] tracking-tight text-neutral-900 sm:text-6xl">
+                Cuando alguien escanea,{" "}
+                <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                  sabe cómo ayudarte
+                </span>
+              </h1>
+              <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-neutral-600 sm:text-xl lg:mx-0">
+                <BrandLogo href="" size="sm" className="align-baseline" /> conecta
+                al instante a quien encuentra tu QR con vos: familia, dueño o
+                contacto de confianza. Personas, mascotas, valijas, equipos — lo
+                que necesites proteger.
+              </p>
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+                <Link href="/register">
+                  <Button
+                    size="lg"
+                    className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 px-8 shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
+                  >
+                    Crear mi perfil gratis
+                    <ArrowRight className="h-5 w-5" aria-hidden />
+                  </Button>
+                </Link>
+                <Link href="/login">
+                  <Button variant="secondary" size="lg">
+                    Ya tengo cuenta
+                  </Button>
+                </Link>
+              </div>
+              <p className="mt-5 text-sm text-neutral-500">
+                Sin instalar apps · Funciona en el navegador · Listo en minutos
+              </p>
             </div>
-            <p className="mt-5 text-sm text-neutral-500">
-              Sin instalar apps · Funciona en el navegador · Listo en minutos
-            </p>
+
+            <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+              <div className="overflow-hidden rounded-3xl border border-white/80 bg-white/60 shadow-xl shadow-violet-500/15 backdrop-blur-sm">
+                <Image
+                  src="/images/landing/hero-scan.png"
+                  alt="Persona mostrando su tarjeta QR mientras alguien la escanea con el celular"
+                  width={1024}
+                  height={1024}
+                  priority
+                  className="h-auto w-full"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="mx-auto mt-16 grid max-w-4xl gap-4 sm:grid-cols-3">
-            {USE_CASES.map(({ icon: Icon, title, description, accent, iconBg }) => (
+          <div className="mx-auto mt-20 grid max-w-5xl gap-6 sm:grid-cols-3">
+            {USE_CASES.map(({ title, description, accent, image, imageAlt }) => (
               <article
                 key={title}
-                className={`rounded-2xl border border-white/80 bg-gradient-to-br ${accent} p-6 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md`}
+                className={`overflow-hidden rounded-2xl border border-white/80 bg-gradient-to-br ${accent} shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md`}
               >
-                <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${iconBg}`}
-                >
-                  <Icon className="h-5 w-5" aria-hidden />
+                <div className="relative aspect-square overflow-hidden bg-white/50">
+                  <Image
+                    src={image}
+                    alt={imageAlt}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                  />
                 </div>
-                <h2 className="mt-4 text-lg font-bold text-neutral-900">{title}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-                  {description}
-                </p>
+                <div className="p-5">
+                  <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                    {description}
+                  </p>
+                </div>
               </article>
             ))}
           </div>
