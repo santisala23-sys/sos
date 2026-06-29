@@ -132,7 +132,7 @@ export async function listQrProfilesByTutor(tutorId: string): Promise<QrProfile[
       id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
-      instructions, medical_notes, allergies,
+      instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
       is_active, created_at
     FROM qr_profiles
@@ -153,7 +153,7 @@ export async function findQrProfileBySlug(
           id, tutor_id, slug, profile_type, beneficiary_name,
           emergency_contact_name, emergency_contact_phone,
           secondary_contact_name, secondary_contact_phone,
-          instructions, medical_notes, allergies,
+          instructions, medical_notes, allergies, blood_type,
           clinical_pdf_filename, clinical_pdf_uploaded_at,
           is_active, created_at
         FROM qr_profiles
@@ -165,7 +165,7 @@ export async function findQrProfileBySlug(
           id, tutor_id, slug, profile_type, beneficiary_name,
           emergency_contact_name, emergency_contact_phone,
           secondary_contact_name, secondary_contact_phone,
-          instructions, medical_notes, allergies,
+          instructions, medical_notes, allergies, blood_type,
           clinical_pdf_filename, clinical_pdf_uploaded_at,
           is_active, created_at
         FROM qr_profiles
@@ -182,7 +182,7 @@ export async function findQrProfileById(id: string): Promise<QrProfile | null> {
       id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
-      instructions, medical_notes, allergies,
+      instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
       is_active, created_at
     FROM qr_profiles
@@ -201,7 +201,7 @@ export async function findActiveQrProfileById(
       id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
-      instructions, medical_notes, allergies,
+      instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
       is_active, created_at
     FROM qr_profiles
@@ -224,6 +224,7 @@ export async function createQrProfile(
     instructions: string;
     medical_notes?: string;
     allergies?: string;
+    blood_type?: string | null;
     is_active?: boolean;
   },
 ): Promise<QrProfile> {
@@ -232,7 +233,7 @@ export async function createQrProfile(
     INSERT INTO qr_profiles (
       tutor_id, slug, profile_type, beneficiary_name, emergency_contact_name,
       emergency_contact_phone, secondary_contact_name, secondary_contact_phone,
-      instructions, medical_notes, allergies, is_active
+      instructions, medical_notes, allergies, blood_type, is_active
     )
     VALUES (
       ${data.tutor_id},
@@ -246,13 +247,14 @@ export async function createQrProfile(
       ${data.instructions},
       ${data.medical_notes ?? ""},
       ${data.allergies ?? ""},
+      ${data.blood_type ?? null},
       ${data.is_active ?? true}
     )
     RETURNING
       id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
-      instructions, medical_notes, allergies,
+      instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
       is_active, created_at
   `;
@@ -274,6 +276,7 @@ export async function updateQrProfile(
       | "instructions"
       | "medical_notes"
       | "allergies"
+      | "blood_type"
       | "is_active"
     >
   >,
@@ -294,13 +297,14 @@ export async function updateQrProfile(
       instructions = ${data.instructions ?? existing.instructions},
       medical_notes = ${data.medical_notes ?? existing.medical_notes ?? ""},
       allergies = ${data.allergies !== undefined ? data.allergies : existing.allergies ?? ""},
+      blood_type = ${data.blood_type !== undefined ? data.blood_type : existing.blood_type ?? null},
       is_active = ${data.is_active ?? existing.is_active}
     WHERE id = ${id} AND tutor_id = ${tutorId}
     RETURNING
       id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
-      instructions, medical_notes, allergies,
+      instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
       is_active, created_at
   `;
@@ -633,7 +637,7 @@ export async function setClinicalPdf(
       id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
-      instructions, medical_notes, allergies,
+      instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
       is_active, created_at
   `;
@@ -659,7 +663,7 @@ export async function clearClinicalPdf(
       id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
-      instructions, medical_notes, allergies,
+      instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
       is_active, created_at
   `;

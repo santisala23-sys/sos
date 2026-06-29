@@ -8,6 +8,7 @@ import {
   getProfileTypeConfig,
   PROFILE_TYPES,
 } from "@/lib/profile-types";
+import { BLOOD_TYPES } from "@/lib/blood-types";
 
 type QrProfileFormProps = {
   profile?: QrProfile;
@@ -65,6 +66,7 @@ export function QrProfileForm({
   );
   const [instructions, setInstructions] = useState(profile?.instructions ?? "");
   const [allergies, setAllergies] = useState(profile?.allergies ?? "");
+  const [bloodType, setBloodType] = useState(profile?.blood_type ?? "");
   const [medicalNotes, setMedicalNotes] = useState(profile?.medical_notes ?? "");
   const [isActive, setIsActive] = useState(profile?.is_active ?? true);
 
@@ -84,6 +86,7 @@ export function QrProfileForm({
       secondary_contact_phone: secondaryContactPhone.trim() || null,
       instructions,
       allergies: typeConfig.showAllergies ? allergies.trim() || null : null,
+      blood_type: typeConfig.showBloodType ? bloodType || null : null,
       medical_notes: typeConfig.showMedicalNotes ? medicalNotes || null : null,
       ...(isEditing ? { is_active: isActive } : {}),
     };
@@ -304,6 +307,27 @@ export function QrProfileForm({
           placeholder={typeConfig.instructionsPlaceholder}
         />
       </label>
+
+      {typeConfig.showBloodType && (
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">Tipo de sangre (opcional)</span>
+          <select
+            value={bloodType}
+            onChange={(e) => setBloodType(e.target.value)}
+            className={inputClass}
+          >
+            <option value="">No especificado</option>
+            {BLOOD_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+          <span className="text-xs text-neutral-500">
+            Se muestra destacado en la vista de emergencia para personal de salud.
+          </span>
+        </label>
+      )}
 
       {typeConfig.showAllergies && (
         <label className="flex flex-col gap-1">

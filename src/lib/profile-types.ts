@@ -32,6 +32,7 @@ export type ProfileTypeConfig = {
   publicHeader: string;
   showAllergies: boolean;
   showMedicalNotes: boolean;
+  showBloodType: boolean;
   showClinicalPdf: boolean;
   allergiesLabel: string;
   medicalNotesLabel: string;
@@ -50,6 +51,7 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     publicHeader: "Perfil de asistencia",
     showAllergies: true,
     showMedicalNotes: true,
+    showBloodType: true,
     showClinicalPdf: true,
     allergiesLabel: "Alergias",
     medicalNotesLabel: "Información médica",
@@ -67,6 +69,7 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     publicHeader: "Mascota — contacto del dueño",
     showAllergies: true,
     showMedicalNotes: true,
+    showBloodType: false,
     showClinicalPdf: false,
     allergiesLabel: "Alergias o restricciones",
     medicalNotesLabel: "Datos veterinarios (opcional)",
@@ -83,6 +86,7 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     publicHeader: "Objeto perdido — contacto",
     showAllergies: false,
     showMedicalNotes: false,
+    showBloodType: false,
     showClinicalPdf: false,
     allergiesLabel: "",
     medicalNotesLabel: "",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertTriangle, FileDown, MapPin } from "lucide-react";
+import { AlertTriangle, Droplet, FileDown, MapPin } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
@@ -201,6 +201,25 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
             scanLogId={scanLogId}
           />
         )}
+
+        {locationResolved &&
+          typeConfig.showBloodType &&
+          profile.blood_type?.trim() && (
+            <section aria-labelledby="blood-type-heading">
+              <h2
+                id="blood-type-heading"
+                className="mb-3 text-lg font-bold uppercase tracking-wide text-violet-300"
+              >
+                Tipo de sangre
+              </h2>
+              <div className="flex items-center gap-4 rounded-xl border-2 border-violet-500 bg-violet-950 px-5 py-4">
+                <Droplet className="h-8 w-8 shrink-0 text-violet-300" aria-hidden />
+                <p className="text-3xl font-black tracking-wide text-white sm:text-4xl">
+                  {profile.blood_type}
+                </p>
+              </div>
+            </section>
+          )}
 
         {locationResolved && scanLogId && (
           <ScanMessageThread

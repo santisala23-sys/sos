@@ -23,6 +23,7 @@ export interface QrProfile {
   instructions: string;
   medical_notes: string | null;
   allergies: string | null;
+  blood_type: string | null;
   clinical_pdf_filename: string | null;
   clinical_pdf_uploaded_at: string | null;
   is_active: boolean;
@@ -55,6 +56,7 @@ export type QrProfileInsert = Pick<
     | "instructions"
     | "medical_notes"
     | "allergies"
+    | "blood_type"
     | "slug"
     | "profile_type"
     | "tutor_id"
@@ -72,6 +74,7 @@ export type QrProfileUpdate = Partial<
     | "instructions"
     | "medical_notes"
     | "allergies"
+    | "blood_type"
     | "is_active"
   >
 >;

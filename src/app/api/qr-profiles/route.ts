@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth/session";
 import { createQrProfile, listQrProfilesByTutor } from "@/lib/db/queries";
 import { generateSlug } from "@/lib/utils/slug";
 import { isProfileType, type ProfileType } from "@/lib/profile-types";
+import { normalizeBloodType } from "@/lib/blood-types";
 
 export async function GET() {
   const session = await getSession();
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
       instructions,
       medical_notes,
       allergies,
+      blood_type,
       profile_type,
     } = body as {
       beneficiary_name?: string;
@@ -41,6 +43,7 @@ export async function POST(request: Request) {
       instructions?: string;
       medical_notes?: string;
       allergies?: string;
+      blood_type?: string | null;
       profile_type?: string;
     };
 
@@ -59,6 +62,11 @@ export async function POST(request: Request) {
     const resolvedProfileType: ProfileType =
       profile_type && isProfileType(profile_type) ? profile_type : "person";
 
+    const resolvedBloodType =
+      resolvedProfileType === "person"
+        ? normalizeBloodType(blood_type)
+        : null;
+
     const profile = await createQrProfile({
       tutor_id: session.userId,
       slug: generateSlug(beneficiary_name),
@@ -70,6 +78,7 @@ export async function POST(request: Request) {
       instructions,
       medical_notes: medical_notes ?? "",
       allergies: allergies ?? "",
+      blood_type: resolvedBloodType,
       profile_type: resolvedProfileType,
     });
 

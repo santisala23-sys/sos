@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import {
   deleteQrProfile,
+  findQrProfileById,
   updateQrProfile,
 } from "@/lib/db/queries";
+import { normalizeBloodType } from "@/lib/blood-types";
+import { isProfileType } from "@/lib/profile-types";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -17,7 +20,31 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
   try {
     const body = await request.json();
-    const profile = await updateQrProfile(id, session.userId, body);
+    const existing = await findQrProfileById(id);
+    if (!existing || existing.tutor_id !== session.userId) {
+      return NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 });
+    }
+
+    const resolvedType =
+      body.profile_type && isProfileType(body.profile_type)
+        ? body.profile_type
+        : existing.profile_type;
+
+    const patch = {
+      ...body,
+      ...(body.blood_type !== undefined
+        ? {
+            blood_type:
+              resolvedType === "person"
+                ? normalizeBloodType(body.blood_type)
+                : null,
+          }
+        : resolvedType !== "person" && body.profile_type
+          ? { blood_type: null }
+          : {}),
+    };
+
+    const profile = await updateQrProfile(id, session.userId, patch);
 
     if (!profile) {
       return NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 });
