@@ -72,6 +72,30 @@ const FEATURES = [
   },
 ] as const;
 
+const HOW_IT_WORKS = [
+  {
+    step: "1",
+    title: "Escanean tu QR",
+    text: "Quien encuentra la mascota, valija o credencial abre el perfil y puede compartir ubicación al instante.",
+    image: "/images/landing/screenshots/scan-location.png",
+    imageAlt: "Pantalla de SOSme pidiendo compartir ubicación al escanear el QR de una mascota",
+  },
+  {
+    step: "2",
+    title: "Conversan en vivo",
+    text: "Chat entre quien está en el lugar y la familia, con mapa y detalle del escaneo en tu panel.",
+    image: "/images/landing/screenshots/live-chat-map.png",
+    imageAlt: "Panel de SOSme con conversación en vivo y mapa de ubicación",
+  },
+  {
+    step: "3",
+    title: "Recibís la alerta",
+    text: "Notificación push al celular cuando hay escaneo, mensaje o SOS — sin abrir la app.",
+    image: "/images/landing/screenshots/push-alert.png",
+    imageAlt: "Notificación push de SOSme con alerta de ubicación",
+  },
+] as const;
+
 const STEPS = [
   {
     step: "01",
@@ -202,6 +226,49 @@ export default function HomePage() {
                 </div>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section className="border-y border-neutral-200/80 bg-white/60 px-4 py-20 backdrop-blur-sm">
+          <div className="mx-auto max-w-6xl">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-sm font-semibold uppercase tracking-widest text-violet-600">
+                Así funciona
+              </p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
+                De un escaneo a una alerta en segundos
+              </h2>
+              <p className="mt-4 text-neutral-600">
+                Probado en la calle: ubicación, chat y notificación push en un solo flujo.
+              </p>
+            </div>
+            <ol className="mt-14 grid gap-10 lg:grid-cols-3">
+              {HOW_IT_WORKS.map(({ step, title, text, image, imageAlt }) => (
+                <li key={step} className="flex flex-col">
+                  <div className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-lg shadow-violet-500/10">
+                    <Image
+                      src={image}
+                      alt={imageAlt}
+                      width={390}
+                      height={844}
+                      className="h-auto w-full"
+                      sizes="(max-width: 1024px) 100vw, 33vw"
+                    />
+                  </div>
+                  <div className="mt-5 flex items-start gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-sm font-black text-white">
+                      {step}
+                    </span>
+                    <div>
+                      <h3 className="font-bold text-neutral-900">{title}</h3>
+                      <p className="mt-1 text-sm leading-relaxed text-neutral-600">
+                        {text}
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 

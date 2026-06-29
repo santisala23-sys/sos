@@ -60,7 +60,7 @@ export default function DashboardPage() {
   const latestUnread = logs.find((l) => !l.read_at);
 
   return (
-    <div className="min-h-dvh bg-neutral-50">
+    <div className="min-h-dvh bg-[#faf9fc]">
       <header className="border-b border-neutral-200 bg-white px-4 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <div>
@@ -131,7 +131,7 @@ export default function DashboardPage() {
           ) : (
             <>
               {showAddForm && (
-                <section className="mb-4 rounded-2xl border border-blue-200 bg-blue-50/50 p-5">
+                <section className="mb-4 rounded-2xl border border-violet-200 bg-violet-50/50 p-5">
                   <h3 className="mb-4 font-semibold text-neutral-900">
                     Nuevo perfil QR
                   </h3>

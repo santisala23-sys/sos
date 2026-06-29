@@ -155,12 +155,12 @@ export function PushNotificationAlert({ push }: PushProps) {
   if (!push.supported || push.checking || push.subscribed) return null;
 
   return (
-    <section className="rounded-xl border-2 border-blue-300 bg-blue-50 p-4 shadow-sm">
+    <section className="rounded-xl border-2 border-violet-300 bg-violet-50 p-4 shadow-sm">
       <div className="flex items-start gap-3">
-        <Bell className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" aria-hidden />
+        <Bell className="mt-0.5 h-5 w-5 shrink-0 text-violet-700" aria-hidden />
         <div className="flex-1">
-          <p className="font-bold text-blue-900">Activá las alertas push</p>
-          <p className="mt-1 text-sm text-blue-800/90">
+          <p className="font-bold text-violet-900">Activá las alertas push</p>
+          <p className="mt-1 text-sm text-violet-800/90">
             Recibí avisos al instante cuando escaneen el QR, haya SOS o un mensaje
             nuevo. Solo tenés que hacerlo una vez en este dispositivo.
           </p>

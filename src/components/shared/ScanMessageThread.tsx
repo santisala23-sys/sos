@@ -109,8 +109,8 @@ export function ScanMessageThread({
     ? "bg-neutral-800 text-neutral-100"
     : "bg-neutral-100 text-neutral-900";
   const bubbleTutor = dark
-    ? "bg-blue-900 text-blue-50"
-    : "bg-blue-100 text-blue-950";
+    ? "bg-violet-900 text-violet-50"
+    : "bg-violet-100 text-violet-950";
 
   return (
     <section
@@ -182,7 +182,7 @@ export function ScanMessageThread({
             }
           }}
           placeholder="Escribí un mensaje..."
-          className={`min-w-0 flex-1 rounded-lg border px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`min-w-0 flex-1 rounded-lg border px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-violet-500 ${
             dark
               ? "border-neutral-600 bg-neutral-950 text-white placeholder:text-neutral-500"
               : "border-neutral-300 bg-white text-neutral-900"

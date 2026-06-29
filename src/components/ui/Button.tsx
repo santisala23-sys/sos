@@ -6,7 +6,8 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const variants = {
-  primary: "bg-blue-700 text-white hover:bg-blue-800 focus-visible:ring-blue-600",
+  primary:
+    "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700 focus-visible:ring-violet-600",
   secondary:
     "bg-neutral-100 text-neutral-900 hover:bg-neutral-200 focus-visible:ring-neutral-400 border border-neutral-300",
   danger: "bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-600",

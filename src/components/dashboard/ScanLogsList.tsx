@@ -20,25 +20,28 @@ export function ScanLogsList({ logs }: ScanLogsListProps) {
 
   return (
     <ul className="flex flex-col gap-3">
-      {logs.map((log) => {
+      {logs.map((log, index) => {
         const isUnread = !log.read_at;
         const hasNote = Boolean(log.scanner_note?.trim());
+        const isLatestUnread = isUnread && index === logs.findIndex((l) => !l.read_at);
 
         return (
           <li key={log.id}>
             <Link
               href={`/dashboard/logs/${log.id}`}
               className={`flex items-start gap-3 rounded-xl border p-4 transition-colors hover:bg-neutral-50 ${
-                isUnread
-                  ? "border-red-300 bg-red-50/50"
-                  : "border-neutral-200 bg-white"
+                isLatestUnread
+                  ? "border-violet-400 bg-violet-50/60 shadow-md ring-2 ring-violet-300/60"
+                  : isUnread
+                    ? "border-red-300 bg-red-50/50"
+                    : "border-neutral-200 bg-white"
               }`}
             >
               <span
                 className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
                   log.alert_type === "sos"
                     ? "bg-red-600 text-white"
-                    : "bg-blue-100 text-blue-800"
+                    : "bg-violet-100 text-violet-800"
                 }`}
               >
                 {log.alert_type === "sos" ? (

@@ -30,7 +30,7 @@ export function LogDetailView({ log }: LogDetailViewProps) {
   }, [log.id]);
 
   return (
-    <div className="min-h-dvh bg-neutral-50">
+    <div className="min-h-dvh bg-[#faf9fc]">
       <header className="border-b border-neutral-200 bg-white px-4 py-4">
         <div className="mx-auto flex max-w-3xl items-center gap-3">
           <button
@@ -84,7 +84,7 @@ export function LogDetailView({ log }: LogDetailViewProps) {
                 href={getGoogleMapsUrl(lat, lng)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm font-medium text-blue-700 underline"
+                className="inline-flex items-center gap-1 text-sm font-medium text-violet-700 underline"
               >
                 Abrir en Maps
                 <ExternalLink className="h-3 w-3" aria-hidden />

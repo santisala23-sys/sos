@@ -101,3 +101,44 @@ export function buildAlertMessage(params: {
   const parts = [headline, locationLine, noteLine, detailLine].filter(Boolean);
   return { message: parts.join("\n"), dashboardUrl, mapsUrl };
 }
+
+export function buildPushNotification(params: {
+  type: AlertPayload["type"];
+  beneficiaryName: string;
+  scannerNote?: string | null;
+  hasLocation?: boolean;
+}): { title: string; body: string } {
+  const { type, beneficiaryName, scannerNote, hasLocation } = params;
+  const note = scannerNote?.trim();
+
+  switch (type) {
+    case "sos":
+      return {
+        title: `🆘 SOS — ${beneficiaryName}`,
+        body: "Necesita ayuda urgente. Tocá para ver el detalle.",
+      };
+    case "location":
+      return {
+        title: `📍 Ubicación — ${beneficiaryName}`,
+        body: hasLocation
+          ? "Compartieron dónde están. Tocá para ver en el mapa."
+          : "Hay una actualización de ubicación.",
+      };
+    case "message":
+    case "note":
+      return {
+        title: `💬 Mensaje — ${beneficiaryName}`,
+        body: note
+          ? note.length > 90
+            ? `${note.slice(0, 87)}…`
+            : note
+          : "Hay un mensaje nuevo en el chat.",
+      };
+    case "scan":
+    default:
+      return {
+        title: `📱 QR escaneado — ${beneficiaryName}`,
+        body: "Alguien abrió el perfil. Tocá para ver la actividad.",
+      };
+  }
+}

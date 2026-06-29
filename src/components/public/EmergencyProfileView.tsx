@@ -264,7 +264,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
             <a
               href={`/api/p/${profile.slug}/clinical-pdf`}
               download={profile.clinical_pdf_filename ?? "historial-clinico.pdf"}
-              className="flex min-h-[56px] items-center justify-center gap-3 rounded-xl border-2 border-blue-500 bg-blue-950 px-4 py-4 text-base font-bold text-blue-100 active:scale-[0.98]"
+              className="flex min-h-[56px] items-center justify-center gap-3 rounded-xl border-2 border-violet-500 bg-violet-950 px-4 py-4 text-base font-bold text-violet-100 active:scale-[0.98]"
             >
               <FileDown className="h-6 w-6 shrink-0" aria-hidden />
               Descargar PDF — {profile.clinical_pdf_filename}
@@ -287,7 +287,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
             ? "Alerta enviada"
             : sosLoading
               ? "Enviando alerta..."
-              : "⚠️ NECESITO AYUDA / SOS"}
+              : "NECESITO AYUDA / SOS"}
         </Button>
       </footer>
     </div>

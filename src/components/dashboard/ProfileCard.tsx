@@ -38,7 +38,7 @@ export function ProfileCard({ profile, onRefresh }: ProfileCardProps) {
             <h3 className="truncate text-lg font-bold text-neutral-900">
               {profile.beneficiary_name}
             </h3>
-            <span className="mt-1 inline-block rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+            <span className="mt-1 inline-block rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">
               {typeLabel}
             </span>
             {!profile.is_active && (
@@ -138,7 +138,7 @@ export function ProfileCard({ profile, onRefresh }: ProfileCardProps) {
           href={sosOnlyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-1 block truncate text-xs text-blue-700 underline"
+          className="mt-1 block truncate text-xs text-violet-700 underline"
         >
           {sosOnlyUrl}
         </a>

@@ -188,7 +188,7 @@ export function QrProfileForm({
   }
 
   const inputClass =
-    "w-full rounded-lg border border-neutral-300 px-4 py-3 text-base focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-200";
+    "w-full rounded-lg border border-neutral-300 px-4 py-3 text-base focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200";
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -202,7 +202,7 @@ export function QrProfileForm({
               key={option.value}
               className={`flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors ${
                 profileType === option.value
-                  ? "border-blue-600 bg-blue-50"
+                  ? "border-violet-600 bg-violet-50"
                   : "border-neutral-200 hover:bg-neutral-50"
               }`}
             >
@@ -357,7 +357,7 @@ export function QrProfileForm({
             <div className="flex flex-wrap items-center gap-3">
               <a
                 href={`/api/qr-profiles/${profile!.id}/clinical-pdf`}
-                className="inline-flex items-center gap-2 text-sm font-medium text-blue-700 hover:underline"
+                className="inline-flex items-center gap-2 text-sm font-medium text-violet-700 hover:underline"
               >
                 <FileText className="h-4 w-4" aria-hidden />
                 {clinicalPdfFilename}
@@ -381,7 +381,7 @@ export function QrProfileForm({
                 accept="application/pdf,.pdf"
                 disabled={pdfLoading}
                 onChange={handlePdfUpload}
-                className="text-sm text-neutral-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+                className="text-sm text-neutral-600 file:mr-3 file:rounded-lg file:border-0 file:bg-violet-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
               />
               {pdfLoading && (
                 <span className="text-xs text-neutral-500">Subiendo PDF...</span>
@@ -392,7 +392,7 @@ export function QrProfileForm({
       )}
 
       {!isEditing && typeConfig.showClinicalPdf && (
-        <p className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-900">
+        <p className="rounded-lg bg-violet-50 px-4 py-3 text-sm text-violet-900">
           Después de crear el perfil podés subir un PDF con el historial clínico.
         </p>
       )}

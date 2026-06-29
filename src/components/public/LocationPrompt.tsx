@@ -29,7 +29,7 @@ export function LocationPrompt({
           <MapPin className="h-10 w-10 text-amber-300" aria-hidden />
         </div>
         <p className="text-xs font-bold uppercase tracking-widest text-amber-300">
-          {denied ? "Ubicación no disponible" : "Paso recomendado"}
+          {denied ? "Ubicación no disponible" : "Gracias por ayudar"}
         </p>
         <h2
           id="location-prompt-title"

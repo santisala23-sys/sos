@@ -1,5 +1,6 @@
 import {
   buildAlertMessage,
+  buildPushNotification,
   sendFamilyAlert,
   type AlertPayload,
 } from "@/lib/alerts/send-alert";
@@ -44,19 +45,19 @@ export async function notifyTutor(params: NotifyTutorParams): Promise<void> {
     mapsUrl,
   });
 
-  const pushTitle =
-    params.type === "sos"
-      ? `🆘 SOS — ${params.beneficiaryName}`
-      : params.type === "note" || params.type === "message"
-        ? `💬 Mensaje — ${params.beneficiaryName}`
-        : `📱 Alerta — ${params.beneficiaryName}`;
+  const push = buildPushNotification({
+    type: params.type,
+    beneficiaryName: params.beneficiaryName,
+    scannerNote: params.scannerNote,
+    hasLocation: params.latitude != null && params.longitude != null,
+  });
 
   const subscriptions = await listPushSubscriptionsByUser(params.tutorId);
   await Promise.all(
     subscriptions.map((sub) =>
       sendWebPush(sub, {
-        title: pushTitle,
-        body: message.split("\n").slice(0, 3).join(" · "),
+        title: push.title,
+        body: push.body,
         url: dashboardUrl,
       }),
     ),
