@@ -150,7 +150,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-lg flex-col overflow-x-hidden overscroll-y-none bg-black text-white">
+    <div className="relative mx-auto max-w-lg bg-black text-white">
       <header className="border-b-4 border-red-600 bg-red-700 px-4 py-6 text-center">
         <p className="text-sm font-bold uppercase tracking-widest text-red-100">
           Perfil de asistencia
@@ -175,6 +175,12 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         />
       )}
 
+      {geoPhase === "skipped" && (
+        <p className="bg-amber-950 px-4 py-2 text-center text-sm font-medium text-amber-100">
+          Continuaste sin compartir ubicación. Los contactos de emergencia están disponibles.
+        </p>
+      )}
+
       {geoPhase === "granted" && (
         <p className="flex items-center justify-center gap-2 bg-green-900 px-4 py-2 text-center text-sm font-medium text-green-100">
           <MapPin className="h-4 w-4 shrink-0" aria-hidden />
@@ -182,7 +188,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         </p>
       )}
 
-      <main className="flex flex-1 flex-col gap-6 px-4 py-6 pb-36">
+      <main className="flex flex-col gap-6 px-4 py-6 pb-[calc(8.5rem+env(safe-area-inset-bottom))]">
         {locationResolved && (
           <ContactActions
             profile={profile}
