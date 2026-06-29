@@ -6,7 +6,17 @@ import {
   setClinicalPdf,
 } from "@/lib/db/queries";
 
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
 type RouteContext = { params: Promise<{ id: string }> };
+
+function isPdfFile(file: File) {
+  return (
+    file.type === "application/pdf" ||
+    file.name.toLowerCase().endsWith(".pdf")
+  );
+}
 
 export async function GET(_request: Request, { params }: RouteContext) {
   const session = await getSession();
@@ -39,23 +49,44 @@ export async function POST(request: Request, { params }: RouteContext) {
   const { id } = await params;
 
   try {
-    const formData = await request.formData();
-    const file = formData.get("file");
+    const contentType = request.headers.get("content-type") ?? "";
+    let base64Data: string;
+    let filename: string;
 
-    if (!(file instanceof File)) {
-      return NextResponse.json({ error: "Archivo requerido" }, { status: 400 });
+    if (contentType.includes("application/json")) {
+      const body = (await request.json()) as {
+        data?: string;
+        filename?: string;
+      };
+      if (!body.data?.trim()) {
+        return NextResponse.json({ error: "Archivo requerido" }, { status: 400 });
+      }
+      base64Data = body.data;
+      filename = body.filename?.trim() || "historial-clinico.pdf";
+    } else {
+      const formData = await request.formData();
+      const file = formData.get("file");
+
+      if (!(file instanceof File)) {
+        return NextResponse.json({ error: "Archivo requerido" }, { status: 400 });
+      }
+
+      if (!isPdfFile(file)) {
+        return NextResponse.json(
+          { error: "Solo se permiten archivos PDF" },
+          { status: 400 },
+        );
+      }
+
+      base64Data = Buffer.from(await file.arrayBuffer()).toString("base64");
+      filename = file.name || "historial-clinico.pdf";
     }
 
-    if (file.type !== "application/pdf") {
-      return NextResponse.json({ error: "Solo se permiten archivos PDF" }, { status: 400 });
-    }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
     const profile = await setClinicalPdf(
       id,
       session.userId,
-      buffer,
-      file.name || "historial-clinico.pdf",
+      base64Data,
+      filename,
     );
 
     if (!profile) {

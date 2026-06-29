@@ -7,6 +7,7 @@ import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
 import { Button } from "@/components/ui/Button";
 import { getSosOnlyUrl } from "@/lib/utils/slug";
+import { PROFILE_TYPES } from "@/lib/profile-types";
 
 type ProfileCardProps = {
   profile: QrProfile;
@@ -17,6 +18,9 @@ export function ProfileCard({ profile, onRefresh }: ProfileCardProps) {
   const [showQr, setShowQr] = useState(false);
   const [editing, setEditing] = useState(false);
   const sosOnlyUrl = getSosOnlyUrl(profile.slug);
+  const typeLabel =
+    PROFILE_TYPES.find((t) => t.value === profile.profile_type)?.label ??
+    "Persona";
 
   async function handleDelete() {
     if (!confirm("¿Eliminar este perfil QR? Esta acción no se puede deshacer.")) {
@@ -34,6 +38,9 @@ export function ProfileCard({ profile, onRefresh }: ProfileCardProps) {
             <h3 className="truncate text-lg font-bold text-neutral-900">
               {profile.beneficiary_name}
             </h3>
+            <span className="mt-1 inline-block rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+              {typeLabel}
+            </span>
             {!profile.is_active && (
               <span className="mt-1 inline-block rounded-full bg-neutral-200 px-2 py-0.5 text-xs font-medium text-neutral-600">
                 Inactivo

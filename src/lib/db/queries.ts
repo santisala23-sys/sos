@@ -1,6 +1,7 @@
 import type {
   AlertType,
   MessageSender,
+  ProfileType,
   QrProfile,
   ScanLog,
   ScanMessage,
@@ -42,7 +43,7 @@ export async function listQrProfilesByTutor(tutorId: string): Promise<QrProfile[
   const sql = getSql();
   const rows = await sql`
     SELECT
-      id, tutor_id, slug, beneficiary_name,
+      id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies,
@@ -63,7 +64,7 @@ export async function findQrProfileBySlug(
   const rows = activeOnly
     ? await sql`
         SELECT
-          id, tutor_id, slug, beneficiary_name,
+          id, tutor_id, slug, profile_type, beneficiary_name,
           emergency_contact_name, emergency_contact_phone,
           secondary_contact_name, secondary_contact_phone,
           instructions, medical_notes, allergies,
@@ -75,7 +76,7 @@ export async function findQrProfileBySlug(
       `
     : await sql`
         SELECT
-          id, tutor_id, slug, beneficiary_name,
+          id, tutor_id, slug, profile_type, beneficiary_name,
           emergency_contact_name, emergency_contact_phone,
           secondary_contact_name, secondary_contact_phone,
           instructions, medical_notes, allergies,
@@ -92,7 +93,7 @@ export async function findQrProfileById(id: string): Promise<QrProfile | null> {
   const sql = getSql();
   const rows = await sql`
     SELECT
-      id, tutor_id, slug, beneficiary_name,
+      id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies,
@@ -111,7 +112,7 @@ export async function findActiveQrProfileById(
   const sql = getSql();
   const rows = await sql`
     SELECT
-      id, tutor_id, slug, beneficiary_name,
+      id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies,
@@ -128,6 +129,7 @@ export async function createQrProfile(
   data: {
     tutor_id: string;
     slug: string;
+    profile_type?: ProfileType;
     beneficiary_name: string;
     emergency_contact_name: string;
     emergency_contact_phone: string;
@@ -142,13 +144,14 @@ export async function createQrProfile(
   const sql = getSql();
   const rows = await sql`
     INSERT INTO qr_profiles (
-      tutor_id, slug, beneficiary_name, emergency_contact_name,
+      tutor_id, slug, profile_type, beneficiary_name, emergency_contact_name,
       emergency_contact_phone, secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies, is_active
     )
     VALUES (
       ${data.tutor_id},
       ${data.slug},
+      ${data.profile_type ?? "person"},
       ${data.beneficiary_name},
       ${data.emergency_contact_name},
       ${data.emergency_contact_phone},
@@ -160,7 +163,7 @@ export async function createQrProfile(
       ${data.is_active ?? true}
     )
     RETURNING
-      id, tutor_id, slug, beneficiary_name,
+      id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies,
@@ -177,6 +180,7 @@ export async function updateQrProfile(
       Pick<
       QrProfile,
       | "beneficiary_name"
+      | "profile_type"
       | "emergency_contact_name"
       | "emergency_contact_phone"
       | "secondary_contact_name"
@@ -196,6 +200,7 @@ export async function updateQrProfile(
     UPDATE qr_profiles
     SET
       beneficiary_name = ${data.beneficiary_name ?? existing.beneficiary_name},
+      profile_type = ${data.profile_type ?? existing.profile_type ?? "person"},
       emergency_contact_name = ${data.emergency_contact_name ?? existing.emergency_contact_name},
       emergency_contact_phone = ${data.emergency_contact_phone ?? existing.emergency_contact_phone},
       secondary_contact_name = ${data.secondary_contact_name !== undefined ? data.secondary_contact_name : existing.secondary_contact_name},
@@ -206,7 +211,7 @@ export async function updateQrProfile(
       is_active = ${data.is_active ?? existing.is_active}
     WHERE id = ${id} AND tutor_id = ${tutorId}
     RETURNING
-      id, tutor_id, slug, beneficiary_name,
+      id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies,
@@ -519,10 +524,11 @@ const MAX_CLINICAL_PDF_BYTES = 5 * 1024 * 1024;
 export async function setClinicalPdf(
   profileId: string,
   tutorId: string,
-  file: Buffer,
+  base64Data: string,
   filename: string,
 ): Promise<QrProfile | null> {
-  if (file.byteLength > MAX_CLINICAL_PDF_BYTES) {
+  const byteLength = Buffer.from(base64Data, "base64").byteLength;
+  if (byteLength > MAX_CLINICAL_PDF_BYTES) {
     throw new Error("PDF demasiado grande (máx. 5 MB)");
   }
 
@@ -533,12 +539,12 @@ export async function setClinicalPdf(
   const rows = await sql`
     UPDATE qr_profiles
     SET
-      clinical_pdf = ${file},
+      clinical_pdf = decode(${base64Data}, 'base64'),
       clinical_pdf_filename = ${filename},
       clinical_pdf_uploaded_at = NOW()
     WHERE id = ${profileId} AND tutor_id = ${tutorId}
     RETURNING
-      id, tutor_id, slug, beneficiary_name,
+      id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies,
@@ -564,7 +570,7 @@ export async function clearClinicalPdf(
       clinical_pdf_uploaded_at = NULL
     WHERE id = ${profileId} AND tutor_id = ${tutorId}
     RETURNING
-      id, tutor_id, slug, beneficiary_name,
+      id, tutor_id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies,
@@ -580,18 +586,18 @@ export async function getClinicalPdfBySlug(slug: string): Promise<{
 } | null> {
   const sql = getSql();
   const rows = await sql`
-    SELECT clinical_pdf_filename, clinical_pdf
+    SELECT clinical_pdf_filename, encode(clinical_pdf, 'base64') AS clinical_pdf_b64
     FROM qr_profiles
     WHERE slug = ${slug} AND is_active = TRUE AND clinical_pdf IS NOT NULL
     LIMIT 1
   `;
   const row = rows[0] as
-    | { clinical_pdf_filename: string; clinical_pdf: Buffer }
+    | { clinical_pdf_filename: string; clinical_pdf_b64: string }
     | undefined;
-  if (!row?.clinical_pdf_filename || !row.clinical_pdf) return null;
+  if (!row?.clinical_pdf_filename || !row.clinical_pdf_b64) return null;
   return {
     filename: row.clinical_pdf_filename,
-    data: row.clinical_pdf,
+    data: Buffer.from(row.clinical_pdf_b64, "base64"),
   };
 }
 
@@ -601,17 +607,17 @@ export async function getClinicalPdfForTutor(
 ): Promise<{ filename: string; data: Buffer } | null> {
   const sql = getSql();
   const rows = await sql`
-    SELECT clinical_pdf_filename, clinical_pdf
+    SELECT clinical_pdf_filename, encode(clinical_pdf, 'base64') AS clinical_pdf_b64
     FROM qr_profiles
     WHERE id = ${profileId} AND tutor_id = ${tutorId} AND clinical_pdf IS NOT NULL
     LIMIT 1
   `;
   const row = rows[0] as
-    | { clinical_pdf_filename: string; clinical_pdf: Buffer }
+    | { clinical_pdf_filename: string; clinical_pdf_b64: string }
     | undefined;
-  if (!row?.clinical_pdf_filename || !row.clinical_pdf) return null;
+  if (!row?.clinical_pdf_filename || !row.clinical_pdf_b64) return null;
   return {
     filename: row.clinical_pdf_filename,
-    data: row.clinical_pdf,
+    data: Buffer.from(row.clinical_pdf_b64, "base64"),
   };
 }

@@ -2,14 +2,35 @@
 
 import { useState } from "react";
 import { FileText, Trash2 } from "lucide-react";
-import type { QrProfile } from "@/types/database";
+import type { ProfileType, QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
+import {
+  getProfileTypeConfig,
+  PROFILE_TYPES,
+} from "@/lib/profile-types";
 
 type QrProfileFormProps = {
   profile?: QrProfile;
   onSuccess: () => void;
   onCancel?: () => void;
 };
+
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== "string") {
+        reject(new Error("No se pudo leer el archivo"));
+        return;
+      }
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
+    reader.readAsDataURL(file);
+  });
+}
 
 export function QrProfileForm({
   profile,
@@ -24,6 +45,9 @@ export function QrProfileForm({
     profile?.clinical_pdf_filename ?? null,
   );
 
+  const [profileType, setProfileType] = useState<ProfileType>(
+    profile?.profile_type ?? "person",
+  );
   const [beneficiaryName, setBeneficiaryName] = useState(
     profile?.beneficiary_name ?? "",
   );
@@ -44,20 +68,23 @@ export function QrProfileForm({
   const [medicalNotes, setMedicalNotes] = useState(profile?.medical_notes ?? "");
   const [isActive, setIsActive] = useState(profile?.is_active ?? true);
 
+  const typeConfig = getProfileTypeConfig(profileType);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     const payload = {
+      profile_type: profileType,
       beneficiary_name: beneficiaryName,
       emergency_contact_name: emergencyContactName,
       emergency_contact_phone: emergencyContactPhone,
       secondary_contact_name: secondaryContactName.trim() || null,
       secondary_contact_phone: secondaryContactPhone.trim() || null,
       instructions,
-      allergies: allergies.trim() || null,
-      medical_notes: medicalNotes || null,
+      allergies: typeConfig.showAllergies ? allergies.trim() || null : null,
+      medical_notes: typeConfig.showMedicalNotes ? medicalNotes || null : null,
       ...(isEditing ? { is_active: isActive } : {}),
     };
 
@@ -89,7 +116,11 @@ export function QrProfileForm({
     const file = e.target.files?.[0];
     if (!file || !profile) return;
 
-    if (file.type !== "application/pdf") {
+    const isPdf =
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf");
+
+    if (!isPdf) {
       setError("Solo se permiten archivos PDF.");
       e.target.value = "";
       return;
@@ -104,25 +135,32 @@ export function QrProfileForm({
     setPdfLoading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
+    try {
+      const data = await readFileAsBase64(file);
+      const res = await fetch(`/api/qr-profiles/${profile.id}/clinical-pdf`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data, filename: file.name }),
+      });
+      const json = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        profile?: QrProfile;
+      };
 
-    const res = await fetch(`/api/qr-profiles/${profile.id}/clinical-pdf`, {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
+      if (!res.ok) {
+        setError(json.error ?? "Error al subir el PDF");
+        return;
+      }
 
-    if (!res.ok) {
-      setError(data.error ?? "Error al subir el PDF");
+      setClinicalPdfFilename(
+        json.profile?.clinical_pdf_filename ?? file.name,
+      );
+    } catch {
+      setError("Error de conexión al subir el PDF. Probá de nuevo.");
+    } finally {
       setPdfLoading(false);
       e.target.value = "";
-      return;
     }
-
-    setClinicalPdfFilename(data.profile?.clinical_pdf_filename ?? file.name);
-    setPdfLoading(false);
-    e.target.value = "";
   }
 
   async function handlePdfDelete() {
@@ -130,19 +168,23 @@ export function QrProfileForm({
     setPdfLoading(true);
     setError(null);
 
-    const res = await fetch(`/api/qr-profiles/${profile.id}/clinical-pdf`, {
-      method: "DELETE",
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch(`/api/qr-profiles/${profile.id}/clinical-pdf`, {
+        method: "DELETE",
+      });
+      const data = await res.json().catch(() => ({}));
 
-    if (!res.ok) {
-      setError(data.error ?? "Error al eliminar el PDF");
+      if (!res.ok) {
+        setError(data.error ?? "Error al eliminar el PDF");
+        return;
+      }
+
+      setClinicalPdfFilename(null);
+    } catch {
+      setError("Error de conexión al eliminar el PDF.");
+    } finally {
       setPdfLoading(false);
-      return;
     }
-
-    setClinicalPdfFilename(null);
-    setPdfLoading(false);
   }
 
   const inputClass =
@@ -150,30 +192,65 @@ export function QrProfileForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <fieldset className="rounded-xl border border-neutral-200 p-4">
+        <legend className="px-1 text-sm font-semibold text-neutral-800">
+          Tipo de perfil *
+        </legend>
+        <div className="flex flex-col gap-2">
+          {PROFILE_TYPES.map((option) => (
+            <label
+              key={option.value}
+              className={`flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors ${
+                profileType === option.value
+                  ? "border-blue-600 bg-blue-50"
+                  : "border-neutral-200 hover:bg-neutral-50"
+              }`}
+            >
+              <input
+                type="radio"
+                name="profile_type"
+                value={option.value}
+                checked={profileType === option.value}
+                onChange={() => setProfileType(option.value)}
+                className="mt-1"
+              />
+              <span>
+                <span className="block text-sm font-semibold text-neutral-900">
+                  {option.label}
+                </span>
+                <span className="block text-xs text-neutral-500">
+                  {option.description}
+                </span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">Nombre de la persona *</span>
+        <span className="text-sm font-medium">{typeConfig.beneficiaryLabel} *</span>
         <input
           required
           value={beneficiaryName}
           onChange={(e) => setBeneficiaryName(e.target.value)}
           className={inputClass}
-          placeholder="Ej: Juan Pérez"
+          placeholder={typeConfig.beneficiaryPlaceholder}
         />
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">Nombre del contacto de emergencia *</span>
+        <span className="text-sm font-medium">{typeConfig.contactLabel} *</span>
         <input
           required
           value={emergencyContactName}
           onChange={(e) => setEmergencyContactName(e.target.value)}
           className={inputClass}
-          placeholder="Ej: María Pérez (madre)"
+          placeholder={typeConfig.contactPlaceholder}
         />
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">Teléfono de emergencia *</span>
+        <span className="text-sm font-medium">Teléfono de contacto *</span>
         <input
           required
           type="tel"
@@ -189,7 +266,7 @@ export function QrProfileForm({
           Contacto secundario (opcional)
         </legend>
         <p className="mb-3 text-xs text-neutral-500">
-          Padre, hermano u otro familiar. También recibe llamada y WhatsApp.
+          Otro familiar o persona de confianza. También recibe llamada y WhatsApp.
         </p>
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1">
@@ -198,7 +275,7 @@ export function QrProfileForm({
               value={secondaryContactName}
               onChange={(e) => setSecondaryContactName(e.target.value)}
               className={inputClass}
-              placeholder="Ej: Carlos García (padre)"
+              placeholder="Ej: Carlos García"
             />
           </label>
           <label className="flex flex-col gap-1">
@@ -216,7 +293,7 @@ export function QrProfileForm({
 
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">
-          Instrucciones de manejo / comportamiento *
+          {typeConfig.instructionsLabel} *
         </span>
         <textarea
           required
@@ -224,36 +301,50 @@ export function QrProfileForm({
           value={instructions}
           onChange={(e) => setInstructions(e.target.value)}
           className={inputClass}
-          placeholder="Ej: No tolera contacto físico. Hablarle pausado. Sensible a sirenas."
+          placeholder={typeConfig.instructionsPlaceholder}
         />
       </label>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">Alergias (opcional)</span>
-        <textarea
-          rows={2}
-          value={allergies}
-          onChange={(e) => setAllergies(e.target.value)}
-          className={inputClass}
-          placeholder="Ej: Penicilina, maní, látex..."
-        />
-        <span className="text-xs text-neutral-500">
-          Se muestra en rojo y bien visible en la vista de emergencia.
-        </span>
-      </label>
+      {typeConfig.showAllergies && (
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">
+            {typeConfig.allergiesLabel} (opcional)
+          </span>
+          <textarea
+            rows={2}
+            value={allergies}
+            onChange={(e) => setAllergies(e.target.value)}
+            className={inputClass}
+            placeholder={
+              profileType === "pet"
+                ? "Ej: Alergia al pollo, no puede comer ciertos snacks..."
+                : "Ej: Penicilina, maní, látex..."
+            }
+          />
+          {profileType === "person" && (
+            <span className="text-xs text-neutral-500">
+              Se muestra en rojo y bien visible en la vista de emergencia.
+            </span>
+          )}
+        </label>
+      )}
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">Notas médicas (opcional)</span>
-        <textarea
-          rows={3}
-          value={medicalNotes}
-          onChange={(e) => setMedicalNotes(e.target.value)}
-          className={inputClass}
-          placeholder="Medicación, condiciones, observaciones para el personal de salud..."
-        />
-      </label>
+      {typeConfig.showMedicalNotes && (
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">
+            {typeConfig.medicalNotesLabel} (opcional)
+          </span>
+          <textarea
+            rows={3}
+            value={medicalNotes}
+            onChange={(e) => setMedicalNotes(e.target.value)}
+            className={inputClass}
+            placeholder={typeConfig.medicalNotesPlaceholder}
+          />
+        </label>
+      )}
 
-      {isEditing && (
+      {isEditing && typeConfig.showClinicalPdf && (
         <fieldset className="rounded-xl border border-neutral-200 p-4">
           <legend className="px-1 text-sm font-semibold text-neutral-800">
             Historial clínico PDF (opcional)
@@ -287,7 +378,7 @@ export function QrProfileForm({
             <label className="flex flex-col gap-1">
               <input
                 type="file"
-                accept="application/pdf"
+                accept="application/pdf,.pdf"
                 disabled={pdfLoading}
                 onChange={handlePdfUpload}
                 className="text-sm text-neutral-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
@@ -300,7 +391,7 @@ export function QrProfileForm({
         </fieldset>
       )}
 
-      {!isEditing && (
+      {!isEditing && typeConfig.showClinicalPdf && (
         <p className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-900">
           Después de crear el perfil podés subir un PDF con el historial clínico.
         </p>
@@ -325,7 +416,7 @@ export function QrProfileForm({
       )}
 
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading || pdfLoading}>
           {loading
             ? "Guardando..."
             : isEditing

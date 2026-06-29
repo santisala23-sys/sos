@@ -1,5 +1,7 @@
 export type AlertType = "scan" | "sos";
 
+export type ProfileType = "person" | "pet" | "object";
+
 export interface User {
   id: string;
   email: string;
@@ -12,6 +14,7 @@ export interface QrProfile {
   id: string;
   tutor_id: string;
   slug: string;
+  profile_type: ProfileType;
   beneficiary_name: string;
   emergency_contact_name: string;
   emergency_contact_phone: string;
@@ -53,13 +56,15 @@ export type QrProfileInsert = Pick<
     | "medical_notes"
     | "allergies"
     | "slug"
-  | "tutor_id"
+    | "profile_type"
+    | "tutor_id"
 >;
 
 export type QrProfileUpdate = Partial<
   Pick<
     QrProfile,
     | "beneficiary_name"
+    | "profile_type"
     | "emergency_contact_name"
     | "emergency_contact_phone"
     | "secondary_contact_name"

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
 import { LocationPrompt } from "@/components/public/LocationPrompt";
 import { ScanMessageThread } from "@/components/shared/ScanMessageThread";
+import { getProfileTypeConfig } from "@/lib/profile-types";
 
 type EmergencyProfileViewProps = {
   profile: QrProfile;
@@ -46,7 +47,9 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   } | null>(null);
 
   const locationResolved = geoPhase === "granted" || geoPhase === "skipped";
-  const hasClinicalPdf = Boolean(profile.clinical_pdf_filename);
+  const typeConfig = getProfileTypeConfig(profile.profile_type);
+  const hasClinicalPdf =
+    typeConfig.showClinicalPdf && Boolean(profile.clinical_pdf_filename);
 
   const triggerScanAlert = useCallback(async () => {
     if (scanTriggered.current) return;
@@ -153,7 +156,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
     <div className="relative mx-auto max-w-lg bg-black text-white">
       <header className="border-b-4 border-red-600 bg-red-700 px-4 py-6 text-center">
         <p className="text-sm font-bold uppercase tracking-widest text-red-100">
-          Perfil de asistencia
+          {typeConfig.publicHeader}
         </p>
         <h1 className="mt-2 text-4xl font-black leading-tight sm:text-5xl">
           {profile.beneficiary_name}
@@ -208,13 +211,13 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           />
         )}
 
-        {locationResolved && profile.allergies?.trim() && (
+        {locationResolved && typeConfig.showAllergies && profile.allergies?.trim() && (
           <section aria-labelledby="allergies-heading">
             <h2
               id="allergies-heading"
               className="mb-3 text-lg font-bold uppercase tracking-wide text-red-400"
             >
-              ⚠️ Alergias
+              ⚠️ {typeConfig.allergiesLabel}
             </h2>
             <div className="rounded-xl border-2 border-red-500 bg-red-950 px-5 py-4 text-lg font-semibold leading-relaxed text-red-50">
               {profile.allergies}
@@ -228,7 +231,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
               id="instructions-heading"
               className="mb-3 text-lg font-bold uppercase tracking-wide text-yellow-400"
             >
-              Cosas a tener en cuenta
+              {typeConfig.instructionsLabel}
             </h2>
             <div className="rounded-xl border-2 border-yellow-500 bg-yellow-950 px-5 py-4 text-lg leading-relaxed text-yellow-50">
               {profile.instructions}
@@ -236,13 +239,13 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           </section>
         )}
 
-        {locationResolved && profile.medical_notes?.trim() && (
+        {locationResolved && typeConfig.showMedicalNotes && profile.medical_notes?.trim() && (
           <section aria-labelledby="medical-heading">
             <h2
               id="medical-heading"
               className="mb-2 text-base font-bold uppercase tracking-wide text-neutral-400"
             >
-              Información médica
+              {typeConfig.medicalNotesLabel}
             </h2>
             <p className="rounded-lg bg-neutral-900 px-4 py-3 text-base text-neutral-200">
               {profile.medical_notes}

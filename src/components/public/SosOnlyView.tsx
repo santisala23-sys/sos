@@ -84,7 +84,11 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
         </p>
         <h1 className="mt-2 text-3xl font-black">{profile.beneficiary_name}</h1>
         <p className="mt-2 text-sm text-neutral-400">
-          Tocá el botón si necesitás ayuda ahora
+          {profile.profile_type === "object"
+            ? "Contactá al propietario si encontraste esto"
+            : profile.profile_type === "pet"
+              ? "Contactá al dueño si encontraste esta mascota"
+              : "Tocá el botón si necesitás ayuda ahora"}
         </p>
       </header>
 
