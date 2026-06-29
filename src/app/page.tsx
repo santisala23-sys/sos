@@ -1,93 +1,267 @@
 import Link from "next/link";
-import { Shield, QrCode, Bell, Phone } from "lucide-react";
+import {
+  ArrowRight,
+  Bell,
+  Briefcase,
+  MapPin,
+  MessageCircle,
+  PawPrint,
+  Phone,
+  QrCode,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { Button } from "@/components/ui/Button";
+
+const USE_CASES = [
+  {
+    icon: UserRound,
+    title: "Personas",
+    description:
+      "Asistencia, alergias, datos médicos y contactos de emergencia para situaciones de estrés.",
+    accent: "from-rose-500/15 to-orange-500/10 text-rose-700",
+    iconBg: "bg-rose-100 text-rose-600",
+  },
+  {
+    icon: PawPrint,
+    title: "Mascotas",
+    description:
+      "Collar o chapita con QR: quien la encuentre llama al dueño al instante.",
+    accent: "from-amber-500/15 to-yellow-500/10 text-amber-800",
+    iconBg: "bg-amber-100 text-amber-700",
+  },
+  {
+    icon: Briefcase,
+    title: "Objetos y valijas",
+    description:
+      "Notebook, equipaje o billetera: instrucciones claras y contacto si alguien lo encuentra.",
+    accent: "from-sky-500/15 to-indigo-500/10 text-sky-800",
+    iconBg: "bg-sky-100 text-sky-700",
+  },
+] as const;
+
+const FEATURES = [
+  {
+    icon: QrCode,
+    title: "QR listo para imprimir",
+    text: "Descargá el código en PNG y pegalo donde quieras: credencial, collar, valija o sticker.",
+  },
+  {
+    icon: Phone,
+    title: "Llamada y WhatsApp",
+    text: "Un toque para contactar a la familia o al dueño, con mensaje de emergencia prearmado.",
+  },
+  {
+    icon: MapPin,
+    title: "Ubicación al escanear",
+    text: "Quien abre el QR puede compartir dónde está. Vos recibís el aviso en el mapa.",
+  },
+  {
+    icon: Bell,
+    title: "Alertas push",
+    text: "Notificación al celular cuando escanean el QR, activan SOS o escriben un mensaje.",
+  },
+  {
+    icon: MessageCircle,
+    title: "Chat en vivo",
+    text: "Conversación entre quien está en el lugar y la familia, desde el panel.",
+  },
+  {
+    icon: Sparkles,
+    title: "Modo solo SOS",
+    text: "Link directo con pantalla mínima para pedir ayuda con un solo botón.",
+  },
+] as const;
+
+const STEPS = [
+  {
+    step: "01",
+    title: "Creás tu perfil",
+    text: "Elegís si es persona, mascota u objeto. Completás contactos e instrucciones en minutos.",
+  },
+  {
+    step: "02",
+    title: "Imprimís el QR",
+    text: "Descargás el PNG, lo plastificás o pegás en el lugar que tenga sentido para vos.",
+  },
+  {
+    step: "03",
+    title: "Listo para el mundo",
+    text: "Quien escanea ve qué hacer y te alerta. Vos seguís todo desde el panel en el celular.",
+  },
+] as const;
 
 export default function HomePage() {
   return (
-    <div className="flex min-h-dvh flex-col bg-white text-neutral-900">
-      <header className="border-b border-neutral-200 px-4 py-4">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <span className="text-xl font-black tracking-tight text-blue-800">
-            SOS
-          </span>
-          <nav className="flex gap-2">
+    <div className="relative min-h-dvh overflow-hidden bg-[#faf9fc] text-neutral-900">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        aria-hidden
+      >
+        <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-violet-200/50 blur-3xl" />
+        <div className="absolute right-0 top-1/4 h-80 w-80 rounded-full bg-indigo-200/40 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-rose-100/60 blur-3xl" />
+      </div>
+
+      <header className="sticky top-0 z-20 border-b border-white/60 bg-white/75 px-4 py-4 backdrop-blur-lg">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+          <BrandLogo size="md" />
+          <nav className="flex items-center gap-2">
             <Link href="/login">
               <Button variant="ghost" size="sm">
                 Ingresar
               </Button>
             </Link>
             <Link href="/register">
-              <Button size="sm">Registrarse</Button>
+              <Button
+                size="sm"
+                className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+              >
+                Empezar gratis
+              </Button>
             </Link>
           </nav>
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-5xl flex-1 flex-col px-4 py-12">
-        <section className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">
-            Asistencia y emergencia QR
-          </p>
-          <h1 className="mt-4 text-4xl font-black leading-tight text-neutral-900 sm:text-5xl">
-            Ayuda inmediata para personas con discapacidad
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-neutral-600">
-            Configurá un perfil de asistencia accesible mediante un código QR
-            físico. Fuerzas de seguridad y personal de emergencia pueden
-            escanearlo y saber al instante cómo actuar y a quién llamar.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/register">
-              <Button size="lg">Crear mi perfil gratis</Button>
-            </Link>
-            <Link href="/login">
-              <Button variant="secondary" size="lg">
-                Ya tengo cuenta
+      <main>
+        <section className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:pt-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="inline-flex items-center gap-2 rounded-full border border-violet-200/80 bg-white/80 px-4 py-1.5 text-sm font-medium text-violet-800 shadow-sm backdrop-blur-sm">
+              <QrCode className="h-4 w-4" aria-hidden />
+              Tu QR personal, para lo que más importa
+            </p>
+            <h1 className="mt-6 text-4xl font-black leading-[1.1] tracking-tight text-neutral-900 sm:text-6xl">
+              Cuando alguien escanea,{" "}
+              <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                sabe cómo ayudarte
+              </span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-neutral-600 sm:text-xl">
+              <BrandLogo href="" size="sm" className="align-baseline" /> conecta
+              al instante a quien encuentra tu QR con vos: familia, dueño o
+              contacto de confianza. Personas, mascotas, valijas, equipos — lo
+              que necesites proteger.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+              <Link href="/register">
+                <Button
+                  size="lg"
+                  className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 px-8 shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
+                >
+                  Crear mi perfil gratis
+                  <ArrowRight className="h-5 w-5" aria-hidden />
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button variant="secondary" size="lg">
+                  Ya tengo cuenta
+                </Button>
+              </Link>
+            </div>
+            <p className="mt-5 text-sm text-neutral-500">
+              Sin instalar apps · Funciona en el navegador · Listo en minutos
+            </p>
+          </div>
+
+          <div className="mx-auto mt-16 grid max-w-4xl gap-4 sm:grid-cols-3">
+            {USE_CASES.map(({ icon: Icon, title, description, accent, iconBg }) => (
+              <article
+                key={title}
+                className={`rounded-2xl border border-white/80 bg-gradient-to-br ${accent} p-6 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md`}
+              >
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${iconBg}`}
+                >
+                  <Icon className="h-5 w-5" aria-hidden />
+                </div>
+                <h2 className="mt-4 text-lg font-bold text-neutral-900">{title}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                  {description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="border-y border-neutral-200/80 bg-white/60 px-4 py-20 backdrop-blur-sm">
+          <div className="mx-auto max-w-6xl">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
+                Simple de configurar, potente cuando hace falta
+              </h2>
+              <p className="mt-4 text-neutral-600">
+                Pensado para familias, dueños de mascotas y cualquiera que quiera
+                un plan B en el bolsillo — o en la valija.
+              </p>
+            </div>
+            <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {FEATURES.map(({ icon: Icon, title, text }) => (
+                <article
+                  key={title}
+                  className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100 text-violet-700">
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </div>
+                  <h3 className="mt-4 font-bold text-neutral-900">{title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                    {text}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 py-20">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
+              Tres pasos y ya estás cubierto
+            </h2>
+          </div>
+          <ol className="mx-auto mt-14 grid max-w-4xl gap-8 sm:grid-cols-3">
+            {STEPS.map(({ step, title, text }) => (
+              <li key={step} className="relative text-center sm:text-left">
+                <span className="text-5xl font-black text-violet-100">{step}</span>
+                <h3 className="mt-2 text-lg font-bold text-neutral-900">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                  {text}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 pb-24">
+          <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-indigo-600 to-violet-700 px-6 py-14 text-center shadow-xl shadow-violet-500/30 sm:px-12">
+            <h2 className="text-3xl font-black text-white sm:text-4xl">
+              Tu QR, tu manera. Empezá hoy.
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-lg text-violet-100">
+              Creá el perfil que necesites, activá las alertas en el celular y
+              llevá la tranquilidad en el bolsillo.
+            </p>
+            <Link href="/register" className="mt-8 inline-block">
+              <Button
+                size="lg"
+                className="bg-white text-violet-700 shadow-lg hover:bg-violet-50"
+              >
+                Crear cuenta en SOSme
               </Button>
             </Link>
           </div>
         </section>
-
-        <section className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            {
-              icon: QrCode,
-              title: "QR imprimible",
-              text: "Descargá el código en PNG para plastificarlo o llevarlo donde haga falta.",
-            },
-            {
-              icon: Phone,
-              title: "Llamada directa",
-              text: "Un toque conecta con el contacto de emergencia de la familia.",
-            },
-            {
-              icon: Shield,
-              title: "Instrucciones claras",
-              text: "Indicaciones de manejo visibles con alto contraste para situaciones de estrés.",
-            },
-            {
-              icon: Bell,
-              title: "Alertas automáticas",
-              text: "La familia recibe aviso al escanear el QR o activar SOS.",
-            },
-          ].map(({ icon: Icon, title, text }) => (
-            <article
-              key={title}
-              className="rounded-2xl border border-neutral-200 p-6"
-            >
-              <Icon
-                className="h-8 w-8 text-blue-700"
-                aria-hidden
-              />
-              <h2 className="mt-4 font-bold">{title}</h2>
-              <p className="mt-2 text-sm text-neutral-600">{text}</p>
-            </article>
-          ))}
-        </section>
       </main>
 
-      <footer className="border-t border-neutral-200 px-4 py-6 text-center text-sm text-neutral-500">
-        SOS — Sistema de Asistencia y Emergencia QR
+      <footer className="border-t border-neutral-200/80 bg-white/80 px-4 py-8 text-center backdrop-blur-sm">
+        <div className="flex justify-center">
+          <BrandLogo size="sm" />
+        </div>
+        <p className="mt-2 text-sm text-neutral-500">
+          QR de emergencia y contacto para personas, mascotas y objetos
+        </p>
       </footer>
     </div>
   );

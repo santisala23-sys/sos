@@ -3,19 +3,19 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "SOS — Asistencia y Emergencia QR",
-    template: "%s | SOS",
+    default: "SOSme — Tu QR personal de emergencia y contacto",
+    template: "%s | SOSme",
   },
   description:
-    "Perfiles de asistencia accesibles por QR para personas con discapacidad. Alertas automáticas para familias.",
-  applicationName: "SOS",
+    "Creá perfiles QR para personas, mascotas u objetos. Alertas push, ubicación y contacto directo cuando alguien escanea.",
+  applicationName: "SOSme",
   manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1d4ed8",
+  themeColor: "#7c3aed",
 };
 
 export default function RootLayout({

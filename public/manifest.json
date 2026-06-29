@@ -1,11 +1,11 @@
 {
-  "name": "SOS — Asistencia QR",
-  "short_name": "SOS",
-  "description": "Perfiles de asistencia y emergencia QR",
+  "name": "SOSme — Tu QR personal",
+  "short_name": "SOSme",
+  "description": "Perfiles QR para personas, mascotas y objetos. Alertas y contacto al instante.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1d4ed8",
+  "background_color": "#faf9fc",
+  "theme_color": "#7c3aed",
   "icons": [
     {
       "src": "/globe.svg",

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogOut, Plus, UserCircle2 } from "lucide-react";
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
@@ -14,6 +13,7 @@ import {
 } from "@/components/dashboard/PushNotificationSetup";
 import { ScanLogsList } from "@/components/dashboard/ScanLogsList";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { Button } from "@/components/ui/Button";
 
 export default function DashboardPage() {
@@ -64,9 +64,7 @@ export default function DashboardPage() {
       <header className="border-b border-neutral-200 bg-white px-4 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <div>
-            <Link href="/" className="text-xl font-black text-blue-800">
-              SOS
-            </Link>
+            <BrandLogo />
             <p className="text-sm text-neutral-500">Panel del tutor</p>
           </div>
           <Button
