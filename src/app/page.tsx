@@ -78,21 +78,28 @@ const HOW_IT_WORKS = [
     title: "Escanean tu QR",
     text: "Quien encuentra la mascota, valija o credencial abre el perfil y puede compartir ubicación al instante.",
     image: "/images/landing/screenshots/scan-location.png",
-    imageAlt: "Pantalla de SOSme pidiendo compartir ubicación al escanear el QR de una mascota",
+    imageAlt: "Pantalla de SOSme con mensaje de gracias por ayudar y botón para compartir ubicación",
   },
   {
     step: "2",
-    title: "Conversan en vivo",
-    text: "Chat entre quien está en el lugar y la familia, con mapa y detalle del escaneo en tu panel.",
+    title: "Contactan al instante",
+    text: "Llamada, WhatsApp y chat en vivo desde la pantalla pública — sin instalar nada.",
+    image: "/images/landing/screenshots/public-profile.png",
+    imageAlt: "Perfil público de SOSme con contactos de emergencia y conversación en vivo",
+  },
+  {
+    step: "3",
+    title: "Seguís todo en el panel",
+    text: "Mapa, mensajes y detalle del escaneo en tiempo real desde tu celular.",
     image: "/images/landing/screenshots/live-chat-map.png",
     imageAlt: "Panel de SOSme con conversación en vivo y mapa de ubicación",
   },
   {
-    step: "3",
+    step: "4",
     title: "Recibís la alerta",
-    text: "Notificación push al celular cuando hay escaneo, mensaje o SOS — sin abrir la app.",
+    text: "Notificación push al celular cuando hay escaneo, mensaje o ubicación — un toque y entrás.",
     image: "/images/landing/screenshots/push-alert.png",
-    imageAlt: "Notificación push de SOSme con alerta de ubicación",
+    imageAlt: "Notificación push de SOSme con alerta de ubicación de Firu",
   },
 ] as const;
 
@@ -242,7 +249,7 @@ export default function HomePage() {
                 Probado en la calle: ubicación, chat y notificación push en un solo flujo.
               </p>
             </div>
-            <ol className="mt-14 grid gap-10 lg:grid-cols-3">
+            <ol className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
               {HOW_IT_WORKS.map(({ step, title, text, image, imageAlt }) => (
                 <li key={step} className="flex flex-col">
                   <div className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-lg shadow-violet-500/10">
