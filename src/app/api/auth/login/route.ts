@@ -30,12 +30,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const valid = await verifyPassword(password, user.password_hash);
+    const valid = user.password_hash
+      ? await verifyPassword(password, user.password_hash)
+      : false;
+
     if (!valid) {
-      return NextResponse.json(
-        { error: "Credenciales incorrectas" },
-        { status: 401 },
-      );
+      const hint = user.google_id
+        ? "Esta cuenta usa Google. Iniciá sesión con el botón de Google."
+        : "Credenciales incorrectas";
+      return NextResponse.json({ error: hint }, { status: 401 });
     }
 
     const token = await createSessionToken({

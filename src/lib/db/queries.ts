@@ -10,16 +10,33 @@ import type {
 } from "@/types/database";
 import { getSql } from "@/lib/db/index";
 
-type UserRow = User & { password_hash: string };
+type UserRow = User & {
+  password_hash: string | null;
+  google_id: string | null;
+  avatar_url: string | null;
+};
 
 export async function findUserByEmail(
   email: string,
 ): Promise<UserRow | null> {
   const sql = getSql();
   const rows = await sql`
-    SELECT id, email, password_hash, full_name, updated_at, created_at
+    SELECT id, email, password_hash, google_id, avatar_url, full_name, updated_at, created_at
     FROM users
     WHERE email = ${email.toLowerCase()}
+    LIMIT 1
+  `;
+  return (rows[0] as UserRow | undefined) ?? null;
+}
+
+export async function findUserByGoogleId(
+  googleId: string,
+): Promise<UserRow | null> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, email, password_hash, google_id, avatar_url, full_name, updated_at, created_at
+    FROM users
+    WHERE google_id = ${googleId}
     LIMIT 1
   `;
   return (rows[0] as UserRow | undefined) ?? null;
@@ -37,6 +54,75 @@ export async function createUser(
     RETURNING id, email, full_name, updated_at, created_at
   `;
   return rows[0] as User;
+}
+
+export async function createGoogleUser(data: {
+  email: string;
+  googleId: string;
+  fullName: string;
+  avatarUrl?: string | null;
+}): Promise<User> {
+  const sql = getSql();
+  const rows = await sql`
+    INSERT INTO users (email, google_id, full_name, avatar_url)
+    VALUES (
+      ${data.email.toLowerCase()},
+      ${data.googleId},
+      ${data.fullName},
+      ${data.avatarUrl ?? null}
+    )
+    RETURNING id, email, full_name, updated_at, created_at
+  `;
+  return rows[0] as User;
+}
+
+export async function linkGoogleAccount(
+  userId: string,
+  data: {
+    googleId: string;
+    fullName?: string;
+    avatarUrl?: string | null;
+  },
+): Promise<User> {
+  const sql = getSql();
+  const rows = await sql`
+    UPDATE users
+    SET
+      google_id = ${data.googleId},
+      full_name = COALESCE(NULLIF(${data.fullName ?? ""}, ""), full_name),
+      avatar_url = COALESCE(${data.avatarUrl ?? null}, avatar_url)
+    WHERE id = ${userId}
+    RETURNING id, email, full_name, updated_at, created_at
+  `;
+  return rows[0] as User;
+}
+
+export async function findOrCreateGoogleUser(
+  profile: {
+    id: string;
+    email: string;
+    name: string;
+    picture?: string;
+  },
+): Promise<User> {
+  const byGoogle = await findUserByGoogleId(profile.id);
+  if (byGoogle) return byGoogle;
+
+  const byEmail = await findUserByEmail(profile.email);
+  if (byEmail) {
+    return linkGoogleAccount(byEmail.id, {
+      googleId: profile.id,
+      fullName: profile.name,
+      avatarUrl: profile.picture,
+    });
+  }
+
+  return createGoogleUser({
+    email: profile.email,
+    googleId: profile.id,
+    fullName: profile.name,
+    avatarUrl: profile.picture,
+  });
 }
 
 export async function listQrProfilesByTutor(tutorId: string): Promise<QrProfile[]> {

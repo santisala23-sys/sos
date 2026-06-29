@@ -3,19 +3,24 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { Button } from "@/components/ui/Button";
 
 type AuthFormProps = {
   mode: "login" | "register";
+  initialError?: string | null;
 };
 
-export function AuthForm({ mode }: AuthFormProps) {
+export function AuthForm({ mode, initialError = null }: AuthFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
   const [loading, setLoading] = useState(false);
+
+  const inputClass =
+    "w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base transition-colors focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,98 +33,136 @@ export function AuthForm({ mode }: AuthFormProps) {
         ? { email, password, fullName }
         : { email, password };
 
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      setError(data.error ?? "Error al procesar la solicitud");
+      if (!res.ok) {
+        setError(data.error ?? "Error al procesar la solicitud");
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setError("Error de conexión. Probá de nuevo.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    router.push("/dashboard");
-    router.refresh();
   }
 
+  const googleEnabled = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col gap-4">
-      {mode === "register" && (
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
-            Nombre completo
+    <div className="flex flex-col gap-5">
+      {googleEnabled && <GoogleSignInButton disabled={loading} />}
+
+      {googleEnabled && (
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-neutral-200" />
+          <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
+            o con email
           </span>
+          <div className="h-px flex-1 bg-neutral-200" />
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {mode === "register" && (
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-neutral-700">
+              Nombre completo
+            </span>
+            <input
+              type="text"
+              required
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className={inputClass}
+              autoComplete="name"
+              placeholder="Ej: María García"
+            />
+          </label>
+        )}
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-neutral-700">Email</span>
           <input
-            type="text"
+            type="email"
             required
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            className="rounded-lg border border-neutral-300 px-4 py-3 text-base focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            autoComplete="name"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={inputClass}
+            autoComplete="email"
+            placeholder="tu@email.com"
           />
         </label>
-      )}
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-neutral-700">Email</span>
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="rounded-lg border border-neutral-300 px-4 py-3 text-base focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-200"
-          autoComplete="email"
-        />
-      </label>
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-neutral-700">Contraseña</span>
+          <input
+            type="password"
+            required
+            minLength={6}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={inputClass}
+            autoComplete={mode === "login" ? "current-password" : "new-password"}
+            placeholder={mode === "register" ? "Mínimo 6 caracteres" : "••••••••"}
+          />
+        </label>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-neutral-700">Contraseña</span>
-        <input
-          type="password"
-          required
-          minLength={6}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="rounded-lg border border-neutral-300 px-4 py-3 text-base focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-200"
-          autoComplete={mode === "login" ? "current-password" : "new-password"}
-        />
-      </label>
+        {error && (
+          <p
+            className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800"
+            role="alert"
+          >
+            {error}
+          </p>
+        )}
 
-      {error && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-          {error}
-        </p>
-      )}
-
-      <Button type="submit" size="lg" disabled={loading} className="w-full">
-        {loading
-          ? "Procesando..."
-          : mode === "login"
-            ? "Iniciar sesión"
-            : "Crear cuenta"}
-      </Button>
+        <Button
+          type="submit"
+          size="lg"
+          disabled={loading}
+          className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+        >
+          {loading
+            ? "Procesando..."
+            : mode === "login"
+              ? "Iniciar sesión"
+              : "Crear cuenta"}
+        </Button>
+      </form>
 
       <p className="text-center text-sm text-neutral-600">
         {mode === "login" ? (
           <>
             ¿No tenés cuenta?{" "}
-            <Link href="/register" className="font-semibold text-blue-700 underline">
-              Registrate
+            <Link
+              href="/register"
+              className="font-semibold text-violet-700 underline-offset-2 hover:underline"
+            >
+              Registrate gratis
             </Link>
           </>
         ) : (
           <>
             ¿Ya tenés cuenta?{" "}
-            <Link href="/login" className="font-semibold text-blue-700 underline">
+            <Link
+              href="/login"
+              className="font-semibold text-violet-700 underline-offset-2 hover:underline"
+            >
               Iniciá sesión
             </Link>
           </>
         )}
       </p>
-    </form>
+    </div>
   );
 }

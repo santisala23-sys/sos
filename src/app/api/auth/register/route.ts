@@ -32,10 +32,10 @@ export async function POST(request: Request) {
 
     const existing = await findUserByEmail(email);
     if (existing) {
-      return NextResponse.json(
-        { error: "Ya existe una cuenta con ese email" },
-        { status: 409 },
-      );
+      const hint = existing.google_id
+        ? "Ya tenés cuenta con Google. Usá «Continuar con Google»."
+        : "Ya existe una cuenta con ese email";
+      return NextResponse.json({ error: hint }, { status: 409 });
     }
 
     const passwordHash = await hashPassword(password);
