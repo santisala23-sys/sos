@@ -91,7 +91,19 @@ export function ScanMessageThread({
     });
 
     if (!res.ok) {
-      setError("No se pudo enviar el mensaje.");
+      let detail = "No se pudo enviar el mensaje.";
+      try {
+        const data = await res.json();
+        if (data.error === "No autorizado") {
+          detail =
+            "No se pudo enviar. Probá abrir el QR en una ventana privada o cerrá sesión en SOSme.";
+        } else if (typeof data.error === "string") {
+          detail = data.error;
+        }
+      } catch {
+        /* keep default */
+      }
+      setError(detail);
       setSending(false);
       return;
     }

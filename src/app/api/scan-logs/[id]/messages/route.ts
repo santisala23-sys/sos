@@ -12,25 +12,32 @@ import {
 
 type RouteContext = { params: Promise<{ id: string }> };
 
+async function authorizeScanLogAccess(
+  scanLogId: string,
+  slug: string | null,
+): Promise<"public" | "tutor" | null> {
+  if (slug) {
+    const access = await findScanLogBySlugAccess(scanLogId, slug);
+    if (access) return "public";
+  }
+
+  const session = await getSession();
+  if (session) {
+    const log = await findScanLogForTutor(scanLogId, session.userId);
+    if (log) return "tutor";
+  }
+
+  return null;
+}
+
 export async function GET(request: Request, { params }: RouteContext) {
   const { id } = await params;
   const { searchParams } = new URL(request.url);
   const slug = searchParams.get("slug");
 
-  const session = await getSession();
-
-  if (session) {
-    const log = await findScanLogForTutor(id, session.userId);
-    if (!log) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-    }
-  } else if (slug) {
-    const access = await findScanLogBySlugAccess(id, slug);
-    if (!access) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-    }
-  } else {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  const access = await authorizeScanLogAccess(id, slug);
+  if (!access) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 
   const messages = await listScanMessages(id);
@@ -48,56 +55,58 @@ export async function POST(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: "message es requerido" }, { status: 400 });
     }
 
-    const session = await getSession();
+    const access = await authorizeScanLogAccess(id, slug ?? null);
+    if (!access) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
 
-    if (session) {
-      const log = await findScanLogForTutor(id, session.userId);
-      if (!log) {
-        return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-      }
-
-      const created = await addScanMessage(id, "tutor", message);
+    if (access === "public") {
+      const created = await addScanMessage(id, "public", message);
       if (!created) {
         return NextResponse.json({ error: "Error al enviar" }, { status: 500 });
       }
 
+      try {
+        const ctx = await getScanLogContextForNotify(id);
+        if (ctx) {
+          await notifyTutor({
+            tutorId: ctx.tutor_id,
+            type: "message",
+            beneficiaryName: ctx.beneficiary_name,
+            emergencyContactName: ctx.emergency_contact_name,
+            emergencyContactPhone: ctx.emergency_contact_phone,
+            scannedAt: ctx.scanned_at,
+            scanLogId: id,
+            latitude: ctx.latitude,
+            longitude: ctx.longitude,
+            scannerNote: message.trim(),
+          });
+        }
+      } catch (notifyError) {
+        console.error("[scan-messages POST] notify tutor:", notifyError);
+      }
+
+      return NextResponse.json({ message: created });
+    }
+
+    const log = await findScanLogForTutor(id, (await getSession())!.userId);
+    if (!log) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
+
+    const created = await addScanMessage(id, "tutor", message);
+    if (!created) {
+      return NextResponse.json({ error: "Error al enviar" }, { status: 500 });
+    }
+
+    try {
       await notifyScanner({
         scanLogId: id,
         slug: log.slug,
         body: message.trim(),
       });
-
-      return NextResponse.json({ message: created });
-    }
-
-    if (!slug) {
-      return NextResponse.json({ error: "slug requerido" }, { status: 400 });
-    }
-
-    const access = await findScanLogBySlugAccess(id, slug);
-    if (!access) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-    }
-
-    const created = await addScanMessage(id, "public", message);
-    if (!created) {
-      return NextResponse.json({ error: "Error al enviar" }, { status: 500 });
-    }
-
-    const ctx = await getScanLogContextForNotify(id);
-    if (ctx) {
-      await notifyTutor({
-        tutorId: ctx.tutor_id,
-        type: "message",
-        beneficiaryName: ctx.beneficiary_name,
-        emergencyContactName: ctx.emergency_contact_name,
-        emergencyContactPhone: ctx.emergency_contact_phone,
-        scannedAt: ctx.scanned_at,
-        scanLogId: id,
-        latitude: ctx.latitude,
-        longitude: ctx.longitude,
-        scannerNote: message.trim(),
-      });
+    } catch (notifyError) {
+      console.error("[scan-messages POST] notify scanner:", notifyError);
     }
 
     return NextResponse.json({ message: created });
