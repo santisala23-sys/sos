@@ -36,10 +36,13 @@ export type AlertPayload = {
 };
 
 export async function sendFamilyAlert(payload: AlertPayload): Promise<void> {
-  console.log("[SOS ALERT]", {
-    timestamp: new Date().toISOString(),
-    ...payload,
-  });
+  if (process.env.NODE_ENV === "development") {
+    console.log("[SOS ALERT]", {
+      timestamp: new Date().toISOString(),
+      type: payload.type,
+      scanLogId: payload.scanLogId,
+    });
+  }
 
   const webhookUrl = process.env.ALERT_WEBHOOK_URL;
   if (!webhookUrl) return;

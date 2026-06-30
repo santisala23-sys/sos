@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Plus, UserCircle2 } from "lucide-react";
+import Link from "next/link";
+import { LogOut, Plus, Shield, UserCircle2 } from "lucide-react";
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
@@ -23,6 +24,7 @@ export default function DashboardPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const push = usePushNotifications();
 
   const loadData = useCallback(async () => {
@@ -47,6 +49,10 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadData();
+    fetch("/api/admin/me")
+      .then((r) => r.json())
+      .then((d) => setIsAdmin(Boolean(d.isAdmin)))
+      .catch(() => setIsAdmin(false));
     const interval = setInterval(loadData, 15000);
     return () => clearInterval(interval);
   }, [loadData]);
@@ -67,16 +73,27 @@ export default function DashboardPage() {
             <BrandLogo />
             <p className="text-sm text-neutral-500">Panel del tutor</p>
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="gap-1"
-          >
-            <LogOut className="h-4 w-4" aria-hidden />
-            Salir
-          </Button>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-violet-700 hover:bg-violet-50"
+              >
+                <Shield className="h-4 w-4" aria-hidden />
+                Admin
+              </Link>
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="gap-1"
+            >
+              <LogOut className="h-4 w-4" aria-hidden />
+              Salir
+            </Button>
+          </div>
         </div>
       </header>
 

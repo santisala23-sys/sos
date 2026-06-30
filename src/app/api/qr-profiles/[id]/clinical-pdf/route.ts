@@ -63,6 +63,12 @@ export async function POST(request: Request, { params }: RouteContext) {
       }
       base64Data = body.data;
       filename = body.filename?.trim() || "historial-clinico.pdf";
+      if (!filename.toLowerCase().endsWith(".pdf")) {
+        return NextResponse.json(
+          { error: "Solo se permiten archivos PDF" },
+          { status: 400 },
+        );
+      }
     } else {
       const formData = await request.formData();
       const file = formData.get("file");

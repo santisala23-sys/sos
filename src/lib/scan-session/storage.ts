@@ -3,6 +3,7 @@ export const SCAN_SESSION_TTL_MS = 48 * 60 * 60 * 1000;
 export type StoredGeoPhase = "pending" | "granted" | "skipped";
 
 export type StoredScanSession = {
+  scanToken: string;
   scanLogId: string;
   geoPhase: StoredGeoPhase;
   updatedAt: number;
@@ -28,14 +29,14 @@ function readScanCookie(slug: string): string | null {
   return null;
 }
 
-function writeScanCookie(slug: string, scanLogId: string) {
+function writeScanCookie(slug: string, scanToken: string) {
   if (typeof document === "undefined") return;
   const maxAge = Math.floor(SCAN_SESSION_TTL_MS / 1000);
   const secure =
     typeof window !== "undefined" && window.location.protocol === "https:"
       ? "; Secure"
       : "";
-  document.cookie = `${cookieName(slug)}=${encodeURIComponent(scanLogId)}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
+  document.cookie = `${cookieName(slug)}=${encodeURIComponent(scanToken)}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
 }
 
 function clearScanCookie(slug: string) {
@@ -50,7 +51,7 @@ export function getStoredScanSession(slug: string): StoredScanSession | null {
     const raw = localStorage.getItem(storageKey(slug));
     if (raw) {
       const parsed = JSON.parse(raw) as StoredScanSession;
-      if (parsed.scanLogId && parsed.updatedAt) {
+      if (parsed.scanToken && parsed.scanLogId && parsed.updatedAt) {
         if (Date.now() - parsed.updatedAt > SCAN_SESSION_TTL_MS) {
           clearStoredScanSession(slug);
           return null;
@@ -59,14 +60,15 @@ export function getStoredScanSession(slug: string): StoredScanSession | null {
       }
     }
   } catch {
-    /* fall through to cookie */
+    /* fall through */
   }
 
-  const cookieScanLogId = readScanCookie(slug);
-  if (!cookieScanLogId) return null;
+  const legacyToken = readScanCookie(slug);
+  if (!legacyToken) return null;
 
   return {
-    scanLogId: cookieScanLogId,
+    scanToken: legacyToken,
+    scanLogId: "",
     geoPhase: "pending",
     updatedAt: Date.now(),
   };
@@ -74,7 +76,7 @@ export function getStoredScanSession(slug: string): StoredScanSession | null {
 
 export function storeScanSession(
   slug: string,
-  data: Pick<StoredScanSession, "scanLogId" | "geoPhase">,
+  data: Pick<StoredScanSession, "scanToken" | "scanLogId" | "geoPhase">,
 ) {
   if (typeof window === "undefined") return;
   const payload: StoredScanSession = {
@@ -82,7 +84,7 @@ export function storeScanSession(
     updatedAt: Date.now(),
   };
   localStorage.setItem(storageKey(slug), JSON.stringify(payload));
-  writeScanCookie(slug, data.scanLogId);
+  writeScanCookie(slug, data.scanToken);
 }
 
 export function clearStoredScanSession(slug: string) {
@@ -95,9 +97,17 @@ export function touchScanSession(slug: string) {
   const existing = getStoredScanSession(slug);
   if (!existing) return;
   storeScanSession(slug, {
+    scanToken: existing.scanToken,
     scanLogId: existing.scanLogId,
     geoPhase: existing.geoPhase,
   });
+}
+
+export function scannerAuthHeaders(scanToken: string): HeadersInit {
+  return {
+    Authorization: `Bearer ${scanToken}`,
+    "Content-Type": "application/json",
+  };
 }
 
 export function scannerPushStorageKey(scanLogId: string) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 
 function GoogleIcon() {
@@ -27,11 +28,25 @@ function GoogleIcon() {
 
 type GoogleSignInButtonProps = {
   disabled?: boolean;
+  acceptedTerms: boolean;
 };
 
-export function GoogleSignInButton({ disabled }: GoogleSignInButtonProps) {
-  function handleClick() {
-    window.location.href = "/api/auth/google";
+export function GoogleSignInButton({
+  disabled,
+  acceptedTerms,
+}: GoogleSignInButtonProps) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleClick() {
+    if (!acceptedTerms || disabled || loading) return;
+
+    setLoading(true);
+    try {
+      await fetch("/api/auth/terms-pending", { method: "POST" });
+      window.location.href = "/api/auth/google";
+    } catch {
+      setLoading(false);
+    }
   }
 
   return (
@@ -39,12 +54,12 @@ export function GoogleSignInButton({ disabled }: GoogleSignInButtonProps) {
       type="button"
       variant="secondary"
       size="lg"
-      disabled={disabled}
+      disabled={disabled || loading || !acceptedTerms}
       onClick={handleClick}
       className="w-full gap-3 border border-neutral-300 bg-white py-3 shadow-sm hover:bg-neutral-50"
     >
       <GoogleIcon />
-      Continuar con Google
+      {loading ? "Redirigiendo..." : "Continuar con Google"}
     </Button>
   );
 }

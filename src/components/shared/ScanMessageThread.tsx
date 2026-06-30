@@ -5,9 +5,11 @@ import { Send } from "lucide-react";
 import type { ScanMessage } from "@/types/database";
 import { formatDateTime } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
+import { scannerAuthHeaders } from "@/lib/scan-session/storage";
 
 type ScanMessageThreadProps = {
   scanLogId: string;
+  scanToken?: string;
   slug?: string;
   mode: "public" | "tutor";
   dark?: boolean;
@@ -15,6 +17,7 @@ type ScanMessageThreadProps = {
 
 export function ScanMessageThread({
   scanLogId,
+  scanToken,
   slug,
   mode,
   dark = false,
@@ -28,12 +31,17 @@ export function ScanMessageThread({
   const shouldStickToBottomRef = useRef(true);
 
   const loadMessages = useCallback(async () => {
+    const headers: HeadersInit = {};
+    if (mode === "public" && scanToken) {
+      headers.Authorization = `Bearer ${scanToken}`;
+    }
+
     const url =
-      mode === "public" && slug
+      mode === "public" && slug && !scanToken
         ? `/api/scan-logs/${scanLogId}/messages?slug=${encodeURIComponent(slug)}`
         : `/api/scan-logs/${scanLogId}/messages`;
 
-    const res = await fetch(url);
+    const res = await fetch(url, { headers });
     if (res.ok) {
       const data = await res.json();
       const next = (data.messages ?? []) as ScanMessage[];
@@ -47,7 +55,7 @@ export function ScanMessageThread({
         return next;
       });
     }
-  }, [scanLogId, slug, mode]);
+  }, [scanLogId, scanToken, slug, mode]);
 
   useEffect(() => {
     loadMessages();
@@ -81,12 +89,17 @@ export function ScanMessageThread({
     setSending(true);
     setError(null);
 
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (mode === "public" && scanToken) {
+      Object.assign(headers, scannerAuthHeaders(scanToken));
+    }
+
     const res = await fetch(`/api/scan-logs/${scanLogId}/messages`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
         message: draft.trim(),
-        ...(mode === "public" && slug ? { slug } : {}),
+        ...(mode === "public" && slug && !scanToken ? { slug } : {}),
       }),
     });
 

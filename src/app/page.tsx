@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LegalFooter } from "@/components/legal/LegalFooter";
 import {
   ArrowRight,
   Bell,
@@ -348,14 +349,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer className="border-t border-neutral-200/80 bg-white/80 px-4 py-8 text-center backdrop-blur-sm">
-        <div className="flex justify-center">
-          <BrandLogo size="sm" />
-        </div>
-        <p className="mt-2 text-sm text-neutral-500">
-          QR de emergencia y contacto para personas, mascotas y objetos
-        </p>
-      </footer>
+      <LegalFooter />
     </div>
   );
 }

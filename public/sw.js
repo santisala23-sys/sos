@@ -20,8 +20,18 @@ self.addEventListener("push", (event) => {
   );
 });
 
+function isSafeUrl(url) {
+  try {
+    const parsed = new URL(url, self.location.origin);
+    return parsed.origin === self.location.origin;
+  } catch {
+    return false;
+  }
+}
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification.data?.url ?? "/dashboard";
+  const raw = event.notification.data?.url ?? "/dashboard";
+  const url = isSafeUrl(raw) ? raw : "/dashboard";
   event.waitUntil(clients.openWindow(url));
 });

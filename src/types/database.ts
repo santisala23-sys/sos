@@ -6,9 +6,13 @@ export interface User {
   id: string;
   email: string;
   full_name: string | null;
+  is_admin?: boolean;
   updated_at: string;
   created_at: string;
 }
+
+/** Perfil público sin IDs internos expuestos al cliente */
+export type PublicQrProfile = Omit<QrProfile, "id" | "tutor_id">;
 
 export interface QrProfile {
   id: string;
@@ -26,6 +30,8 @@ export interface QrProfile {
   blood_type: string | null;
   clinical_pdf_filename: string | null;
   clinical_pdf_uploaded_at: string | null;
+  sensitive_data_consent_at?: string | null;
+  sensitive_data_consent_version?: string | null;
   is_active: boolean;
   created_at: string;
 }

@@ -10,7 +10,12 @@ import {
   createSessionToken,
   sessionCookieOptions,
 } from "@/lib/auth/session";
-import { findOrCreateGoogleUser } from "@/lib/db/queries";
+import { findOrCreateGoogleUser, recordTermsAcceptance } from "@/lib/db/queries";
+import {
+  clearTermsPendingCookieOptions,
+  legalAcceptancePayload,
+} from "@/lib/legal/terms-cookie";
+import { TERMS_PENDING_COOKIE } from "@/lib/legal/constants";
 import { getAppUrl } from "@/lib/utils/app-url";
 
 export async function GET(request: Request) {
@@ -50,6 +55,13 @@ export async function GET(request: Request) {
     const accessToken = await exchangeGoogleCode(code);
     const googleUser = await fetchGoogleUserInfo(accessToken);
     const user = await findOrCreateGoogleUser(googleUser);
+
+    const termsPending = cookieStore.get(TERMS_PENDING_COOKIE)?.value;
+    if (termsPending) {
+      const legal = legalAcceptancePayload();
+      await recordTermsAcceptance(user.id, legal.termsVersion, legal.privacyVersion);
+      cookieStore.set(clearTermsPendingCookieOptions());
+    }
 
     const token = await createSessionToken({
       userId: user.id,

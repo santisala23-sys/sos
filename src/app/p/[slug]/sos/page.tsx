@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { findQrProfileBySlug } from "@/lib/db/queries";
 import { SosOnlyView } from "@/components/public/SosOnlyView";
+import { toPublicProfile } from "@/lib/utils/public-profile";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -20,5 +21,5 @@ export default async function SosOnlyPage({ params }: PageProps) {
     notFound();
   }
 
-  return <SosOnlyView profile={profile} />;
+  return <SosOnlyView profile={toPublicProfile(profile)} />;
 }

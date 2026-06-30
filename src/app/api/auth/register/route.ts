@@ -1,19 +1,25 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { withApi } from "@/lib/api/with-api";
 import { hashPassword } from "@/lib/auth/password";
 import {
   createSessionToken,
   sessionCookieOptions,
 } from "@/lib/auth/session";
 import { createUser, findUserByEmail } from "@/lib/db/queries";
+import { legalAcceptancePayload } from "@/lib/legal/terms-cookie";
+import { logSecurityAudit } from "@/lib/security/audit";
+import { validatePassword } from "@/lib/security/password-policy";
 
-export async function POST(request: Request) {
-  try {
+export const POST = withApi(
+  { rateLimit: "auth" },
+  async (request, _ctx, meta) => {
     const body = await request.json();
-    const { email, password, fullName } = body as {
+    const { email, password, fullName, acceptedTerms } = body as {
       email?: string;
       password?: string;
       fullName?: string;
+      acceptedTerms?: boolean;
     };
 
     if (!email || !password || !fullName) {
@@ -23,11 +29,16 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password.length < 6) {
+    if (!acceptedTerms) {
       return NextResponse.json(
-        { error: "La contraseña debe tener al menos 6 caracteres" },
+        { error: "Tenés que aceptar los Términos y la Política de Privacidad para continuar" },
         { status: 400 },
       );
+    }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      return NextResponse.json({ error: passwordError }, { status: 400 });
     }
 
     const existing = await findUserByEmail(email);
@@ -39,7 +50,7 @@ export async function POST(request: Request) {
     }
 
     const passwordHash = await hashPassword(password);
-    const user = await createUser(email, passwordHash, fullName);
+    const user = await createUser(email, passwordHash, fullName, legalAcceptancePayload());
     const token = await createSessionToken({
       userId: user.id,
       email: user.email,
@@ -48,6 +59,12 @@ export async function POST(request: Request) {
     const cookieStore = await cookies();
     cookieStore.set(sessionCookieOptions(token));
 
+    await logSecurityAudit({
+      eventType: "register",
+      ipHash: meta.ipHash,
+      userId: user.id,
+    });
+
     return NextResponse.json({
       user: {
         id: user.id,
@@ -55,8 +72,5 @@ export async function POST(request: Request) {
         full_name: user.full_name,
       },
     });
-  } catch (error) {
-    console.error("[auth/register]", error);
-    return NextResponse.json({ error: "Error interno" }, { status: 500 });
-  }
-}
+  },
+);

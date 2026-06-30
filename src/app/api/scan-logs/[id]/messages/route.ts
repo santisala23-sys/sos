@@ -1,53 +1,74 @@
 import { NextResponse } from "next/server";
+import { withApi } from "@/lib/api/with-api";
 import { getSession } from "@/lib/auth/session";
 import { notifyTutor } from "@/lib/alerts/notify-tutor";
 import { notifyScanner } from "@/lib/alerts/notify-scanner";
 import {
   addScanMessage,
-  findScanLogBySlugAccess,
   findScanLogForTutor,
   getScanLogContextForNotify,
   listScanMessages,
 } from "@/lib/db/queries";
+import { getScanTokenFromRequest } from "@/lib/security/scan-token";
+import {
+  authorizeScannerAccess,
+  authorizeScannerFromToken,
+  denyScanner,
+} from "@/lib/security/scanner-auth";
+
+const MAX_MESSAGE_LENGTH = 2000;
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-async function authorizeScanLogAccess(
+async function resolveAccess(
+  request: Request,
   scanLogId: string,
   slug: string | null,
+  ipHash: string | null,
 ): Promise<"public" | "tutor" | null> {
-  if (slug) {
-    const access = await findScanLogBySlugAccess(scanLogId, slug);
-    if (access) return "public";
-  }
-
   const session = await getSession();
   if (session) {
     const log = await findScanLogForTutor(scanLogId, session.userId);
     if (log) return "tutor";
   }
 
+  const token = getScanTokenFromRequest(request);
+  if (token) {
+    const scanner = await authorizeScannerFromToken(token, ipHash);
+    if (scanner && scanner.scanLogId === scanLogId) return "public";
+  }
+
+  if (slug) {
+    const scanner = await authorizeScannerAccess(request, scanLogId, slug);
+    if (scanner) return "public";
+    await denyScanner(ipHash, "messages_slug_fallback_denied");
+  }
+
   return null;
 }
 
-export async function GET(request: Request, { params }: RouteContext) {
-  const { id } = await params;
-  const { searchParams } = new URL(request.url);
-  const slug = searchParams.get("slug");
+export const GET = withApi(
+  { rateLimit: "messages" },
+  async (request, context, meta) => {
+    const { id } = await (context.params as RouteContext["params"]);
+    const { searchParams } = new URL(request.url);
+    const slug = searchParams.get("slug");
 
-  const access = await authorizeScanLogAccess(id, slug);
-  if (!access) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-  }
+    const access = await resolveAccess(request, id, slug, meta.ipHash);
+    if (!access) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
 
-  const messages = await listScanMessages(id);
-  return NextResponse.json({ messages });
-}
+    const messages = await listScanMessages(id);
+    return NextResponse.json({ messages });
+  },
+);
 
-export async function POST(request: Request, { params }: RouteContext) {
-  const { id } = await params;
+export const POST = withApi(
+  { rateLimit: "messages" },
+  async (request, context, meta) => {
+    const { id } = await (context.params as RouteContext["params"]);
 
-  try {
     const body = await request.json();
     const { message, slug } = body as { message?: string; slug?: string };
 
@@ -55,7 +76,14 @@ export async function POST(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: "message es requerido" }, { status: 400 });
     }
 
-    const access = await authorizeScanLogAccess(id, slug ?? null);
+    if (message.trim().length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json(
+        { error: `Máximo ${MAX_MESSAGE_LENGTH} caracteres` },
+        { status: 400 },
+      );
+    }
+
+    const access = await resolveAccess(request, id, slug ?? null, meta.ipHash);
     if (!access) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
@@ -110,8 +138,5 @@ export async function POST(request: Request, { params }: RouteContext) {
     }
 
     return NextResponse.json({ message: created });
-  } catch (error) {
-    console.error("[scan-messages POST]", error);
-    return NextResponse.json({ error: "Error interno" }, { status: 500 });
-  }
-}
+  },
+);

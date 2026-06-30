@@ -7,6 +7,7 @@ import {
   clearScannerPushRegistered,
   isScannerPushRegistered,
   markScannerPushRegistered,
+  scannerAuthHeaders,
 } from "@/lib/scan-session/storage";
 import {
   isPushSupported,
@@ -14,14 +15,14 @@ import {
 } from "@/lib/push/client";
 
 type ScannerPushPromptProps = {
+  scanToken: string;
   scanLogId: string;
-  slug: string;
   dark?: boolean;
 };
 
 export function ScannerPushPrompt({
+  scanToken,
   scanLogId,
-  slug,
   dark = false,
 }: ScannerPushPromptProps) {
   const [supported, setSupported] = useState(true);
@@ -46,12 +47,8 @@ export function ScannerPushPrompt({
   async function registerScannerPush(sub: PushSubscription) {
     const res = await fetch("/api/push/scanner-subscribe", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        scanLogId,
-        slug,
-        ...sub.toJSON(),
-      }),
+      headers: scannerAuthHeaders(scanToken),
+      body: JSON.stringify(sub.toJSON()),
     });
     if (!res.ok) throw new Error("save failed");
     markScannerPushRegistered(scanLogId);
@@ -90,12 +87,8 @@ export function ScannerPushPrompt({
       if (sub) {
         await fetch("/api/push/scanner-subscribe", {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scanLogId,
-            slug,
-            endpoint: sub.endpoint,
-          }),
+          headers: scannerAuthHeaders(scanToken),
+          body: JSON.stringify({ endpoint: sub.endpoint }),
         });
       }
       clearScannerPushRegistered(scanLogId);

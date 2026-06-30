@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { findQrProfileBySlug } from "@/lib/db/queries";
 import { EmergencyProfileView } from "@/components/public/EmergencyProfileView";
+import { toPublicProfile } from "@/lib/utils/public-profile";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -28,5 +29,5 @@ export default async function PublicProfilePage({ params }: PageProps) {
     notFound();
   }
 
-  return <EmergencyProfileView profile={profile} />;
+  return <EmergencyProfileView profile={toPublicProfile(profile)} />;
 }

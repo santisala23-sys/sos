@@ -1,6 +1,6 @@
 "use client";
 
-import type { QrProfile } from "@/types/database";
+import type { PublicQrProfile } from "@/types/database";
 import {
   buildWhatsAppEmergencyMessage,
   buildWhatsAppUrl,
@@ -8,7 +8,7 @@ import {
 import { Phone } from "lucide-react";
 
 type ContactActionsProps = {
-  profile: QrProfile;
+  profile: PublicQrProfile;
   alertType?: "scan" | "sos" | "general";
   latitude?: number | null;
   longitude?: number | null;

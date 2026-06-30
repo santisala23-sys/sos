@@ -16,6 +16,7 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
   const [loading, setLoading] = useState(false);
 
@@ -25,12 +26,18 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (mode === "register" && !acceptedTerms) {
+      setError("Tenés que aceptar los Términos y la Política de Privacidad para continuar");
+      return;
+    }
+
     setLoading(true);
 
     const endpoint = mode === "register" ? "/api/auth/register" : "/api/auth/login";
     const body =
       mode === "register"
-        ? { email, password, fullName }
+        ? { email, password, fullName, acceptedTerms }
         : { email, password };
 
     try {
@@ -60,7 +67,29 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
 
   return (
     <div className="flex flex-col gap-5">
-      {googleEnabled && <GoogleSignInButton disabled={loading} />}
+      <label className="flex items-start gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3 text-sm text-neutral-700">
+        <input
+          type="checkbox"
+          checked={acceptedTerms}
+          onChange={(e) => setAcceptedTerms(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-neutral-300 text-violet-600 focus:ring-violet-500"
+        />
+        <span>
+          Acepto los{" "}
+          <Link href="/terminos" className="font-semibold text-violet-700 underline-offset-2 hover:underline" target="_blank">
+            Términos y Condiciones
+          </Link>{" "}
+          y la{" "}
+          <Link href="/privacidad" className="font-semibold text-violet-700 underline-offset-2 hover:underline" target="_blank">
+            Política de Privacidad
+          </Link>{" "}
+          de SOSme.
+        </span>
+      </label>
+
+      {googleEnabled && (
+        <GoogleSignInButton disabled={loading || !acceptedTerms} acceptedTerms={acceptedTerms} />
+      )}
 
       {googleEnabled && (
         <div className="flex items-center gap-3">
@@ -113,7 +142,7 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
             onChange={(e) => setPassword(e.target.value)}
             className={inputClass}
             autoComplete={mode === "login" ? "current-password" : "new-password"}
-            placeholder={mode === "register" ? "Mínimo 6 caracteres" : "••••••••"}
+            placeholder={mode === "register" ? "Mín. 8 caracteres, letra y número" : "••••••••"}
           />
         </label>
 

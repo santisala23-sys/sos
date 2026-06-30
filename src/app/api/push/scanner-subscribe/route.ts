@@ -1,63 +1,68 @@
 import { NextResponse } from "next/server";
+import { withApi } from "@/lib/api/with-api";
 import {
   deleteScannerPushSubscription,
-  findScanLogBySlugAccess,
   saveScannerPushSubscription,
 } from "@/lib/db/queries";
+import {
+  authorizeScannerFromToken,
+  denyScanner,
+} from "@/lib/security/scanner-auth";
+import { getScanTokenFromRequest } from "@/lib/security/scan-token";
 
-export async function POST(request: Request) {
-  try {
+export const POST = withApi(
+  { rateLimit: "api" },
+  async (request, _ctx, meta) => {
+    const scanToken = getScanTokenFromRequest(request);
+    if (!scanToken) {
+      return NextResponse.json({ error: "Token requerido" }, { status: 401 });
+    }
+
+    const access = await authorizeScannerFromToken(scanToken, meta.ipHash);
+    if (!access) {
+      return denyScanner(meta.ipHash, "scanner_push_denied");
+    }
+
     const body = await request.json();
-    const { scanLogId, slug, endpoint, keys } = body as {
-      scanLogId?: string;
-      slug?: string;
+    const { endpoint, keys } = body as {
       endpoint?: string;
       keys?: { p256dh?: string; auth?: string };
     };
 
-    if (!scanLogId || !slug || !endpoint || !keys?.p256dh || !keys?.auth) {
+    if (!endpoint || !keys?.p256dh || !keys?.auth) {
       return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
     }
 
-    const access = await findScanLogBySlugAccess(scanLogId, slug);
-    if (!access) {
-      return NextResponse.json({ error: "Sesión no válida" }, { status: 403 });
-    }
-
-    await saveScannerPushSubscription(scanLogId, {
+    await saveScannerPushSubscription(access.scanLogId, {
       endpoint,
       keys: { p256dh: keys.p256dh, auth: keys.auth },
     });
 
     return NextResponse.json({ ok: true });
-  } catch (error) {
-    console.error("[push/scanner-subscribe POST]", error);
-    return NextResponse.json({ error: "Error interno" }, { status: 500 });
-  }
-}
+  },
+);
 
-export async function DELETE(request: Request) {
-  try {
+export const DELETE = withApi(
+  { rateLimit: "api" },
+  async (request, _ctx, meta) => {
+    const scanToken = getScanTokenFromRequest(request);
+    if (!scanToken) {
+      return NextResponse.json({ error: "Token requerido" }, { status: 401 });
+    }
+
+    const access = await authorizeScannerFromToken(scanToken, meta.ipHash);
+    if (!access) {
+      return denyScanner(meta.ipHash, "scanner_push_delete_denied");
+    }
+
     const body = await request.json();
-    const { scanLogId, slug, endpoint } = body as {
-      scanLogId?: string;
-      slug?: string;
-      endpoint?: string;
-    };
+    const { endpoint } = body as { endpoint?: string };
 
-    if (!scanLogId || !slug || !endpoint) {
+    if (!endpoint) {
       return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
     }
 
-    const access = await findScanLogBySlugAccess(scanLogId, slug);
-    if (!access) {
-      return NextResponse.json({ error: "Sesión no válida" }, { status: 403 });
-    }
-
-    await deleteScannerPushSubscription(scanLogId, endpoint);
+    await deleteScannerPushSubscription(access.scanLogId, endpoint);
     return NextResponse.json({ ok: true });
-  } catch (error) {
-    console.error("[push/scanner-subscribe DELETE]", error);
-    return NextResponse.json({ error: "Error interno" }, { status: 500 });
-  }
-}
+  },
+);

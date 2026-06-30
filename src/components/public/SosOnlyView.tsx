@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertTriangle, MapPin } from "lucide-react";
-import type { QrProfile } from "@/types/database";
+import type { PublicQrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
 import { ScannerPushPrompt } from "@/components/public/ScannerPushPrompt";
@@ -10,11 +10,12 @@ import { ScanMessageThread } from "@/components/shared/ScanMessageThread";
 import {
   clearStoredScanSession,
   getStoredScanSession,
+  scannerAuthHeaders,
   storeScanSession,
 } from "@/lib/scan-session/storage";
 
 type SosOnlyViewProps = {
-  profile: QrProfile;
+  profile: PublicQrProfile;
 };
 
 async function requestGeolocation() {
@@ -38,20 +39,22 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
   const [sosLoading, setSosLoading] = useState(false);
   const [sosSent, setSosSent] = useState(false);
   const [scanLogId, setScanLogId] = useState<string | null>(null);
+  const [scanToken, setScanToken] = useState<string | null>(null);
   const [sessionRestored, setSessionRestored] = useState(false);
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
   const geoRequested = useRef(false);
+  const scanTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     async function tryRestore() {
       const stored = getStoredScanSession(profile.slug);
-      if (!stored) return;
+      if (!stored?.scanToken) return;
 
       const res = await fetch(
-        `/api/scan-logs/resume?slug=${encodeURIComponent(profile.slug)}&scanLogId=${encodeURIComponent(stored.scanLogId)}`,
+        `/api/scan-logs/resume?scanToken=${encodeURIComponent(stored.scanToken)}`,
       );
       if (!res.ok) return;
       const data = await res.json();
@@ -60,6 +63,8 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
         return;
       }
 
+      scanTokenRef.current = data.scanToken ?? stored.scanToken;
+      setScanToken(scanTokenRef.current);
       setScanLogId(data.scanLogId);
       setSessionRestored(true);
       if (data.latitude != null && data.longitude != null) {
@@ -95,7 +100,7 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          profileId: profile.id,
+          slug: profile.slug,
           userAgent: navigator.userAgent,
           latitude: location?.latitude ?? null,
           longitude: location?.longitude ?? null,
@@ -103,11 +108,25 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
       });
       if (res.ok) {
         const data = await res.json();
+        scanTokenRef.current = data.scanToken;
+        setScanToken(data.scanToken);
         setScanLogId(data.scanLogId);
         storeScanSession(profile.slug, {
+          scanToken: data.scanToken,
           scanLogId: data.scanLogId,
           geoPhase: location ? "granted" : "skipped",
         });
+
+        if (location && data.scanToken) {
+          await fetch("/api/alerts/location", {
+            method: "PATCH",
+            headers: scannerAuthHeaders(data.scanToken),
+            body: JSON.stringify({
+              latitude: location.latitude,
+              longitude: location.longitude,
+            }),
+          });
+        }
       }
       setSosSent(true);
     } finally {
@@ -167,8 +186,8 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
           </p>
         )}
 
-        {scanLogId && (
-          <ScannerPushPrompt scanLogId={scanLogId} slug={profile.slug} dark />
+        {scanLogId && scanToken && (
+          <ScannerPushPrompt scanToken={scanToken} scanLogId={scanLogId} dark />
         )}
 
         <ContactActions
@@ -180,10 +199,10 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
           compact
         />
 
-        {scanLogId && (
+        {scanLogId && scanToken && (
           <ScanMessageThread
             scanLogId={scanLogId}
-            slug={profile.slug}
+            scanToken={scanToken}
             mode="public"
             dark
           />

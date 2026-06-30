@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { FileText, Trash2 } from "lucide-react";
 import type { ProfileType, QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
@@ -9,6 +10,7 @@ import {
   PROFILE_TYPES,
 } from "@/lib/profile-types";
 import { BLOOD_TYPES } from "@/lib/blood-types";
+import { profileHasSensitiveData } from "@/lib/legal/sensitive-data";
 
 type QrProfileFormProps = {
   profile?: QrProfile;
@@ -69,13 +71,30 @@ export function QrProfileForm({
   const [bloodType, setBloodType] = useState(profile?.blood_type ?? "");
   const [medicalNotes, setMedicalNotes] = useState(profile?.medical_notes ?? "");
   const [isActive, setIsActive] = useState(profile?.is_active ?? true);
+  const [sensitiveDataConsent, setSensitiveDataConsent] = useState(
+    Boolean(profile?.sensitive_data_consent_at),
+  );
 
   const typeConfig = getProfileTypeConfig(profileType);
+  const needsSensitiveConsent =
+    profileHasSensitiveData({
+      profileType,
+      allergies,
+      medicalNotes,
+      bloodType,
+      hasClinicalPdf: Boolean(clinicalPdfFilename),
+    }) && !profile?.sensitive_data_consent_at;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (needsSensitiveConsent && !sensitiveDataConsent) {
+      setError("Para guardar datos médicos necesitás confirmar el consentimiento");
+      setLoading(false);
+      return;
+    }
 
     const payload = {
       profile_type: profileType,
@@ -88,6 +107,7 @@ export function QrProfileForm({
       allergies: typeConfig.showAllergies ? allergies.trim() || null : null,
       blood_type: typeConfig.showBloodType ? bloodType || null : null,
       medical_notes: typeConfig.showMedicalNotes ? medicalNotes || null : null,
+      ...(needsSensitiveConsent ? { sensitiveDataConsent } : {}),
       ...(isEditing ? { is_active: isActive } : {}),
     };
 
@@ -430,6 +450,30 @@ export function QrProfileForm({
             className="h-4 w-4 rounded border-neutral-300"
           />
           <span className="text-sm">Perfil activo (visible al escanear QR)</span>
+        </label>
+      )}
+
+      {needsSensitiveConsent && (
+        <label className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          <input
+            type="checkbox"
+            checked={sensitiveDataConsent}
+            onChange={(e) => setSensitiveDataConsent(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-amber-300 text-violet-600 focus:ring-violet-500"
+            required
+          />
+          <span>
+            Declaro que tengo legitimación para cargar estos datos de salud, que cuento con el
+            consentimiento expreso del titular (o soy el titular), y que entiendo que quien
+            escanee el QR podrá ver esta información.{" "}
+            <Link
+              href="/aviso-datos-sensibles"
+              className="font-semibold text-violet-800 underline-offset-2 hover:underline"
+              target="_blank"
+            >
+              Más info
+            </Link>
+          </span>
         </label>
       )}
 

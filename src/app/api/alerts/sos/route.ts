@@ -1,28 +1,25 @@
 import { NextResponse } from "next/server";
+import { withApi } from "@/lib/api/with-api";
 import { notifyTutor } from "@/lib/alerts/notify-tutor";
-import {
-  createScanLog,
-  findActiveQrProfileById,
-} from "@/lib/db/queries";
+import { createScanLog, findQrProfileBySlug } from "@/lib/db/queries";
+import { createScanToken } from "@/lib/security/scan-token";
 
-export async function POST(request: Request) {
-  try {
+export const POST = withApi(
+  { rateLimit: "alerts" },
+  async (request) => {
     const body = await request.json();
-    const { profileId, userAgent, latitude, longitude } = body as {
-      profileId?: string;
+    const { slug, userAgent, latitude, longitude } = body as {
+      slug?: string;
       userAgent?: string;
       latitude?: number | null;
       longitude?: number | null;
     };
 
-    if (!profileId) {
-      return NextResponse.json(
-        { error: "profileId es requerido" },
-        { status: 400 },
-      );
+    if (!slug?.trim()) {
+      return NextResponse.json({ error: "slug es requerido" }, { status: 400 });
     }
 
-    const profile = await findActiveQrProfileById(profileId);
+    const profile = await findQrProfileBySlug(slug.trim(), true);
     if (!profile) {
       return NextResponse.json(
         { error: "Perfil no encontrado o inactivo" },
@@ -31,11 +28,16 @@ export async function POST(request: Request) {
     }
 
     const scanLog = await createScanLog({
-      profile_id: profileId,
+      profile_id: profile.id,
       user_agent: userAgent ?? null,
       alert_type: "sos",
       latitude: latitude ?? null,
       longitude: longitude ?? null,
+    });
+
+    const scanToken = await createScanToken({
+      scanLogId: scanLog.id,
+      slug: profile.slug,
     });
 
     await notifyTutor({
@@ -50,9 +52,6 @@ export async function POST(request: Request) {
       longitude,
     });
 
-    return NextResponse.json({ scanLogId: scanLog.id });
-  } catch (error) {
-    console.error("[alerts/sos]", error);
-    return NextResponse.json({ error: "Error interno" }, { status: 500 });
-  }
-}
+    return NextResponse.json({ scanLogId: scanLog.id, scanToken });
+  },
+);

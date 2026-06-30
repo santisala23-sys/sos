@@ -1,5 +1,6 @@
 import { Bell, QrCode, Shield } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
+import { LegalFooter } from "@/components/legal/LegalFooter";
 import { AuthForm } from "@/components/auth/AuthForm";
 
 type AuthPageShellProps = {
@@ -73,11 +74,11 @@ export function AuthPageShell({ mode, error }: AuthPageShellProps) {
           </div>
 
           <p className="mt-6 text-center text-xs text-neutral-500">
-            Al continuar aceptás usar SOSme para gestionar perfiles de contacto y
-            emergencia.
+            Al continuar aceptás los Términos y la Política de Privacidad indicados arriba.
           </p>
         </section>
       </div>
+      <LegalFooter compact />
     </div>
   );
 }

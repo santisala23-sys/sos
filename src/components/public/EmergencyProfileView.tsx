@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertTriangle, Droplet, FileDown, MapPin } from "lucide-react";
-import type { QrProfile } from "@/types/database";
+import type { PublicQrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
 import { LocationPrompt } from "@/components/public/LocationPrompt";
@@ -12,12 +12,13 @@ import { getProfileTypeConfig } from "@/lib/profile-types";
 import {
   clearStoredScanSession,
   getStoredScanSession,
+  scannerAuthHeaders,
   storeScanSession,
   touchScanSession,
 } from "@/lib/scan-session/storage";
 
 type EmergencyProfileViewProps = {
-  profile: QrProfile;
+  profile: PublicQrProfile;
 };
 
 async function requestGeolocation(): Promise<{
@@ -41,8 +42,10 @@ async function requestGeolocation(): Promise<{
 
 export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   const scanTriggered = useRef(false);
+  const scanTokenRef = useRef<string | null>(null);
   const scanLogIdRef = useRef<string | null>(null);
   const [scanLogId, setScanLogId] = useState<string | null>(null);
+  const [scanToken, setScanToken] = useState<string | null>(null);
   const [geoPhase, setGeoPhase] = useState<
     "pending" | "loading" | "granted" | "skipped" | "denied"
   >("pending");
@@ -69,15 +72,18 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          profileId: profile.id,
+          slug: profile.slug,
           userAgent: navigator.userAgent,
         }),
       });
       if (res.ok) {
         const data = await res.json();
+        scanTokenRef.current = data.scanToken;
         scanLogIdRef.current = data.scanLogId;
+        setScanToken(data.scanToken);
         setScanLogId(data.scanLogId);
         storeScanSession(profile.slug, {
+          scanToken: data.scanToken,
           scanLogId: data.scanLogId,
           geoPhase: "pending",
         });
@@ -85,21 +91,23 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
     } catch {
       scanTriggered.current = false;
     }
-  }, [profile.id]);
+  }, [profile.slug]);
 
   useEffect(() => {
     async function initSession() {
       const stored = getStoredScanSession(profile.slug);
-      if (stored) {
+      if (stored?.scanToken) {
         try {
           const res = await fetch(
-            `/api/scan-logs/resume?slug=${encodeURIComponent(profile.slug)}&scanLogId=${encodeURIComponent(stored.scanLogId)}`,
+            `/api/scan-logs/resume?scanToken=${encodeURIComponent(stored.scanToken)}`,
           );
           if (res.ok) {
             const data = await res.json();
             if (data.valid) {
               scanTriggered.current = true;
+              scanTokenRef.current = data.scanToken ?? stored.scanToken;
               scanLogIdRef.current = data.scanLogId;
+              setScanToken(scanTokenRef.current);
               setScanLogId(data.scanLogId);
 
               const hasServerCoords =
@@ -126,7 +134,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
             }
           }
         } catch {
-          /* fall through to new scan */
+          /* fall through */
         }
         clearStoredScanSession(profile.slug);
       }
@@ -139,13 +147,14 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   }, [profile.slug, triggerScanAlert]);
 
   useEffect(() => {
-    if (!scanLogId) return;
+    if (!scanLogId || !scanToken) return;
     if (!locationResolved) return;
     storeScanSession(profile.slug, {
+      scanToken,
       scanLogId,
       geoPhase: geoPhase === "granted" ? "granted" : "skipped",
     });
-  }, [scanLogId, locationResolved, geoPhase, profile.slug]);
+  }, [scanLogId, scanToken, locationResolved, geoPhase, profile.slug]);
 
   useEffect(() => {
     if (scanLogId && sessionRestored) {
@@ -153,15 +162,17 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
     }
   }, [scanLogId, sessionRestored, profile.slug]);
 
-  async function sendLocationToServer(
-    logId: string,
-    location: { latitude: number; longitude: number },
-  ) {
+  async function sendLocationToServer(location: {
+    latitude: number;
+    longitude: number;
+  }) {
+    const token = scanTokenRef.current;
+    if (!token) return;
+
     await fetch("/api/alerts/location", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: scannerAuthHeaders(token),
       body: JSON.stringify({
-        scanLogId: logId,
         latitude: location.latitude,
         longitude: location.longitude,
       }),
@@ -179,12 +190,12 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
 
     setCoords(location);
 
-    for (let attempt = 0; attempt < 8 && !scanLogIdRef.current; attempt++) {
+    for (let attempt = 0; attempt < 8 && !scanTokenRef.current; attempt++) {
       await new Promise((resolve) => setTimeout(resolve, 400));
     }
 
-    if (scanLogIdRef.current) {
-      await sendLocationToServer(scanLogIdRef.current, location);
+    if (scanTokenRef.current) {
+      await sendLocationToServer(location);
     }
 
     setGeoPhase("granted");
@@ -199,9 +210,8 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
     const location = coords ?? (await requestGeolocation());
     if (location) {
       setCoords(location);
-      const logId = scanLogIdRef.current;
-      if (logId) {
-        await sendLocationToServer(logId, location);
+      if (scanTokenRef.current) {
+        await sendLocationToServer(location);
       }
     }
 
@@ -210,7 +220,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          profileId: profile.id,
+          slug: profile.slug,
           userAgent: navigator.userAgent,
           latitude: location?.latitude ?? null,
           longitude: location?.longitude ?? null,
@@ -218,13 +228,38 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
       });
       if (res.ok) {
         const data = await res.json();
+        scanTokenRef.current = data.scanToken;
         scanLogIdRef.current = data.scanLogId;
+        setScanToken(data.scanToken);
         setScanLogId(data.scanLogId);
+        storeScanSession(profile.slug, {
+          scanToken: data.scanToken,
+          scanLogId: data.scanLogId,
+          geoPhase: location ? "granted" : "skipped",
+        });
       }
       setSosSent(true);
     } finally {
       setSosLoading(false);
     }
+  }
+
+  async function downloadClinicalPdf() {
+    const token = scanTokenRef.current;
+    if (!token) return;
+
+    const res = await fetch(`/api/p/${profile.slug}/clinical-pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return;
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = profile.clinical_pdf_filename ?? "historial-clinico.pdf";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -237,6 +272,17 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           {profile.beneficiary_name}
         </h1>
       </header>
+
+      <aside className="border-b border-neutral-800 bg-neutral-900/90 px-4 py-3 text-center text-xs leading-relaxed text-neutral-300">
+        Al abrir este QR se notifica al tutor. En emergencia grave llamá al{" "}
+        <strong className="text-white">911</strong>.{" "}
+        <a
+          href="/aviso-escaneadores-publicos"
+          className="font-medium text-violet-300 underline underline-offset-2 hover:text-violet-200"
+        >
+          Qué datos se registran
+        </a>
+      </aside>
 
       {sessionRestored && locationResolved && (
         <p className="bg-violet-950 px-4 py-2 text-center text-sm font-medium text-violet-100">
@@ -272,13 +318,9 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         </p>
       )}
 
-      {sessionReady && locationResolved && scanLogId && (
+      {sessionReady && locationResolved && scanLogId && scanToken && (
         <div className="px-4 pt-4">
-          <ScannerPushPrompt
-            scanLogId={scanLogId}
-            slug={profile.slug}
-            dark
-          />
+          <ScannerPushPrompt scanToken={scanToken} scanLogId={scanLogId} dark />
         </div>
       )}
 
@@ -299,10 +341,10 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           />
         )}
 
-        {locationResolved && scanLogId && (
+        {locationResolved && scanLogId && scanToken && (
           <ScanMessageThread
             scanLogId={scanLogId}
-            slug={profile.slug}
+            scanToken={scanToken}
             mode="public"
             dark
           />
@@ -350,7 +392,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           </section>
         )}
 
-        {locationResolved && hasClinicalPdf && (
+        {locationResolved && hasClinicalPdf && scanToken && (
           <section aria-labelledby="clinical-pdf-heading">
             <h2
               id="clinical-pdf-heading"
@@ -358,14 +400,14 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
             >
               Historial clínico
             </h2>
-            <a
-              href={`/api/p/${profile.slug}/clinical-pdf`}
-              download={profile.clinical_pdf_filename ?? "historial-clinico.pdf"}
-              className="flex min-h-[56px] items-center justify-center gap-3 rounded-xl border-2 border-violet-500 bg-violet-950 px-4 py-4 text-base font-bold text-violet-100 active:scale-[0.98]"
+            <button
+              type="button"
+              onClick={downloadClinicalPdf}
+              className="flex min-h-[56px] w-full items-center justify-center gap-3 rounded-xl border-2 border-violet-500 bg-violet-950 px-4 py-4 text-base font-bold text-violet-100 active:scale-[0.98]"
             >
               <FileDown className="h-6 w-6 shrink-0" aria-hidden />
               Descargar PDF — {profile.clinical_pdf_filename}
-            </a>
+            </button>
           </section>
         )}
 
@@ -390,6 +432,9 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
       </main>
 
       <footer className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-lg border-t-2 border-red-800 bg-neutral-950 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <p className="mb-3 text-center text-xs text-red-200/90">
+          En emergencia grave, llamá al <strong>911</strong> además de usar este botón.
+        </p>
         <Button
           type="button"
           variant="danger"

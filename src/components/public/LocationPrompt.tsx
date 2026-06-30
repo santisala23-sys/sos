@@ -66,6 +66,16 @@ export function LocationPrompt({
           </Button>
         )}
 
+        {!denied && (
+          <p className="mt-3 text-xs leading-relaxed text-amber-200/90">
+            Al compartir, enviamos tu ubicación GPS al tutor responsable para ayudar en la
+            asistencia. Podés continuar sin ubicación.{" "}
+            <a href="/privacidad" className="underline underline-offset-2 hover:text-white">
+              Privacidad
+            </a>
+          </p>
+        )}
+
         {denied && (
           <div className="mt-4 w-full rounded-lg bg-red-950/80 px-4 py-3 text-sm text-red-200" role="alert">
             Revisá que el navegador tenga permiso de ubicación, o continuá sin GPS.

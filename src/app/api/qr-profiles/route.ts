@@ -4,6 +4,10 @@ import { createQrProfile, listQrProfilesByTutor } from "@/lib/db/queries";
 import { generateSlug } from "@/lib/utils/slug";
 import { isProfileType, type ProfileType } from "@/lib/profile-types";
 import { normalizeBloodType } from "@/lib/blood-types";
+import {
+  sensitiveConsentFields,
+  validateSensitiveDataConsent,
+} from "@/lib/legal/validate-sensitive";
 
 export async function GET() {
   const session = await getSession();
@@ -34,6 +38,7 @@ export async function POST(request: Request) {
       allergies,
       blood_type,
       profile_type,
+      sensitiveDataConsent,
     } = body as {
       beneficiary_name?: string;
       emergency_contact_name?: string;
@@ -45,6 +50,7 @@ export async function POST(request: Request) {
       allergies?: string;
       blood_type?: string | null;
       profile_type?: string;
+      sensitiveDataConsent?: boolean;
     };
 
     if (
@@ -67,6 +73,17 @@ export async function POST(request: Request) {
         ? normalizeBloodType(blood_type)
         : null;
 
+    const consentError = validateSensitiveDataConsent({
+      profileType: resolvedProfileType,
+      allergies,
+      medicalNotes: medical_notes,
+      bloodType: resolvedBloodType,
+      sensitiveDataConsent,
+    });
+    if (consentError) {
+      return NextResponse.json({ error: consentError }, { status: 400 });
+    }
+
     const profile = await createQrProfile({
       tutor_id: session.userId,
       slug: generateSlug(beneficiary_name),
@@ -80,6 +97,7 @@ export async function POST(request: Request) {
       allergies: allergies ?? "",
       blood_type: resolvedBloodType,
       profile_type: resolvedProfileType,
+      ...sensitiveConsentFields(Boolean(sensitiveDataConsent)),
     });
 
     return NextResponse.json({ profile }, { status: 201 });
