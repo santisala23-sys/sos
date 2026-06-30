@@ -5,7 +5,13 @@ import { AlertTriangle, MapPin } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
+import { ScannerPushPrompt } from "@/components/public/ScannerPushPrompt";
 import { ScanMessageThread } from "@/components/shared/ScanMessageThread";
+import {
+  clearStoredScanSession,
+  getStoredScanSession,
+  storeScanSession,
+} from "@/lib/scan-session/storage";
 
 type SosOnlyViewProps = {
   profile: QrProfile;
@@ -32,11 +38,40 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
   const [sosLoading, setSosLoading] = useState(false);
   const [sosSent, setSosSent] = useState(false);
   const [scanLogId, setScanLogId] = useState<string | null>(null);
+  const [sessionRestored, setSessionRestored] = useState(false);
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
   const geoRequested = useRef(false);
+
+  useEffect(() => {
+    async function tryRestore() {
+      const stored = getStoredScanSession(profile.slug);
+      if (!stored) return;
+
+      const res = await fetch(
+        `/api/scan-logs/resume?slug=${encodeURIComponent(profile.slug)}&scanLogId=${encodeURIComponent(stored.scanLogId)}`,
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.valid) {
+        clearStoredScanSession(profile.slug);
+        return;
+      }
+
+      setScanLogId(data.scanLogId);
+      setSessionRestored(true);
+      if (data.latitude != null && data.longitude != null) {
+        setCoords({ latitude: data.latitude, longitude: data.longitude });
+      }
+      if (data.alertType === "sos") {
+        setSosSent(true);
+      }
+    }
+
+    tryRestore();
+  }, [profile.slug]);
 
   const fetchGeo = useCallback(async () => {
     const c = await requestGeolocation();
@@ -69,6 +104,10 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
       if (res.ok) {
         const data = await res.json();
         setScanLogId(data.scanLogId);
+        storeScanSession(profile.slug, {
+          scanLogId: data.scanLogId,
+          geoPhase: location ? "granted" : "skipped",
+        });
       }
       setSosSent(true);
     } finally {
@@ -120,6 +159,16 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
             <MapPin className="h-3 w-3" aria-hidden />
             Ubicación compartida con la familia
           </p>
+        )}
+
+        {sessionRestored && (
+          <p className="rounded-xl bg-violet-900/40 px-4 py-3 text-center text-sm text-violet-100">
+            Retomaste la conversación anterior en este dispositivo.
+          </p>
+        )}
+
+        {scanLogId && (
+          <ScannerPushPrompt scanLogId={scanLogId} slug={profile.slug} dark />
         )}
 
         <ContactActions

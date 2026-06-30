@@ -711,3 +711,44 @@ export async function getClinicalPdfForTutor(
     data: Buffer.from(row.clinical_pdf_b64, "base64"),
   };
 }
+
+export async function saveScannerPushSubscription(
+  scanLogId: string,
+  subscription: { endpoint: string; keys: { p256dh: string; auth: string } },
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    INSERT INTO scanner_push_subscriptions (scan_log_id, endpoint, p256dh, auth)
+    VALUES (
+      ${scanLogId},
+      ${subscription.endpoint},
+      ${subscription.keys.p256dh},
+      ${subscription.keys.auth}
+    )
+    ON CONFLICT (endpoint) DO UPDATE
+      SET scan_log_id = EXCLUDED.scan_log_id,
+          p256dh = EXCLUDED.p256dh,
+          auth = EXCLUDED.auth
+  `;
+}
+
+export async function deleteScannerPushSubscription(
+  scanLogId: string,
+  endpoint: string,
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    DELETE FROM scanner_push_subscriptions
+    WHERE scan_log_id = ${scanLogId} AND endpoint = ${endpoint}
+  `;
+}
+
+export async function listScannerPushSubscriptions(scanLogId: string) {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT endpoint, p256dh, auth
+    FROM scanner_push_subscriptions
+    WHERE scan_log_id = ${scanLogId}
+  `;
+  return rows as { endpoint: string; p256dh: string; auth: string }[];
+}

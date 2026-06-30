@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import { notifyTutor } from "@/lib/alerts/notify-tutor";
+import { notifyScanner } from "@/lib/alerts/notify-scanner";
 import {
   addScanMessage,
   findScanLogBySlugAccess,
@@ -59,6 +60,12 @@ export async function POST(request: Request, { params }: RouteContext) {
       if (!created) {
         return NextResponse.json({ error: "Error al enviar" }, { status: 500 });
       }
+
+      await notifyScanner({
+        scanLogId: id,
+        slug: log.slug,
+        body: message.trim(),
+      });
 
       return NextResponse.json({ message: created });
     }

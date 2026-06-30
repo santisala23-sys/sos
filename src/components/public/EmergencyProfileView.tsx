@@ -6,8 +6,15 @@ import type { QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
 import { LocationPrompt } from "@/components/public/LocationPrompt";
+import { ScannerPushPrompt } from "@/components/public/ScannerPushPrompt";
 import { ScanMessageThread } from "@/components/shared/ScanMessageThread";
 import { getProfileTypeConfig } from "@/lib/profile-types";
+import {
+  clearStoredScanSession,
+  getStoredScanSession,
+  storeScanSession,
+  touchScanSession,
+} from "@/lib/scan-session/storage";
 
 type EmergencyProfileViewProps = {
   profile: QrProfile;
@@ -45,6 +52,8 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [sessionRestored, setSessionRestored] = useState(false);
 
   const locationResolved = geoPhase === "granted" || geoPhase === "skipped";
   const typeConfig = getProfileTypeConfig(profile.profile_type);
@@ -68,6 +77,10 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         const data = await res.json();
         scanLogIdRef.current = data.scanLogId;
         setScanLogId(data.scanLogId);
+        storeScanSession(profile.slug, {
+          scanLogId: data.scanLogId,
+          geoPhase: "pending",
+        });
       }
     } catch {
       scanTriggered.current = false;
@@ -75,8 +88,70 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   }, [profile.id]);
 
   useEffect(() => {
-    triggerScanAlert();
-  }, [triggerScanAlert]);
+    async function initSession() {
+      const stored = getStoredScanSession(profile.slug);
+      if (stored) {
+        try {
+          const res = await fetch(
+            `/api/scan-logs/resume?slug=${encodeURIComponent(profile.slug)}&scanLogId=${encodeURIComponent(stored.scanLogId)}`,
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (data.valid) {
+              scanTriggered.current = true;
+              scanLogIdRef.current = data.scanLogId;
+              setScanLogId(data.scanLogId);
+
+              const hasServerCoords =
+                data.latitude != null && data.longitude != null;
+              if (hasServerCoords) {
+                setCoords({
+                  latitude: data.latitude,
+                  longitude: data.longitude,
+                });
+                setGeoPhase("granted");
+              } else if (
+                stored.geoPhase === "granted" ||
+                stored.geoPhase === "skipped"
+              ) {
+                setGeoPhase(stored.geoPhase);
+              } else {
+                setGeoPhase("pending");
+              }
+
+              setSessionRestored(true);
+              touchScanSession(profile.slug);
+              setSessionReady(true);
+              return;
+            }
+          }
+        } catch {
+          /* fall through to new scan */
+        }
+        clearStoredScanSession(profile.slug);
+      }
+
+      await triggerScanAlert();
+      setSessionReady(true);
+    }
+
+    initSession();
+  }, [profile.slug, triggerScanAlert]);
+
+  useEffect(() => {
+    if (!scanLogId) return;
+    if (!locationResolved) return;
+    storeScanSession(profile.slug, {
+      scanLogId,
+      geoPhase: geoPhase === "granted" ? "granted" : "skipped",
+    });
+  }, [scanLogId, locationResolved, geoPhase, profile.slug]);
+
+  useEffect(() => {
+    if (scanLogId && sessionRestored) {
+      touchScanSession(profile.slug);
+    }
+  }, [scanLogId, sessionRestored, profile.slug]);
 
   async function sendLocationToServer(
     logId: string,
@@ -163,7 +238,13 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         </h1>
       </header>
 
-      {!locationResolved && (
+      {sessionRestored && locationResolved && (
+        <p className="bg-violet-950 px-4 py-2 text-center text-sm font-medium text-violet-100">
+          Retomaste la conversación anterior en este dispositivo.
+        </p>
+      )}
+
+      {!locationResolved && sessionReady && (
         <LocationPrompt
           beneficiaryName={profile.beneficiary_name}
           status={
@@ -191,8 +272,24 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         </p>
       )}
 
+      {sessionReady && locationResolved && scanLogId && (
+        <div className="px-4 pt-4">
+          <ScannerPushPrompt
+            scanLogId={scanLogId}
+            slug={profile.slug}
+            dark
+          />
+        </div>
+      )}
+
       <main className="flex flex-col gap-6 px-4 py-6 pb-[calc(8.5rem+env(safe-area-inset-bottom))]">
-        {locationResolved && (
+        {!sessionReady && (
+          <p className="py-8 text-center text-sm text-neutral-400">
+            Cargando...
+          </p>
+        )}
+
+        {sessionReady && locationResolved && (
           <ContactActions
             profile={profile}
             alertType="scan"
@@ -201,25 +298,6 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
             scanLogId={scanLogId}
           />
         )}
-
-        {locationResolved &&
-          typeConfig.showBloodType &&
-          profile.blood_type?.trim() && (
-            <section aria-labelledby="blood-type-heading">
-              <h2
-                id="blood-type-heading"
-                className="mb-3 text-lg font-bold uppercase tracking-wide text-violet-300"
-              >
-                Tipo de sangre
-              </h2>
-              <div className="flex items-center gap-4 rounded-xl border-2 border-violet-500 bg-violet-950 px-5 py-4">
-                <Droplet className="h-8 w-8 shrink-0 text-violet-300" aria-hidden />
-                <p className="text-3xl font-black tracking-wide text-white sm:text-4xl">
-                  {profile.blood_type}
-                </p>
-              </div>
-            </section>
-          )}
 
         {locationResolved && scanLogId && (
           <ScanMessageThread
@@ -290,6 +368,25 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
             </a>
           </section>
         )}
+
+        {locationResolved &&
+          typeConfig.showBloodType &&
+          profile.blood_type?.trim() && (
+            <section aria-labelledby="blood-type-heading">
+              <h2
+                id="blood-type-heading"
+                className="mb-3 text-lg font-bold uppercase tracking-wide text-violet-300"
+              >
+                Tipo de sangre
+              </h2>
+              <div className="flex items-center gap-4 rounded-xl border-2 border-violet-500 bg-violet-950 px-5 py-4">
+                <Droplet className="h-8 w-8 shrink-0 text-violet-300" aria-hidden />
+                <p className="text-3xl font-black tracking-wide text-white sm:text-4xl">
+                  {profile.blood_type}
+                </p>
+              </div>
+            </section>
+          )}
       </main>
 
       <footer className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-lg border-t-2 border-red-800 bg-neutral-950 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">

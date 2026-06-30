@@ -23,7 +23,7 @@ if (existsSync(envPath)) {
 neonConfig.webSocketConstructor = ws;
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const sql = readFileSync(
-  join(root, "db/migrations/008_blood_type.sql"),
+  join(root, "db/migrations/008_scanner_push_and_session.sql"),
   "utf8",
 );
 
