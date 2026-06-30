@@ -110,6 +110,32 @@ export async function recordEligibleDeclaration(
   `;
 }
 
+export async function findUserLegalStatus(userId: string) {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      accepted_terms_at,
+      terms_version,
+      privacy_policy_version,
+      declared_eligible_at,
+      declared_eligible_version
+    FROM users
+    WHERE id = ${userId}
+    LIMIT 1
+  `;
+  return (
+    (rows[0] as
+      | {
+          accepted_terms_at: string | null;
+          terms_version: string | null;
+          privacy_policy_version: string | null;
+          declared_eligible_at: string | null;
+          declared_eligible_version: string | null;
+        }
+      | undefined) ?? null
+  );
+}
+
 export async function createGoogleUser(data: {
   email: string;
   googleId: string;

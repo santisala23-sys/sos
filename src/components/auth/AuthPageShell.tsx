@@ -74,7 +74,9 @@ export function AuthPageShell({ mode, error }: AuthPageShellProps) {
           </div>
 
           <p className="mt-6 text-center text-xs text-neutral-500">
-            Al continuar aceptás los Términos y la Política de Privacidad indicados arriba.
+            {isLogin
+              ? "¿Problemas para entrar? Revisá email y contraseña o usá Google si vinculaste tu cuenta."
+              : "Las confirmaciones legales van al final del formulario, antes de crear la cuenta."}
           </p>
         </section>
       </div>

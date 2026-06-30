@@ -6,6 +6,7 @@ import Link from "next/link";
 import { LogOut, Plus, Shield, UserCircle2 } from "lucide-react";
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
+import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBanner";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import {
   PushNotificationAlert,
@@ -25,6 +26,11 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [legalStatus, setLegalStatus] = useState<{
+    needsAcceptance: boolean;
+    currentVersion: string;
+    userVersion: string | null;
+  } | null>(null);
   const push = usePushNotifications();
 
   const loadData = useCallback(async () => {
@@ -49,6 +55,12 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadData();
+    fetch("/api/auth/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.legal) setLegalStatus(d.legal);
+      })
+      .catch(() => setLegalStatus(null));
     fetch("/api/admin/me")
       .then((r) => r.json())
       .then((d) => setIsAdmin(Boolean(d.isAdmin)))
@@ -64,6 +76,7 @@ export default function DashboardPage() {
   }
 
   const latestUnread = logs.find((l) => !l.read_at);
+  const legalBlocked = legalStatus?.needsAcceptance ?? false;
 
   return (
     <div className="min-h-dvh bg-[#faf9fc]">
@@ -98,7 +111,21 @@ export default function DashboardPage() {
       </header>
 
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
-        {!loading && unreadCount > 0 && (
+        {legalStatus?.needsAcceptance && (
+          <LegalAcceptanceBanner
+            currentVersion={legalStatus.currentVersion}
+            userVersion={legalStatus.userVersion}
+            onAccepted={() =>
+              setLegalStatus({
+                ...legalStatus,
+                needsAcceptance: false,
+                userVersion: legalStatus.currentVersion,
+              })
+            }
+          />
+        )}
+
+        {!loading && unreadCount > 0 && !legalBlocked && (
           <AlertBanner
             unreadCount={unreadCount}
             latestLogId={latestUnread?.id}
@@ -107,7 +134,7 @@ export default function DashboardPage() {
 
         <PushNotificationAlert push={push} />
 
-        <section id="perfiles">
+        <section id="perfiles" className={legalBlocked ? "pointer-events-none opacity-40" : undefined}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <UserCircle2 className="h-5 w-5 text-neutral-500" aria-hidden />
@@ -175,7 +202,7 @@ export default function DashboardPage() {
           )}
         </section>
 
-        <section id="actividad">
+        <section id="actividad" className={legalBlocked ? "pointer-events-none opacity-40" : undefined}>
           <h2 className="mb-4 text-xl font-bold text-neutral-900">
             Actividad reciente
           </h2>
