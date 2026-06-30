@@ -46,7 +46,11 @@ export async function createUser(
   email: string,
   passwordHash: string,
   fullName: string,
-  legal?: { termsVersion: string; privacyVersion: string },
+  legal?: {
+    termsVersion: string;
+    privacyVersion: string;
+    eligibleVersion: string;
+  },
 ): Promise<User> {
   const sql = getSql();
   const acceptedAt = legal ? new Date().toISOString() : null;
@@ -57,7 +61,9 @@ export async function createUser(
       full_name,
       accepted_terms_at,
       terms_version,
-      privacy_policy_version
+      privacy_policy_version,
+      declared_eligible_at,
+      declared_eligible_version
     )
     VALUES (
       ${email.toLowerCase()},
@@ -65,7 +71,9 @@ export async function createUser(
       ${fullName},
       ${acceptedAt},
       ${legal?.termsVersion ?? null},
-      ${legal?.privacyVersion ?? null}
+      ${legal?.privacyVersion ?? null},
+      ${acceptedAt},
+      ${legal?.eligibleVersion ?? null}
     )
     RETURNING id, email, full_name, updated_at, created_at
   `;
@@ -88,20 +96,55 @@ export async function recordTermsAcceptance(
   `;
 }
 
+export async function recordEligibleDeclaration(
+  userId: string,
+  eligibleVersion: string,
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    UPDATE users
+    SET
+      declared_eligible_at = COALESCE(declared_eligible_at, NOW()),
+      declared_eligible_version = ${eligibleVersion}
+    WHERE id = ${userId}
+  `;
+}
+
 export async function createGoogleUser(data: {
   email: string;
   googleId: string;
   fullName: string;
   avatarUrl?: string | null;
+  legal?: {
+    termsVersion: string;
+    privacyVersion: string;
+    eligibleVersion: string;
+  };
 }): Promise<User> {
   const sql = getSql();
+  const acceptedAt = data.legal ? new Date().toISOString() : null;
   const rows = await sql`
-    INSERT INTO users (email, google_id, full_name, avatar_url)
+    INSERT INTO users (
+      email,
+      google_id,
+      full_name,
+      avatar_url,
+      accepted_terms_at,
+      terms_version,
+      privacy_policy_version,
+      declared_eligible_at,
+      declared_eligible_version
+    )
     VALUES (
       ${data.email.toLowerCase()},
       ${data.googleId},
       ${data.fullName},
-      ${data.avatarUrl ?? null}
+      ${data.avatarUrl ?? null},
+      ${acceptedAt},
+      ${data.legal?.termsVersion ?? null},
+      ${data.legal?.privacyVersion ?? null},
+      ${acceptedAt},
+      ${data.legal?.eligibleVersion ?? null}
     )
     RETURNING id, email, full_name, updated_at, created_at
   `;
@@ -136,6 +179,11 @@ export async function findOrCreateGoogleUser(
     name: string;
     picture?: string;
   },
+  legal?: {
+    termsVersion: string;
+    privacyVersion: string;
+    eligibleVersion: string;
+  },
 ): Promise<User> {
   const byGoogle = await findUserByGoogleId(profile.id);
   if (byGoogle) return byGoogle;
@@ -154,6 +202,7 @@ export async function findOrCreateGoogleUser(
     googleId: profile.id,
     fullName: profile.name,
     avatarUrl: profile.picture,
+    legal,
   });
 }
 

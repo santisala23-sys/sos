@@ -15,11 +15,12 @@ export const POST = withApi(
   { rateLimit: "auth" },
   async (request, _ctx, meta) => {
     const body = await request.json();
-    const { email, password, fullName, acceptedTerms } = body as {
+    const { email, password, fullName, acceptedTerms, declaredEligible } = body as {
       email?: string;
       password?: string;
       fullName?: string;
       acceptedTerms?: boolean;
+      declaredEligible?: boolean;
     };
 
     if (!email || !password || !fullName) {
@@ -32,6 +33,16 @@ export const POST = withApi(
     if (!acceptedTerms) {
       return NextResponse.json(
         { error: "Tenés que aceptar los Términos y la Política de Privacidad para continuar" },
+        { status: 400 },
+      );
+    }
+
+    if (!declaredEligible) {
+      return NextResponse.json(
+        {
+          error:
+            "Tenés que confirmar que sos mayor de edad y que contás con legitimación para actuar como tutor responsable",
+        },
         { status: 400 },
       );
     }

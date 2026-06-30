@@ -29,20 +29,29 @@ function GoogleIcon() {
 type GoogleSignInButtonProps = {
   disabled?: boolean;
   acceptedTerms: boolean;
+  declaredEligible?: boolean;
+  requireEligibility?: boolean;
 };
 
 export function GoogleSignInButton({
   disabled,
   acceptedTerms,
+  declaredEligible = false,
+  requireEligibility = false,
 }: GoogleSignInButtonProps) {
   const [loading, setLoading] = useState(false);
+  const eligibilityOk = !requireEligibility || declaredEligible;
 
   async function handleClick() {
-    if (!acceptedTerms || disabled || loading) return;
+    if (!acceptedTerms || !eligibilityOk || disabled || loading) return;
 
     setLoading(true);
     try {
-      await fetch("/api/auth/terms-pending", { method: "POST" });
+      await fetch("/api/auth/terms-pending", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ declaredEligible: requireEligibility && declaredEligible }),
+      });
       window.location.href = "/api/auth/google";
     } catch {
       setLoading(false);
@@ -54,7 +63,7 @@ export function GoogleSignInButton({
       type="button"
       variant="secondary"
       size="lg"
-      disabled={disabled || loading || !acceptedTerms}
+      disabled={disabled || loading || !acceptedTerms || !eligibilityOk}
       onClick={handleClick}
       className="w-full gap-3 border border-neutral-300 bg-white py-3 shadow-sm hover:bg-neutral-50"
     >

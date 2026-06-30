@@ -40,6 +40,7 @@ const migrations = [
   "008_blood_type.sql",
   "009_security_and_admin.sql",
   "010_legal_consent.sql",
+  "011_registration_eligibility.sql",
 ];
 
 for (const file of migrations) {

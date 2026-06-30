@@ -17,8 +17,12 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [declaredEligible, setDeclaredEligible] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
   const [loading, setLoading] = useState(false);
+
+  const isRegister = mode === "register";
+  const registrationReady = acceptedTerms && (!isRegister || declaredEligible);
 
   const inputClass =
     "w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base transition-colors focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200";
@@ -27,18 +31,24 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
     e.preventDefault();
     setError(null);
 
-    if (mode === "register" && !acceptedTerms) {
+    if (!acceptedTerms) {
       setError("Tenés que aceptar los Términos y la Política de Privacidad para continuar");
+      return;
+    }
+
+    if (isRegister && !declaredEligible) {
+      setError(
+        "Tenés que confirmar que sos mayor de edad y que contás con legitimación para actuar como tutor responsable",
+      );
       return;
     }
 
     setLoading(true);
 
-    const endpoint = mode === "register" ? "/api/auth/register" : "/api/auth/login";
-    const body =
-      mode === "register"
-        ? { email, password, fullName, acceptedTerms }
-        : { email, password };
+    const endpoint = isRegister ? "/api/auth/register" : "/api/auth/login";
+    const body = isRegister
+      ? { email, password, fullName, acceptedTerms, declaredEligible }
+      : { email, password };
 
     try {
       const res = await fetch(endpoint, {
@@ -67,6 +77,22 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
 
   return (
     <div className="flex flex-col gap-5">
+      {isRegister && (
+        <label className="flex items-start gap-3 rounded-xl border border-violet-200 bg-violet-50/80 px-4 py-3 text-sm text-neutral-700">
+          <input
+            type="checkbox"
+            checked={declaredEligible}
+            onChange={(e) => setDeclaredEligible(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-neutral-300 text-violet-600 focus:ring-violet-500"
+          />
+          <span>
+            Declaro ser <strong>mayor de 18 años</strong> y contar con legitimación para usar
+            SOSme como tutor responsable (titular, padre/madre/tutor legal, dueño o responsable
+            del beneficiario al cargar datos de terceros, incluidos menores).
+          </span>
+        </label>
+      )}
+
       <label className="flex items-start gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3 text-sm text-neutral-700">
         <input
           type="checkbox"
@@ -88,7 +114,12 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
       </label>
 
       {googleEnabled && (
-        <GoogleSignInButton disabled={loading || !acceptedTerms} acceptedTerms={acceptedTerms} />
+        <GoogleSignInButton
+          disabled={loading || !registrationReady}
+          acceptedTerms={acceptedTerms}
+          declaredEligible={isRegister ? declaredEligible : false}
+          requireEligibility={isRegister}
+        />
       )}
 
       {googleEnabled && (
@@ -102,7 +133,7 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {mode === "register" && (
+        {isRegister && (
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-neutral-700">
               Nombre completo
@@ -142,7 +173,7 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
             onChange={(e) => setPassword(e.target.value)}
             className={inputClass}
             autoComplete={mode === "login" ? "current-password" : "new-password"}
-            placeholder={mode === "register" ? "Mín. 8 caracteres, letra y número" : "••••••••"}
+            placeholder={isRegister ? "Mín. 8 caracteres, letra y número" : "••••••••"}
           />
         </label>
 
@@ -158,7 +189,7 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
         <Button
           type="submit"
           size="lg"
-          disabled={loading}
+          disabled={loading || (isRegister && !registrationReady)}
           className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
         >
           {loading

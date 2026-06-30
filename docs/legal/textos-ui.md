@@ -18,7 +18,21 @@
 
 > Tenés que aceptar los Términos y la Política de Privacidad para continuar.
 
-**Nota OAuth:** el mismo checkbox debe mostrarse antes de «Continuar con Google» en `/register` y `/login`.
+**Nota OAuth:** el mismo checkbox de términos debe mostrarse antes de «Continuar con Google» en `/register` y `/login`. En `/register` también va el checkbox de elegibilidad.
+
+---
+
+## 1b. Checkbox mayoría de edad y legitimación (solo registro)
+
+**Etiqueta (obligatorio en `/register`):**
+
+> Declaro ser mayor de 18 años y contar con legitimación para usar SOSme como tutor responsable (titular, padre/madre/tutor legal, dueño o responsable del beneficiario al cargar datos de terceros, incluidos menores).
+
+**Error de validación:**
+
+> Tenés que confirmar que sos mayor de edad y que contás con legitimación para actuar como tutor responsable.
+
+**Google OAuth:** cuentas nuevas solo se crean desde `/register` con ambos checkboxes marcados. Desde `/login`, Google solo funciona para cuentas existentes.
 
 ---
 

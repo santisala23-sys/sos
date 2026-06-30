@@ -10,17 +10,28 @@ import {
   createSessionToken,
   sessionCookieOptions,
 } from "@/lib/auth/session";
-import { findOrCreateGoogleUser, recordTermsAcceptance } from "@/lib/db/queries";
 import {
+  findOrCreateGoogleUser,
+  findUserByEmail,
+  findUserByGoogleId,
+  recordEligibleDeclaration,
+  recordTermsAcceptance,
+} from "@/lib/db/queries";
+import {
+  clearEligiblePendingCookieOptions,
   clearTermsPendingCookieOptions,
   legalAcceptancePayload,
 } from "@/lib/legal/terms-cookie";
-import { TERMS_PENDING_COOKIE } from "@/lib/legal/constants";
+import {
+  ELIGIBLE_PENDING_COOKIE,
+  TERMS_PENDING_COOKIE,
+} from "@/lib/legal/constants";
 import { getAppUrl } from "@/lib/utils/app-url";
 
 export async function GET(request: Request) {
   const appUrl = getAppUrl();
   const loginUrl = `${appUrl}/login`;
+  const registerUrl = `${appUrl}/register`;
 
   try {
     const { searchParams } = new URL(request.url);
@@ -54,13 +65,41 @@ export async function GET(request: Request) {
 
     const accessToken = await exchangeGoogleCode(code);
     const googleUser = await fetchGoogleUserInfo(accessToken);
-    const user = await findOrCreateGoogleUser(googleUser);
 
     const termsPending = cookieStore.get(TERMS_PENDING_COOKIE)?.value;
-    if (termsPending) {
-      const legal = legalAcceptancePayload();
-      await recordTermsAcceptance(user.id, legal.termsVersion, legal.privacyVersion);
+    const eligiblePending = cookieStore.get(ELIGIBLE_PENDING_COOKIE)?.value;
+
+    const existing =
+      (await findUserByGoogleId(googleUser.id)) ??
+      (await findUserByEmail(googleUser.email));
+
+    if (!existing && !eligiblePending) {
       cookieStore.set(clearTermsPendingCookieOptions());
+      cookieStore.set(clearEligiblePendingCookieOptions());
+      return NextResponse.redirect(
+        `${registerUrl}?error=${encodeURIComponent(
+          "Para crear tu cuenta usá Registrate y confirmá que sos mayor de edad o tutor/responsable legal.",
+        )}`,
+      );
+    }
+
+    const legal = termsPending && eligiblePending ? legalAcceptancePayload() : undefined;
+    const user = await findOrCreateGoogleUser(googleUser, legal);
+
+    if (termsPending) {
+      const payload = legalAcceptancePayload();
+      await recordTermsAcceptance(
+        user.id,
+        payload.termsVersion,
+        payload.privacyVersion,
+      );
+      cookieStore.set(clearTermsPendingCookieOptions());
+    }
+
+    if (eligiblePending) {
+      const payload = legalAcceptancePayload();
+      await recordEligibleDeclaration(user.id, payload.eligibleVersion);
+      cookieStore.set(clearEligiblePendingCookieOptions());
     }
 
     const token = await createSessionToken({

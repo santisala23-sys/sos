@@ -43,3 +43,4 @@ export const LEGAL_FOOTER_LINKS: { href: string; label: string }[] = [
 ];
 
 export const TERMS_PENDING_COOKIE = "sos_terms_pending";
+export const ELIGIBLE_PENDING_COOKIE = "sos_eligible_pending";
