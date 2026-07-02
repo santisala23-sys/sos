@@ -6,6 +6,7 @@ import {
   Bell,
   MapPin,
   MessageCircle,
+  Package,
   Phone,
   QrCode,
   Sparkles,
@@ -198,7 +199,7 @@ export default function HomePage() {
                 </Link>
               </div>
               <p className="mt-5 text-sm text-neutral-500">
-                Sin instalar apps · 1 QR gratis · Listo en minutos ·{" "}
+                Sin instalar apps · 1 QR gratis · Activación en productos con código ·{" "}
                 <Link href="/pricing" className="font-medium text-violet-700 hover:underline">
                   Ver planes
                 </Link>
@@ -337,6 +338,54 @@ export default function HomePage() {
           </ol>
         </section>
 
+        <section className="mx-auto max-w-6xl px-4 py-16">
+          <div className="overflow-hidden rounded-3xl border border-violet-200/80 bg-gradient-to-br from-violet-50 via-white to-indigo-50 p-8 shadow-sm sm:p-12">
+            <div className="grid items-center gap-10 lg:grid-cols-2">
+              <div>
+                <p className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-800">
+                  <Package className="h-3.5 w-3.5" aria-hidden />
+                  Para marcas y productos
+                </p>
+                <h2 className="mt-4 text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
+                  QR en ropa, accesorios y packaging
+                </h2>
+                <p className="mt-4 text-neutral-600 leading-relaxed">
+                  Cada prenda puede llevar un código único. El comprador lo activa en{" "}
+                  <strong>/activar</strong>, configura contacto de emergencia y listo —
+                  sin app extra.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <Link href="/productos">
+                    <Button size="lg" className="gap-2">
+                      QR en productos
+                      <ArrowRight className="h-5 w-5" aria-hidden />
+                    </Button>
+                  </Link>
+                  <Link href="/pricing">
+                    <Button variant="secondary" size="lg">
+                      Planes y partners
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              <ol className="space-y-4 text-sm text-neutral-700">
+                <li className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm">
+                  <span className="font-bold text-violet-700">1.</span> Imprimís el QR
+                  en etiqueta o hang tag con URL de activación.
+                </li>
+                <li className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm">
+                  <span className="font-bold text-violet-700">2.</span> El comprador
+                  escanea, se registra y vincula el código a su perfil.
+                </li>
+                <li className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm">
+                  <span className="font-bold text-violet-700">3.</span> Escaneos
+                  siguientes muestran el perfil ya configurado — emergencia o contacto.
+                </li>
+              </ol>
+            </div>
+          </div>
+        </section>
+
         <section className="mx-auto max-w-6xl px-4 pb-24">
           <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-indigo-600 to-violet-700 px-6 py-14 text-center shadow-xl shadow-violet-500/30 sm:px-12">
             <h2 className="text-3xl font-black text-white sm:text-4xl">
@@ -344,16 +393,27 @@ export default function HomePage() {
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-lg text-violet-100">
               Creá el perfil que necesites, activá las alertas en el celular y
-              llevá la tranquilidad en el bolsillo.
+              llevá la tranquilidad en el bolsillo — o en la etiqueta de tu producto.
             </p>
-            <Link href="/register" className="mt-8 inline-block">
-              <Button
-                size="lg"
-                className="bg-white text-violet-700 shadow-lg hover:bg-violet-50"
-              >
-                Crear cuenta en SOSme
-              </Button>
-            </Link>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link href="/register" className="inline-block">
+                <Button
+                  size="lg"
+                  className="bg-white text-violet-700 shadow-lg hover:bg-violet-50"
+                >
+                  Crear cuenta en SOSme
+                </Button>
+              </Link>
+              <Link href="/productos" className="inline-block">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="border-white/30 bg-white/10 text-white hover:bg-white/20"
+                >
+                  Soy una marca
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
       </main>

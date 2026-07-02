@@ -37,7 +37,10 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthPage && session) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    const redirect = request.nextUrl.searchParams.get("redirect");
+    url.pathname =
+      redirect && redirect.startsWith("/") ? redirect : "/dashboard";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

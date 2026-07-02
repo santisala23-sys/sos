@@ -47,8 +47,8 @@ export default function PricingPage() {
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-neutral-600">
             Por ahora no cobramos online: registrarte es gratis con{" "}
-            <strong>un perfil QR</strong>. Si querés más perfiles o QR en productos
-            físicos, contactanos y lo vemos juntos.
+            <strong>un perfil QR</strong>. Si compraste un producto con código SOSme,
+            activalo en la página de activación (URL en tu etiqueta). Para más perfiles o lotes para marcas, contactanos.
           </p>
         </div>
 
@@ -115,7 +115,16 @@ export default function PricingPage() {
           </article>
         </div>
 
-        <section className="mt-12 rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8">
+        <section className="mt-12 rounded-2xl border border-violet-200 bg-violet-50/50 p-6 sm:p-8">
+          <h2 className="text-xl font-bold text-neutral-900">¿Compraste un producto con QR?</h2>
+          <p className="mt-2 text-neutral-600">
+            Escaneá el código de la etiqueta o ingresá a{" "}
+            <strong>/activar/TUCODIGO</strong> para vincular el producto a tu cuenta y
+            configurar contacto de emergencia.
+          </p>
+        </section>
+
+        <section className="mt-8 rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8">
           <h2 className="text-xl font-bold text-neutral-900">
             {PLANS.partner.name} — QR en ropa y productos
           </h2>

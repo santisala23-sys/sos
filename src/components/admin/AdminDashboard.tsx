@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   BarChart3,
   Globe,
+  Package,
   Pencil,
   QrCode,
   RefreshCw,
@@ -30,11 +31,13 @@ import {
   AdminDetailPanel,
   type AdminDetailTarget,
 } from "@/components/admin/AdminDetailPanel";
+import { AdminProductBatchesPanel } from "@/components/admin/AdminProductBatchesPanel";
 
 type AdminTab =
   | "overview"
   | "users"
   | "profiles"
+  | "batches"
   | "activity"
   | "api"
   | "security";
@@ -234,6 +237,7 @@ export function AdminDashboard() {
     { id: "overview", label: "Overview", icon: <BarChart3 className="h-4 w-4" /> },
     { id: "users", label: "Usuarios", icon: <Users className="h-4 w-4" /> },
     { id: "profiles", label: "Perfiles QR", icon: <QrCode className="h-4 w-4" /> },
+    { id: "batches", label: "Lotes QR", icon: <Package className="h-4 w-4" /> },
     { id: "activity", label: "Escaneos", icon: <Activity className="h-4 w-4" /> },
     { id: "api", label: "API & Errores", icon: <Server className="h-4 w-4" /> },
     { id: "security", label: "Seguridad", icon: <ShieldAlert className="h-4 w-4" /> },
@@ -463,6 +467,8 @@ export function AdminDashboard() {
           ))}
         </DataTable>
       )}
+
+      {tab === "batches" && <AdminProductBatchesPanel />}
 
       {tab === "activity" && !loading && (
         <DataTable headers={["Beneficiario", "Tipo", "Tutor", "Ubicación", "Leído", "Fecha", ""]}>

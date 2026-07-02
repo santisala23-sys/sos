@@ -9,9 +9,10 @@ import { Button } from "@/components/ui/Button";
 type AuthFormProps = {
   mode: "login" | "register";
   initialError?: string | null;
+  redirectTo?: string | null;
 };
 
-export function AuthForm({ mode, initialError = null }: AuthFormProps) {
+export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -65,7 +66,9 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
         return;
       }
 
-      router.push("/dashboard");
+      const destination =
+        redirectTo && redirectTo.startsWith("/") ? redirectTo : "/dashboard";
+      router.push(destination);
       router.refresh();
     } catch {
       setError("Error de conexión. Probá de nuevo.");

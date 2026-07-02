@@ -7,6 +7,7 @@ import { AuthForm } from "@/components/auth/AuthForm";
 type AuthPageShellProps = {
   mode: "login" | "register";
   error?: string | null;
+  redirectTo?: string | null;
 };
 
 const BENEFITS = [
@@ -24,7 +25,7 @@ const BENEFITS = [
   },
 ] as const;
 
-export function AuthPageShell({ mode, error }: AuthPageShellProps) {
+export function AuthPageShell({ mode, error, redirectTo }: AuthPageShellProps) {
   const isLogin = mode === "login";
 
   return (
@@ -70,7 +71,7 @@ export function AuthPageShell({ mode, error }: AuthPageShellProps) {
             </p>
 
             <div className="mt-6">
-              <AuthForm mode={mode} initialError={error} />
+              <AuthForm mode={mode} initialError={error} redirectTo={redirectTo} />
             </div>
           </div>
 

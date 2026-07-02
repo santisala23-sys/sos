@@ -14,7 +14,7 @@
 2. Vos generás lote de slugs o perfiles en admin.
 3. Imprimís etiquetas con QR apuntando a `https://sosme.app/p/{slug}` o a activación.
 
-### Fase 2 — Activación por código (tablas ya creadas)
+### Fase 2 — Activación por código ✅ implementado
 
 Tablas en migración `012`:
 
@@ -27,10 +27,12 @@ Tablas en migración `012`:
 
 **Flujo comprador:**
 
-1. Escanea QR en la prenda → landing `/activar/{code}` o `/p/{slug}?claim=CODE`
-2. Si no tiene cuenta → registro (1 QR gratis ya usado por activación vinculada)
+1. Escanea QR en la prenda → `/activar/{code}`
+2. Si no tiene cuenta → registro con redirect al código
 3. Completa perfil de emergencia/contacto
-4. QR queda ligado a ese usuario
+4. QR queda ligado a ese usuario (no cuenta contra límite manual)
+
+**Admin:** pestaña «Lotes QR» → crear lote → export CSV (código, URL activación, slug, URL perfil).
 
 ### Fase 3 — Tienda / checkout
 
@@ -62,7 +64,7 @@ UPDATE users SET plan_tier = 'partner', max_profiles = 100 WHERE email = '...';
 
 ## Próximo desarrollo sugerido
 
-1. Página `/activar/[code]` + API claim
-2. Admin: crear lote + export CSV de códigos/URLs para imprenta
+1. ~~Página `/activar/[code]` + API claim~~ ✅
+2. ~~Admin: crear lote + export CSV~~ ✅
 3. Landing partner white-label (logo marca)
 4. Métricas por batch en admin
