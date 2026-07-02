@@ -976,6 +976,8 @@ export type AdminUserRow = User & {
   profile_count: number;
   scan_count: number;
   is_admin: boolean;
+  plan_tier?: string;
+  max_profiles?: number | null;
 };
 
 export async function listAdminUsers(limit = 100, offset = 0): Promise<AdminUserRow[]> {
@@ -1131,13 +1133,38 @@ export async function getAdminStatusBreakdown(): Promise<AdminStatusBreakdown[]>
   return rows as AdminStatusBreakdown[];
 }
 
+export async function findUserPlanById(
+  userId: string,
+): Promise<{ plan_tier: string; max_profiles: number | null } | null> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT plan_tier, max_profiles
+    FROM users
+    WHERE id = ${userId}
+    LIMIT 1
+  `;
+  return (
+    (rows[0] as { plan_tier: string; max_profiles: number | null } | undefined) ??
+    null
+  );
+}
+
+export async function countQrProfilesByTutor(userId: string): Promise<number> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT COUNT(*)::int AS count FROM qr_profiles WHERE tutor_id = ${userId}
+  `;
+  return (rows[0] as { count: number }).count ?? 0;
+}
+
 export async function findAdminUserById(
   userId: string,
 ): Promise<(AdminUserRow & { google_id: string | null }) | null> {
   const sql = getSql();
   const rows = await sql`
     SELECT
-      u.id, u.email, u.full_name, u.is_admin, u.google_id, u.created_at, u.updated_at,
+      u.id, u.email, u.full_name, u.is_admin, u.google_id, u.plan_tier, u.max_profiles,
+      u.created_at, u.updated_at,
       COUNT(DISTINCT qp.id)::int AS profile_count,
       COUNT(DISTINCT sl.id)::int AS scan_count
     FROM users u
@@ -1152,7 +1179,12 @@ export async function findAdminUserById(
 
 export async function adminUpdateUser(
   userId: string,
-  data: { full_name?: string; is_admin?: boolean },
+  data: {
+    full_name?: string;
+    is_admin?: boolean;
+    plan_tier?: string;
+    max_profiles?: number | null;
+  },
 ): Promise<User | null> {
   const sql = getSql();
   const existing = await findAdminUserById(userId);
@@ -1162,7 +1194,9 @@ export async function adminUpdateUser(
     UPDATE users
     SET
       full_name = ${data.full_name !== undefined ? data.full_name : existing.full_name},
-      is_admin = ${data.is_admin !== undefined ? data.is_admin : existing.is_admin}
+      is_admin = ${data.is_admin !== undefined ? data.is_admin : existing.is_admin},
+      plan_tier = ${data.plan_tier !== undefined ? data.plan_tier : existing.plan_tier ?? "free"},
+      max_profiles = ${data.max_profiles !== undefined ? data.max_profiles : existing.max_profiles ?? null}
     WHERE id = ${userId}
     RETURNING id, email, full_name, is_admin, updated_at, created_at
   `;

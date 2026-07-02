@@ -150,6 +150,16 @@ export function AuthForm({ mode, initialError = null }: AuthFormProps) {
   return (
     <div className="flex flex-col gap-5">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="rounded-xl border border-violet-200 bg-violet-50/70 px-4 py-3 text-sm text-violet-950">
+          <strong>Plan gratis:</strong> incluye{" "}
+          <strong>1 perfil QR</strong> (persona, mascota u objeto). Si después necesitás
+          más, podés{" "}
+          <Link href="/contacto" className="font-semibold underline-offset-2 hover:underline">
+            pedirlos por contacto
+          </Link>
+          .
+        </div>
+
         <label className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-neutral-700">Nombre completo</span>
           <input

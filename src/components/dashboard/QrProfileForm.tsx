@@ -126,7 +126,14 @@ export function QrProfileForm({
     const data = await res.json();
 
     if (!res.ok) {
-      setError(data.error ?? "Error al guardar");
+      if (data.code === "PROFILE_LIMIT") {
+        setError(
+          data.error ??
+            "Llegaste al límite de perfiles. Contactanos para ampliar tu cuenta.",
+        );
+      } else {
+        setError(data.error ?? "Error al guardar");
+      }
       setLoading(false);
       return;
     }

@@ -137,7 +137,13 @@ export default function HomePage() {
       <header className="sticky top-0 z-20 border-b border-white/60 bg-white/75 px-4 py-4 backdrop-blur-lg">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
           <BrandLogo size="md" />
-          <nav className="flex items-center gap-2">
+          <nav className="flex items-center gap-2 sm:gap-3">
+            <Link href="/pricing" className="hidden text-sm font-medium text-neutral-600 hover:text-violet-700 sm:inline">
+              Planes
+            </Link>
+            <Link href="/productos" className="hidden text-sm font-medium text-neutral-600 hover:text-violet-700 md:inline">
+              QR en productos
+            </Link>
             <Link href="/login">
               <Button variant="ghost" size="sm">
                 Ingresar
@@ -192,7 +198,10 @@ export default function HomePage() {
                 </Link>
               </div>
               <p className="mt-5 text-sm text-neutral-500">
-                Sin instalar apps · Funciona en el navegador · Listo en minutos
+                Sin instalar apps · 1 QR gratis · Listo en minutos ·{" "}
+                <Link href="/pricing" className="font-medium text-violet-700 hover:underline">
+                  Ver planes
+                </Link>
               </p>
             </div>
 

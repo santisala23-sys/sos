@@ -7,6 +7,7 @@ import { LogOut, Plus, Shield, UserCircle2 } from "lucide-react";
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBanner";
+import { RequestMoreProfilesCard } from "@/components/billing/RequestMoreProfilesCard";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import {
   PushNotificationAlert,
@@ -31,6 +32,13 @@ export default function DashboardPage() {
     currentVersion: string;
     userVersion: string | null;
   } | null>(null);
+  const [planStatus, setPlanStatus] = useState<{
+    planName: string;
+    maxProfiles: number;
+    currentCount: number;
+    canCreateMore: boolean;
+  } | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const push = usePushNotifications();
 
   const loadData = useCallback(async () => {
@@ -59,8 +67,13 @@ export default function DashboardPage() {
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (d?.legal) setLegalStatus(d.legal);
+        if (d?.plan) setPlanStatus(d.plan);
+        if (d?.email) setUserEmail(d.email);
       })
-      .catch(() => setLegalStatus(null));
+      .catch(() => {
+        setLegalStatus(null);
+        setPlanStatus(null);
+      });
     fetch("/api/admin/me")
       .then((r) => r.json())
       .then((d) => setIsAdmin(Boolean(d.isAdmin)))
@@ -77,6 +90,7 @@ export default function DashboardPage() {
 
   const latestUnread = logs.find((l) => !l.read_at);
   const legalBlocked = legalStatus?.needsAcceptance ?? false;
+  const atProfileLimit = planStatus != null && !planStatus.canCreateMore;
 
   return (
     <div className="min-h-dvh bg-[#faf9fc]">
@@ -84,7 +98,15 @@ export default function DashboardPage() {
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <div>
             <BrandLogo />
-            <p className="text-sm text-neutral-500">Panel del tutor</p>
+            <p className="text-sm text-neutral-500">
+              Panel del tutor
+              {planStatus && (
+                <span className="text-neutral-400">
+                  {" "}
+                  · {planStatus.currentCount}/{planStatus.maxProfiles} QR
+                </span>
+              )}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             {isAdmin && (
@@ -134,13 +156,20 @@ export default function DashboardPage() {
 
         <PushNotificationAlert push={push} />
 
+        {!loading && atProfileLimit && !legalBlocked && (
+          <RequestMoreProfilesCard
+            email={userEmail ?? undefined}
+            profileCount={planStatus?.currentCount}
+          />
+        )}
+
         <section id="perfiles" className={legalBlocked ? "pointer-events-none opacity-40" : undefined}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <UserCircle2 className="h-5 w-5 text-neutral-500" aria-hidden />
               <h2 className="text-xl font-bold text-neutral-900">Mis perfiles</h2>
             </div>
-            {!loading && profiles.length > 0 && (
+            {!loading && profiles.length > 0 && planStatus?.canCreateMore && (
               <Button
                 type="button"
                 size="sm"
@@ -161,7 +190,7 @@ export default function DashboardPage() {
                 Creá tu primer perfil
               </h3>
               <p className="mt-1 text-sm text-neutral-600">
-                Completá los datos para generar el QR de emergencia.
+                Completá los datos para generar tu QR de emergencia (plan gratis: 1 perfil).
               </p>
               <div className="mt-6">
                 <QrProfileForm

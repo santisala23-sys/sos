@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Bell, QrCode, Shield } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { LegalFooter } from "@/components/legal/LegalFooter";
@@ -65,7 +66,7 @@ export function AuthPageShell({ mode, error }: AuthPageShellProps) {
             <p className="mt-1 text-sm text-neutral-500">
               {isLogin
                 ? "Usá Google o tu email y contraseña."
-                : "Registrate con Google o con email."}
+                : "Gratis con 1 QR. Completá tus datos y confirmá al final."}
             </p>
 
             <div className="mt-6">
@@ -76,7 +77,15 @@ export function AuthPageShell({ mode, error }: AuthPageShellProps) {
           <p className="mt-6 text-center text-xs text-neutral-500">
             {isLogin
               ? "¿Problemas para entrar? Revisá email y contraseña o usá Google si vinculaste tu cuenta."
-              : "Las confirmaciones legales van al final del formulario, antes de crear la cuenta."}
+              : "Un perfil QR incluido · Más perfiles vía contacto · Ver planes"}
+            {!isLogin && (
+              <>
+                {" "}
+                <Link href="/pricing" className="font-medium text-violet-700 hover:underline">
+                  acá
+                </Link>
+              </>
+            )}
           </p>
         </section>
       </div>

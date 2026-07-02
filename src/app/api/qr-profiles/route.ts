@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
-import { createQrProfile, listQrProfilesByTutor } from "@/lib/db/queries";
+import { createQrProfile, countQrProfilesByTutor, findUserPlanById, listQrProfilesByTutor } from "@/lib/db/queries";
+import { getProfileLimitStatus } from "@/lib/billing/limits";
 import { generateSlug } from "@/lib/utils/slug";
 import { isProfileType, type ProfileType } from "@/lib/profile-types";
 import { normalizeBloodType } from "@/lib/blood-types";
@@ -82,6 +83,27 @@ export async function POST(request: Request) {
     });
     if (consentError) {
       return NextResponse.json({ error: consentError }, { status: 400 });
+    }
+
+    const [plan, profileCount] = await Promise.all([
+      findUserPlanById(session.userId),
+      countQrProfilesByTutor(session.userId),
+    ]);
+    const limit = getProfileLimitStatus(
+      plan ?? { plan_tier: "free", max_profiles: null },
+      profileCount,
+    );
+
+    if (!limit.canCreateMore) {
+      return NextResponse.json(
+        {
+          error:
+            "Tu plan incluye 1 perfil QR. Para agregar más, contactanos y te ampliamos la cuenta.",
+          code: "PROFILE_LIMIT",
+          plan: limit,
+        },
+        { status: 403 },
+      );
     }
 
     const profile = await createQrProfile({
