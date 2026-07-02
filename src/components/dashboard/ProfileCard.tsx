@@ -12,10 +12,11 @@ import { PROFILE_TYPES } from "@/lib/profile-types";
 type ProfileCardProps = {
   profile: QrProfile;
   onRefresh: () => void;
+  defaultShowQr?: boolean;
 };
 
-export function ProfileCard({ profile, onRefresh }: ProfileCardProps) {
-  const [showQr, setShowQr] = useState(false);
+export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: ProfileCardProps) {
+  const [showQr, setShowQr] = useState(defaultShowQr);
   const [editing, setEditing] = useState(false);
   const sosOnlyUrl = getSosOnlyUrl(profile.slug);
   const typeLabel =

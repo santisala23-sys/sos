@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, Plus, Shield, UserCircle2 } from "lucide-react";
+import { CheckCircle2, LogOut, Package, Plus, Shield, UserCircle2 } from "lucide-react";
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
+import { ActivateCodeInput } from "@/components/dashboard/ActivateCodeInput";
 import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBanner";
+import { ProfileOnboardingChoice } from "@/components/dashboard/ProfileOnboardingChoice";
 import { RequestMoreProfilesCard } from "@/components/billing/RequestMoreProfilesCard";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import {
@@ -26,6 +28,9 @@ export default function DashboardPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showActivateForm, setShowActivateForm] = useState(false);
+  const [highlightedSlug, setHighlightedSlug] = useState<string | null>(null);
+  const [openActivarOnboarding, setOpenActivarOnboarding] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [legalStatus, setLegalStatus] = useState<{
     needsAcceptance: boolean;
@@ -82,6 +87,18 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, [loadData]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const activatedSlug = params.get("activado");
+    if (activatedSlug) {
+      setHighlightedSlug(activatedSlug);
+    }
+    if (params.get("activar") === "1" || window.location.hash === "#activar") {
+      setShowActivateForm(true);
+      setOpenActivarOnboarding(true);
+    }
+  }, []);
+
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/");
@@ -91,6 +108,9 @@ export default function DashboardPage() {
   const latestUnread = logs.find((l) => !l.read_at);
   const legalBlocked = legalStatus?.needsAcceptance ?? false;
   const atProfileLimit = planStatus != null && !planStatus.canCreateMore;
+  const activatedProfile = highlightedSlug
+    ? profiles.find((p) => p.slug === highlightedSlug)
+    : null;
 
   return (
     <div className="min-h-dvh bg-[#faf9fc]">
@@ -156,6 +176,19 @@ export default function DashboardPage() {
 
         <PushNotificationAlert push={push} />
 
+        {!loading && activatedProfile && !legalBlocked && (
+          <div className="flex items-start gap-3 rounded-2xl border border-green-200 bg-green-50 p-4">
+            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-600" aria-hidden />
+            <div>
+              <p className="font-semibold text-green-900">QR activado correctamente</p>
+              <p className="mt-1 text-sm text-green-800">
+                El perfil <strong>{activatedProfile.beneficiary_name}</strong> ya está
+                listo. Podés descargar el PNG abajo en &quot;Ver QR&quot;.
+              </p>
+            </div>
+          </div>
+        )}
+
         {!loading && atProfileLimit && !legalBlocked && (
           <RequestMoreProfilesCard
             email={userEmail ?? undefined}
@@ -169,40 +202,63 @@ export default function DashboardPage() {
               <UserCircle2 className="h-5 w-5 text-neutral-500" aria-hidden />
               <h2 className="text-xl font-bold text-neutral-900">Mis perfiles</h2>
             </div>
-            {!loading && profiles.length > 0 && planStatus?.canCreateMore && (
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => setShowAddForm((v) => !v)}
-                className="gap-1"
-              >
-                <Plus className="h-4 w-4" aria-hidden />
-                {showAddForm ? "Cancelar" : "Agregar perfil"}
-              </Button>
+            {!loading && profiles.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    setShowActivateForm((v) => !v);
+                    if (!showActivateForm) setShowAddForm(false);
+                  }}
+                  className="gap-1"
+                  id="activar"
+                >
+                  <Package className="h-4 w-4" aria-hidden />
+                  {showActivateForm ? "Cancelar" : "Activar código"}
+                </Button>
+                {planStatus?.canCreateMore && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      setShowAddForm((v) => !v);
+                      if (!showAddForm) setShowActivateForm(false);
+                    }}
+                    className="gap-1"
+                  >
+                    <Plus className="h-4 w-4" aria-hidden />
+                    {showAddForm ? "Cancelar" : "Agregar perfil"}
+                  </Button>
+                )}
+              </div>
             )}
           </div>
 
           {loading ? (
             <p className="text-neutral-500">Cargando...</p>
           ) : profiles.length === 0 ? (
-            <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-neutral-900">
-                Creá tu primer perfil
-              </h3>
-              <p className="mt-1 text-sm text-neutral-600">
-                Completá los datos para generar tu QR de emergencia (plan gratis: 1 perfil).
-              </p>
-              <div className="mt-6">
-                <QrProfileForm
-                  onSuccess={() => {
-                    loadData();
-                    setShowAddForm(false);
-                  }}
-                />
-              </div>
-            </section>
+            <ProfileOnboardingChoice
+              onCreateSuccess={loadData}
+              initialMode={openActivarOnboarding ? "activate" : "choose"}
+            />
           ) : (
             <>
+              {showActivateForm && (
+                <section className="mb-4 rounded-2xl border border-violet-200 bg-violet-50/50 p-5">
+                  <h3 className="font-semibold text-neutral-900">
+                    Activar colgante o código
+                  </h3>
+                  <p className="mt-1 text-sm text-neutral-600">
+                    Ingresá el código impreso en la etiqueta, colgante o sticker.
+                  </p>
+                  <div className="mt-4">
+                    <ActivateCodeInput buttonLabel="Ir a activar" />
+                  </div>
+                </section>
+              )}
+
               {showAddForm && (
                 <section className="mb-4 rounded-2xl border border-violet-200 bg-violet-50/50 p-5">
                   <h3 className="mb-4 font-semibold text-neutral-900">
@@ -224,6 +280,7 @@ export default function DashboardPage() {
                     key={profile.id}
                     profile={profile}
                     onRefresh={loadData}
+                    defaultShowQr={profile.slug === highlightedSlug}
                   />
                 ))}
               </div>

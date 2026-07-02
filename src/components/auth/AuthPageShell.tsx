@@ -44,7 +44,7 @@ export function AuthPageShell({ mode, error, redirectTo }: AuthPageShellProps) {
           <p className="mt-4 max-w-md text-lg text-neutral-600">
             {isLogin
               ? "Ingresá a tu panel para gestionar perfiles, ver alertas y descargar tus QR."
-              : "Creá tu cuenta gratis y configurá el primer perfil QR en pocos minutos."}
+              : "Creá tu cuenta gratis. Después elegís: un QR nuevo o activar un colgante con código."}
           </p>
 
           <ul className="mt-8 hidden space-y-4 lg:block">
@@ -67,7 +67,7 @@ export function AuthPageShell({ mode, error, redirectTo }: AuthPageShellProps) {
             <p className="mt-1 text-sm text-neutral-500">
               {isLogin
                 ? "Usá Google o tu email y contraseña."
-                : "Gratis con 1 QR. Completá tus datos y confirmá al final."}
+                : "Gratis con 1 QR manual · Colgantes de colegio o producto se activan aparte."}
             </p>
 
             <div className="mt-6">
@@ -76,14 +76,20 @@ export function AuthPageShell({ mode, error, redirectTo }: AuthPageShellProps) {
           </div>
 
           <p className="mt-6 text-center text-xs text-neutral-500">
-            {isLogin
-              ? "¿Problemas para entrar? Revisá email y contraseña o usá Google si vinculaste tu cuenta."
-              : "Un perfil QR incluido · Más perfiles vía contacto · Ver planes"}
-            {!isLogin && (
+            {isLogin ? (
+              <>¿Tenés un código de colgante? Tras ingresar, usá «Activar código» en el panel.</>
+            ) : (
               <>
-                {" "}
+                Un perfil QR incluido · ¿Colgante del colegio? Activá el código en el{" "}
+                <Link
+                  href={`/register?redirect=${encodeURIComponent("/dashboard?activar=1")}`}
+                  className="font-medium text-violet-700 hover:underline"
+                >
+                  panel
+                </Link>
+                {" · "}
                 <Link href="/pricing" className="font-medium text-violet-700 hover:underline">
-                  acá
+                  Ver planes
                 </Link>
               </>
             )}
