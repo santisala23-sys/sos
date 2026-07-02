@@ -113,8 +113,8 @@ const STEPS = [
   },
   {
     step: "02",
-    title: "Imprimís el QR",
-    text: "Descargás el PNG, lo plastificás o pegás en el lugar que tenga sentido para vos.",
+    title: "Imprimís o pedís el QR",
+    text: "Descargá el PNG gratis o pedí collar, colgante, credencial o imán en la tienda.",
   },
   {
     step: "03",
@@ -142,8 +142,8 @@ export default function HomePage() {
             <Link href="/pricing" className="hidden text-sm font-medium text-neutral-600 hover:text-violet-700 sm:inline">
               Planes
             </Link>
-            <Link href="/productos" className="hidden text-sm font-medium text-neutral-600 hover:text-violet-700 md:inline">
-              QR en productos
+            <Link href="/tienda" className="hidden text-sm font-medium text-neutral-600 hover:text-violet-700 md:inline">
+              Tienda
             </Link>
             <Link href="/login">
               <Button variant="ghost" size="sm">
@@ -199,7 +199,11 @@ export default function HomePage() {
                 </Link>
               </div>
               <p className="mt-5 text-sm text-neutral-500">
-                Sin instalar apps · 1 QR gratis · Activación en productos con código ·{" "}
+                Sin instalar apps · 1 QR gratis ·{" "}
+                <Link href="/tienda" className="font-medium text-violet-700 hover:underline">
+                  Productos con QR
+                </Link>
+                {" · "}
                 <Link href="/pricing" className="font-medium text-violet-700 hover:underline">
                   Ver planes
                 </Link>
@@ -344,44 +348,44 @@ export default function HomePage() {
               <div>
                 <p className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-800">
                   <Package className="h-3.5 w-3.5" aria-hidden />
-                  Para marcas y productos
+                  Tienda SOSme
                 </p>
                 <h2 className="mt-4 text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
-                  QR en ropa, accesorios y packaging
+                  Collares, colgantes, credenciales e imanes
                 </h2>
-                <p className="mt-4 text-neutral-600 leading-relaxed">
-                  Cada prenda puede llevar un código único. El comprador lo activa en{" "}
-                  <strong>/activar</strong>, configura contacto de emergencia y listo —
-                  sin app extra.
+                <p className="mt-4 leading-relaxed text-neutral-600">
+                  ¿Preferís el QR ya impreso en un producto? Pedí collar para la
+                  mascota, colgante para la mochila, credencial plastificada o imán —
+                  con tu perfil SOSme incluido.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <Link href="/productos">
+                  <Link href="/tienda">
                     <Button size="lg" className="gap-2">
-                      QR en productos
+                      Ver tienda
                       <ArrowRight className="h-5 w-5" aria-hidden />
                     </Button>
                   </Link>
-                  <Link href="/pricing">
+                  <Link href="/register">
                     <Button variant="secondary" size="lg">
-                      Planes y partners
+                      Empezar con QR gratis
                     </Button>
                   </Link>
                 </div>
               </div>
-              <ol className="space-y-4 text-sm text-neutral-700">
+              <ul className="space-y-4 text-sm text-neutral-700">
                 <li className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm">
-                  <span className="font-bold text-violet-700">1.</span> Imprimís el QR
-                  en etiqueta o hang tag con URL de activación.
+                  <span className="font-bold text-violet-700">Collar / chapita</span> — mascotas e identificación.
                 </li>
                 <li className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm">
-                  <span className="font-bold text-violet-700">2.</span> El comprador
-                  escanea, se registra y vincula el código a su perfil.
+                  <span className="font-bold text-violet-700">Colgante</span> — mochilas, viajes, actividades.
                 </li>
                 <li className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm">
-                  <span className="font-bold text-violet-700">3.</span> Escaneos
-                  siguientes muestran el perfil ya configurado — emergencia o contacto.
+                  <span className="font-bold text-violet-700">Credencial plastificada</span> — datos médicos y contacto.
                 </li>
-              </ol>
+                <li className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm">
+                  <span className="font-bold text-violet-700">Imán y sticker</span> — heladera, valija, equipaje.
+                </li>
+              </ul>
             </div>
           </div>
         </section>
@@ -392,8 +396,7 @@ export default function HomePage() {
               Tu QR, tu manera. Empezá hoy.
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-lg text-violet-100">
-              Creá el perfil que necesites, activá las alertas en el celular y
-              llevá la tranquilidad en el bolsillo — o en la etiqueta de tu producto.
+              Creá tu perfil gratis o pedí el QR en un producto listo para usar.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link href="/register" className="inline-block">
@@ -401,16 +404,16 @@ export default function HomePage() {
                   size="lg"
                   className="bg-white text-violet-700 shadow-lg hover:bg-violet-50"
                 >
-                  Crear cuenta en SOSme
+                  Crear cuenta gratis
                 </Button>
               </Link>
-              <Link href="/productos" className="inline-block">
+              <Link href="/tienda" className="inline-block">
                 <Button
                   size="lg"
                   variant="secondary"
                   className="border-white/30 bg-white/10 text-white hover:bg-white/20"
                 >
-                  Soy una marca
+                  Ver tienda
                 </Button>
               </Link>
             </div>

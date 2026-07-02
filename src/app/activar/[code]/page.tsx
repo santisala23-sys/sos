@@ -45,8 +45,8 @@ export default async function ActivarPage({ params }: ActivarPageProps) {
           <Link href="/">
             <BrandLogo size="sm" />
           </Link>
-          <Link href="/productos" className="text-sm font-medium text-violet-700 hover:underline">
-            QR en productos
+          <Link href="/tienda" className="text-sm font-medium text-violet-700 hover:underline">
+            Tienda
           </Link>
         </div>
       </header>

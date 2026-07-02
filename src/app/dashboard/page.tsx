@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, LogOut, Package, Plus, Shield, UserCircle2 } from "lucide-react";
+import { CheckCircle2, LogOut, Plus, Shield, UserCircle2 } from "lucide-react";
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { ActivateCodeInput } from "@/components/dashboard/ActivateCodeInput";
 import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBanner";
-import { ProfileOnboardingChoice } from "@/components/dashboard/ProfileOnboardingChoice";
 import { RequestMoreProfilesCard } from "@/components/billing/RequestMoreProfilesCard";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import {
@@ -28,9 +27,8 @@ export default function DashboardPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showActivateForm, setShowActivateForm] = useState(false);
+  const [showActivateCode, setShowActivateCode] = useState(false);
   const [highlightedSlug, setHighlightedSlug] = useState<string | null>(null);
-  const [openActivarOnboarding, setOpenActivarOnboarding] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [legalStatus, setLegalStatus] = useState<{
     needsAcceptance: boolean;
@@ -90,13 +88,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const activatedSlug = params.get("activado");
-    if (activatedSlug) {
-      setHighlightedSlug(activatedSlug);
-    }
-    if (params.get("activar") === "1" || window.location.hash === "#activar") {
-      setShowActivateForm(true);
-      setOpenActivarOnboarding(true);
-    }
+    if (activatedSlug) setHighlightedSlug(activatedSlug);
   }, []);
 
   async function handleLogout() {
@@ -168,10 +160,7 @@ export default function DashboardPage() {
         )}
 
         {!loading && unreadCount > 0 && !legalBlocked && (
-          <AlertBanner
-            unreadCount={unreadCount}
-            latestLogId={latestUnread?.id}
-          />
+          <AlertBanner unreadCount={unreadCount} latestLogId={latestUnread?.id} />
         )}
 
         <PushNotificationAlert push={push} />
@@ -182,8 +171,8 @@ export default function DashboardPage() {
             <div>
               <p className="font-semibold text-green-900">QR activado correctamente</p>
               <p className="mt-1 text-sm text-green-800">
-                El perfil <strong>{activatedProfile.beneficiary_name}</strong> ya está
-                listo. Podés descargar el PNG abajo en &quot;Ver QR&quot;.
+                El perfil <strong>{activatedProfile.beneficiary_name}</strong> está listo.
+                Descargá el PNG con &quot;Ver QR&quot;.
               </p>
             </div>
           </div>
@@ -202,68 +191,48 @@ export default function DashboardPage() {
               <UserCircle2 className="h-5 w-5 text-neutral-500" aria-hidden />
               <h2 className="text-xl font-bold text-neutral-900">Mis perfiles</h2>
             </div>
-            {!loading && profiles.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => {
-                    setShowActivateForm((v) => !v);
-                    if (!showActivateForm) setShowAddForm(false);
-                  }}
-                  className="gap-1"
-                  id="activar"
-                >
-                  <Package className="h-4 w-4" aria-hidden />
-                  {showActivateForm ? "Cancelar" : "Activar código"}
-                </Button>
-                {planStatus?.canCreateMore && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      setShowAddForm((v) => !v);
-                      if (!showAddForm) setShowActivateForm(false);
-                    }}
-                    className="gap-1"
-                  >
-                    <Plus className="h-4 w-4" aria-hidden />
-                    {showAddForm ? "Cancelar" : "Agregar perfil"}
-                  </Button>
-                )}
-              </div>
+            {!loading && profiles.length > 0 && planStatus?.canCreateMore && (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setShowAddForm((v) => !v)}
+                className="gap-1"
+              >
+                <Plus className="h-4 w-4" aria-hidden />
+                {showAddForm ? "Cancelar" : "Agregar perfil"}
+              </Button>
             )}
           </div>
 
           {loading ? (
             <p className="text-neutral-500">Cargando...</p>
           ) : profiles.length === 0 ? (
-            <ProfileOnboardingChoice
-              onCreateSuccess={loadData}
-              initialMode={openActivarOnboarding ? "activate" : "choose"}
-            />
+            <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-neutral-900">Creá tu primer perfil QR</h3>
+              <p className="mt-1 text-sm text-neutral-600">
+                Plan gratis: 1 perfil para persona, mascota u objeto. ¿Necesitás más?{" "}
+                <Link href="/contacto" className="font-medium text-violet-700 hover:underline">
+                  Contactanos
+                </Link>
+                .
+              </p>
+              <div className="mt-6">
+                <QrProfileForm onSuccess={loadData} />
+              </div>
+              <details className="mt-6 rounded-xl border border-neutral-100 bg-neutral-50/80">
+                <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-neutral-700">
+                  ¿Tenés un código en un colgante o producto?
+                </summary>
+                <div className="border-t border-neutral-100 px-4 py-4">
+                  <ActivateCodeInput buttonLabel="Ir a activar" />
+                </div>
+              </details>
+            </section>
           ) : (
             <>
-              {showActivateForm && (
-                <section className="mb-4 rounded-2xl border border-violet-200 bg-violet-50/50 p-5">
-                  <h3 className="font-semibold text-neutral-900">
-                    Activar colgante o código
-                  </h3>
-                  <p className="mt-1 text-sm text-neutral-600">
-                    Ingresá el código impreso en la etiqueta, colgante o sticker.
-                  </p>
-                  <div className="mt-4">
-                    <ActivateCodeInput buttonLabel="Ir a activar" />
-                  </div>
-                </section>
-              )}
-
               {showAddForm && (
                 <section className="mb-4 rounded-2xl border border-violet-200 bg-violet-50/50 p-5">
-                  <h3 className="mb-4 font-semibold text-neutral-900">
-                    Nuevo perfil QR
-                  </h3>
+                  <h3 className="mb-4 font-semibold text-neutral-900">Nuevo perfil QR</h3>
                   <QrProfileForm
                     onSuccess={() => {
                       loadData();
@@ -284,14 +253,39 @@ export default function DashboardPage() {
                   />
                 ))}
               </div>
+
+              <details
+                className="mt-4 rounded-xl border border-neutral-200 bg-white"
+                open={showActivateCode}
+                onToggle={(e) => setShowActivateCode((e.target as HTMLDetailsElement).open)}
+              >
+                <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-neutral-700">
+                  Activar código de colgante o producto
+                </summary>
+                <div className="border-t border-neutral-100 px-4 py-4">
+                  <ActivateCodeInput buttonLabel="Ir a activar" />
+                </div>
+              </details>
             </>
           )}
         </section>
 
+        <section
+          className={`rounded-2xl border border-violet-200 bg-violet-50/50 p-5 ${legalBlocked ? "pointer-events-none opacity-40" : ""}`}
+        >
+          <h2 className="font-bold text-neutral-900">¿Preferís el QR en un producto físico?</h2>
+          <p className="mt-1 text-sm text-neutral-600">
+            Collares, colgantes, credenciales plastificadas e imanes con tu SOSme incluido.
+          </p>
+          <Link href="/tienda" className="mt-3 inline-block">
+            <Button variant="secondary" size="sm">
+              Ver tienda
+            </Button>
+          </Link>
+        </section>
+
         <section id="actividad" className={legalBlocked ? "pointer-events-none opacity-40" : undefined}>
-          <h2 className="mb-4 text-xl font-bold text-neutral-900">
-            Actividad reciente
-          </h2>
+          <h2 className="mb-4 text-xl font-bold text-neutral-900">Actividad reciente</h2>
           {loading ? (
             <p className="text-neutral-500">Cargando...</p>
           ) : (

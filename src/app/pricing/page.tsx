@@ -1,15 +1,15 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Check, MessageCircle } from "lucide-react";
+import { Check, MessageCircle, ShoppingBag } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { LegalFooter } from "@/components/legal/LegalFooter";
 import { Button } from "@/components/ui/Button";
-import { FREE_PLAN, PLANS } from "@/lib/billing/plans";
+import { FREE_PLAN } from "@/lib/billing/plans";
 import { buildWhatsAppUrl, buildRequestMoreProfilesMessage } from "@/lib/utils/contact";
 
 export const metadata: Metadata = {
   title: "Planes y precios",
-  description: "Empezá gratis con 1 QR. Pedí más perfiles o QR para productos contactando al equipo.",
+  description: "1 QR gratis por familia. Más perfiles por contacto. Productos físicos en la tienda.",
 };
 
 const FREE_FEATURES = [
@@ -31,9 +31,14 @@ export default function PricingPage() {
           <Link href="/">
             <BrandLogo size="sm" />
           </Link>
-          <Link href="/register" className="text-sm font-medium text-violet-700 hover:underline">
-            Registrate gratis
-          </Link>
+          <nav className="flex items-center gap-4 text-sm">
+            <Link href="/tienda" className="text-neutral-600 hover:text-violet-700">
+              Tienda
+            </Link>
+            <Link href="/register" className="font-medium text-violet-700 hover:underline">
+              Registrate gratis
+            </Link>
+          </nav>
         </div>
       </header>
 
@@ -43,12 +48,15 @@ export default function PricingPage() {
             Planes
           </p>
           <h1 className="mt-2 text-3xl font-black text-neutral-900 sm:text-4xl">
-            Empezá gratis. Pedí más cuando lo necesites.
+            Simple: 1 QR gratis por familia
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-neutral-600">
-            Por ahora no cobramos online: registrarte es gratis con{" "}
-            <strong>un perfil QR</strong>. Si compraste un producto con código SOSme,
-            activalo en la página de activación (URL en tu etiqueta). Para más perfiles o lotes para marcas, contactanos.
+            Registrate sin costo con un perfil. Si necesitás varios QR (mascotas, hijos,
+            valijas), escribinos. Para el QR en un producto físico, visitá la{" "}
+            <Link href="/tienda" className="font-semibold text-violet-700 hover:underline">
+              tienda
+            </Link>
+            .
           </p>
         </div>
 
@@ -81,8 +89,7 @@ export default function PricingPage() {
           <article className="rounded-3xl border border-neutral-200 bg-white p-8 shadow-sm">
             <h2 className="text-2xl font-black text-neutral-900">Más perfiles</h2>
             <p className="mt-2 text-neutral-600">
-              Familia numerosa, varias mascotas, valijas, equipos — contanos qué
-              necesitás y te ampliamos la cuenta.
+              ¿Tu familia necesita 3, 5 o más QR? Contanos y ampliamos tu cuenta manualmente.
             </p>
             <p className="mt-6 text-sm text-neutral-500">
               Precio a convenir · Sin tarjeta por ahora · Respuesta por WhatsApp
@@ -90,15 +97,15 @@ export default function PricingPage() {
             <ul className="mt-8 space-y-3 text-sm text-neutral-700">
               <li className="flex items-start gap-2">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" aria-hidden />
-                Varios perfiles QR en una sola cuenta
+                Varios perfiles en una sola cuenta
               </li>
               <li className="flex items-start gap-2">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" aria-hidden />
-                Mismo panel, alertas y chat para todos
+                Mismo panel y alertas para todos
               </li>
               <li className="flex items-start gap-2">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" aria-hidden />
-                Ideal para probar en serio antes de pagos automáticos
+                Ideal antes de activar pagos automáticos
               </li>
             </ul>
             <a
@@ -116,32 +123,23 @@ export default function PricingPage() {
         </div>
 
         <section className="mt-12 rounded-2xl border border-violet-200 bg-violet-50/50 p-6 sm:p-8">
-          <h2 className="text-xl font-bold text-neutral-900">¿Compraste un producto con QR?</h2>
-          <p className="mt-2 text-neutral-600">
-            Escaneá el código de la etiqueta o ingresá a{" "}
-            <strong>/activar/TUCODIGO</strong> para vincular el producto a tu cuenta y
-            configurar contacto de emergencia.
-          </p>
-        </section>
-
-        <section className="mt-8 rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8">
-          <h2 className="text-xl font-bold text-neutral-900">
-            {PLANS.partner.name} — QR en ropa y productos
-          </h2>
-          <p className="mt-2 text-neutral-600">
-            ¿Tenés una marca de ropa, accesorios o productos donde quieras una{" "}
-            <strong>etiqueta con QR</strong>? Cada prenda puede llevar un código que el
-            comprador activa al registrarse.{" "}
-            <Link href="/productos" className="font-semibold text-violet-700 hover:underline">
-              Ver cómo funciona
-            </Link>
-            .
-          </p>
+          <div className="flex items-start gap-3">
+            <ShoppingBag className="mt-0.5 h-6 w-6 shrink-0 text-violet-600" aria-hidden />
+            <div>
+              <h2 className="text-xl font-bold text-neutral-900">Productos físicos con QR</h2>
+              <p className="mt-2 text-neutral-600">
+                Collares, colgantes, credenciales plastificadas, imanes y stickers — pedí
+                desde la tienda y coordinamos envío y pago por WhatsApp.
+              </p>
+              <Link href="/tienda" className="mt-4 inline-block">
+                <Button>Ir a la tienda</Button>
+              </Link>
+            </div>
+          </div>
         </section>
 
         <p className="mt-8 text-center text-sm text-neutral-500">
-          Cuando activemos pagos online, avisaremos con tiempo y respetaremos a quienes
-          ya usen SOSme gratis.
+          Pagos online en la tienda: próximamente. Por ahora pedidos manuales con respuesta rápida.
         </p>
       </main>
 

@@ -13,6 +13,7 @@ import {
   Search,
   Server,
   ShieldAlert,
+  ShoppingBag,
   Users,
 } from "lucide-react";
 import type {
@@ -32,11 +33,13 @@ import {
   type AdminDetailTarget,
 } from "@/components/admin/AdminDetailPanel";
 import { AdminProductBatchesPanel } from "@/components/admin/AdminProductBatchesPanel";
+import { AdminStorePanel } from "@/components/admin/AdminStorePanel";
 
 type AdminTab =
   | "overview"
   | "users"
   | "profiles"
+  | "store"
   | "batches"
   | "activity"
   | "api"
@@ -237,6 +240,7 @@ export function AdminDashboard() {
     { id: "overview", label: "Overview", icon: <BarChart3 className="h-4 w-4" /> },
     { id: "users", label: "Usuarios", icon: <Users className="h-4 w-4" /> },
     { id: "profiles", label: "Perfiles QR", icon: <QrCode className="h-4 w-4" /> },
+    { id: "store", label: "Tienda", icon: <ShoppingBag className="h-4 w-4" /> },
     { id: "batches", label: "Lotes QR", icon: <Package className="h-4 w-4" /> },
     { id: "activity", label: "Escaneos", icon: <Activity className="h-4 w-4" /> },
     { id: "api", label: "API & Errores", icon: <Server className="h-4 w-4" /> },
@@ -469,6 +473,8 @@ export function AdminDashboard() {
       )}
 
       {tab === "batches" && <AdminProductBatchesPanel />}
+
+      {tab === "store" && <AdminStorePanel />}
 
       {tab === "activity" && !loading && (
         <DataTable headers={["Beneficiario", "Tipo", "Tutor", "Ubicación", "Leído", "Fecha", ""]}>

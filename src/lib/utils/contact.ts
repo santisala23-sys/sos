@@ -41,3 +41,32 @@ export function buildPartnerInquiryMessage(params: {
 
   return lines.join("\n");
 }
+
+export function buildStoreOrderWhatsAppMessage(params: {
+  orderId: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  shippingAddress?: string | null;
+  customerNotes?: string | null;
+  items: { product_name: string; quantity: number; unit_price_label: string }[];
+}): string {
+  const itemLines = params.items.map(
+    (i) => `• ${i.quantity}x ${i.product_name} (${i.unit_price_label})`,
+  );
+  const lines = [
+    "Hola SOSme, acabo de hacer un pedido desde la tienda.",
+    `Pedido #${params.orderId.slice(0, 8).toUpperCase()}`,
+    "",
+    "Productos:",
+    ...itemLines,
+    "",
+    `Nombre: ${params.customerName}`,
+    `Tel: ${params.customerPhone}`,
+    `Email: ${params.customerEmail}`,
+    params.shippingAddress ? `Envío: ${params.shippingAddress}` : null,
+    params.customerNotes ? `Notas: ${params.customerNotes}` : null,
+  ].filter(Boolean);
+
+  return lines.join("\n");
+}
