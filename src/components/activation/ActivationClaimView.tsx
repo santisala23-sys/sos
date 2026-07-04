@@ -94,10 +94,10 @@ export function ActivationClaimView({
         <div className="flex items-start gap-3">
           <QrCode className="mt-0.5 h-8 w-8 shrink-0 text-violet-600" aria-hidden />
           <div>
-            <p className="font-semibold text-neutral-900">Activá tu QR de producto</p>
+            <p className="font-semibold text-neutral-900">Activá tu producto una sola vez</p>
             <p className="mt-2 text-sm text-neutral-600">
-              Creá una cuenta gratis o ingresá para vincular este código. La activación
-              de producto no cuenta contra el límite de perfiles manuales.
+              Creá una cuenta o ingresá para vincular este QR a tu perfil. Después, quien
+              escanee ve tus datos de contacto — sin instalar apps.
             </p>
           </div>
         </div>

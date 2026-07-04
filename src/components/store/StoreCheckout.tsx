@@ -274,32 +274,40 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
                   {formatStorePrice(product.price_cents, product.price_label)}
                 </p>
 
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  <div className="flex items-center rounded-xl border border-neutral-200">
-                    <button
-                      type="button"
-                      onClick={() => setQty(product.id, qty - 1)}
-                      className="rounded-l-xl px-3 py-2 text-neutral-600 hover:bg-neutral-50"
-                      aria-label="Quitar uno"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-                    <span className="min-w-[2rem] text-center font-semibold tabular-nums">
-                      {qty}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setQty(product.id, qty + 1)}
-                      className="rounded-r-xl px-3 py-2 text-neutral-600 hover:bg-neutral-50"
-                      aria-label="Agregar uno"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-                  {qty > 0 && (
+                {qty === 0 ? (
+                  <Button
+                    type="button"
+                    className="mt-4 w-full"
+                    onClick={() => setQty(product.id, 1)}
+                  >
+                    Comprar
+                  </Button>
+                ) : (
+                  <div className="mt-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center rounded-xl border border-neutral-200">
+                      <button
+                        type="button"
+                        onClick={() => setQty(product.id, qty - 1)}
+                        className="rounded-l-xl px-3 py-2 text-neutral-600 hover:bg-neutral-50"
+                        aria-label="Quitar uno"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <span className="min-w-[2rem] text-center font-semibold tabular-nums">
+                        {qty}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQty(product.id, qty + 1)}
+                        className="rounded-r-xl px-3 py-2 text-neutral-600 hover:bg-neutral-50"
+                        aria-label="Agregar uno"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
                     <span className="text-xs font-medium text-violet-700">En el pedido</span>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </article>
           );

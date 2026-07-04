@@ -273,15 +273,23 @@ export default function DashboardPage() {
         <section
           className={`rounded-2xl border border-violet-200 bg-violet-50/50 p-5 ${legalBlocked ? "pointer-events-none opacity-40" : ""}`}
         >
-          <h2 className="font-bold text-neutral-900">¿Preferís el QR en un producto físico?</h2>
+          <h2 className="font-bold text-neutral-900">¿Preferís un producto físico?</h2>
           <p className="mt-1 text-sm text-neutral-600">
-            Collares, colgantes, credenciales plastificadas e imanes con tu SOSme incluido.
+            Comprá collar, colgante o credencial, escaneá una vez y registralo. O descargá
+            tu QR en PNG / PDF desde &quot;Ver QR&quot; en cada perfil.
           </p>
-          <Link href="/tienda" className="mt-3 inline-block">
-            <Button variant="secondary" size="sm">
-              Ver tienda
-            </Button>
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link href="/tienda">
+              <Button variant="secondary" size="sm">
+                Ver tienda
+              </Button>
+            </Link>
+            <Link href="/activar">
+              <Button variant="ghost" size="sm">
+                Activar código
+              </Button>
+            </Link>
+          </div>
         </section>
 
         <section id="actividad" className={legalBlocked ? "pointer-events-none opacity-40" : undefined}>

@@ -48,15 +48,14 @@ export default function PricingPage() {
             Planes
           </p>
           <h1 className="mt-2 text-3xl font-black text-neutral-900 sm:text-4xl">
-            Simple: 1 QR gratis por familia
+            Simple: 1 QR gratis o producto físico
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-neutral-600">
-            Registrate sin costo con un perfil. Si necesitás varios QR (mascotas, hijos,
-            valijas), escribinos. Para el QR en un producto físico, visitá la{" "}
+            Creá tu perfil gratis e imprimí el QR (PNG/PDF), o comprá un producto en la{" "}
             <Link href="/tienda" className="font-semibold text-violet-700 hover:underline">
               tienda
             </Link>
-            .
+            {" "}y activá el código una sola vez. Si necesitás varios perfiles, escribinos.
           </p>
         </div>
 
@@ -128,12 +127,17 @@ export default function PricingPage() {
             <div>
               <h2 className="text-xl font-bold text-neutral-900">Productos físicos con QR</h2>
               <p className="mt-2 text-neutral-600">
-                Collares, colgantes, credenciales plastificadas, imanes y stickers — pedí
-                desde la tienda y coordinamos envío y pago por WhatsApp.
+                Comprás el accesorio, escaneás una vez, te registrás y queda vinculado.
+                Pedí desde la tienda; coordinamos pago y envío por WhatsApp.
               </p>
-              <Link href="/tienda" className="mt-4 inline-block">
-                <Button>Ir a la tienda</Button>
-              </Link>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link href="/tienda">
+                  <Button>Ir a la tienda</Button>
+                </Link>
+                <Link href="/activar">
+                  <Button variant="secondary">Activar código</Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>

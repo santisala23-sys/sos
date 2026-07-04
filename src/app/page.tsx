@@ -183,30 +183,23 @@ export default function HomePage() {
                 que necesites proteger.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-                <Link href="/register">
+                <Link href="/tienda">
                   <Button
                     size="lg"
                     className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 px-8 shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
                   >
-                    Crear mi perfil gratis
+                    Comprar producto con QR
                     <ArrowRight className="h-5 w-5" aria-hidden />
                   </Button>
                 </Link>
-                <Link href="/login">
+                <Link href="/register">
                   <Button variant="secondary" size="lg">
-                    Ya tengo cuenta
+                    Crear gratis e imprimir
                   </Button>
                 </Link>
               </div>
               <p className="mt-5 text-sm text-neutral-500">
-                Sin instalar apps · 1 QR gratis ·{" "}
-                <Link href="/tienda" className="font-medium text-violet-700 hover:underline">
-                  Productos con QR
-                </Link>
-                {" · "}
-                <Link href="/pricing" className="font-medium text-violet-700 hover:underline">
-                  Ver planes
-                </Link>
+                Sin instalar apps · Escaneás una vez y registrás · O descargás PNG/PDF vos
               </p>
             </div>
 
@@ -343,50 +336,89 @@ export default function HomePage() {
         </section>
 
         <section className="mx-auto max-w-6xl px-4 py-16">
-          <div className="overflow-hidden rounded-3xl border border-violet-200/80 bg-gradient-to-br from-violet-50 via-white to-indigo-50 p-8 shadow-sm sm:p-12">
-            <div className="grid items-center gap-10 lg:grid-cols-2">
-              <div>
-                <p className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-800">
-                  <Package className="h-3.5 w-3.5" aria-hidden />
-                  Tienda SOSme
-                </p>
-                <h2 className="mt-4 text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
-                  Collares, colgantes, credenciales e imanes
-                </h2>
-                <p className="mt-4 leading-relaxed text-neutral-600">
-                  ¿Preferís el QR ya impreso en un producto? Pedí collar para la
-                  mascota, colgante para la mochila, credencial plastificada o imán —
-                  con tu perfil SOSme incluido.
-                </p>
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <Link href="/tienda">
-                    <Button size="lg" className="gap-2">
-                      Ver tienda
-                      <ArrowRight className="h-5 w-5" aria-hidden />
-                    </Button>
-                  </Link>
-                  <Link href="/register">
-                    <Button variant="secondary" size="lg">
-                      Empezar con QR gratis
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-              <ul className="space-y-4 text-sm text-neutral-700">
-                <li className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm">
-                  <span className="font-bold text-violet-700">Collar / chapita</span> — mascotas e identificación.
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
+              Dos formas de tener tu QR
+            </h2>
+            <p className="mt-4 text-neutral-600">
+              Como en los accesorios inteligentes: comprás el producto y lo activás una vez,
+              o te creás la cuenta y lo imprimís vos.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-6 lg:grid-cols-2">
+            <article className="flex flex-col rounded-3xl border-2 border-violet-300 bg-white p-8 shadow-lg shadow-violet-500/10">
+              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-800">
+                <Package className="h-3.5 w-3.5" aria-hidden />
+                Producto físico
+              </p>
+              <h3 className="mt-4 text-2xl font-black text-neutral-900">
+                Comprás y activás una vez
+              </h3>
+              <p className="mt-3 flex-1 text-neutral-600">
+                Collar, colgante, credencial, imán o sticker con QR único. Escaneás,
+                te registrás y queda vinculado a tu perfil. Quien lo encuentre ve
+                contacto y te avisa — sin instalar apps.
+              </p>
+              <ol className="mt-6 space-y-2 text-sm text-neutral-700">
+                <li>
+                  <strong className="text-violet-700">1.</strong> Pedís el producto en la tienda
                 </li>
-                <li className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm">
-                  <span className="font-bold text-violet-700">Colgante</span> — mochilas, viajes, actividades.
+                <li>
+                  <strong className="text-violet-700">2.</strong> Escaneás el QR una sola vez
                 </li>
-                <li className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm">
-                  <span className="font-bold text-violet-700">Credencial plastificada</span> — datos médicos y contacto.
+                <li>
+                  <strong className="text-violet-700">3.</strong> Completás el perfil y listo
                 </li>
-                <li className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm">
-                  <span className="font-bold text-violet-700">Imán y sticker</span> — heladera, valija, equipaje.
+              </ol>
+              <Link href="/tienda" className="mt-8 block">
+                <Button size="lg" className="w-full gap-2">
+                  Ver tienda
+                  <ArrowRight className="h-5 w-5" aria-hidden />
+                </Button>
+              </Link>
+              <p className="mt-3 text-center text-xs text-neutral-500">
+                ¿Ya lo compraste?{" "}
+                <Link href="/activar" className="font-medium text-violet-700 hover:underline">
+                  Activar código
+                </Link>
+              </p>
+            </article>
+
+            <article className="flex flex-col rounded-3xl border border-neutral-200 bg-white p-8 shadow-sm">
+              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-neutral-700">
+                <QrCode className="h-3.5 w-3.5" aria-hidden />
+                Digital gratis
+              </p>
+              <h3 className="mt-4 text-2xl font-black text-neutral-900">
+                Creás la cuenta e imprimís
+              </h3>
+              <p className="mt-3 flex-1 text-neutral-600">
+                1 perfil gratis. Configurás persona, mascota u objeto y descargás el QR en
+                PNG o PDF para imprimir, plastificar o pegar donde quieras.
+              </p>
+              <ol className="mt-6 space-y-2 text-sm text-neutral-700">
+                <li>
+                  <strong className="text-violet-700">1.</strong> Te registrás gratis
                 </li>
-              </ul>
-            </div>
+                <li>
+                  <strong className="text-violet-700">2.</strong> Completás el perfil
+                </li>
+                <li>
+                  <strong className="text-violet-700">3.</strong> Descargás PNG o imprimís PDF
+                </li>
+              </ol>
+              <Link href="/register" className="mt-8 block">
+                <Button variant="secondary" size="lg" className="w-full">
+                  Crear perfil gratis
+                </Button>
+              </Link>
+              <p className="mt-3 text-center text-xs text-neutral-500">
+                ¿Necesitás más de 1 QR?{" "}
+                <Link href="/pricing" className="font-medium text-violet-700 hover:underline">
+                  Pedí más perfiles
+                </Link>
+              </p>
+            </article>
           </div>
         </section>
 
@@ -396,24 +428,24 @@ export default function HomePage() {
               Tu QR, tu manera. Empezá hoy.
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-lg text-violet-100">
-              Creá tu perfil gratis o pedí el QR en un producto listo para usar.
+              Comprá el accesorio y activá una vez, o creá tu perfil gratis e imprimí el QR.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/register" className="inline-block">
+              <Link href="/tienda" className="inline-block">
                 <Button
                   size="lg"
                   className="bg-white text-violet-700 shadow-lg hover:bg-violet-50"
                 >
-                  Crear cuenta gratis
+                  Comprar producto
                 </Button>
               </Link>
-              <Link href="/tienda" className="inline-block">
+              <Link href="/register" className="inline-block">
                 <Button
                   size="lg"
                   variant="secondary"
                   className="border-white/30 bg-white/10 text-white hover:bg-white/20"
                 >
-                  Ver tienda
+                  Crear gratis e imprimir
                 </Button>
               </Link>
             </div>
