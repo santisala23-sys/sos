@@ -7,8 +7,7 @@ import { ActivateCodeInput } from "@/components/dashboard/ActivateCodeInput";
 
 export const metadata: Metadata = {
   title: "Activar producto SOSme",
-  description:
-    "Escaneaste un QR o tenés un código en tu collar, colgante o credencial. Activalo acá una sola vez.",
+  description: "Escaneá el QR o ingresá el código una sola vez y registralo.",
 };
 
 export default function ActivarIndexPage() {
@@ -34,8 +33,7 @@ export default function ActivarIndexPage() {
             Activá tu producto
           </h1>
           <p className="mt-3 text-neutral-600">
-            Compraste un collar, colgante o credencial SOSme. Escaneá el QR o ingresá el
-            código una sola vez, registrate y listo: queda vinculado a tu cuenta.
+            Una sola vez. Ingresá el código, registrate y listo.
           </p>
         </div>
 
@@ -43,21 +41,19 @@ export default function ActivarIndexPage() {
           <ActivateCodeInput buttonLabel="Continuar" />
         </div>
 
-        <ol className="mt-8 space-y-3 text-sm text-neutral-600">
-          <li>
-            <strong className="text-neutral-900">1.</strong> Ingresá el código de la etiqueta.
-          </li>
-          <li>
-            <strong className="text-neutral-900">2.</strong> Creá tu cuenta o iniciá sesión.
-          </li>
-          <li>
-            <strong className="text-neutral-900">3.</strong> Completá el perfil (contacto,
-            instrucciones).
-          </li>
-          <li>
-            <strong className="text-neutral-900">4.</strong> Quien escanee después ve tu perfil —
-            sin instalar apps.
-          </li>
+        <ol className="mt-8 space-y-4">
+          {[
+            "Ingresá el código de la etiqueta",
+            "Creá tu cuenta o iniciá sesión",
+            "Completá el perfil — listo",
+          ].map((text, i) => (
+            <li key={text} className="flex items-start gap-3 text-sm text-neutral-700">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-600 text-sm font-bold text-white">
+                {i + 1}
+              </span>
+              {text}
+            </li>
+          ))}
         </ol>
 
         <p className="mt-8 text-center text-sm text-neutral-500">
