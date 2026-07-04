@@ -179,6 +179,55 @@ export async function claimActivationForUser(
   return { profile, activation: refreshed };
 }
 
+export type ActivationStats = {
+  batch_count: number;
+  total_codes: number;
+  unclaimed: number;
+  claimed: number;
+  disabled: number;
+  activation_rate: number;
+};
+
+export async function getActivationStats(): Promise<ActivationStats> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      (SELECT COUNT(*)::int FROM qr_product_batches) AS batch_count,
+      COUNT(*)::int AS total_codes,
+      COUNT(*) FILTER (WHERE status = 'unclaimed')::int AS unclaimed,
+      COUNT(*) FILTER (WHERE status = 'claimed')::int AS claimed,
+      COUNT(*) FILTER (WHERE status = 'disabled')::int AS disabled
+    FROM qr_activations
+  `;
+  const row = rows[0] as {
+    batch_count: number;
+    total_codes: number;
+    unclaimed: number;
+    claimed: number;
+    disabled: number;
+  };
+
+  const activation_rate =
+    row.total_codes > 0
+      ? Math.round((row.claimed / row.total_codes) * 100)
+      : 0;
+
+  return { ...row, activation_rate };
+}
+
+export async function getProductBatchById(
+  batchId: string,
+): Promise<Omit<QrProductBatchRow, "unclaimed_count" | "claimed_count" | "disabled_count"> | null> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, partner_name, product_label, notes, quantity, created_at
+    FROM qr_product_batches
+    WHERE id = ${batchId}
+    LIMIT 1
+  `;
+  return (rows[0] as Omit<QrProductBatchRow, "unclaimed_count" | "claimed_count" | "disabled_count"> | undefined) ?? null;
+}
+
 export async function listProductBatches(): Promise<QrProductBatchRow[]> {
   const sql = getSql();
   const rows = await sql`

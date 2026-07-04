@@ -2,14 +2,18 @@ import { NextResponse } from "next/server";
 import { withApi } from "@/lib/api/with-api";
 import {
   createProductBatch,
+  getActivationStats,
   listProductBatches,
 } from "@/lib/db/queries-activation";
 
 export const GET = withApi(
   { requireAdmin: true, rateLimit: "admin" },
   async () => {
-    const batches = await listProductBatches();
-    return NextResponse.json({ batches });
+    const [batches, stats] = await Promise.all([
+      listProductBatches(),
+      getActivationStats(),
+    ]);
+    return NextResponse.json({ batches, stats });
   },
 );
 

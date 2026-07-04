@@ -41,4 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# QR export output (generated locally)
+/exports/
+
 .vercel
