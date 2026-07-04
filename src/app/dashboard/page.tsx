@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, LogOut, Plus, Shield, UserCircle2 } from "lucide-react";
+import { CheckCircle2, LogOut, Shield, UserCircle2 } from "lucide-react";
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { ActivateCodeInput } from "@/components/dashboard/ActivateCodeInput";
 import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBanner";
-import { RequestMoreProfilesCard } from "@/components/billing/RequestMoreProfilesCard";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import {
   PushNotificationAlert,
@@ -41,7 +40,6 @@ export default function DashboardPage() {
     currentCount: number;
     canCreateMore: boolean;
   } | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
   const push = usePushNotifications();
 
   const loadData = useCallback(async () => {
@@ -71,7 +69,6 @@ export default function DashboardPage() {
       .then((d) => {
         if (d?.legal) setLegalStatus(d.legal);
         if (d?.plan) setPlanStatus(d.plan);
-        if (d?.email) setUserEmail(d.email);
       })
       .catch(() => {
         setLegalStatus(null);
@@ -178,30 +175,10 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {!loading && atProfileLimit && !legalBlocked && (
-          <RequestMoreProfilesCard
-            email={userEmail ?? undefined}
-            profileCount={planStatus?.currentCount}
-          />
-        )}
-
         <section id="perfiles" className={legalBlocked ? "pointer-events-none opacity-40" : undefined}>
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <UserCircle2 className="h-5 w-5 text-neutral-500" aria-hidden />
-              <h2 className="text-xl font-bold text-neutral-900">Mis perfiles</h2>
-            </div>
-            {!loading && profiles.length > 0 && planStatus?.canCreateMore && (
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => setShowAddForm((v) => !v)}
-                className="gap-1"
-              >
-                <Plus className="h-4 w-4" aria-hidden />
-                {showAddForm ? "Cancelar" : "Agregar perfil"}
-              </Button>
-            )}
+          <div className="mb-4 flex items-center gap-2">
+            <UserCircle2 className="h-5 w-5 text-neutral-500" aria-hidden />
+            <h2 className="text-xl font-bold text-neutral-900">Mis perfiles</h2>
           </div>
 
           {loading ? (
@@ -230,19 +207,6 @@ export default function DashboardPage() {
             </section>
           ) : (
             <>
-              {showAddForm && (
-                <section className="mb-4 rounded-2xl border border-violet-200 bg-violet-50/50 p-5">
-                  <h3 className="mb-4 font-semibold text-neutral-900">Nuevo perfil QR</h3>
-                  <QrProfileForm
-                    onSuccess={() => {
-                      loadData();
-                      setShowAddForm(false);
-                    }}
-                    onCancel={() => setShowAddForm(false)}
-                  />
-                </section>
-              )}
-
               <div className="grid gap-4 sm:grid-cols-2">
                 {profiles.map((profile) => (
                   <ProfileCard
@@ -266,30 +230,44 @@ export default function DashboardPage() {
                   <ActivateCodeInput buttonLabel="Ir a activar" />
                 </div>
               </details>
+
+              <details
+                className="mt-4 rounded-xl border border-neutral-200 bg-white"
+                open={showAddForm && !atProfileLimit}
+                onToggle={(e) => {
+                  const open = (e.target as HTMLDetailsElement).open;
+                  if (atProfileLimit && open) {
+                    router.push("/pricing");
+                    return;
+                  }
+                  setShowAddForm(open);
+                }}
+              >
+                <summary
+                  className="cursor-pointer px-4 py-3 text-sm font-medium text-neutral-700"
+                  onClick={(e) => {
+                    if (atProfileLimit) {
+                      e.preventDefault();
+                      router.push("/pricing");
+                    }
+                  }}
+                >
+                  Crear perfil QR nuevo
+                </summary>
+                {!atProfileLimit && (
+                  <div className="border-t border-neutral-100 px-4 py-4">
+                    <QrProfileForm
+                      onSuccess={() => {
+                        loadData();
+                        setShowAddForm(false);
+                      }}
+                      onCancel={() => setShowAddForm(false)}
+                    />
+                  </div>
+                )}
+              </details>
             </>
           )}
-        </section>
-
-        <section
-          className={`rounded-2xl border border-violet-200 bg-violet-50/50 p-5 ${legalBlocked ? "pointer-events-none opacity-40" : ""}`}
-        >
-          <h2 className="font-bold text-neutral-900">¿Preferís un producto físico?</h2>
-          <p className="mt-1 text-sm text-neutral-600">
-            Comprá collar, colgante o credencial, escaneá una vez y registralo. O descargá
-            tu QR en PNG / PDF desde &quot;Ver QR&quot; en cada perfil.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Link href="/tienda">
-              <Button variant="secondary" size="sm">
-                Ver tienda
-              </Button>
-            </Link>
-            <Link href="/activar">
-              <Button variant="ghost" size="sm">
-                Activar código
-              </Button>
-            </Link>
-          </div>
         </section>
 
         <section id="actividad" className={legalBlocked ? "pointer-events-none opacity-40" : undefined}>

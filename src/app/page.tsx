@@ -130,7 +130,7 @@ export default function HomePage() {
                     size="lg"
                     className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 px-8 shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
                   >
-                    Comprar producto
+                    Ver productos
                     <ArrowRight className="h-5 w-5" aria-hidden />
                   </Button>
                 </Link>
@@ -349,7 +349,7 @@ export default function HomePage() {
                   size="lg"
                   className="bg-white text-violet-700 shadow-lg hover:bg-violet-50"
                 >
-                  Comprar producto
+                  Ver productos
                 </Button>
               </Link>
               <Link href="/register" className="inline-block">
