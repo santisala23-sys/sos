@@ -374,11 +374,18 @@ export function AdminProductBatchesPanel() {
                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                           <div className="flex flex-col gap-1.5">
                             <a
-                              href={`/api/admin/product-batches/${batch.id}?format=zip`}
+                              href={`/api/admin/product-batches/${batch.id}?format=pdf`}
                               className="inline-flex items-center justify-center gap-1 rounded-lg bg-violet-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-violet-500"
                             >
                               <Download className="h-3 w-3" aria-hidden />
-                              Imprenta (ZIP)
+                              Imprenta (PDF)
+                            </a>
+                            <a
+                              href={`/api/admin/product-batches/${batch.id}?format=zip`}
+                              className="inline-flex items-center justify-center gap-1 rounded-lg border border-violet-700/60 px-2.5 py-1.5 text-xs font-semibold text-violet-200 hover:bg-violet-950/40"
+                            >
+                              <Download className="h-3 w-3" aria-hidden />
+                              ZIP
                             </a>
                             <a
                               href={`/api/admin/product-batches/${batch.id}?format=csv`}
@@ -404,18 +411,33 @@ export function AdminProductBatchesPanel() {
                               <>
                                 <div className="mb-3 flex flex-wrap items-center gap-2">
                                   <a
-                                    href={`/api/admin/product-batches/${batch.id}?format=zip`}
+                                    href={`/api/admin/product-batches/${batch.id}?format=pdf`}
                                     className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-violet-500"
                                   >
                                     <Download className="h-3.5 w-3.5" aria-hidden />
-                                    Descargar ZIP para imprenta
+                                    PDF capas (40×40 mm)
                                   </a>
+                                  <a
+                                    href={`/api/admin/product-batches/${batch.id}?format=zip`}
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 px-3 py-1.5 text-xs font-semibold text-neutral-200 hover:bg-neutral-800"
+                                  >
+                                    <Download className="h-3.5 w-3.5" aria-hidden />
+                                    ZIP PNG/SVG
+                                  </a>
+                                  {batch.unclaimed_count < batch.quantity && (
+                                    <a
+                                      href={`/api/admin/product-batches/${batch.id}?format=pdf&only_unclaimed=1`}
+                                      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 px-3 py-1.5 text-xs text-neutral-300 hover:bg-neutral-800"
+                                    >
+                                      PDF solo sin activar ({batch.unclaimed_count})
+                                    </a>
+                                  )}
                                   {batch.unclaimed_count < batch.quantity && (
                                     <a
                                       href={`/api/admin/product-batches/${batch.id}?format=zip&only_unclaimed=1`}
                                       className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 px-3 py-1.5 text-xs text-neutral-300 hover:bg-neutral-800"
                                     >
-                                      Solo sin activar ({batch.unclaimed_count})
+                                      ZIP solo sin activar ({batch.unclaimed_count})
                                     </a>
                                   )}
                                   {batch.product_label && (

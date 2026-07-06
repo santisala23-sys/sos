@@ -6,6 +6,7 @@ import {
   generateBatchExportFiles,
   isExportTemplateKey,
 } from "@/lib/activation/batch-export";
+import { buildBatchPrintPdf } from "@/lib/activation/batch-print-pdf";
 import { getActivationUrl } from "@/lib/activation/codes";
 import {
   getProductBatchById,
@@ -60,6 +61,47 @@ export const GET = withApi(
           "Content-Disposition": `attachment; filename="lote-${batchId.slice(0, 8)}.csv"`,
         },
       });
+    }
+
+    if (format === "pdf") {
+      const onlyUnclaimed = searchParams.get("only_unclaimed") === "1";
+      const templatePath = searchParams.get("template_path") ?? undefined;
+      const activationsToExport = onlyUnclaimed
+        ? activations.filter((activation) => activation.status === "unclaimed")
+        : activations;
+
+      if (activationsToExport.length === 0) {
+        return NextResponse.json(
+          { error: "No hay códigos para exportar en PDF." },
+          { status: 400 },
+        );
+      }
+
+      try {
+        const pdfBuffer = await buildBatchPrintPdf({
+          templatePath,
+          items: activationsToExport.map((activation) => ({
+            activationUrl: getActivationUrl(activation.activation_code),
+            label: activation.activation_code,
+          })),
+        });
+        const slug = batch.product_label
+          ? batch.product_label.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+          : "llavero";
+
+        return new NextResponse(new Uint8Array(pdfBuffer), {
+          headers: {
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `attachment; filename="sosme-lote-${batchId.slice(0, 8)}-${slug}-imprenta.pdf"`,
+          },
+        });
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Error al generar PDF de imprenta";
+        return NextResponse.json({ error: message }, { status: 400 });
+      }
     }
 
     if (format === "zip") {
