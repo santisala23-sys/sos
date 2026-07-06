@@ -89,7 +89,7 @@ export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
                 key={href}
                 href={resolved}
                 className={cn(
-                  "rounded-xl px-4 py-2.5 text-[15px] font-medium transition-colors",
+                  "rounded-xl px-4 py-2.5 text-base font-medium transition-colors",
                   active
                     ? "bg-violet-100 text-violet-800"
                     : "text-neutral-600 hover:bg-violet-50 hover:text-violet-800",
@@ -103,14 +103,14 @@ export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
 
         <div className="hidden items-center gap-3 xl:flex">
           <Link href="/login">
-            <Button variant="ghost" size="md" className="px-5 text-[15px]">
+            <Button variant="ghost" size="md" className="px-5 text-base">
               Ingresar
             </Button>
           </Link>
           <Link href="/register">
             <Button
               size="md"
-              className="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
+              className="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 text-base shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
             >
               Empezar gratis
             </Button>

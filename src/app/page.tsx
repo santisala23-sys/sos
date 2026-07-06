@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LegalFooter } from "@/components/legal/LegalFooter";
+import { DemoVideoSection } from "@/components/marketing/DemoVideoSection";
+import { HowItWorksSection } from "@/components/marketing/HowItWorksSection";
 import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { SectionHeading } from "@/components/marketing/SectionHeading";
@@ -55,30 +57,6 @@ const USE_CASES = [
   },
 ] as const;
 
-const HOW_IT_WORKS = [
-  {
-    step: "1",
-    title: "Escanean el QR",
-    text: "Con la cámara del celular. No hace falta descargar nada.",
-    image: "/images/landing/screenshots/scan-location.png",
-    imageAlt: "Celular escaneando un QR SOSme",
-  },
-  {
-    step: "2",
-    title: "Ven cómo contactarte",
-    text: "WhatsApp, llamada y ubicación en el mapa, al instante.",
-    image: "/images/landing/screenshots/public-profile.png",
-    imageAlt: "Perfil público con contactos de emergencia",
-  },
-  {
-    step: "3",
-    title: "Vos recibís la alerta",
-    text: "Notificación push en tu celular cuando alguien escanea.",
-    image: "/images/landing/screenshots/push-alert.png",
-    imageAlt: "Notificación push de alerta SOSme",
-  },
-] as const;
-
 const INCLUDES = [
   { icon: QrCode, text: "Perfil online con tus datos de contacto" },
   { icon: MessageCircle, text: "WhatsApp y llamada al instante" },
@@ -86,12 +64,6 @@ const INCLUDES = [
   { icon: Bell, text: "Alerta en tu celular al escanear" },
   { icon: Smartphone, text: "Sin apps: funciona en el navegador" },
   { icon: Zap, text: "Sin cuotas mensuales" },
-] as const;
-
-const HERO_STATS = [
-  { value: "3 pasos", label: "para activar" },
-  { value: "0 apps", label: "para escanear" },
-  { value: "1 gratis", label: "perfil incluido" },
 ] as const;
 
 export default function HomePage() {
@@ -140,19 +112,6 @@ export default function HomePage() {
                   </Button>
                 </Link>
               </div>
-
-              <dl className="mt-12 grid grid-cols-3 gap-4 border-t border-violet-100 pt-8">
-                {HERO_STATS.map(({ value, label }) => (
-                  <div key={label} className="text-center lg:text-left">
-                    <dt className="text-2xl font-black text-violet-700 sm:text-3xl">
-                      {value}
-                    </dt>
-                    <dd className="mt-1 text-sm font-medium text-neutral-500">
-                      {label}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
             </div>
 
             <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
@@ -257,9 +216,9 @@ export default function HomePage() {
               ({ title, description, detail, accent, image, imageAlt }) => (
                 <article
                   key={title}
-                  className={`group overflow-hidden rounded-[1.75rem] border border-white/90 bg-gradient-to-br ${accent} shadow-lg shadow-violet-500/5 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-500/15`}
+                  className={`group mx-auto w-full max-w-[280px] overflow-hidden rounded-[1.75rem] border border-white/90 bg-gradient-to-br ${accent} shadow-lg shadow-violet-500/5 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-500/15 sm:max-w-none`}
                 >
-                  <div className="relative aspect-[3/4] overflow-hidden bg-white/40">
+                  <div className="relative aspect-[4/5] overflow-hidden bg-white/40">
                     <Image
                       src={image}
                       alt={imageAlt}
@@ -286,51 +245,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Cómo funciona */}
-        <section
-          id="como-funciona"
-          className="scroll-mt-32 border-y border-neutral-200/50 bg-white px-4 py-24 sm:px-6 lg:px-8"
-        >
-          <div className="mx-auto max-w-[88rem]">
-            <SectionHeading
-              eyebrow="Cómo funciona"
-              title="Tres pasos, cero complicaciones"
-              description="Funciona con cualquier celular. Sin apps, sin registros para quien escanea."
-            />
+        <DemoVideoSection className="bg-white/50" />
 
-            <ol className="mt-20 grid gap-14 sm:grid-cols-3 lg:gap-10">
-              {HOW_IT_WORKS.map(({ step, title, text, image, imageAlt }, index) => (
-                <li key={step} className="relative flex flex-col text-center">
-                  {index < HOW_IT_WORKS.length - 1 && (
-                    <div
-                      className="absolute left-[calc(50%+7rem)] top-20 hidden h-px w-[calc(100%-10rem)] bg-gradient-to-r from-violet-300 to-indigo-300 sm:block"
-                      aria-hidden
-                    />
-                  )}
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-2xl font-black text-white shadow-xl shadow-violet-500/30">
-                    {step}
-                  </div>
-                  <h3 className="mt-6 text-xl font-bold text-neutral-900">
-                    {title}
-                  </h3>
-                  <p className="mt-3 text-neutral-600">{text}</p>
-                  <div className="mx-auto mt-10 w-full max-w-[260px] overflow-hidden rounded-[1.75rem] border-[5px] border-neutral-900 bg-neutral-950 p-1.5 shadow-2xl shadow-violet-500/15">
-                    <div className="overflow-hidden rounded-[1.25rem]">
-                      <Image
-                        src={image}
-                        alt={imageAlt}
-                        width={390}
-                        height={844}
-                        className="h-auto w-full"
-                        sizes="260px"
-                      />
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
+        <HowItWorksSection />
 
         {/* Qué incluye */}
         <section className="mx-auto max-w-[88rem] px-4 py-24 sm:px-6 lg:px-8">
