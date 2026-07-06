@@ -7,6 +7,10 @@ import { formatDateTime } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
 import { scannerAuthHeaders } from "@/lib/scan-session/storage";
 
+const POLL_INTERVAL_MS = 6000;
+const POLL_INTERVAL_HIDDEN_MS = 20000;
+const RATE_LIMIT_BACKOFF_MS = 30000;
+
 type ScanMessageThreadProps = {
   scanLogId: string;
   scanToken?: string;
@@ -29,8 +33,11 @@ export function ScanMessageThread({
   const listRef = useRef<HTMLDivElement>(null);
   const prevCountRef = useRef(0);
   const shouldStickToBottomRef = useRef(true);
+  const pollBackoffUntilRef = useRef(0);
 
   const loadMessages = useCallback(async () => {
+    if (Date.now() < pollBackoffUntilRef.current) return;
+
     const headers: HeadersInit = {};
     if (mode === "public" && scanToken) {
       headers.Authorization = `Bearer ${scanToken}`;
@@ -42,6 +49,15 @@ export function ScanMessageThread({
         : `/api/scan-logs/${scanLogId}/messages`;
 
     const res = await fetch(url, { headers });
+    if (res.status === 429) {
+      const retryAfter = Number(res.headers.get("Retry-After"));
+      const backoffMs = Number.isFinite(retryAfter)
+        ? retryAfter * 1000
+        : RATE_LIMIT_BACKOFF_MS;
+      pollBackoffUntilRef.current = Date.now() + backoffMs;
+      return;
+    }
+
     if (res.ok) {
       const data = await res.json();
       const next = (data.messages ?? []) as ScanMessage[];
@@ -58,9 +74,43 @@ export function ScanMessageThread({
   }, [scanLogId, scanToken, slug, mode]);
 
   useEffect(() => {
-    loadMessages();
-    const interval = setInterval(loadMessages, 4000);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const schedule = () => {
+      const hidden = document.visibilityState === "hidden";
+      const delay =
+        Date.now() < pollBackoffUntilRef.current
+          ? Math.max(
+              pollBackoffUntilRef.current - Date.now(),
+              POLL_INTERVAL_HIDDEN_MS,
+            )
+          : hidden
+            ? POLL_INTERVAL_HIDDEN_MS
+            : POLL_INTERVAL_MS;
+
+      timeoutId = setTimeout(async () => {
+        if (cancelled) return;
+        await loadMessages();
+        if (!cancelled) schedule();
+      }, delay);
+    };
+
+    void loadMessages();
+    schedule();
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        void loadMessages();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [loadMessages]);
 
   useEffect(() => {
@@ -110,6 +160,9 @@ export function ScanMessageThread({
         if (data.error === "No autorizado") {
           detail =
             "No se pudo enviar. Probá abrir el QR en una ventana privada o cerrá sesión en SOSme.";
+        } else if (res.status === 429) {
+          detail =
+            "Enviaste muchos mensajes seguidos. Esperá un momento e intentá de nuevo.";
         } else if (typeof data.error === "string") {
           detail = data.error;
         }

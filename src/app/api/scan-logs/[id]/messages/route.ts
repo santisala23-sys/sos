@@ -48,7 +48,7 @@ async function resolveAccess(
 }
 
 export const GET = withApi(
-  { rateLimit: "messages" },
+  { rateLimit: "api", rateLimitSuffix: "messages-read" },
   async (request, context, meta) => {
     const { id } = await (context.params as RouteContext["params"]);
     const { searchParams } = new URL(request.url);
@@ -65,7 +65,7 @@ export const GET = withApi(
 );
 
 export const POST = withApi(
-  { rateLimit: "messages" },
+  { rateLimit: "messages", rateLimitSuffix: "messages-send" },
   async (request, context, meta) => {
     const { id } = await (context.params as RouteContext["params"]);
 

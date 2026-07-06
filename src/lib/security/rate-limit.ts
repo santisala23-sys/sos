@@ -13,7 +13,8 @@ const PRESETS: Record<
 > = {
   auth: { limit: 10, windowMs: 15 * 60 * 1000 },
   alerts: { limit: 20, windowMs: 60 * 60 * 1000 },
-  messages: { limit: 60, windowMs: 60 * 60 * 1000 },
+  /** Solo envíos de mensajes (POST). El polling del chat usa preset `api`. */
+  messages: { limit: 40, windowMs: 60 * 60 * 1000 },
   api: { limit: 120, windowMs: 60 * 1000 },
   admin: { limit: 200, windowMs: 60 * 1000 },
 };
