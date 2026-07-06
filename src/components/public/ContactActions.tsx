@@ -15,6 +15,7 @@ type ContactActionsProps = {
   scannerNote?: string | null;
   scanLogId?: string | null;
   compact?: boolean;
+  variant?: "default" | "emergency";
 };
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -36,6 +37,7 @@ type ContactRowProps = {
   whatsAppMessage: string;
   label?: string;
   compact?: boolean;
+  emergency?: boolean;
 };
 
 function ContactRow({
@@ -44,9 +46,42 @@ function ContactRow({
   whatsAppMessage,
   label,
   compact,
+  emergency,
 }: ContactRowProps) {
   const telHref = `tel:${phone.replace(/\s/g, "")}`;
   const waHref = buildWhatsAppUrl(phone, whatsAppMessage);
+
+  if (emergency) {
+    return (
+      <div className="rounded-2xl border border-neutral-700/80 bg-neutral-950/60 p-4">
+        {label && (
+          <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+            {label}
+          </p>
+        )}
+        <p className="mt-1 text-lg font-bold text-white">{name}</p>
+        <p className="mt-0.5 font-mono text-sm text-neutral-400">{phone}</p>
+        <div className="mt-4 grid grid-cols-2 gap-2.5">
+          <a
+            href={telHref}
+            className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-green-600 px-3 py-3 text-sm font-bold text-white shadow-lg shadow-green-900/30 transition-transform active:scale-[0.98]"
+          >
+            <Phone className="h-5 w-5 shrink-0" aria-hidden />
+            Llamar
+          </a>
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-[#25D366] px-3 py-3 text-sm font-bold text-white shadow-lg shadow-green-900/20 transition-transform active:scale-[0.98]"
+          >
+            <WhatsAppIcon className="h-5 w-5 shrink-0" />
+            WhatsApp
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   if (compact) {
     return (
@@ -121,6 +156,7 @@ export function ContactActions({
   scannerNote,
   scanLogId,
   compact = false,
+  variant = "default",
 }: ContactActionsProps) {
   const message = buildWhatsAppEmergencyMessage({
     beneficiaryName: profile.beneficiary_name,
@@ -144,14 +180,17 @@ export function ContactActions({
     profile.secondary_contact_phone?.trim() &&
     profile.secondary_contact_name?.trim();
 
+  const isEmergency = variant === "emergency";
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className={`flex flex-col ${isEmergency ? "gap-3" : "gap-6"}`}>
       <ContactRow
         name={profile.emergency_contact_name}
         phone={profile.emergency_contact_phone}
         whatsAppMessage={message}
         label="Contacto principal"
-        compact={compact}
+        compact={compact && !isEmergency}
+        emergency={isEmergency}
       />
       {hasSecondary && (
         <ContactRow
@@ -159,7 +198,8 @@ export function ContactActions({
           phone={profile.secondary_contact_phone!}
           whatsAppMessage={secondaryMessage}
           label="Contacto secundario"
-          compact={compact}
+          compact={compact && !isEmergency}
+          emergency={isEmergency}
         />
       )}
     </div>

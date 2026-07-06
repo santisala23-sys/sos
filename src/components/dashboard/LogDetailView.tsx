@@ -112,10 +112,21 @@ export function LogDetailView({ log }: LogDetailViewProps) {
             className="h-72 w-full border-0 sm:h-80"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
           />
-          <p className="border-t border-neutral-100 px-5 py-3 font-mono text-xs text-neutral-500 sm:px-6">
-            {lat.toFixed(5)}, {lng.toFixed(5)}
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-neutral-100 px-5 py-3 sm:px-6">
+            <p className="font-mono text-xs text-neutral-500">
+              {lat.toFixed(5)}, {lng.toFixed(5)}
+            </p>
+            <a
+              href={getGoogleMapsUrl(lat, lng)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-semibold text-violet-700 underline-offset-2 hover:underline"
+            >
+              Si el mapa no carga, abrir en Google Maps
+            </a>
+          </div>
         </section>
       ) : (
         <section className="rounded-[1.75rem] border border-dashed border-violet-200 bg-violet-50/40 px-6 py-12 text-center">
