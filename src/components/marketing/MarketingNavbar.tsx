@@ -54,21 +54,21 @@ export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 px-4 transition-[padding] duration-300",
-        scrolled ? "py-2.5" : "py-5",
+        "sticky top-0 z-50 px-3 transition-[padding] duration-300 sm:px-6 lg:px-8",
+        scrolled ? "py-2" : "py-4",
       )}
     >
       <div
         className={cn(
-          "mx-auto flex max-w-6xl items-center justify-between gap-5 rounded-2xl border px-5 py-3.5 transition-all duration-300 sm:px-6 sm:py-4",
+          "mx-auto flex w-full max-w-[96rem] items-center justify-between gap-6 rounded-2xl border px-5 py-3.5 transition-all duration-300 sm:px-8 sm:py-4",
           scrolled
-            ? "border-violet-200/70 bg-white/92 shadow-xl shadow-violet-500/8 backdrop-blur-xl"
-            : "border-white/80 bg-white/80 shadow-md shadow-violet-500/8 backdrop-blur-lg",
+            ? "border-violet-200/70 bg-white/94 shadow-xl shadow-violet-500/10 backdrop-blur-xl"
+            : "border-white/80 bg-white/85 shadow-lg shadow-violet-500/10 backdrop-blur-lg",
         )}
       >
-        <div className="flex min-w-0 items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4 lg:gap-5">
           <BrandLogo size="lg" showMark />
-          <span className="hidden border-l border-neutral-200 pl-4 text-sm leading-snug text-neutral-500 xl:block">
+          <span className="hidden border-l border-neutral-200 pl-5 text-sm leading-snug text-neutral-500 2xl:block">
             Contacto de emergencia
             <br />
             <span className="font-semibold text-violet-700">
@@ -78,7 +78,7 @@ export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
         </div>
 
         <nav
-          className="hidden items-center gap-0.5 lg:flex"
+          className="hidden items-center gap-1 xl:flex"
           aria-label="Navegación principal"
         >
           {NAV_LINKS.map(({ href, label }) => {
@@ -101,16 +101,16 @@ export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
           })}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-3 xl:flex">
           <Link href="/login">
-            <Button variant="ghost" size="md" className="text-[15px]">
+            <Button variant="ghost" size="md" className="px-5 text-[15px]">
               Ingresar
             </Button>
           </Link>
           <Link href="/register">
             <Button
               size="md"
-              className="bg-gradient-to-r from-violet-600 to-indigo-600 px-5 shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
+              className="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
             >
               Empezar gratis
             </Button>
@@ -119,7 +119,7 @@ export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
 
         <button
           type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700 transition-colors hover:bg-neutral-50 lg:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700 transition-colors hover:bg-neutral-50 xl:hidden"
           aria-expanded={open}
           aria-controls="mobile-nav"
           aria-label={open ? "Cerrar menú" : "Abrir menú"}
@@ -132,7 +132,7 @@ export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
       {open && (
         <div
           id="mobile-nav"
-          className="mx-auto mt-3 max-w-6xl overflow-hidden rounded-2xl border border-violet-200/60 bg-white/96 p-5 shadow-2xl shadow-violet-500/10 backdrop-blur-xl lg:hidden"
+          className="mx-auto mt-3 w-full max-w-[96rem] overflow-hidden rounded-2xl border border-violet-200/60 bg-white/96 p-5 shadow-2xl shadow-violet-500/10 backdrop-blur-xl xl:hidden"
         >
           <nav className="flex flex-col gap-1" aria-label="Navegación móvil">
             {NAV_LINKS.map(({ href, label }) => {

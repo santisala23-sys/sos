@@ -12,6 +12,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import { LegalFooter } from "@/components/legal/LegalFooter";
+import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { StoreCheckout } from "@/components/store/StoreCheckout";
 import { Button } from "@/components/ui/Button";
@@ -64,26 +65,12 @@ export default async function TiendaPage() {
   }
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-[#f8f6fc] text-neutral-900">
-      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
-        <div className="absolute -left-40 top-0 h-[28rem] w-[28rem] rounded-full bg-violet-300/30 blur-3xl" />
-        <div className="absolute right-0 top-1/4 h-96 w-96 rounded-full bg-indigo-200/40 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-rose-200/30 blur-3xl" />
-        <div
-          className="absolute inset-0 opacity-[0.35]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgb(139 92 246 / 0.08) 1px, transparent 0)",
-            backgroundSize: "28px 28px",
-          }}
-        />
-      </div>
-
+    <MarketingBackground>
       <MarketingNavbar variant="subpage" />
 
       <main>
         {/* Hero */}
-        <section className="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:pt-12">
+        <section className="mx-auto max-w-[88rem] px-4 pb-16 pt-8 sm:px-6 sm:pt-12 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <p className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white/90 px-4 py-1.5 text-sm font-semibold text-violet-800 shadow-sm">
               <Package className="h-4 w-4" aria-hidden />
@@ -263,6 +250,6 @@ export default async function TiendaPage() {
       </main>
 
       <LegalFooter />
-    </div>
+    </MarketingBackground>
   );
 }
