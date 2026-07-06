@@ -34,6 +34,7 @@ import {
 } from "@/components/admin/AdminDetailPanel";
 import { AdminProductBatchesPanel } from "@/components/admin/AdminProductBatchesPanel";
 import { AdminStorePanel } from "@/components/admin/AdminStorePanel";
+import { adminStatAccents, adminUi } from "@/components/admin/adminUi";
 
 type AdminTab =
   | "overview"
@@ -56,21 +57,15 @@ function StatCard({
   sub?: string;
   accent?: "violet" | "red" | "green" | "amber" | "blue";
 }) {
-  const colors = {
-    violet: "border-violet-500/30 bg-violet-950/40 text-violet-200",
-    red: "border-red-500/30 bg-red-950/40 text-red-200",
-    green: "border-green-500/30 bg-green-950/40 text-green-200",
-    amber: "border-amber-500/30 bg-amber-950/40 text-amber-200",
-    blue: "border-blue-500/30 bg-blue-950/40 text-blue-200",
-  };
-
   return (
-    <div className={`rounded-2xl border p-5 ${colors[accent]}`}>
-      <p className="text-xs font-medium uppercase tracking-wider opacity-70">
+    <div
+      className={`rounded-2xl border p-5 shadow-lg ${adminStatAccents[accent]}`}
+    >
+      <p className="text-xs font-semibold uppercase tracking-wider opacity-70">
         {label}
       </p>
       <p className="mt-2 text-3xl font-black tabular-nums">{value}</p>
-      {sub && <p className="mt-1 text-xs opacity-60">{sub}</p>}
+      {sub && <p className="mt-1 text-xs opacity-70">{sub}</p>}
     </div>
   );
 }
@@ -84,8 +79,8 @@ function MiniBarChart({
 }) {
   const max = Math.max(...data.map((d) => d.count), 1);
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
-      <p className="mb-4 text-sm font-semibold text-neutral-300">{label}</p>
+    <div className={adminUi.card}>
+      <p className={`mb-4 ${adminUi.cardTitle}`}>{label}</p>
       <div className="flex h-32 items-end gap-1">
         {data.length === 0 ? (
           <p className="text-sm text-neutral-500">Sin datos aún</p>
@@ -96,7 +91,7 @@ function MiniBarChart({
               className="group relative flex flex-1 flex-col items-center"
             >
               <div
-                className="w-full rounded-t bg-violet-600 transition-all group-hover:bg-violet-500"
+                className="w-full rounded-t bg-gradient-to-t from-violet-600 to-indigo-500 transition-all group-hover:from-violet-500 group-hover:to-indigo-400"
                 style={{ height: `${Math.max(4, (point.count / max) * 100)}%` }}
                 title={`${point.bucket}: ${point.count}`}
               />
@@ -119,9 +114,9 @@ function DataTable({
   children: React.ReactNode;
 }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-neutral-800">
+    <div className={adminUi.tableWrap}>
       <table className="w-full min-w-[640px] text-left text-sm">
-        <thead className="border-b border-neutral-800 bg-neutral-900/80 text-xs uppercase tracking-wide text-neutral-400">
+        <thead className={adminUi.tableHead}>
           <tr>
             {headers.map((h) => (
               <th key={h} className="px-4 py-3 font-semibold">
@@ -130,7 +125,7 @@ function DataTable({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-800/80">{children}</tbody>
+        <tbody className="divide-y divide-neutral-100">{children}</tbody>
       </table>
     </div>
   );
@@ -139,10 +134,10 @@ function DataTable({
 function StatusBadge({ code }: { code: number }) {
   const color =
     code >= 500
-      ? "bg-red-900/60 text-red-300"
+      ? "bg-red-100 text-red-800"
       : code >= 400
-        ? "bg-amber-900/60 text-amber-300"
-        : "bg-green-900/60 text-green-300";
+        ? "bg-amber-100 text-amber-900"
+        : "bg-green-100 text-green-800";
   return (
     <span className={`rounded px-2 py-0.5 font-mono text-xs ${color}`}>
       {code}
@@ -155,7 +150,7 @@ function EditButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 rounded-lg border border-neutral-700 px-2.5 py-1 text-xs text-violet-300 hover:bg-neutral-800 hover:text-violet-200"
+      className={adminUi.editBtn}
     >
       <Pencil className="h-3 w-3" />
       Gestionar
@@ -248,18 +243,26 @@ export function AdminDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-white">Panel de control</h1>
-          <p className="mt-1 text-sm text-neutral-400">
-            Métricas, usuarios, API, errores y auditoría de seguridad en tiempo real.
-          </p>
-        </div>
+    <div className={adminUi.page}>
+      <section className={adminUi.hero}>
+        <p className={adminUi.heroBadge}>
+          <BarChart3 className="h-4 w-4" aria-hidden />
+          Administración
+        </p>
+        <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
+          Panel de control
+        </h1>
+        <p className="mt-2 max-w-2xl text-base text-violet-100">
+          Métricas, usuarios, tienda, API, errores y auditoría de seguridad en
+          tiempo real.
+        </p>
+      </section>
+
+      <div className="flex flex-wrap items-center justify-end gap-4">
         <button
           type="button"
           onClick={() => loadTab()}
-          className="flex items-center gap-2 rounded-xl border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-200 hover:bg-neutral-800"
+          className={adminUi.refreshBtn}
         >
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Actualizar
@@ -275,10 +278,8 @@ export function AdminDashboard() {
               setTab(t.id);
               setSearch("");
             }}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-              tab === t.id
-                ? "bg-violet-600 text-white"
-                : "bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
+              tab === t.id ? adminUi.tabActive : adminUi.tabInactive
             }`}
           >
             {t.icon}
@@ -295,13 +296,13 @@ export function AdminDashboard() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar en esta tabla..."
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-900 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 focus:border-violet-500 focus:outline-none"
+            className={adminUi.input}
           />
         </div>
       )}
 
       {loading && tab !== "overview" && (
-        <p className="text-neutral-500">Cargando...</p>
+        <p className={adminUi.loading}>Cargando...</p>
       )}
 
       {tab === "overview" && overview && (
@@ -357,20 +358,20 @@ export function AdminDashboard() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
-              <p className="mb-4 flex items-center gap-2 text-sm font-semibold text-neutral-300">
-                <Globe className="h-4 w-4" />
+            <div className={adminUi.card}>
+              <p className={`mb-4 flex items-center gap-2 ${adminUi.cardTitle}`}>
+                <Globe className="h-4 w-4 text-violet-600" />
                 Top endpoints (24h)
               </p>
               <div className="space-y-2">
                 {topEndpoints.map((ep) => (
                   <div
                     key={ep.path}
-                    className="flex items-center justify-between rounded-lg bg-neutral-950 px-3 py-2 text-sm"
+                    className="flex items-center justify-between rounded-xl bg-neutral-50 px-3 py-2 text-sm"
                   >
-                    <code className="truncate text-violet-300">{ep.path}</code>
+                    <code className="truncate text-violet-700">{ep.path}</code>
                     <div className="flex shrink-0 items-center gap-3 tabular-nums">
-                      <span className="text-neutral-300">{ep.count}</span>
+                      <span className="font-medium text-neutral-800">{ep.count}</span>
                       {ep.error_count > 0 && (
                         <span className="text-xs text-red-400">
                           {ep.error_count} err
@@ -385,19 +386,19 @@ export function AdminDashboard() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
-              <p className="mb-4 flex items-center gap-2 text-sm font-semibold text-neutral-300">
-                <AlertTriangle className="h-4 w-4" />
+            <div className={adminUi.card}>
+              <p className={`mb-4 flex items-center gap-2 ${adminUi.cardTitle}`}>
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
                 Códigos HTTP (24h)
               </p>
               <div className="flex flex-wrap gap-2">
                 {statusBreakdown.map((s) => (
                   <div
                     key={s.status_code}
-                    className="flex items-center gap-2 rounded-lg bg-neutral-950 px-3 py-2"
+                    className="flex items-center gap-2 rounded-xl bg-neutral-50 px-3 py-2"
                   >
                     <StatusBadge code={s.status_code} />
-                    <span className="tabular-nums text-neutral-300">{s.count}</span>
+                    <span className="tabular-nums font-medium text-neutral-800">{s.count}</span>
                   </div>
                 ))}
                 {statusBreakdown.length === 0 && (
@@ -412,14 +413,14 @@ export function AdminDashboard() {
       {tab === "users" && !loading && (
         <DataTable headers={["Email", "Nombre", "Perfiles", "Escaneos", "Admin", "Registro", ""]}>
           {filterRows(users, search, ["email", "full_name"]).map((u) => (
-            <tr key={u.id} className="hover:bg-neutral-900/50">
-              <td className="px-4 py-3 font-mono text-xs text-violet-300">{u.email}</td>
+            <tr key={u.id} className={adminUi.tableRow}>
+              <td className={`${adminUi.tableCell} font-mono text-xs text-violet-700`}>{u.email}</td>
               <td className="px-4 py-3">{u.full_name ?? "—"}</td>
               <td className="px-4 py-3 tabular-nums">{u.profile_count}</td>
               <td className="px-4 py-3 tabular-nums">{u.scan_count}</td>
               <td className="px-4 py-3">
                 {u.is_admin ? (
-                  <span className="rounded bg-violet-900/60 px-2 py-0.5 text-xs text-violet-300">
+                  <span className="rounded bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-800">
                     admin
                   </span>
                 ) : (
@@ -444,9 +445,9 @@ export function AdminDashboard() {
             "slug",
             "tutor_email",
           ]).map((p) => (
-            <tr key={p.id} className="hover:bg-neutral-900/50">
-              <td className="px-4 py-3 font-medium">{p.beneficiary_name}</td>
-              <td className="px-4 py-3 font-mono text-xs text-violet-300">/p/{p.slug}</td>
+            <tr key={p.id} className={adminUi.tableRow}>
+              <td className={`${adminUi.tableCell} font-medium`}>{p.beneficiary_name}</td>
+              <td className={`${adminUi.tableCell} font-mono text-xs text-violet-700`}>/p/{p.slug}</td>
               <td className="px-4 py-3 text-xs text-neutral-400">{p.tutor_email}</td>
               <td className="px-4 py-3">{p.profile_type}</td>
               <td className="px-4 py-3 tabular-nums">{p.scan_count}</td>
@@ -454,8 +455,8 @@ export function AdminDashboard() {
                 <span
                   className={`rounded px-2 py-0.5 text-xs ${
                     p.is_active
-                      ? "bg-green-900/50 text-green-300"
-                      : "bg-neutral-800 text-neutral-400"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-neutral-100 text-neutral-500"
                   }`}
                 >
                   {p.is_active ? "activo" : "inactivo"}
@@ -483,14 +484,14 @@ export function AdminDashboard() {
             "tutor_email",
             "slug",
           ]).map((log) => (
-            <tr key={log.id} className="hover:bg-neutral-900/50">
+            <tr key={log.id} className={adminUi.tableRow}>
               <td className="px-4 py-3">{log.beneficiary_name}</td>
               <td className="px-4 py-3">
                 <span
                   className={`rounded px-2 py-0.5 text-xs font-bold uppercase ${
                     log.alert_type === "sos"
-                      ? "bg-red-900/60 text-red-300"
-                      : "bg-neutral-800 text-neutral-300"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-neutral-100 text-neutral-600"
                   }`}
                 >
                   {log.alert_type}
@@ -522,18 +523,18 @@ export function AdminDashboard() {
 
       {tab === "api" && !loading && (
         <div className="space-y-4">
-          <label className="flex items-center gap-2 text-sm text-neutral-400">
+          <label className="flex items-center gap-2 text-sm text-neutral-600">
             <input
               type="checkbox"
               checked={apiErrorsOnly}
               onChange={(e) => setApiErrorsOnly(e.target.checked)}
-              className="rounded border-neutral-600"
+              className="rounded border-neutral-300 text-violet-600 focus:ring-violet-500"
             />
             Solo errores (4xx / 5xx)
           </label>
           <DataTable headers={["Método", "Ruta", "Status", "Duración", "Error", "Fecha"]}>
             {apiLogs.map((log) => (
-              <tr key={log.id} className="hover:bg-neutral-900/50">
+              <tr key={log.id} className={adminUi.tableRow}>
                 <td className="px-4 py-3 font-mono text-xs">{log.method}</td>
                 <td className="max-w-xs truncate px-4 py-3 font-mono text-xs text-violet-300">
                   {log.path}
@@ -557,9 +558,9 @@ export function AdminDashboard() {
       {tab === "security" && !loading && (
         <DataTable headers={["Evento", "Usuario", "IP (hash)", "Detalles", "Fecha"]}>
           {securityLogs.map((log) => (
-            <tr key={log.id} className="hover:bg-neutral-900/50">
+            <tr key={log.id} className={adminUi.tableRow}>
               <td className="px-4 py-3">
-                <span className="rounded bg-red-950/60 px-2 py-0.5 font-mono text-xs text-red-300">
+                <span className="rounded bg-red-100 px-2 py-0.5 font-mono text-xs font-semibold text-red-800">
                   {log.event_type}
                 </span>
               </td>

@@ -15,6 +15,7 @@ import type {
   QrProductBatchRow,
 } from "@/lib/db/queries-activation";
 import { formatDateTime } from "@/lib/utils/format";
+import { adminStatAccents, adminUi } from "@/components/admin/adminUi";
 
 function StatCard({
   label,
@@ -27,15 +28,10 @@ function StatCard({
   sub?: string;
   accent?: "violet" | "green" | "amber" | "neutral";
 }) {
-  const colors = {
-    violet: "border-violet-500/30 bg-violet-950/40 text-violet-200",
-    green: "border-green-500/30 bg-green-950/40 text-green-200",
-    amber: "border-amber-500/30 bg-amber-950/40 text-amber-200",
-    neutral: "border-neutral-600/40 bg-neutral-900/60 text-neutral-200",
-  };
+  const colors = adminStatAccents;
 
   return (
-    <div className={`rounded-2xl border p-4 ${colors[accent]}`}>
+    <div className={`rounded-2xl border p-4 shadow-md ${colors[accent]}`}>
       <p className="text-xs font-medium uppercase tracking-wider opacity-70">
         {label}
       </p>
@@ -60,7 +56,7 @@ function ActivationProgress({
         <span className="text-green-400">{claimed} activos</span>
         <span className="text-neutral-500">{pct}%</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-neutral-800">
+      <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
         <div
           className="h-full rounded-full bg-gradient-to-r from-green-600 to-green-400 transition-all"
           style={{ width: `${pct}%` }}
@@ -72,9 +68,9 @@ function ActivationProgress({
 
 function StatusBadge({ status }: { status: QrActivationRow["status"] }) {
   const styles = {
-    unclaimed: "bg-amber-950 text-amber-300 border-amber-800/60",
-    claimed: "bg-green-950 text-green-300 border-green-800/60",
-    disabled: "bg-neutral-800 text-neutral-400 border-neutral-700",
+    unclaimed: "bg-amber-100 text-amber-900 border-amber-200",
+    claimed: "bg-green-100 text-green-800 border-green-200",
+    disabled: "bg-neutral-100 text-neutral-600 border-neutral-200",
   };
   const labels = {
     unclaimed: "Sin activar",
@@ -222,9 +218,9 @@ export function AdminProductBatchesPanel() {
 
       <form
         onSubmit={handleCreate}
-        className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+        className={adminUi.formCard}
       >
-        <div className="flex items-center gap-2 text-white">
+        <div className="flex items-center gap-2 text-neutral-900">
           <Plus className="h-5 w-5 text-violet-400" aria-hidden />
           <h2 className="text-lg font-bold">Nuevo lote de activación</h2>
         </div>
@@ -242,7 +238,7 @@ export function AdminProductBatchesPanel() {
               value={partnerName}
               onChange={(e) => setPartnerName(e.target.value)}
               placeholder="Ej. Stock propio"
-              className="mt-1 w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white focus:border-violet-500 focus:outline-none"
+              className={`mt-1 w-full ${adminUi.inputPlain}`}
             />
           </label>
           <label className="block text-sm text-neutral-300">
@@ -251,7 +247,7 @@ export function AdminProductBatchesPanel() {
               value={productLabel}
               onChange={(e) => setProductLabel(e.target.value)}
               placeholder="Ej. Llavero QR, Credencial plastificada"
-              className="mt-1 w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white focus:border-violet-500 focus:outline-none"
+              className={`mt-1 w-full ${adminUi.inputPlain}`}
             />
           </label>
           <label className="block text-sm text-neutral-300">
@@ -262,7 +258,7 @@ export function AdminProductBatchesPanel() {
               max={500}
               value={quantity}
               onChange={(e) => setQuantity(Number(e.target.value))}
-              className="mt-1 w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white focus:border-violet-500 focus:outline-none"
+              className={`mt-1 w-full ${adminUi.inputPlain}`}
             />
           </label>
           <label className="block text-sm text-neutral-300 sm:col-span-2">
@@ -271,7 +267,7 @@ export function AdminProductBatchesPanel() {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Ej. Imprenta X, entrega marzo 2026"
-              className="mt-1 w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white focus:border-violet-500 focus:outline-none"
+              className={`mt-1 w-full ${adminUi.inputPlain}`}
             />
           </label>
         </div>
@@ -301,7 +297,7 @@ export function AdminProductBatchesPanel() {
             type="button"
             onClick={() => load()}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 px-3 py-1.5 text-xs text-neutral-300 hover:bg-neutral-800 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs text-neutral-700 shadow-sm hover:bg-violet-50 disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} aria-hidden />
             Actualizar
@@ -313,9 +309,9 @@ export function AdminProductBatchesPanel() {
         ) : batches.length === 0 ? (
           <p className="text-neutral-500">Todavía no hay lotes creados.</p>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-neutral-800">
+          <div className={adminUi.tableWrap}>
             <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="border-b border-neutral-800 bg-neutral-900/80 text-xs uppercase tracking-wide text-neutral-400">
+              <thead className={adminUi.tableHead}>
                 <tr>
                   <th className="w-8 px-2 py-3" aria-hidden />
                   <th className="px-4 py-3">Partner</th>
@@ -328,7 +324,7 @@ export function AdminProductBatchesPanel() {
                   <th className="px-4 py-3">Exportar</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-800/80">
+              <tbody className="divide-y divide-neutral-100">
                 {batches.map((batch) => {
                   const isExpanded = expandedBatchId === batch.id;
                   const activations = batchActivations[batch.id] ?? [];
@@ -336,7 +332,7 @@ export function AdminProductBatchesPanel() {
                   return (
                     <Fragment key={batch.id}>
                       <tr
-                        className="cursor-pointer text-neutral-200 hover:bg-neutral-900/50"
+                        className="cursor-pointer text-neutral-800 hover:bg-violet-50/50"
                         onClick={() => toggleBatchDetail(batch.id)}
                       >
                         <td className="px-2 py-3 text-neutral-500">
@@ -389,7 +385,7 @@ export function AdminProductBatchesPanel() {
                             </a>
                             <a
                               href={`/api/admin/product-batches/${batch.id}?format=csv`}
-                              className="inline-flex items-center justify-center gap-1 rounded-lg border border-neutral-700 px-2.5 py-1 text-xs text-violet-300 hover:bg-neutral-800"
+                              className="inline-flex items-center justify-center gap-1 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs text-violet-800 hover:bg-violet-100"
                             >
                               CSV
                             </a>
@@ -397,7 +393,7 @@ export function AdminProductBatchesPanel() {
                         </td>
                       </tr>
                       {isExpanded && (
-                        <tr className="bg-neutral-950/60">
+                        <tr className="bg-violet-50/30">
                           <td colSpan={9} className="px-4 py-4">
                             {loadingBatchId === batch.id ? (
                               <p className="text-sm text-neutral-500">
@@ -419,7 +415,7 @@ export function AdminProductBatchesPanel() {
                                   </a>
                                   <a
                                     href={`/api/admin/product-batches/${batch.id}?format=zip`}
-                                    className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 px-3 py-1.5 text-xs font-semibold text-neutral-200 hover:bg-neutral-800"
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50"
                                   >
                                     <Download className="h-3.5 w-3.5" aria-hidden />
                                     ZIP PNG/SVG
@@ -427,7 +423,7 @@ export function AdminProductBatchesPanel() {
                                   {batch.unclaimed_count < batch.quantity && (
                                     <a
                                       href={`/api/admin/product-batches/${batch.id}?format=pdf&only_unclaimed=1`}
-                                      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 px-3 py-1.5 text-xs text-neutral-300 hover:bg-neutral-800"
+                                      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 px-3 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
                                     >
                                       PDF solo sin activar ({batch.unclaimed_count})
                                     </a>
@@ -435,7 +431,7 @@ export function AdminProductBatchesPanel() {
                                   {batch.unclaimed_count < batch.quantity && (
                                     <a
                                       href={`/api/admin/product-batches/${batch.id}?format=zip&only_unclaimed=1`}
-                                      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 px-3 py-1.5 text-xs text-neutral-300 hover:bg-neutral-800"
+                                      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 px-3 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
                                     >
                                       ZIP solo sin activar ({batch.unclaimed_count})
                                     </a>
@@ -456,7 +452,7 @@ export function AdminProductBatchesPanel() {
                                       <th className="px-3 py-2">Slug perfil</th>
                                     </tr>
                                   </thead>
-                                  <tbody className="divide-y divide-neutral-800/60">
+                                  <tbody className="divide-y divide-neutral-100">
                                     {activations.map((activation) => (
                                       <tr key={activation.id} className="text-neutral-300">
                                         <td className="px-3 py-2 font-mono font-medium">

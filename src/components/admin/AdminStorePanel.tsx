@@ -11,6 +11,7 @@ import {
   getStoreProductTypeLabel,
 } from "@/lib/store/product-types";
 import { formatDateTime } from "@/lib/utils/format";
+import { adminUi } from "@/components/admin/adminUi";
 
 type StoreSubTab = "products" | "orders";
 
@@ -136,8 +137,8 @@ export function AdminStorePanel() {
           onClick={() => setSubTab("products")}
           className={`rounded-xl px-4 py-2 text-sm font-medium ${
             subTab === "products"
-              ? "bg-violet-600 text-white"
-              : "bg-neutral-900 text-neutral-400 hover:text-white"
+              ? adminUi.subTabActive
+              : adminUi.subTabInactive
           }`}
         >
           Productos
@@ -147,8 +148,8 @@ export function AdminStorePanel() {
           onClick={() => setSubTab("orders")}
           className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium ${
             subTab === "orders"
-              ? "bg-violet-600 text-white"
-              : "bg-neutral-900 text-neutral-400 hover:text-white"
+              ? adminUi.subTabActive
+              : adminUi.subTabInactive
           }`}
         >
           <ShoppingBag className="h-4 w-4" />
@@ -165,9 +166,9 @@ export function AdminStorePanel() {
         <>
           <form
             onSubmit={handleSaveProduct}
-            className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className={adminUi.formCard}
           >
-            <div className="flex items-center gap-2 text-white">
+            <div className="flex items-center gap-2 text-neutral-900">
               {editingId ? <Pencil className="h-5 w-5 text-violet-400" /> : <Plus className="h-5 w-5 text-violet-400" />}
               <h2 className="text-lg font-bold">
                 {editingId ? "Editar producto" : "Nuevo producto"}
@@ -181,7 +182,7 @@ export function AdminStorePanel() {
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                  className={`mt-1 w-full ${adminUi.inputPlain}`}
                 />
               </label>
               <label className="block text-sm text-neutral-300">
@@ -189,7 +190,7 @@ export function AdminStorePanel() {
                 <select
                   value={form.product_type}
                   onChange={(e) => setForm({ ...form, product_type: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                  className={`mt-1 w-full ${adminUi.inputPlain}`}
                 >
                   {STORE_PRODUCT_TYPES.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -204,7 +205,7 @@ export function AdminStorePanel() {
                   type="number"
                   value={form.sort_order}
                   onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                  className={`mt-1 w-full ${adminUi.inputPlain}`}
                 />
               </label>
               <label className="block text-sm text-neutral-300">
@@ -215,7 +216,7 @@ export function AdminStorePanel() {
                   value={form.price_cents}
                   onChange={(e) => setForm({ ...form, price_cents: e.target.value })}
                   placeholder="Ej. 450000 = $4500"
-                  className="mt-1 w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                  className={`mt-1 w-full ${adminUi.inputPlain}`}
                 />
               </label>
               <label className="block text-sm text-neutral-300">
@@ -224,7 +225,7 @@ export function AdminStorePanel() {
                   value={form.price_label}
                   onChange={(e) => setForm({ ...form, price_label: e.target.value })}
                   placeholder="Consultar"
-                  className="mt-1 w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                  className={`mt-1 w-full ${adminUi.inputPlain}`}
                 />
               </label>
               <label className="block text-sm text-neutral-300 sm:col-span-2">
@@ -233,7 +234,7 @@ export function AdminStorePanel() {
                   value={form.image_url}
                   onChange={(e) => setForm({ ...form, image_url: e.target.value })}
                   placeholder="https://..."
-                  className="mt-1 w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                  className={`mt-1 w-full ${adminUi.inputPlain}`}
                 />
               </label>
               <label className="block text-sm text-neutral-300 sm:col-span-2">
@@ -242,7 +243,7 @@ export function AdminStorePanel() {
                   rows={3}
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                  className={`mt-1 w-full ${adminUi.inputPlain}`}
                 />
               </label>
               <label className="flex items-center gap-2 text-sm text-neutral-300">
@@ -270,7 +271,7 @@ export function AdminStorePanel() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="rounded-xl border border-neutral-700 px-5 py-2.5 text-sm text-neutral-300 hover:bg-neutral-800"
+                  className="rounded-xl border border-neutral-200 px-5 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50"
                 >
                   Cancelar edición
                 </button>
@@ -281,9 +282,9 @@ export function AdminStorePanel() {
           {loading ? (
             <p className="text-neutral-500">Cargando productos...</p>
           ) : (
-            <div className="overflow-x-auto rounded-2xl border border-neutral-800">
+            <div className={adminUi.tableWrap}>
               <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="border-b border-neutral-800 bg-neutral-900/80 text-xs uppercase tracking-wide text-neutral-400">
+                <thead className={adminUi.tableHead}>
                   <tr>
                     <th className="px-4 py-3">Producto</th>
                     <th className="px-4 py-3">Tipo</th>
@@ -293,7 +294,7 @@ export function AdminStorePanel() {
                     <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-800/80">
+                <tbody className="divide-y divide-neutral-100">
                   {products.map((p) => (
                     <tr key={p.id} className="text-neutral-200">
                       <td className="px-4 py-3 font-medium">{p.name}</td>
@@ -309,7 +310,7 @@ export function AdminStorePanel() {
                           className={`rounded px-2 py-0.5 text-xs ${
                             p.is_active
                               ? "bg-green-900/50 text-green-300"
-                              : "bg-neutral-800 text-neutral-400"
+                              : "bg-neutral-100 text-neutral-600"
                           }`}
                         >
                           {p.is_active ? "activo" : "oculto"}
@@ -320,14 +321,14 @@ export function AdminStorePanel() {
                           <button
                             type="button"
                             onClick={() => startEdit(p)}
-                            className="rounded-lg border border-neutral-700 px-2 py-1 text-xs text-violet-300 hover:bg-neutral-800"
+                            className={adminUi.editBtn}
                           >
                             Editar
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(p.id)}
-                            className="rounded-lg border border-neutral-700 px-2 py-1 text-xs text-red-400 hover:bg-neutral-800"
+                            className="rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100"
                           >
                             <Trash2 className="h-3 w-3" />
                           </button>
@@ -353,11 +354,11 @@ export function AdminStorePanel() {
               {orders.map((order) => (
                 <article
                   key={order.id}
-                  className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5"
+                  className="rounded-2xl border border-violet-100 bg-white p-5 shadow-md"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="font-bold text-white">
+                      <p className="font-bold text-neutral-900">
                         {order.customer_name}
                         <span className="ml-2 font-mono text-xs font-normal text-neutral-500">
                           #{order.id.slice(0, 8)}
@@ -374,7 +375,7 @@ export function AdminStorePanel() {
                     <select
                       value={order.status}
                       onChange={(e) => handleOrderStatus(order.id, e.target.value)}
-                      className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-1.5 text-sm text-white"
+                      className={`rounded-lg ${adminUi.inputPlain}`}
                     >
                       {STORE_ORDER_STATUSES.map((s) => (
                         <option key={s.value} value={s.value}>

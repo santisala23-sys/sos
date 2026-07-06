@@ -19,6 +19,7 @@ import type {
 import { formatDateTime } from "@/lib/utils/format";
 import { getPublicProfileUrl, getSosOnlyUrl } from "@/lib/utils/slug";
 import { getGoogleMapsUrl } from "@/lib/alerts/send-alert";
+import { adminUi } from "@/components/admin/adminUi";
 import { Button } from "@/components/ui/Button";
 
 export type AdminDetailTarget =
@@ -49,8 +50,7 @@ function Field({
   );
 }
 
-const inputClass =
-  "rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-white focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500";
+const inputClass = adminUi.inputPlain;
 
 export function AdminDetailPanel({
   target,
@@ -246,37 +246,37 @@ export function AdminDetailPanel({
     <div className="fixed inset-0 z-50 flex justify-end">
       <button
         type="button"
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className={adminUi.panelOverlay}
         onClick={onClose}
         aria-label="Cerrar panel"
       />
-      <aside className="relative flex h-full w-full max-w-lg flex-col border-l border-neutral-800 bg-neutral-950 shadow-2xl">
-        <header className="flex items-center justify-between border-b border-neutral-800 px-5 py-4">
+      <aside className={adminUi.panelAside}>
+        <header className={adminUi.panelHeader}>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-violet-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-violet-600">
               Troubleshoot
             </p>
-            <h2 className="text-lg font-bold text-white">{title}</h2>
+            <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+            className="rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
           >
             <X className="h-5 w-5" />
           </button>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-5 py-5">
+        <div className={adminUi.panelBody}>
           {loading && (
-            <div className="flex items-center justify-center gap-2 py-12 text-neutral-400">
+            <div className="flex items-center justify-center gap-2 py-12 text-neutral-500">
               <Loader2 className="h-5 w-5 animate-spin" />
               Cargando...
             </div>
           )}
 
           {error && (
-            <p className="mb-4 rounded-lg bg-red-950/60 px-4 py-3 text-sm text-red-300" role="alert">
+            <p className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
               {error}
             </p>
           )}
@@ -288,7 +288,7 @@ export function AdminDetailPanel({
 
           {!loading && target.type === "user" && user && (
             <div className="space-y-5">
-              <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4 text-sm">
+              <div className={adminUi.panelSection}>
                 <p className="font-mono text-violet-300">{user.email}</p>
                 <p className="mt-1 text-neutral-500">
                   ID: <span className="font-mono">{user.id}</span>
@@ -314,7 +314,7 @@ export function AdminDetailPanel({
                 />
               </Field>
 
-              <label className="flex items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-3">
+              <label className="flex items-center gap-3 rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-3">
                 <input
                   type="checkbox"
                   checked={userForm.is_admin}
@@ -339,7 +339,7 @@ export function AdminDetailPanel({
                     {userProfiles.map((p) => (
                       <li
                         key={p.id}
-                        className="flex items-center justify-between rounded-lg bg-neutral-900 px-3 py-2 text-sm"
+                        className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-sm shadow-sm"
                       >
                         <span>{p.beneficiary_name}</span>
                         <a
@@ -381,7 +381,7 @@ export function AdminDetailPanel({
                 </a>
               </div>
 
-              <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4 text-xs text-neutral-500">
+              <div className="rounded-xl border border-neutral-100 bg-neutral-50 p-4 text-xs text-neutral-600">
                 <p>Tutor: {profile.tutor_email}</p>
                 <p className="mt-1 font-mono">ID: {profile.id}</p>
                 <p className="mt-1">Slug: /p/{profile.slug}</p>
@@ -470,7 +470,7 @@ export function AdminDetailPanel({
                   variant="secondary"
                   disabled={actionLoading === "toggle"}
                   onClick={toggleProfileActive}
-                  className="border-neutral-700 bg-neutral-800 text-white hover:bg-neutral-700"
+                  className="border-violet-200 bg-violet-50 text-violet-900 hover:bg-violet-100"
                 >
                   {profile.is_active ? "Desactivar" : "Activar"}
                 </Button>
@@ -494,14 +494,14 @@ export function AdminDetailPanel({
                 className={`rounded-xl border px-4 py-3 text-sm font-bold uppercase ${
                   scan.alert_type === "sos"
                     ? "border-red-800 bg-red-950/60 text-red-300"
-                    : "border-neutral-700 bg-neutral-900 text-neutral-300"
+                    : "border-neutral-200 bg-neutral-50 text-neutral-700"
                 }`}
               >
                 {scan.alert_type === "sos" ? "🆘 Alerta SOS" : "📱 Escaneo QR"}
               </div>
 
-              <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4 text-sm text-neutral-300">
-                <p className="font-semibold text-white">{scan.beneficiary_name}</p>
+              <div className="rounded-xl border border-neutral-100 bg-neutral-50 p-4 text-sm text-neutral-700">
+                <p className="font-semibold text-neutral-900">{scan.beneficiary_name}</p>
                 <p className="mt-1 text-neutral-500">Tutor: {scan.tutor_email}</p>
                 <p className="mt-1 text-neutral-500">
                   {formatDateTime(scan.scanned_at)}
@@ -530,7 +530,7 @@ export function AdminDetailPanel({
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 rounded-lg bg-neutral-900 px-4 py-3 text-sm text-violet-300 hover:bg-neutral-800"
+                  className="flex items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm text-violet-700 shadow-sm hover:bg-violet-50"
                 >
                   <MapPin className="h-4 w-4" />
                   Ver en Google Maps ({Number(scan.latitude).toFixed(5)},{" "}
@@ -557,7 +557,7 @@ export function AdminDetailPanel({
                   variant="secondary"
                   disabled={actionLoading === "read"}
                   onClick={toggleScanRead}
-                  className="border-neutral-700 bg-neutral-800 text-white"
+                  className="border-violet-200 bg-violet-50 text-violet-900"
                 >
                   {scan.read_at ? "Marcar no leído" : "Marcar leído"}
                 </Button>
@@ -565,7 +565,7 @@ export function AdminDetailPanel({
                   href={`/dashboard/logs/${scan.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded-xl border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+                  className="inline-flex items-center gap-1 rounded-xl border border-neutral-200 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
                 >
                   <ExternalLink className="h-4 w-4" />
                   Vista tutor
@@ -573,7 +573,7 @@ export function AdminDetailPanel({
                 <button
                   type="button"
                   onClick={load}
-                  className="inline-flex items-center gap-1 rounded-xl border border-neutral-700 px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-800"
+                  className="inline-flex items-center gap-1 rounded-xl border border-neutral-200 px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
                 >
                   <RefreshCw className="h-4 w-4" />
                   Refrescar
@@ -581,7 +581,7 @@ export function AdminDetailPanel({
               </div>
 
               {scan.scanner_note && (
-                <div className="rounded-lg bg-neutral-900 px-4 py-3 text-sm">
+                <div className="rounded-lg bg-white px-4 py-3 text-sm shadow-sm">
                   <p className="text-xs text-neutral-500">Nota del escaneo</p>
                   <p className="mt-1 text-neutral-200">{scan.scanner_note}</p>
                 </div>
@@ -601,7 +601,7 @@ export function AdminDetailPanel({
                         className={`rounded-lg px-3 py-2 text-sm ${
                           msg.sender === "tutor"
                             ? "bg-violet-950/60 text-violet-100"
-                            : "bg-neutral-900 text-neutral-200"
+                            : "bg-neutral-100 text-neutral-800"
                         }`}
                       >
                         <span className="text-[10px] uppercase text-neutral-500">
