@@ -1,13 +1,25 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertTriangle, Droplet, FileDown, MapPin } from "lucide-react";
+import Link from "next/link";
+import {
+  AlertTriangle,
+  Droplet,
+  FileDown,
+  HeartPulse,
+  MapPin,
+  MessageCircle,
+  Phone,
+} from "lucide-react";
 import type { PublicQrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
 import { LocationPrompt } from "@/components/public/LocationPrompt";
+import { PublicThemeToggle } from "@/components/public/PublicThemeToggle";
+import { publicThemeStyles } from "@/components/public/publicThemeStyles";
 import { ScannerPushPrompt } from "@/components/public/ScannerPushPrompt";
 import { ScanMessageThread } from "@/components/shared/ScanMessageThread";
+import { usePublicTheme } from "@/components/public/usePublicTheme";
 import { getProfileTypeConfig } from "@/lib/profile-types";
 import {
   clearStoredScanSession,
@@ -41,6 +53,9 @@ async function requestGeolocation(): Promise<{
 }
 
 export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
+  const { isLight, toggle, mounted } = usePublicTheme();
+  const t = publicThemeStyles(isLight);
+
   const scanTriggered = useRef(false);
   const scanTokenRef = useRef<string | null>(null);
   const scanLogIdRef = useRef<string | null>(null);
@@ -262,30 +277,46 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
     URL.revokeObjectURL(url);
   }
 
+  if (!mounted) {
+    return <div className="min-h-dvh bg-neutral-950" />;
+  }
+
   return (
-    <div className="relative mx-auto max-w-lg bg-black text-white">
-      <header className="border-b-4 border-red-600 bg-red-700 px-4 py-6 text-center">
-        <p className="text-sm font-bold uppercase tracking-widest text-red-100">
+    <div className={t.page}>
+      <div
+        className={`pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b ${
+          isLight
+            ? "from-violet-200/50 via-indigo-100/30 to-transparent"
+            : "from-violet-950/60 via-indigo-950/20 to-transparent"
+        }`}
+        aria-hidden
+      />
+
+      <header className={t.headerAssistance}>
+        <PublicThemeToggle
+          isLight={isLight}
+          onToggle={toggle}
+          className="absolute right-4 top-4 z-10"
+        />
+        <p className={t.badge}>
+          <HeartPulse className="h-3.5 w-3.5" aria-hidden />
           {typeConfig.publicHeader}
         </p>
-        <h1 className="mt-2 text-4xl font-black leading-tight sm:text-5xl">
+        <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-4xl">
           {profile.beneficiary_name}
         </h1>
       </header>
 
-      <aside className="border-b border-neutral-800 bg-neutral-900/90 px-4 py-3 text-center text-xs leading-relaxed text-neutral-300">
+      <aside className={t.strip}>
         Al abrir este QR se notifica al tutor. En emergencia grave llamá al{" "}
-        <strong className="text-white">911</strong>.{" "}
-        <a
-          href="/aviso-escaneadores-publicos"
-          className="font-medium text-violet-300 underline underline-offset-2 hover:text-violet-200"
-        >
+        <strong className={t.stripStrong}>911</strong>.{" "}
+        <Link href="/aviso-escaneadores-publicos" className={t.stripLink}>
           Qué datos se registran
-        </a>
+        </Link>
       </aside>
 
       {sessionRestored && locationResolved && (
-        <p className="bg-violet-950 px-4 py-2 text-center text-sm font-medium text-violet-100">
+        <p className={t.statusViolet}>
           Retomaste la conversación anterior en este dispositivo.
         </p>
       )}
@@ -302,138 +333,166 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           }
           onShare={handleShareLocation}
           onSkip={handleSkipLocation}
+          isLight={isLight}
         />
       )}
 
       {geoPhase === "skipped" && (
-        <p className="bg-amber-950 px-4 py-2 text-center text-sm font-medium text-amber-100">
-          Continuaste sin compartir ubicación. Los contactos de emergencia están disponibles.
+        <p className={t.skippedBanner}>
+          Continuaste sin compartir ubicación. Los contactos de emergencia están
+          disponibles.
         </p>
       )}
 
       {geoPhase === "granted" && (
-        <p className="flex items-center justify-center gap-2 bg-green-900 px-4 py-2 text-center text-sm font-medium text-green-100">
+        <p className={t.grantedBanner}>
           <MapPin className="h-4 w-4 shrink-0" aria-hidden />
           Ubicación compartida con la familia
         </p>
       )}
 
-      {sessionReady && locationResolved && scanLogId && scanToken && (
-        <div className="px-4 pt-4">
-          <ScannerPushPrompt scanToken={scanToken} scanLogId={scanLogId} dark />
-        </div>
-      )}
-
-      <main className="flex flex-col gap-6 px-4 py-6 pb-[calc(8.5rem+env(safe-area-inset-bottom))]">
-        {!sessionReady && (
-          <p className="py-8 text-center text-sm text-neutral-400">
-            Cargando...
-          </p>
-        )}
+      <main className="relative space-y-5 px-4 py-5 pb-[calc(10.5rem+env(safe-area-inset-bottom))]">
+        {!sessionReady && <p className={t.loading}>Cargando...</p>}
 
         {sessionReady && locationResolved && (
-          <ContactActions
-            profile={profile}
-            alertType="scan"
-            latitude={coords?.latitude}
-            longitude={coords?.longitude}
-            scanLogId={scanLogId}
-          />
-        )}
-
-        {locationResolved && scanLogId && scanToken && (
-          <ScanMessageThread
-            scanLogId={scanLogId}
-            scanToken={scanToken}
-            mode="public"
-            dark
-          />
-        )}
-
-        {locationResolved && typeConfig.showAllergies && profile.allergies?.trim() && (
-          <section aria-labelledby="allergies-heading">
-            <h2
-              id="allergies-heading"
-              className="mb-3 text-lg font-bold uppercase tracking-wide text-red-400"
-            >
-              ⚠️ {typeConfig.allergiesLabel}
-            </h2>
-            <div className="rounded-xl border-2 border-red-500 bg-red-950 px-5 py-4 text-lg font-semibold leading-relaxed text-red-50">
-              {profile.allergies}
-            </div>
-          </section>
-        )}
-
-        {locationResolved && (
-          <section aria-labelledby="instructions-heading">
-            <h2
-              id="instructions-heading"
-              className="mb-3 text-lg font-bold uppercase tracking-wide text-yellow-400"
-            >
-              {typeConfig.instructionsLabel}
-            </h2>
-            <div className="rounded-xl border-2 border-yellow-500 bg-yellow-950 px-5 py-4 text-lg leading-relaxed text-yellow-50">
-              {profile.instructions}
-            </div>
-          </section>
-        )}
-
-        {locationResolved && typeConfig.showMedicalNotes && profile.medical_notes?.trim() && (
-          <section aria-labelledby="medical-heading">
-            <h2
-              id="medical-heading"
-              className="mb-2 text-base font-bold uppercase tracking-wide text-neutral-400"
-            >
-              {typeConfig.medicalNotesLabel}
-            </h2>
-            <p className="rounded-lg bg-neutral-900 px-4 py-3 text-base text-neutral-200">
-              {profile.medical_notes}
-            </p>
-          </section>
-        )}
-
-        {locationResolved && hasClinicalPdf && scanToken && (
-          <section aria-labelledby="clinical-pdf-heading">
-            <h2
-              id="clinical-pdf-heading"
-              className="mb-2 text-base font-bold uppercase tracking-wide text-neutral-400"
-            >
-              Historial clínico
-            </h2>
-            <button
-              type="button"
-              onClick={downloadClinicalPdf}
-              className="flex min-h-[56px] w-full items-center justify-center gap-3 rounded-xl border-2 border-violet-500 bg-violet-950 px-4 py-4 text-base font-bold text-violet-100 active:scale-[0.98]"
-            >
-              <FileDown className="h-6 w-6 shrink-0" aria-hidden />
-              Descargar PDF — {profile.clinical_pdf_filename}
-            </button>
-          </section>
-        )}
-
-        {locationResolved &&
-          typeConfig.showBloodType &&
-          profile.blood_type?.trim() && (
-            <section aria-labelledby="blood-type-heading">
-              <h2
-                id="blood-type-heading"
-                className="mb-3 text-lg font-bold uppercase tracking-wide text-violet-300"
-              >
-                Tipo de sangre
-              </h2>
-              <div className="flex items-center gap-4 rounded-xl border-2 border-violet-500 bg-violet-950 px-5 py-4">
-                <Droplet className="h-8 w-8 shrink-0 text-violet-300" aria-hidden />
-                <p className="text-3xl font-black tracking-wide text-white sm:text-4xl">
-                  {profile.blood_type}
-                </p>
+          <>
+            <section aria-labelledby="contacts-heading" className={t.card}>
+              <div className={t.cardHeader}>
+                <div className="flex items-center gap-2">
+                  <span className={t.iconWrapGreen}>
+                    <Phone className="h-4 w-4" aria-hidden />
+                  </span>
+                  <div>
+                    <h2 id="contacts-heading" className={t.cardTitle}>
+                      Contactos de emergencia
+                    </h2>
+                    <p className={t.cardSubtitle}>
+                      Llamá o escribí por WhatsApp a la familia
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4">
+                <ContactActions
+                  profile={profile}
+                  alertType="scan"
+                  latitude={coords?.latitude}
+                  longitude={coords?.longitude}
+                  scanLogId={scanLogId}
+                  variant="emergency"
+                  isLight={isLight}
+                />
               </div>
             </section>
-          )}
+
+            {scanLogId && scanToken && (
+              <section aria-labelledby="chat-heading" className={t.card}>
+                <div className={t.cardHeader}>
+                  <div className="flex items-center gap-2">
+                    <span className={t.iconWrapViolet}>
+                      <MessageCircle className="h-4 w-4" aria-hidden />
+                    </span>
+                    <div>
+                      <h2 id="chat-heading" className={t.cardTitle}>
+                        Mensaje a la familia
+                      </h2>
+                      <p className={t.cardSubtitle}>
+                        Coordiná la asistencia en tiempo real
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <ScannerPushPrompt
+                    scanToken={scanToken}
+                    scanLogId={scanLogId}
+                    dark={!isLight}
+                  />
+                  <div className="mt-4">
+                    <ScanMessageThread
+                      scanLogId={scanLogId}
+                      scanToken={scanToken}
+                      mode="public"
+                      dark={!isLight}
+                    />
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {typeConfig.showAllergies && profile.allergies?.trim() && (
+              <section aria-labelledby="allergies-heading" className={t.card}>
+                <div className="p-5">
+                  <h2 id="allergies-heading" className={t.sectionHeadingRed}>
+                    ⚠️ {typeConfig.allergiesLabel}
+                  </h2>
+                  <div className={t.infoAllergies}>{profile.allergies}</div>
+                </div>
+              </section>
+            )}
+
+            <section aria-labelledby="instructions-heading" className={t.card}>
+              <div className="p-5">
+                <h2 id="instructions-heading" className={t.sectionHeadingYellow}>
+                  {typeConfig.instructionsLabel}
+                </h2>
+                <div className={t.infoInstructions}>{profile.instructions}</div>
+              </div>
+            </section>
+
+            {typeConfig.showMedicalNotes && profile.medical_notes?.trim() && (
+              <section aria-labelledby="medical-heading" className={t.card}>
+                <div className="p-5">
+                  <h2 id="medical-heading" className={t.sectionHeadingMuted}>
+                    {typeConfig.medicalNotesLabel}
+                  </h2>
+                  <p className={t.infoMedical}>{profile.medical_notes}</p>
+                </div>
+              </section>
+            )}
+
+            {typeConfig.showBloodType && profile.blood_type?.trim() && (
+              <section aria-labelledby="blood-type-heading" className={t.card}>
+                <div className="p-5">
+                  <h2 id="blood-type-heading" className={t.sectionHeadingViolet}>
+                    Tipo de sangre
+                  </h2>
+                  <div className={t.infoBlood}>
+                    <Droplet className={t.bloodIcon} aria-hidden />
+                    <p className={t.bloodType}>{profile.blood_type}</p>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {hasClinicalPdf && scanToken && (
+              <section aria-labelledby="clinical-pdf-heading" className={t.card}>
+                <div className="p-5">
+                  <h2 id="clinical-pdf-heading" className={t.sectionHeadingMuted}>
+                    Historial clínico
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={downloadClinicalPdf}
+                    className={t.pdfButton}
+                  >
+                    <FileDown className="h-6 w-6 shrink-0" aria-hidden />
+                    Descargar PDF — {profile.clinical_pdf_filename}
+                  </button>
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
+        <p className={t.footerBrand}>{typeConfig.publicHeader} · SOSme</p>
       </main>
 
-      <footer className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-lg border-t-2 border-red-800 bg-neutral-950 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <p className="mb-3 text-center text-xs text-red-200/90">
-          En emergencia grave, llamá al <strong>911</strong> además de usar este botón.
+      <footer className={t.footer}>
+        <p className={t.footerNote}>
+          En emergencia grave, llamá al{" "}
+          <strong className={t.footerNoteStrong}>911</strong> además de usar este
+          botón.
         </p>
         <Button
           type="button"
@@ -441,7 +500,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           size="xl"
           disabled={sosLoading || sosSent}
           onClick={handleSos}
-          className="w-full gap-3 py-6 text-2xl"
+          className="w-full gap-3 py-6 text-2xl shadow-2xl shadow-red-900/50"
         >
           <AlertTriangle className="h-8 w-8" aria-hidden />
           {sosSent

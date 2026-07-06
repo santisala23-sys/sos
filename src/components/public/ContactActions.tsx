@@ -6,6 +6,7 @@ import {
   buildWhatsAppUrl,
 } from "@/lib/utils/whatsapp";
 import { Phone } from "lucide-react";
+import { cn } from "@/lib/utils/cn";
 
 type ContactActionsProps = {
   profile: PublicQrProfile;
@@ -16,6 +17,7 @@ type ContactActionsProps = {
   scanLogId?: string | null;
   compact?: boolean;
   variant?: "default" | "emergency";
+  isLight?: boolean;
 };
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -38,6 +40,7 @@ type ContactRowProps = {
   label?: string;
   compact?: boolean;
   emergency?: boolean;
+  isLight?: boolean;
 };
 
 function ContactRow({
@@ -47,20 +50,47 @@ function ContactRow({
   label,
   compact,
   emergency,
+  isLight = false,
 }: ContactRowProps) {
   const telHref = `tel:${phone.replace(/\s/g, "")}`;
   const waHref = buildWhatsAppUrl(phone, whatsAppMessage);
 
   if (emergency) {
     return (
-      <div className="rounded-2xl border border-neutral-700/80 bg-neutral-950/60 p-4">
+      <div
+        className={cn(
+          "rounded-2xl border p-4",
+          isLight
+            ? "border-neutral-200 bg-neutral-50 shadow-sm"
+            : "border-neutral-700/80 bg-neutral-950/60",
+        )}
+      >
         {label && (
-          <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+          <p
+            className={cn(
+              "text-[11px] font-bold uppercase tracking-wider",
+              isLight ? "text-neutral-500" : "text-neutral-500",
+            )}
+          >
             {label}
           </p>
         )}
-        <p className="mt-1 text-lg font-bold text-white">{name}</p>
-        <p className="mt-0.5 font-mono text-sm text-neutral-400">{phone}</p>
+        <p
+          className={cn(
+            "mt-1 text-lg font-bold",
+            isLight ? "text-neutral-900" : "text-white",
+          )}
+        >
+          {name}
+        </p>
+        <p
+          className={cn(
+            "mt-0.5 font-mono text-sm",
+            isLight ? "text-neutral-600" : "text-neutral-400",
+          )}
+        >
+          {phone}
+        </p>
         <div className="mt-4 grid grid-cols-2 gap-2.5">
           <a
             href={telHref}
@@ -157,6 +187,7 @@ export function ContactActions({
   scanLogId,
   compact = false,
   variant = "default",
+  isLight = false,
 }: ContactActionsProps) {
   const message = buildWhatsAppEmergencyMessage({
     beneficiaryName: profile.beneficiary_name,
@@ -191,6 +222,7 @@ export function ContactActions({
         label="Contacto principal"
         compact={compact && !isEmergency}
         emergency={isEmergency}
+        isLight={isLight}
       />
       {hasSecondary && (
         <ContactRow
@@ -200,6 +232,7 @@ export function ContactActions({
           label="Contacto secundario"
           compact={compact && !isEmergency}
           emergency={isEmergency}
+          isLight={isLight}
         />
       )}
     </div>

@@ -13,8 +13,11 @@ import {
 import type { PublicQrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
+import { PublicThemeToggle } from "@/components/public/PublicThemeToggle";
+import { publicThemeStyles } from "@/components/public/publicThemeStyles";
 import { ScannerPushPrompt } from "@/components/public/ScannerPushPrompt";
 import { ScanMessageThread } from "@/components/shared/ScanMessageThread";
+import { usePublicTheme } from "@/components/public/usePublicTheme";
 import { getProfileTypeConfig } from "@/lib/profile-types";
 import {
   clearStoredScanSession,
@@ -22,6 +25,7 @@ import {
   scannerAuthHeaders,
   storeScanSession,
 } from "@/lib/scan-session/storage";
+import { cn } from "@/lib/utils/cn";
 
 type SosOnlyViewProps = {
   profile: PublicQrProfile;
@@ -45,6 +49,9 @@ async function requestGeolocation() {
 }
 
 export function SosOnlyView({ profile }: SosOnlyViewProps) {
+  const { isLight, toggle, mounted } = usePublicTheme();
+  const t = publicThemeStyles(isLight);
+
   const [sosLoading, setSosLoading] = useState(false);
   const [sosSent, setSosSent] = useState(false);
   const [scanLogId, setScanLogId] = useState<string | null>(null);
@@ -153,33 +160,44 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
     }
   }
 
+  if (!mounted) {
+    return <div className="min-h-dvh bg-neutral-950" />;
+  }
+
   return (
-    <div className="relative mx-auto min-h-dvh max-w-lg bg-neutral-950 text-white">
+    <div className={t.page}>
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-red-950/80 via-red-950/30 to-transparent"
+        className={cn(
+          "pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b",
+          isLight
+            ? "from-red-200/50 via-rose-100/30 to-transparent"
+            : "from-red-950/80 via-red-950/30 to-transparent",
+        )}
         aria-hidden
       />
 
-      <header className="relative border-b border-red-900/50 bg-gradient-to-br from-red-700 via-red-800 to-red-950 px-5 pb-6 pt-8 text-center shadow-lg shadow-red-950/50">
-        <p className="inline-flex items-center gap-2 rounded-full border border-red-400/30 bg-red-950/40 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-red-100">
+      <header className={t.headerSos}>
+        <PublicThemeToggle
+          isLight={isLight}
+          onToggle={toggle}
+          className="absolute right-4 top-4 z-10"
+        />
+        <p className={t.badge}>
           <ShieldAlert className="h-3.5 w-3.5" aria-hidden />
           Modo SOS directo
         </p>
         <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-4xl">
           {profile.beneficiary_name}
         </h1>
-        <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-red-100/90">
+        <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed opacity-90">
           {subtitle}
         </p>
       </header>
 
-      <aside className="border-b border-neutral-800/80 bg-neutral-900/90 px-4 py-3 text-center text-xs leading-relaxed text-neutral-400">
+      <aside className={t.strip}>
         En emergencia grave llamá al{" "}
-        <strong className="text-white">911</strong> además de usar este botón.{" "}
-        <Link
-          href="/aviso-escaneadores-publicos"
-          className="font-medium text-violet-300 underline-offset-2 hover:text-violet-200 hover:underline"
-        >
+        <strong className={t.stripStrong}>911</strong> además de usar este botón.{" "}
+        <Link href="/aviso-escaneadores-publicos" className={t.stripLink}>
           Qué datos se registran
         </Link>
       </aside>
@@ -188,14 +206,17 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
         {(sosSent || sessionRestored || coords) && (
           <div className="flex flex-col gap-2">
             {sosSent && (
-              <div className="flex items-start gap-3 rounded-2xl border border-green-500/30 bg-green-950/50 px-4 py-3.5">
+              <div className={t.statusSuccess}>
                 <CheckCircle2
-                  className="mt-0.5 h-5 w-5 shrink-0 text-green-400"
+                  className={cn(
+                    "mt-0.5 h-5 w-5 shrink-0",
+                    isLight ? "text-green-600" : "text-green-400",
+                  )}
                   aria-hidden
                 />
                 <div>
-                  <p className="font-semibold text-green-100">Alerta enviada</p>
-                  <p className="mt-0.5 text-sm text-green-200/80">
+                  <p className={t.statusSuccessTitle}>Alerta enviada</p>
+                  <p className={t.statusSuccessText}>
                     La familia fue notificada. También podés llamar o escribir por
                     WhatsApp abajo.
                   </p>
@@ -204,43 +225,43 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
             )}
 
             {sessionRestored && !sosSent && (
-              <div className="rounded-2xl border border-violet-500/30 bg-violet-950/40 px-4 py-3 text-center text-sm text-violet-100">
+              <div className={t.statusViolet}>
                 Retomaste la conversación anterior en este dispositivo.
               </div>
             )}
 
             {coords && (
-              <p className="flex items-center justify-center gap-2 rounded-xl bg-neutral-900/80 px-3 py-2.5 text-xs font-medium text-neutral-400">
-                <MapPin className="h-3.5 w-3.5 text-green-400" aria-hidden />
+              <p className={t.statusLocation}>
+                <MapPin
+                  className={cn(
+                    "h-3.5 w-3.5",
+                    isLight ? "text-green-600" : "text-green-400",
+                  )}
+                  aria-hidden
+                />
                 Ubicación compartida con la familia
               </p>
             )}
           </div>
         )}
 
-        <section
-          aria-labelledby="sos-contacts-heading"
-          className="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/80 shadow-xl"
-        >
-          <div className="border-b border-neutral-800 bg-neutral-900 px-4 py-3.5">
+        <section aria-labelledby="sos-contacts-heading" className={t.card}>
+          <div className={t.cardHeader}>
             <div className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-600/20 text-green-400">
+              <span className={t.iconWrapGreen}>
                 <Phone className="h-4 w-4" aria-hidden />
               </span>
               <div>
-                <h2
-                  id="sos-contacts-heading"
-                  className="text-base font-bold text-white"
-                >
+                <h2 id="sos-contacts-heading" className={t.cardTitle}>
                   Contactar a la familia
                 </h2>
-                <p className="text-xs text-neutral-500">
+                <p className={t.cardSubtitle}>
                   Llamá o escribí por WhatsApp en cualquier momento
                 </p>
               </div>
             </div>
           </div>
-          <div className="space-y-5 p-4">
+          <div className="space-y-3 p-4">
             <ContactActions
               profile={profile}
               alertType="sos"
@@ -248,28 +269,23 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
               longitude={coords?.longitude}
               scanLogId={scanLogId}
               variant="emergency"
+              isLight={isLight}
             />
           </div>
         </section>
 
         {hasActiveSession ? (
-          <section
-            aria-labelledby="sos-chat-heading"
-            className="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/80 shadow-xl"
-          >
-            <div className="border-b border-neutral-800 bg-neutral-900 px-4 py-3.5">
+          <section aria-labelledby="sos-chat-heading" className={t.card}>
+            <div className={t.cardHeader}>
               <div className="flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-600/20 text-violet-300">
+                <span className={t.iconWrapViolet}>
                   <MessageCircle className="h-4 w-4" aria-hidden />
                 </span>
                 <div>
-                  <h2
-                    id="sos-chat-heading"
-                    className="text-base font-bold text-white"
-                  >
+                  <h2 id="sos-chat-heading" className={t.cardTitle}>
                     Mensaje a la familia
                   </h2>
-                  <p className="text-xs text-neutral-500">
+                  <p className={t.cardSubtitle}>
                     Escribí acá; ellos responden desde su panel SOSme
                   </p>
                 </div>
@@ -279,43 +295,45 @@ export function SosOnlyView({ profile }: SosOnlyViewProps) {
               <ScannerPushPrompt
                 scanToken={scanToken!}
                 scanLogId={scanLogId!}
-                dark
+                dark={!isLight}
               />
               <div className="mt-4">
                 <ScanMessageThread
                   scanLogId={scanLogId!}
                   scanToken={scanToken!}
                   mode="public"
-                  dark
+                  dark={!isLight}
                 />
               </div>
             </div>
           </section>
         ) : (
-          <section className="rounded-2xl border border-dashed border-neutral-700 bg-neutral-900/40 px-4 py-5 text-center">
+          <section className={t.placeholder}>
             <MessageCircle
-              className="mx-auto h-8 w-8 text-neutral-600"
+              className={cn(
+                "mx-auto h-8 w-8",
+                isLight ? "text-violet-300" : "text-neutral-600",
+              )}
               aria-hidden
             />
-            <p className="mt-2 text-sm font-medium text-neutral-400">
-              Chat con la familia
-            </p>
-            <p className="mt-1 text-xs leading-relaxed text-neutral-500">
+            <p className={t.placeholderTitle}>Chat con la familia</p>
+            <p className={t.placeholderText}>
               Después de tocar &quot;Necesito ayuda&quot; vas a poder enviar mensajes en
               vivo desde acá.
             </p>
           </section>
         )}
 
-        <p className="text-center text-[11px] leading-relaxed text-neutral-600">
+        <p className={t.footerBrand}>
           {typeConfig.publicHeader} · SOSme
         </p>
       </main>
 
-      <footer className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-lg border-t border-red-900/60 bg-neutral-950/95 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md">
-        <p className="mb-3 text-center text-xs text-red-200/80">
-          Mantené presionado mentalmente el <strong className="text-white">911</strong>{" "}
-          si la situación es grave.
+      <footer className={t.footer}>
+        <p className={t.footerNote}>
+          En emergencia grave, llamá al{" "}
+          <strong className={t.footerNoteStrong}>911</strong> además de usar este
+          botón.
         </p>
         <Button
           type="button"
