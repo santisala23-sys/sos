@@ -1,36 +1,62 @@
-import Image from "next/image";
 import Link from "next/link";
 import { LegalFooter } from "@/components/legal/LegalFooter";
+import { HeroVisual, PhoneMockup } from "@/components/marketing/LandingVisuals";
+import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import {
   ArrowRight,
+  Bell,
   Check,
+  Heart,
+  Luggage,
+  MapPin,
+  MessageCircle,
   Package,
+  PawPrint,
+  Phone,
   QrCode,
+  Shield,
+  Smartphone,
+  Zap,
 } from "lucide-react";
-import { BrandLogo } from "@/components/shared/BrandLogo";
 import { Button } from "@/components/ui/Button";
+
+const TRUST_PILLS = [
+  { icon: Smartphone, label: "Sin instalar apps" },
+  { icon: Bell, label: "Alerta al instante" },
+  { icon: MessageCircle, label: "WhatsApp directo" },
+  { icon: Shield, label: "Gratis para empezar" },
+] as const;
 
 const USE_CASES = [
   {
     title: "Personas",
-    description: "Contacto de emergencia, alergias e instrucciones si hace falta ayuda.",
-    accent: "from-rose-500/15 to-orange-500/10",
-    image: "/images/landing/use-case-personas.png",
-    imageAlt: "Tarjeta con código QR guardada en el bolsillo de una chaqueta",
+    description:
+      "Ideal para niños, adultos mayores o quien necesite un contacto de emergencia visible.",
+    detail: "Alergias, medicación e instrucciones si hace falta ayuda.",
+    icon: Heart,
+    accent: "from-rose-500 to-orange-500",
+    bg: "from-rose-50 to-orange-50",
+    border: "border-rose-200/80",
   },
   {
     title: "Mascotas",
-    description: "Collar o chapita con QR: quien la encuentre te llama al instante.",
-    accent: "from-amber-500/15 to-yellow-500/10",
-    image: "/images/landing/use-case-mascotas.png",
-    imageAlt: "Perro con collar y chapita que muestra un código QR",
+    description:
+      "Collar o chapita con QR: quien encuentra a tu mascota sabe cómo avisarte.",
+    detail: "Llamada o WhatsApp al dueño en segundos.",
+    icon: PawPrint,
+    accent: "from-amber-500 to-yellow-500",
+    bg: "from-amber-50 to-yellow-50",
+    border: "border-amber-200/80",
   },
   {
     title: "Objetos y valijas",
-    description: "Si alguien encuentra tu valija o notebook, sabe cómo avisarte.",
-    accent: "from-sky-500/15 to-indigo-500/10",
-    image: "/images/landing/use-case-valijas.png",
-    imageAlt: "Valija de viaje con un sticker de código QR en el aeropuerto",
+    description:
+      "Pegá un QR en tu valija, mochila o notebook para que te contacten si se pierde.",
+    detail: "Perfecto para viajes, colegio o el día a día.",
+    icon: Luggage,
+    accent: "from-sky-500 to-indigo-500",
+    bg: "from-sky-50 to-indigo-50",
+    border: "border-sky-200/80",
   },
 ] as const;
 
@@ -38,182 +64,253 @@ const HOW_IT_WORKS = [
   {
     step: "1",
     title: "Escanean el QR",
-    text: "Con la cámara del celular. Sin instalar ninguna app.",
-    image: "/images/landing/screenshots/scan-location.png",
-    imageAlt: "Celular escaneando un QR SOSme",
+    text: "Con la cámara del celular. No hace falta descargar nada.",
+    mockup: "scan" as const,
   },
   {
     step: "2",
     title: "Ven cómo contactarte",
-    text: "WhatsApp, llamada y ubicación en el mapa.",
-    image: "/images/landing/screenshots/public-profile.png",
-    imageAlt: "Perfil público con contactos de emergencia",
+    text: "WhatsApp, llamada y ubicación en el mapa, al instante.",
+    mockup: "contact" as const,
   },
   {
     step: "3",
     title: "Vos recibís la alerta",
-    text: "Notificación en el celular cuando alguien escanea.",
-    image: "/images/landing/screenshots/push-alert.png",
-    imageAlt: "Notificación push de alerta SOSme",
+    text: "Notificación push en tu celular cuando alguien escanea.",
+    mockup: "alert" as const,
   },
 ] as const;
 
 const INCLUDES = [
-  "Perfil online con tus datos de contacto",
-  "WhatsApp y llamada al instante",
-  "Ubicación cuando escanean (opcional)",
-  "Alerta en tu celular",
-  "Sin apps: funciona en el navegador",
-  "Sin cuotas mensuales",
+  { icon: QrCode, text: "Perfil online con tus datos de contacto" },
+  { icon: MessageCircle, text: "WhatsApp y llamada al instante" },
+  { icon: MapPin, text: "Ubicación cuando escanean (opcional)" },
+  { icon: Bell, text: "Alerta en tu celular al escanear" },
+  { icon: Smartphone, text: "Sin apps: funciona en el navegador" },
+  { icon: Zap, text: "Sin cuotas mensuales" },
 ] as const;
 
 export default function HomePage() {
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-[#faf9fc] text-neutral-900">
-      <div
-        className="pointer-events-none absolute inset-0 -z-10"
-        aria-hidden
-      >
-        <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-violet-200/50 blur-3xl" />
-        <div className="absolute right-0 top-1/4 h-80 w-80 rounded-full bg-indigo-200/40 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-rose-100/60 blur-3xl" />
+    <div className="relative min-h-dvh overflow-hidden bg-[#f8f6fc] text-neutral-900">
+      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
+        <div className="absolute -left-40 top-0 h-[28rem] w-[28rem] rounded-full bg-violet-300/30 blur-3xl" />
+        <div className="absolute right-0 top-1/3 h-96 w-96 rounded-full bg-indigo-200/40 blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 h-80 w-80 rounded-full bg-rose-200/30 blur-3xl" />
+        <div
+          className="absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 1px 1px, rgb(139 92 246 / 0.08) 1px, transparent 0)",
+            backgroundSize: "28px 28px",
+          }}
+        />
       </div>
 
-      <header className="sticky top-0 z-20 border-b border-white/60 bg-white/75 px-4 py-4 backdrop-blur-lg">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <BrandLogo size="md" />
-          <nav className="flex items-center gap-2 sm:gap-3">
-            <Link href="/tienda" className="hidden text-sm font-medium text-neutral-600 hover:text-violet-700 md:inline">
-              Tienda
-            </Link>
-            <Link href="/pricing" className="hidden text-sm font-medium text-neutral-600 hover:text-violet-700 sm:inline">
-              Planes
-            </Link>
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
-                Ingresar
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
-              >
-                Empezar gratis
-              </Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <MarketingNavbar />
 
       <main>
-        <section className="mx-auto max-w-6xl px-4 pb-16 pt-16 sm:pt-24">
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+        {/* Hero */}
+        <section className="mx-auto max-w-6xl px-4 pb-20 pt-10 sm:pt-16">
+          <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
             <div className="text-center lg:text-left">
-              <p className="inline-flex items-center gap-2 rounded-full border border-violet-200/80 bg-white/80 px-4 py-1.5 text-sm font-medium text-violet-800 shadow-sm backdrop-blur-sm">
-                <QrCode className="h-4 w-4" aria-hidden />
-                Sin instalar apps
+              <p className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white/90 px-4 py-1.5 text-sm font-semibold text-violet-800 shadow-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-violet-600" />
+                </span>
+                Sistema de contacto y emergencia por QR
               </p>
-              <h1 className="mt-6 text-4xl font-black leading-[1.1] tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
-                Escanean tu QR y{" "}
-                <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                  saben cómo ayudarte
+
+              <h1 className="mt-6 text-4xl font-black leading-[1.08] tracking-tight text-neutral-900 sm:text-5xl lg:text-[3.4rem]">
+                Si alguien encuentra lo que importa,{" "}
+                <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-700 bg-clip-text text-transparent">
+                  sabe cómo ayudarte
                 </span>
               </h1>
+
               <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-neutral-600 sm:text-xl lg:mx-0">
-                Para personas, mascotas o valijas. Quien encuentra el QR te contacta
-                al instante. Vos recibís la alerta en el celular.
+                <strong className="font-semibold text-neutral-800">SOSme</strong>{" "}
+                vincula un código QR a tu perfil de emergencia. Lo pegás en una
+                persona, mascota u objeto — y quien lo escanea puede contactarte
+                al instante mientras vos recibís la alerta.
               </p>
+
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-                <Link href="/tienda">
+                <Link href="/register">
                   <Button
                     size="lg"
                     className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 px-8 shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
                   >
-                    Ver productos
+                    Crear perfil gratis
                     <ArrowRight className="h-5 w-5" aria-hidden />
                   </Button>
                 </Link>
-                <Link href="/register">
-                  <Button variant="secondary" size="lg">
-                    Crear gratis e imprimir
+                <Link href="/tienda">
+                  <Button variant="secondary" size="lg" className="gap-2">
+                    <Package className="h-5 w-5" aria-hidden />
+                    Ver productos físicos
                   </Button>
                 </Link>
               </div>
             </div>
 
-            <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-              <div className="overflow-hidden rounded-3xl border border-white/80 bg-white/60 shadow-xl shadow-violet-500/15 backdrop-blur-sm">
-                <Image
-                  src="/images/landing/hero-scan.png"
-                  alt="Persona mostrando su tarjeta QR mientras alguien la escanea con el celular"
-                  width={1024}
-                  height={1024}
-                  priority
-                  className="h-auto w-full"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-              </div>
-            </div>
+            <HeroVisual />
           </div>
 
-          <div className="mx-auto mt-16 grid max-w-5xl gap-6 sm:grid-cols-3">
-            {USE_CASES.map(({ title, description, accent, image, imageAlt }) => (
-              <article
-                key={title}
-                className={`overflow-hidden rounded-2xl border border-white/80 bg-gradient-to-br ${accent} shadow-sm backdrop-blur-sm`}
+          <div className="mx-auto mt-16 grid max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {TRUST_PILLS.map(({ icon: Icon, label }) => (
+              <div
+                key={label}
+                className="flex items-center justify-center gap-2.5 rounded-2xl border border-white/80 bg-white/70 px-4 py-3 text-sm font-medium text-neutral-700 shadow-sm backdrop-blur-sm"
               >
-                <div className="relative aspect-square overflow-hidden bg-white/50">
-                  <Image
-                    src={image}
-                    alt={imageAlt}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 100vw, 33vw"
-                  />
-                </div>
-                <div className="p-5">
-                  <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
-                  <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-                    {description}
-                  </p>
-                </div>
-              </article>
+                <Icon className="h-4 w-4 shrink-0 text-violet-600" aria-hidden />
+                {label}
+              </div>
             ))}
           </div>
         </section>
 
-        <section className="border-y border-neutral-200/80 bg-white px-4 py-20">
+        {/* Qué es */}
+        <section
+          id="que-es"
+          className="scroll-mt-28 border-y border-violet-100/80 bg-white/60 px-4 py-20 backdrop-blur-sm"
+        >
           <div className="mx-auto max-w-6xl">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="text-sm font-semibold uppercase tracking-widest text-violet-600">
-                Cómo funciona
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-sm font-bold uppercase tracking-widest text-violet-600">
+                ¿Qué es SOSme?
               </p>
               <h2 className="mt-3 text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
-                Así de simple
+                Un QR que conecta a quien necesita ayuda con quien puede darla
               </h2>
-              <p className="mt-4 text-lg text-neutral-600">
-                Tres pasos. Sin instalar nada.
+              <p className="mt-5 text-lg leading-relaxed text-neutral-600">
+                Creás un perfil con tus datos de contacto. Ese perfil tiene un
+                código QR único. Lo imprimís, lo pegás en un collar, credencial
+                o valija — y listo. Cuando alguien lo escanea, ve cómo
+                contactarte y vos recibís una notificación al toque.
               </p>
             </div>
 
-            <ol className="mt-14 grid gap-10 sm:grid-cols-3">
-              {HOW_IT_WORKS.map(({ step, title, text, image, imageAlt }) => (
-                <li key={step} className="flex flex-col text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-violet-600 text-xl font-black text-white">
+            <div className="mt-14 grid gap-6 md:grid-cols-3">
+              {[
+                {
+                  step: "01",
+                  title: "Creás tu perfil",
+                  text: "Cargás contactos, instrucciones y lo que quieras que vean en una emergencia.",
+                  icon: QrCode,
+                },
+                {
+                  step: "02",
+                  title: "Pegás o llevás el QR",
+                  text: "En una chapita, collar, tarjeta o sticker. También podés imprimirlo vos gratis.",
+                  icon: Package,
+                },
+                {
+                  step: "03",
+                  title: "Te avisan al escanear",
+                  text: "La persona escanea, te contacta, y vos recibís alerta con ubicación opcional.",
+                  icon: Bell,
+                },
+              ].map(({ step, title, text, icon: Icon }) => (
+                <article
+                  key={step}
+                  className="relative overflow-hidden rounded-3xl border border-violet-100 bg-gradient-to-b from-white to-violet-50/40 p-7 shadow-sm"
+                >
+                  <span className="text-5xl font-black text-violet-100">
+                    {step}
+                  </span>
+                  <div className="mt-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20">
+                    <Icon className="h-6 w-6" aria-hidden />
+                  </div>
+                  <h3 className="mt-5 text-xl font-bold text-neutral-900">
+                    {title}
+                  </h3>
+                  <p className="mt-2 leading-relaxed text-neutral-600">{text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Casos de uso */}
+        <section id="casos" className="scroll-mt-28 mx-auto max-w-6xl px-4 py-20">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-sm font-bold uppercase tracking-widest text-violet-600">
+              Casos de uso
+            </p>
+            <h2 className="mt-3 text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
+              Para lo que más te importa
+            </h2>
+            <p className="mt-4 text-lg text-neutral-600">
+              Un mismo sistema, adaptado a personas, mascotas u objetos.
+            </p>
+          </div>
+
+          <div className="mt-14 grid gap-6 lg:grid-cols-3">
+            {USE_CASES.map(
+              ({ title, description, detail, icon: Icon, accent, bg, border }) => (
+                <article
+                  key={title}
+                  className={`group flex flex-col rounded-3xl border ${border} bg-gradient-to-br ${bg} p-7 shadow-sm transition-shadow hover:shadow-lg hover:shadow-violet-500/5`}
+                >
+                  <div
+                    className={`inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${accent} text-white shadow-lg`}
+                  >
+                    <Icon className="h-7 w-7" aria-hidden />
+                  </div>
+                  <h3 className="mt-6 text-2xl font-black text-neutral-900">
+                    {title}
+                  </h3>
+                  <p className="mt-3 flex-1 leading-relaxed text-neutral-700">
+                    {description}
+                  </p>
+                  <p className="mt-4 text-sm font-medium text-neutral-500">
+                    {detail}
+                  </p>
+                </article>
+              ),
+            )}
+          </div>
+        </section>
+
+        {/* Cómo funciona */}
+        <section
+          id="como-funciona"
+          className="scroll-mt-28 border-y border-neutral-200/60 bg-white px-4 py-20"
+        >
+          <div className="mx-auto max-w-6xl">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-sm font-bold uppercase tracking-widest text-violet-600">
+                Cómo funciona
+              </p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
+                Tres pasos, cero complicaciones
+              </h2>
+              <p className="mt-4 text-lg text-neutral-600">
+                Funciona con cualquier celular. Sin apps, sin registros para
+                quien escanea.
+              </p>
+            </div>
+
+            <ol className="mt-16 grid gap-12 lg:grid-cols-3 lg:gap-8">
+              {HOW_IT_WORKS.map(({ step, title, text, mockup }, index) => (
+                <li key={step} className="relative flex flex-col text-center">
+                  {index < HOW_IT_WORKS.length - 1 && (
+                    <div
+                      className="absolute left-[calc(50%+6rem)] top-16 hidden h-px w-[calc(100%-8rem)] bg-gradient-to-r from-violet-300 to-indigo-300 lg:block"
+                      aria-hidden
+                    />
+                  )}
+                  <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-lg font-black text-white shadow-lg shadow-violet-500/25">
                     {step}
                   </div>
-                  <h3 className="mt-4 text-xl font-bold text-neutral-900">{title}</h3>
-                  <p className="mt-2 text-neutral-600">{text}</p>
-                  <div className="mx-auto mt-6 w-full max-w-[220px] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-lg shadow-violet-500/10">
-                    <Image
-                      src={image}
-                      alt={imageAlt}
-                      width={390}
-                      height={844}
-                      className="h-auto w-full"
-                      sizes="220px"
-                    />
+                  <h3 className="mt-5 text-xl font-bold text-neutral-900">
+                    {title}
+                  </h3>
+                  <p className="mt-2 max-w-xs text-neutral-600">{text}</p>
+                  <div className="mt-8 flex justify-center">
+                    <PhoneMockup step={mockup} />
                   </div>
                 </li>
               ))}
@@ -221,104 +318,129 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-16">
-          <div className="grid items-center gap-10 rounded-3xl border border-neutral-200 bg-white p-8 shadow-sm lg:grid-cols-2 lg:p-12">
+        {/* Qué incluye */}
+        <section className="mx-auto max-w-6xl px-4 py-20">
+          <div className="overflow-hidden rounded-[2rem] border border-violet-100 bg-gradient-to-br from-white via-white to-violet-50/50 p-8 shadow-xl shadow-violet-500/5 lg:grid lg:grid-cols-2 lg:gap-12 lg:p-12">
             <div>
-              <h2 className="text-2xl font-black text-neutral-900 sm:text-3xl">
-                Qué incluye
-              </h2>
-              <p className="mt-3 text-neutral-600">
-                Todo lo que necesitás para que te encuentren y te avisen.
+              <p className="text-sm font-bold uppercase tracking-widest text-violet-600">
+                Todo incluido
               </p>
-              <ul className="mt-8 space-y-3">
-                {INCLUDES.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-neutral-800">
-                    <Check className="mt-0.5 h-5 w-5 shrink-0 text-violet-600" aria-hidden />
-                    <span>{item}</span>
+              <h2 className="mt-3 text-3xl font-black text-neutral-900">
+                Lo que necesitás para estar tranquilo
+              </h2>
+              <p className="mt-4 text-lg text-neutral-600">
+                Cada perfil SOSme incluye herramientas pensadas para emergencias
+                reales, no solo un QR estático.
+              </p>
+              <ul className="mt-8 grid gap-4 sm:grid-cols-2">
+                {INCLUDES.map(({ icon: Icon, text }) => (
+                  <li
+                    key={text}
+                    className="flex items-start gap-3 rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+                      <Icon className="h-4 w-4" aria-hidden />
+                    </span>
+                    <span className="pt-1 text-sm font-medium text-neutral-800">
+                      {text}
+                    </span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50">
-              <Image
-                src="/images/landing/screenshots/live-chat-map.png"
-                alt="Panel de SOSme con mapa y chat en vivo"
-                width={390}
-                height={844}
-                className="mx-auto h-auto w-full max-w-xs"
-                sizes="320px"
-              />
+
+            <div className="mt-10 flex items-center justify-center lg:mt-0">
+              <div className="relative w-full max-w-xs">
+                <div className="absolute -inset-4 rounded-full bg-violet-200/40 blur-2xl" />
+                <PhoneMockup step="contact" className="relative max-w-none" />
+                <div className="absolute -bottom-4 -right-2 w-[70%] rotate-3">
+                  <PhoneMockup step="alert" />
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
+        {/* Elegí cómo empezar */}
         <section className="mx-auto max-w-6xl px-4 py-8 pb-16">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-black tracking-tight text-neutral-900">
+            <h2 className="text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
               Elegí cómo empezar
             </h2>
-            <p className="mt-3 text-neutral-600">
-              Comprás el producto y lo activás una vez, o te creás la cuenta y lo imprimís vos.
+            <p className="mt-4 text-lg text-neutral-600">
+              Comprás un producto listo para usar, o creás tu perfil digital
+              gratis e imprimís el QR vos mismo.
             </p>
           </div>
-          <div className="mt-10 grid gap-6 lg:grid-cols-2">
-            <article className="flex flex-col rounded-3xl border-2 border-violet-300 bg-white p-8 shadow-lg shadow-violet-500/10">
-              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-800">
+
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+            <article className="relative flex flex-col overflow-hidden rounded-3xl border-2 border-violet-300 bg-white p-8 shadow-xl shadow-violet-500/10">
+              <div className="absolute right-0 top-0 h-32 w-32 rounded-bl-[4rem] bg-gradient-to-bl from-violet-100 to-transparent" />
+              <p className="relative inline-flex w-fit items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-violet-800">
                 <Package className="h-3.5 w-3.5" aria-hidden />
                 Producto físico
               </p>
-              <h3 className="mt-4 text-2xl font-black text-neutral-900">
+              <h3 className="relative mt-4 text-2xl font-black text-neutral-900">
                 Comprás y activás una vez
               </h3>
-              <ol className="mt-6 flex-1 space-y-3 text-neutral-700">
-                <li className="flex gap-3">
-                  <span className="font-black text-violet-600">1.</span>
-                  Pedís el collar, colgante o credencial
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-black text-violet-600">2.</span>
-                  Escaneás el QR una sola vez y te registrás
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-black text-violet-600">3.</span>
-                  Listo: queda vinculado a tu perfil
-                </li>
+              <p className="relative mt-2 text-neutral-600">
+                Ideal si querés collar, chapita o credencial listos para usar.
+              </p>
+              <ol className="relative mt-6 flex-1 space-y-4 text-neutral-700">
+                {[
+                  "Pedís el collar, colgante o credencial",
+                  "Escaneás el QR una sola vez y te registrás",
+                  "Listo: queda vinculado a tu perfil para siempre",
+                ].map((item, i) => (
+                  <li key={item} className="flex gap-3">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-600 text-sm font-bold text-white">
+                      {i + 1}
+                    </span>
+                    {item}
+                  </li>
+                ))}
               </ol>
-              <Link href="/tienda" className="mt-8 block">
+              <Link href="/tienda" className="relative mt-8 block">
                 <Button size="lg" className="w-full gap-2">
                   Ver tienda
                   <ArrowRight className="h-5 w-5" aria-hidden />
                 </Button>
               </Link>
-              <p className="mt-3 text-center text-sm text-neutral-500">
+              <p className="relative mt-3 text-center text-sm text-neutral-500">
                 ¿Ya lo tenés?{" "}
-                <Link href="/activar" className="font-medium text-violet-700 hover:underline">
+                <Link
+                  href="/activar"
+                  className="font-semibold text-violet-700 hover:underline"
+                >
                   Activar código
                 </Link>
               </p>
             </article>
 
             <article className="flex flex-col rounded-3xl border border-neutral-200 bg-white p-8 shadow-sm">
-              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-neutral-700">
+              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-neutral-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-neutral-700">
                 <QrCode className="h-3.5 w-3.5" aria-hidden />
                 Digital gratis
               </p>
               <h3 className="mt-4 text-2xl font-black text-neutral-900">
                 Creás la cuenta e imprimís
               </h3>
-              <ol className="mt-6 flex-1 space-y-3 text-neutral-700">
-                <li className="flex gap-3">
-                  <span className="font-black text-violet-600">1.</span>
-                  Te registrás gratis (1 perfil)
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-black text-violet-600">2.</span>
-                  Completás los datos de contacto
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-black text-violet-600">3.</span>
-                  Descargás PNG o imprimís PDF
-                </li>
+              <p className="mt-2 text-neutral-600">
+                Perfecto para probar o si preferís armar tu propio QR.
+              </p>
+              <ol className="mt-6 flex-1 space-y-4 text-neutral-700">
+                {[
+                  "Te registrás gratis (1 perfil incluido)",
+                  "Completás los datos de contacto",
+                  "Descargás PNG o imprimís PDF",
+                ].map((item, i) => (
+                  <li key={item} className="flex gap-3">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-sm font-bold text-neutral-700">
+                      {i + 1}
+                    </span>
+                    {item}
+                  </li>
+                ))}
               </ol>
               <Link href="/register" className="mt-8 block">
                 <Button variant="secondary" size="lg" className="w-full">
@@ -327,38 +449,52 @@ export default function HomePage() {
               </Link>
               <p className="mt-3 text-center text-sm text-neutral-500">
                 ¿Necesitás más de 1?{" "}
-                <Link href="/pricing" className="font-medium text-violet-700 hover:underline">
-                  Pedí más perfiles
+                <Link
+                  href="/pricing"
+                  className="font-semibold text-violet-700 hover:underline"
+                >
+                  Ver planes
                 </Link>
               </p>
             </article>
           </div>
         </section>
 
+        {/* CTA final */}
         <section className="mx-auto max-w-6xl px-4 pb-24">
-          <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-indigo-600 to-violet-700 px-6 py-14 text-center shadow-xl shadow-violet-500/30 sm:px-12">
-            <h2 className="text-3xl font-black text-white sm:text-4xl">
-              Empezá hoy
+          <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-violet-600 via-indigo-600 to-violet-800 px-6 py-16 text-center shadow-2xl shadow-violet-500/30 sm:px-12">
+            <div
+              className="pointer-events-none absolute inset-0 opacity-20"
+              aria-hidden
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+                backgroundSize: "24px 24px",
+              }}
+            />
+            <h2 className="relative text-3xl font-black text-white sm:text-4xl">
+              Protegé lo que más importa hoy
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-violet-100">
-              Comprá el producto o creá tu perfil gratis e imprimí el QR.
+            <p className="relative mx-auto mt-4 max-w-xl text-lg text-violet-100">
+              Creá tu perfil gratis en minutos o elegí un producto físico listo
+              para activar.
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/tienda" className="inline-block">
+            <div className="relative mt-8 flex flex-wrap justify-center gap-3">
+              <Link href="/register">
                 <Button
                   size="lg"
                   className="bg-white text-violet-700 shadow-lg hover:bg-violet-50"
                 >
-                  Ver productos
+                  Empezar gratis
                 </Button>
               </Link>
-              <Link href="/register" className="inline-block">
+              <Link href="/tienda">
                 <Button
                   size="lg"
                   variant="secondary"
                   className="border-white/30 bg-white/10 text-white hover:bg-white/20"
                 >
-                  Crear gratis e imprimir
+                  Ver productos
                 </Button>
               </Link>
             </div>
