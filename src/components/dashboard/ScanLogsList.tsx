@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, MessageSquare, AlertTriangle, QrCode } from "lucide-react";
+import { MapPin, MessageSquare, AlertTriangle, QrCode, ChevronRight } from "lucide-react";
 import type { ScanLogWithProfile } from "@/types/database";
 import { alertTypeLabel, formatDateTime } from "@/lib/utils/format";
+import { cn } from "@/lib/utils/cn";
 
 type ScanLogsListProps = {
   logs: ScanLogWithProfile[];
@@ -12,9 +13,17 @@ type ScanLogsListProps = {
 export function ScanLogsList({ logs }: ScanLogsListProps) {
   if (logs.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-neutral-300 px-6 py-10 text-center text-neutral-500">
-        Todavía no hubo escaneos. Cuando alguien lea el QR, aparecerá acá.
-      </p>
+      <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/40 px-6 py-14 text-center">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
+          <QrCode className="h-7 w-7" aria-hidden />
+        </span>
+        <p className="mt-4 font-semibold text-neutral-800">
+          Todavía no hubo escaneos
+        </p>
+        <p className="mt-1 text-sm text-neutral-500">
+          Cuando alguien lea tu QR, el evento aparecerá acá al instante.
+        </p>
+      </div>
     );
   }
 
@@ -23,62 +32,68 @@ export function ScanLogsList({ logs }: ScanLogsListProps) {
       {logs.map((log, index) => {
         const isUnread = !log.read_at;
         const hasNote = Boolean(log.scanner_note?.trim());
-        const isLatestUnread = isUnread && index === logs.findIndex((l) => !l.read_at);
+        const isLatestUnread =
+          isUnread && index === logs.findIndex((l) => !l.read_at);
+        const isSos = log.alert_type === "sos";
 
         return (
           <li key={log.id}>
             <Link
               href={`/dashboard/logs/${log.id}`}
-              className={`flex items-start gap-3 rounded-xl border p-4 transition-colors hover:bg-neutral-50 ${
+              className={cn(
+                "group flex items-start gap-4 rounded-2xl border p-4 transition-all duration-200 sm:p-5",
                 isLatestUnread
-                  ? "border-violet-400 bg-violet-50/60 shadow-md ring-2 ring-violet-300/60"
+                  ? "border-violet-400 bg-gradient-to-r from-violet-50 to-indigo-50 shadow-lg shadow-violet-500/15 ring-2 ring-violet-300/50"
                   : isUnread
-                    ? "border-red-300 bg-red-50/50"
-                    : "border-neutral-200 bg-white"
-              }`}
+                    ? "border-red-200 bg-red-50/60 hover:border-red-300 hover:shadow-md"
+                    : "border-neutral-200/80 bg-white hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-lg hover:shadow-violet-500/10",
+              )}
             >
               <span
-                className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-                  log.alert_type === "sos"
-                    ? "bg-red-600 text-white"
-                    : "bg-violet-100 text-violet-800"
-                }`}
+                className={cn(
+                  "mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm",
+                  isSos
+                    ? "bg-red-600 text-white shadow-red-500/30"
+                    : "bg-violet-100 text-violet-800",
+                )}
               >
-                {log.alert_type === "sos" ? (
-                  <AlertTriangle className="h-4 w-4" aria-hidden />
+                {isSos ? (
+                  <AlertTriangle className="h-5 w-5" aria-hidden />
                 ) : (
-                  <QrCode className="h-4 w-4" aria-hidden />
+                  <QrCode className="h-5 w-5" aria-hidden />
                 )}
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-semibold text-neutral-900">
-                    {log.beneficiary_name}
-                  </p>
+                  <p className="font-bold text-neutral-900">{log.beneficiary_name}</p>
                   {isUnread && (
-                    <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">
+                    <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
                       Nuevo
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-neutral-600">
+                <p className="mt-0.5 text-sm text-neutral-600">
                   {alertTypeLabel(log.alert_type)} · {formatDateTime(log.scanned_at)}
                 </p>
-                <div className="mt-1 flex flex-wrap gap-3 text-xs text-neutral-500">
+                <div className="mt-2 flex flex-wrap gap-2">
                   {log.latitude != null && log.longitude != null && (
-                    <span className="inline-flex items-center gap-1">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-600">
                       <MapPin className="h-3 w-3" aria-hidden />
                       Con ubicación
                     </span>
                   )}
                   {hasNote && (
-                    <span className="inline-flex items-center gap-1 text-amber-700">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800">
                       <MessageSquare className="h-3 w-3" aria-hidden />
                       Con nota
                     </span>
                   )}
                 </div>
               </div>
+              <ChevronRight
+                className="mt-2 h-5 w-5 shrink-0 text-neutral-300 transition-transform group-hover:translate-x-0.5 group-hover:text-violet-500"
+                aria-hidden
+              />
             </Link>
           </li>
         );

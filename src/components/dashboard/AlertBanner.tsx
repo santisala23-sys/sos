@@ -18,22 +18,28 @@ export function AlertBanner({ unreadCount, latestLogId }: AlertBannerProps) {
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 rounded-xl border-2 border-red-300 bg-red-50 px-4 py-4 text-red-900 transition-colors hover:bg-red-100"
+      className="group flex items-center gap-4 overflow-hidden rounded-2xl border-2 border-red-300/80 bg-gradient-to-r from-red-50 via-rose-50 to-red-50 p-5 shadow-lg shadow-red-500/15 transition-all hover:border-red-400 hover:shadow-xl hover:shadow-red-500/20"
     >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-600 text-white">
+      <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-600 text-white shadow-lg shadow-red-500/40">
         <Bell className="h-5 w-5" aria-hidden />
+        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-black text-red-600 shadow">
+          {unreadCount > 9 ? "9+" : unreadCount}
+        </span>
       </span>
       <div className="flex-1">
-        <p className="font-bold">
+        <p className="text-lg font-bold text-red-950">
           {unreadCount === 1
             ? "Tenés 1 alerta nueva"
             : `Tenés ${unreadCount} alertas nuevas`}
         </p>
-        <p className="text-sm text-red-800/80">
-          Escaneo, SOS o nota pendiente de revisar — tocá para ver
+        <p className="mt-0.5 text-sm text-red-800/90">
+          Escaneo, SOS o nota pendiente de revisar — tocá para ver el detalle
         </p>
       </div>
-      <ChevronRight className="h-5 w-5 shrink-0" aria-hidden />
+      <ChevronRight
+        className="h-5 w-5 shrink-0 text-red-400 transition-transform group-hover:translate-x-1"
+        aria-hidden
+      />
     </Link>
   );
 }

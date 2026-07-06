@@ -32,43 +32,52 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
   }
 
   return (
-    <article className="flex flex-col rounded-2xl border border-neutral-200 bg-white shadow-sm">
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-2">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-violet-100/80 bg-white shadow-lg shadow-violet-500/8 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/15">
+      <div className="h-1 bg-gradient-to-r from-violet-500 via-indigo-500 to-violet-600" />
+
+      <div className="p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="truncate text-lg font-bold text-neutral-900">
+            <h3 className="truncate text-lg font-bold text-neutral-900 sm:text-xl">
               {profile.beneficiary_name}
             </h3>
-            <span className="mt-1 inline-block rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">
-              {typeLabel}
-            </span>
-            {!profile.is_active && (
-              <span className="mt-1 inline-block rounded-full bg-neutral-200 px-2 py-0.5 text-xs font-medium text-neutral-600">
-                Inactivo
+            <div className="mt-2 flex flex-wrap gap-2">
+              <span className="inline-flex rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-800">
+                {typeLabel}
               </span>
-            )}
+              {!profile.is_active && (
+                <span className="inline-flex rounded-full bg-neutral-200 px-2.5 py-1 text-xs font-semibold text-neutral-600">
+                  Inactivo
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        <dl className="mt-3 space-y-1 text-sm text-neutral-600">
+        <dl className="mt-4 space-y-2 rounded-xl bg-neutral-50/80 px-4 py-3 text-sm text-neutral-600">
           <div>
             <dt className="sr-only">Contacto</dt>
-            <dd>
-              {profile.emergency_contact_name} · {profile.emergency_contact_phone}
+            <dd className="font-medium text-neutral-800">
+              {profile.emergency_contact_name}
             </dd>
+            <dd>{profile.emergency_contact_phone}</dd>
           </div>
           {profile.secondary_contact_name && profile.secondary_contact_phone && (
-            <div>
-              <dt className="text-xs text-neutral-400">Secundario</dt>
-              <dd>
+            <div className="border-t border-neutral-200/80 pt-2">
+              <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+                Secundario
+              </dt>
+              <dd className="mt-0.5">
                 {profile.secondary_contact_name} · {profile.secondary_contact_phone}
               </dd>
             </div>
           )}
-          <div className="text-xs text-neutral-400">/p/{profile.slug}</div>
+          <div className="border-t border-neutral-200/80 pt-2 font-mono text-xs text-violet-600">
+            /p/{profile.slug}
+          </div>
         </dl>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-5 flex flex-wrap gap-2">
           <Button
             type="button"
             variant="secondary"
@@ -77,7 +86,7 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
               setShowQr(!showQr);
               if (!showQr) setEditing(false);
             }}
-            className="gap-1"
+            className="gap-1.5 border-violet-100 bg-violet-50/50 hover:bg-violet-100"
           >
             <QrCode className="h-4 w-4" aria-hidden />
             {showQr ? "Ocultar QR" : "Ver QR"}
@@ -90,17 +99,17 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
               setEditing(!editing);
               if (!editing) setShowQr(false);
             }}
-            className="gap-1"
+            className="gap-1.5"
           >
             <Pencil className="h-4 w-4" aria-hidden />
-            Editar perfil
+            Editar
           </Button>
           <Button
             type="button"
             variant="danger"
             size="sm"
             onClick={handleDelete}
-            className="gap-1"
+            className="gap-1.5"
           >
             <Trash2 className="h-4 w-4" aria-hidden />
             Eliminar
@@ -109,7 +118,7 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
       </div>
 
       {showQr && (
-        <div className="border-t border-neutral-100 px-5 py-4">
+        <div className="border-t border-violet-100 bg-violet-50/30 px-5 py-5 sm:px-6">
           <QrCodeDisplay
             slug={profile.slug}
             beneficiaryName={profile.beneficiary_name}
@@ -118,7 +127,7 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
       )}
 
       {editing && (
-        <div className="border-t border-neutral-100 px-5 py-4">
+        <div className="border-t border-violet-100 bg-neutral-50/50 px-5 py-5 sm:px-6">
           <QrProfileForm
             profile={profile}
             onSuccess={() => {
@@ -130,8 +139,8 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
         </div>
       )}
 
-      <div className="mt-auto border-t border-amber-100 bg-amber-50/80 px-5 py-3">
-        <p className="flex items-center gap-1.5 text-xs font-semibold text-amber-900">
+      <div className="mt-auto border-t border-amber-100 bg-gradient-to-r from-amber-50 to-orange-50/80 px-5 py-4 sm:px-6">
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-amber-900">
           <Smartphone className="h-3.5 w-3.5 shrink-0" aria-hidden />
           Modo solo SOS
         </p>
@@ -139,7 +148,7 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
           href={sosOnlyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-1 block truncate text-xs text-violet-700 underline"
+          className="mt-1.5 block truncate text-sm font-medium text-violet-700 underline-offset-2 hover:underline"
         >
           {sosOnlyUrl}
         </a>

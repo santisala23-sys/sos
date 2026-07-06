@@ -155,12 +155,14 @@ export function PushNotificationAlert({ push }: PushProps) {
   if (!push.supported || push.checking || push.subscribed) return null;
 
   return (
-    <section className="rounded-xl border-2 border-violet-300 bg-violet-50 p-4 shadow-sm">
-      <div className="flex items-start gap-3">
-        <Bell className="mt-0.5 h-5 w-5 shrink-0 text-violet-700" aria-hidden />
+    <section className="overflow-hidden rounded-2xl border border-violet-200/80 bg-gradient-to-r from-violet-50 to-indigo-50/80 p-5 shadow-lg shadow-violet-500/10">
+      <div className="flex items-start gap-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-lg shadow-violet-500/30">
+          <Bell className="h-5 w-5" aria-hidden />
+        </span>
         <div className="flex-1">
-          <p className="font-bold text-violet-900">Activá las alertas push</p>
-          <p className="mt-1 text-sm text-violet-800/90">
+          <p className="font-bold text-violet-950">Activá las alertas push</p>
+          <p className="mt-1 text-sm leading-relaxed text-violet-800/90">
             Recibí avisos al instante cuando escaneen el QR, haya SOS o un mensaje
             nuevo. Solo tenés que hacerlo una vez en este dispositivo.
           </p>
@@ -169,7 +171,7 @@ export function PushNotificationAlert({ push }: PushProps) {
             size="sm"
             disabled={push.loading}
             onClick={push.subscribe}
-            className="mt-3 gap-1"
+            className="mt-4 gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 shadow-md hover:from-violet-700 hover:to-indigo-700"
           >
             <Bell className="h-4 w-4" aria-hidden />
             {push.loading ? "Activando..." : "Activar alertas push"}
@@ -189,7 +191,7 @@ export function PushNotificationFooter({ push }: PushProps) {
   if (!push.supported || push.checking || !push.subscribed) return null;
 
   return (
-    <section className="rounded-xl border border-green-200 bg-green-50/80 px-4 py-3">
+    <section className="rounded-2xl border border-green-200/80 bg-gradient-to-r from-green-50 to-emerald-50/80 px-5 py-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm text-green-900">
           <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600" aria-hidden />

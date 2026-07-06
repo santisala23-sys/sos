@@ -3,10 +3,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, LogOut, Shield, UserCircle2 } from "lucide-react";
+import {
+  Activity,
+  Bell,
+  CheckCircle2,
+  Plus,
+  QrCode,
+  Sparkles,
+  UserCircle2,
+} from "lucide-react";
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { ActivateCodeInput } from "@/components/dashboard/ActivateCodeInput";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBanner";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import {
@@ -16,7 +25,6 @@ import {
 } from "@/components/dashboard/PushNotificationSetup";
 import { ScanLogsList } from "@/components/dashboard/ScanLogsList";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
-import { BrandLogo } from "@/components/shared/BrandLogo";
 import { Button } from "@/components/ui/Button";
 
 export default function DashboardPage() {
@@ -28,7 +36,6 @@ export default function DashboardPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showActivateCode, setShowActivateCode] = useState(false);
   const [highlightedSlug, setHighlightedSlug] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [legalStatus, setLegalStatus] = useState<{
     needsAcceptance: boolean;
     currentVersion: string;
@@ -74,10 +81,6 @@ export default function DashboardPage() {
         setLegalStatus(null);
         setPlanStatus(null);
       });
-    fetch("/api/admin/me")
-      .then((r) => r.json())
-      .then((d) => setIsAdmin(Boolean(d.isAdmin)))
-      .catch(() => setIsAdmin(false));
     const interval = setInterval(loadData, 15000);
     return () => clearInterval(interval);
   }, [loadData]);
@@ -88,12 +91,6 @@ export default function DashboardPage() {
     if (activatedSlug) setHighlightedSlug(activatedSlug);
   }, []);
 
-  async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/");
-    router.refresh();
-  }
-
   const latestUnread = logs.find((l) => !l.read_at);
   const legalBlocked = legalStatus?.needsAcceptance ?? false;
   const atProfileLimit = planStatus != null && !planStatus.canCreateMore;
@@ -102,137 +99,185 @@ export default function DashboardPage() {
     : null;
 
   return (
-    <div className="min-h-dvh bg-[#faf9fc]">
-      <header className="border-b border-neutral-200 bg-white px-4 py-4">
-        <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <div>
-            <BrandLogo />
-            <p className="text-sm text-neutral-500">
-              Panel del tutor
-              {planStatus && (
-                <span className="text-neutral-400">
-                  {" "}
-                  · {planStatus.currentCount}/{planStatus.maxProfiles} QR
+    <main className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/90 bg-gradient-to-br from-violet-600 via-violet-700 to-indigo-800 p-6 text-white shadow-2xl shadow-violet-600/30 sm:p-8">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-20"
+          aria-hidden
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.35) 1px, transparent 0)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+        <div className="relative">
+          <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-sm font-semibold backdrop-blur-sm">
+            <Sparkles className="h-4 w-4" aria-hidden />
+            Tu espacio SOSme
+          </p>
+          <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
+            Hola, este es tu panel
+          </h1>
+          <p className="mt-2 max-w-xl text-base text-violet-100 sm:text-lg">
+            Gestioná perfiles QR, revisá escaneos y mantené tus contactos de
+            emergencia siempre actualizados.
+          </p>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-violet-200">
+                <QrCode className="h-4 w-4" aria-hidden />
+                <span className="text-xs font-semibold uppercase tracking-wide">
+                  Perfiles
                 </span>
-              )}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            {isAdmin && (
-              <Link
-                href="/admin"
-                className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-violet-700 hover:bg-violet-50"
-              >
-                <Shield className="h-4 w-4" aria-hidden />
-                Admin
-              </Link>
-            )}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="gap-1"
-            >
-              <LogOut className="h-4 w-4" aria-hidden />
-              Salir
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
-        {legalStatus?.needsAcceptance && (
-          <LegalAcceptanceBanner
-            currentVersion={legalStatus.currentVersion}
-            userVersion={legalStatus.userVersion}
-            onAccepted={() =>
-              setLegalStatus({
-                ...legalStatus,
-                needsAcceptance: false,
-                userVersion: legalStatus.currentVersion,
-              })
-            }
-          />
-        )}
-
-        {!loading && unreadCount > 0 && !legalBlocked && (
-          <AlertBanner unreadCount={unreadCount} latestLogId={latestUnread?.id} />
-        )}
-
-        <PushNotificationAlert push={push} />
-
-        {!loading && activatedProfile && !legalBlocked && (
-          <div className="flex items-start gap-3 rounded-2xl border border-green-200 bg-green-50 p-4">
-            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-600" aria-hidden />
-            <div>
-              <p className="font-semibold text-green-900">QR activado correctamente</p>
-              <p className="mt-1 text-sm text-green-800">
-                El perfil <strong>{activatedProfile.beneficiary_name}</strong> está listo.
-                Descargá el PNG con &quot;Ver QR&quot;.
+              </div>
+              <p className="mt-2 text-2xl font-black">
+                {loading ? "—" : profiles.length}
+                {planStatus && (
+                  <span className="text-lg font-semibold text-violet-200">
+                    /{planStatus.maxProfiles}
+                  </span>
+                )}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-violet-200">
+                <Bell className="h-4 w-4" aria-hidden />
+                <span className="text-xs font-semibold uppercase tracking-wide">
+                  Alertas nuevas
+                </span>
+              </div>
+              <p className="mt-2 text-2xl font-black">
+                {loading ? "—" : unreadCount}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-violet-200">
+                <Activity className="h-4 w-4" aria-hidden />
+                <span className="text-xs font-semibold uppercase tracking-wide">
+                  Plan
+                </span>
+              </div>
+              <p className="mt-2 text-lg font-bold leading-tight">
+                {planStatus?.planName ?? "—"}
               </p>
             </div>
           </div>
-        )}
+        </div>
+      </section>
 
-        <section id="perfiles" className={legalBlocked ? "pointer-events-none opacity-40" : undefined}>
-          <div className="mb-4 flex items-center gap-2">
-            <UserCircle2 className="h-5 w-5 text-neutral-500" aria-hidden />
-            <h2 className="text-xl font-bold text-neutral-900">Mis perfiles</h2>
+      {legalStatus?.needsAcceptance && (
+        <LegalAcceptanceBanner
+          currentVersion={legalStatus.currentVersion}
+          userVersion={legalStatus.userVersion}
+          onAccepted={() =>
+            setLegalStatus({
+              ...legalStatus,
+              needsAcceptance: false,
+              userVersion: legalStatus.currentVersion,
+            })
+          }
+        />
+      )}
+
+      {!loading && unreadCount > 0 && !legalBlocked && (
+        <AlertBanner unreadCount={unreadCount} latestLogId={latestUnread?.id} />
+      )}
+
+      <PushNotificationAlert push={push} />
+
+      {!loading && activatedProfile && !legalBlocked && (
+        <div className="flex items-start gap-4 rounded-2xl border border-green-200/80 bg-gradient-to-r from-green-50 to-emerald-50 p-5 shadow-lg shadow-green-500/10">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-600 text-white shadow-md">
+            <CheckCircle2 className="h-5 w-5" aria-hidden />
+          </span>
+          <div>
+            <p className="font-bold text-green-900">QR activado correctamente</p>
+            <p className="mt-1 text-sm leading-relaxed text-green-800">
+              El perfil <strong>{activatedProfile.beneficiary_name}</strong> está
+              listo. Descargá el PNG con &quot;Ver QR&quot;.
+            </p>
           </div>
+        </div>
+      )}
 
-          {loading ? (
-            <p className="text-neutral-500">Cargando...</p>
-          ) : profiles.length === 0 ? (
-            <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-neutral-900">Creá tu primer perfil QR</h3>
-              <p className="mt-1 text-sm text-neutral-600">
-                Plan gratis: 1 perfil para persona, mascota u objeto. ¿Necesitás más?{" "}
-                <Link href="/contacto" className="font-medium text-violet-700 hover:underline">
-                  Contactanos
-                </Link>
-                .
-              </p>
-              <div className="mt-6">
-                <QrProfileForm onSuccess={loadData} />
-              </div>
-              <details className="mt-6 rounded-xl border border-neutral-100 bg-neutral-50/80">
-                <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-neutral-700">
-                  ¿Tenés un código en un colgante o producto?
-                </summary>
-                <div className="border-t border-neutral-100 px-4 py-4">
-                  <ActivateCodeInput buttonLabel="Ir a activar" />
-                </div>
-              </details>
-            </section>
-          ) : (
-            <>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {profiles.map((profile) => (
-                  <ProfileCard
-                    key={profile.id}
-                    profile={profile}
-                    onRefresh={loadData}
-                    defaultShowQr={profile.slug === highlightedSlug}
-                  />
-                ))}
-              </div>
-
-              <details
-                className="mt-4 rounded-xl border border-neutral-200 bg-white"
-                open={showActivateCode}
-                onToggle={(e) => setShowActivateCode((e.target as HTMLDetailsElement).open)}
+      <DashboardSection
+        id="perfiles"
+        icon={UserCircle2}
+        title="Mis perfiles"
+        description="Cada perfil tiene su QR, contactos de emergencia y modo solo SOS."
+        disabled={legalBlocked}
+      >
+        {loading ? (
+          <div className="space-y-3">
+            <div className="h-32 animate-pulse rounded-2xl bg-violet-50" />
+            <div className="h-32 animate-pulse rounded-2xl bg-violet-50" />
+          </div>
+        ) : profiles.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/50 p-6 sm:p-8">
+            <h3 className="text-lg font-bold text-neutral-900">
+              Creá tu primer perfil QR
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+              Plan gratis: 1 perfil para persona, mascota u objeto. ¿Necesitás más?{" "}
+              <Link
+                href="/pricing"
+                className="font-semibold text-violet-700 underline-offset-2 hover:underline"
               >
-                <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-neutral-700">
+                Ver planes
+              </Link>{" "}
+              o{" "}
+              <Link
+                href="/contacto"
+                className="font-semibold text-violet-700 underline-offset-2 hover:underline"
+              >
+                contactanos
+              </Link>
+              .
+            </p>
+            <div className="mt-6 rounded-2xl border border-white/80 bg-white p-5 shadow-sm">
+              <QrProfileForm onSuccess={loadData} />
+            </div>
+            <details className="mt-6 overflow-hidden rounded-2xl border border-violet-100 bg-white">
+              <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-neutral-700 transition-colors hover:bg-violet-50/50">
+                ¿Tenés un código en un colgante o producto?
+              </summary>
+              <div className="border-t border-violet-100 px-5 py-5">
+                <ActivateCodeInput buttonLabel="Ir a activar" />
+              </div>
+            </details>
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-5 lg:grid-cols-2">
+              {profiles.map((profile) => (
+                <ProfileCard
+                  key={profile.id}
+                  profile={profile}
+                  onRefresh={loadData}
+                  defaultShowQr={profile.slug === highlightedSlug}
+                />
+              ))}
+            </div>
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <details
+                className="overflow-hidden rounded-2xl border border-violet-100 bg-violet-50/40 transition-colors open:bg-white"
+                open={showActivateCode}
+                onToggle={(e) =>
+                  setShowActivateCode((e.target as HTMLDetailsElement).open)
+                }
+              >
+                <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-neutral-800 transition-colors hover:bg-violet-50/80">
                   Activar código de colgante o producto
                 </summary>
-                <div className="border-t border-neutral-100 px-4 py-4">
+                <div className="border-t border-violet-100 px-5 py-5">
                   <ActivateCodeInput buttonLabel="Ir a activar" />
                 </div>
               </details>
 
               <details
-                className="mt-4 rounded-xl border border-neutral-200 bg-white"
+                className="overflow-hidden rounded-2xl border border-violet-100 bg-violet-50/40 transition-colors open:bg-white"
                 open={showAddForm && !atProfileLimit}
                 onToggle={(e) => {
                   const open = (e.target as HTMLDetailsElement).open;
@@ -244,7 +289,7 @@ export default function DashboardPage() {
                 }}
               >
                 <summary
-                  className="cursor-pointer px-4 py-3 text-sm font-medium text-neutral-700"
+                  className="flex cursor-pointer items-center gap-2 px-5 py-4 text-sm font-semibold text-neutral-800 transition-colors hover:bg-violet-50/80"
                   onClick={(e) => {
                     if (atProfileLimit) {
                       e.preventDefault();
@@ -252,10 +297,11 @@ export default function DashboardPage() {
                     }
                   }}
                 >
+                  <Plus className="h-4 w-4 text-violet-600" aria-hidden />
                   Crear perfil QR nuevo
                 </summary>
                 {!atProfileLimit && (
-                  <div className="border-t border-neutral-100 px-4 py-4">
+                  <div className="border-t border-violet-100 px-5 py-5">
                     <QrProfileForm
                       onSuccess={() => {
                         loadData();
@@ -266,21 +312,29 @@ export default function DashboardPage() {
                   </div>
                 )}
               </details>
-            </>
-          )}
-        </section>
+            </div>
+          </>
+        )}
+      </DashboardSection>
 
-        <section id="actividad" className={legalBlocked ? "pointer-events-none opacity-40" : undefined}>
-          <h2 className="mb-4 text-xl font-bold text-neutral-900">Actividad reciente</h2>
-          {loading ? (
-            <p className="text-neutral-500">Cargando...</p>
-          ) : (
-            <ScanLogsList logs={logs} />
-          )}
-        </section>
+      <DashboardSection
+        id="actividad"
+        icon={Activity}
+        title="Actividad reciente"
+        description="Escaneos, alertas SOS y mensajes de quien leyó tu QR."
+        disabled={legalBlocked}
+      >
+        {loading ? (
+          <div className="space-y-3">
+            <div className="h-20 animate-pulse rounded-2xl bg-violet-50" />
+            <div className="h-20 animate-pulse rounded-2xl bg-violet-50" />
+          </div>
+        ) : (
+          <ScanLogsList logs={logs} />
+        )}
+      </DashboardSection>
 
-        <PushNotificationFooter push={push} />
-      </main>
-    </div>
+      <PushNotificationFooter push={push} />
+    </main>
   );
 }

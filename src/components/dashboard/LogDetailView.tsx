@@ -8,6 +8,7 @@ import {
   ExternalLink,
   MapPin,
   AlertTriangle,
+  Clock,
 } from "lucide-react";
 import type { ScanLogWithProfile } from "@/types/database";
 import { getGoogleMapsEmbedUrl, getGoogleMapsUrl } from "@/lib/alerts/send-alert";
@@ -24,98 +25,115 @@ export function LogDetailView({ log }: LogDetailViewProps) {
   const hasLocation = log.latitude != null && log.longitude != null;
   const lat = Number(log.latitude);
   const lng = Number(log.longitude);
+  const isSos = log.alert_type === "sos";
 
   useEffect(() => {
     fetch(`/api/scan-logs/${log.id}`, { method: "PATCH" });
   }, [log.id]);
 
   return (
-    <div className="min-h-dvh bg-[#faf9fc]">
-      <header className="border-b border-neutral-200 bg-white px-4 py-4">
-        <div className="mx-auto flex max-w-3xl items-center gap-3">
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard")}
-            className="rounded-lg p-2 text-neutral-600 hover:bg-neutral-100"
-            aria-label="Volver al panel"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-lg font-bold text-neutral-900">
-              Detalle del evento
-            </h1>
-            <p className="text-sm text-neutral-500">{log.beneficiary_name}</p>
+    <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <button
+        type="button"
+        onClick={() => router.push("/dashboard#actividad")}
+        className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-white/80 hover:text-violet-800"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        Volver a actividad
+      </button>
+
+      <section
+        className={`overflow-hidden rounded-[1.75rem] border shadow-xl ${
+          isSos
+            ? "border-red-200 bg-gradient-to-br from-red-50 to-rose-50 shadow-red-500/10"
+            : "border-white/90 bg-white/95 shadow-violet-500/10"
+        }`}
+      >
+        <div
+          className={`h-1 ${isSos ? "bg-red-500" : "bg-gradient-to-r from-violet-500 to-indigo-600"}`}
+        />
+        <div className="p-6 sm:p-8">
+          <div className="flex flex-wrap items-start gap-4">
+            <span
+              className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-lg ${
+                isSos
+                  ? "bg-red-600 text-white shadow-red-500/30"
+                  : "bg-violet-100 text-violet-800 shadow-violet-500/20"
+              }`}
+            >
+              {isSos ? (
+                <AlertTriangle className="h-7 w-7" aria-hidden />
+              ) : (
+                <Clock className="h-7 w-7" aria-hidden />
+              )}
+            </span>
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                Detalle del evento
+              </p>
+              <h1 className="mt-1 text-2xl font-black text-neutral-900 sm:text-3xl">
+                {log.beneficiary_name}
+              </h1>
+              <p className="mt-2 text-lg font-bold text-neutral-800">
+                {alertTypeLabel(log.alert_type)}
+              </p>
+              <p className="mt-1 text-sm text-neutral-600">
+                {formatDateTime(log.scanned_at)}
+              </p>
+            </div>
           </div>
         </div>
-      </header>
+      </section>
 
-      <main className="mx-auto max-w-3xl space-y-4 px-4 py-6">
-        <section
-          className={`rounded-xl border p-5 ${
-            log.alert_type === "sos"
-              ? "border-red-300 bg-red-50"
-              : "border-neutral-200 bg-white"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            {log.alert_type === "sos" ? (
-              <AlertTriangle className="h-5 w-5 text-red-600" aria-hidden />
-            ) : null}
-            <p className="font-bold text-neutral-900">
-              {alertTypeLabel(log.alert_type)}
-            </p>
+      <section className="rounded-[1.75rem] border border-white/90 bg-white/95 p-6 shadow-xl shadow-violet-500/8 sm:p-8">
+        <ScanMessageThread scanLogId={log.id} mode="tutor" />
+      </section>
+
+      {hasLocation ? (
+        <section className="overflow-hidden rounded-[1.75rem] border border-white/90 bg-white/95 shadow-xl shadow-violet-500/8">
+          <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4 sm:px-6">
+            <span className="inline-flex items-center gap-2 font-bold text-neutral-900">
+              <MapPin className="h-5 w-5 text-violet-600" aria-hidden />
+              Ubicación del escaneo
+            </span>
+            <a
+              href={getGoogleMapsUrl(lat, lng)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-violet-700 underline-offset-2 hover:underline"
+            >
+              Abrir en Maps
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+            </a>
           </div>
-          <p className="mt-2 text-sm text-neutral-600">
-            {formatDateTime(log.scanned_at)}
+          <iframe
+            title="Mapa de ubicación del escaneo"
+            src={getGoogleMapsEmbedUrl(lat, lng)}
+            className="h-72 w-full border-0 sm:h-80"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+          <p className="border-t border-neutral-100 px-5 py-3 font-mono text-xs text-neutral-500 sm:px-6">
+            {lat.toFixed(5)}, {lng.toFixed(5)}
           </p>
         </section>
+      ) : (
+        <section className="rounded-[1.75rem] border border-dashed border-violet-200 bg-violet-50/40 px-6 py-12 text-center">
+          <MapPin className="mx-auto mb-3 h-8 w-8 text-violet-400" aria-hidden />
+          <p className="font-semibold text-neutral-800">
+            Sin ubicación GPS
+          </p>
+          <p className="mt-1 text-sm text-neutral-500">
+            No se compartió ubicación en este evento.
+          </p>
+        </section>
+      )}
 
-        <ScanMessageThread scanLogId={log.id} mode="tutor" />
-
-        {hasLocation && (
-          <section className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
-            <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3">
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-800">
-                <MapPin className="h-4 w-4" aria-hidden />
-                Ubicación
-              </span>
-              <a
-                href={getGoogleMapsUrl(lat, lng)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm font-medium text-violet-700 underline"
-              >
-                Abrir en Maps
-                <ExternalLink className="h-3 w-3" aria-hidden />
-              </a>
-            </div>
-            <iframe
-              title="Mapa de ubicación del escaneo"
-              src={getGoogleMapsEmbedUrl(lat, lng)}
-              className="h-64 w-full border-0"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-            <p className="px-4 py-2 text-xs text-neutral-500">
-              {lat.toFixed(5)}, {lng.toFixed(5)}
-            </p>
-          </section>
-        )}
-
-        {!hasLocation && (
-          <section className="rounded-xl border border-dashed border-neutral-300 bg-white px-4 py-6 text-center text-sm text-neutral-500">
-            <MapPin className="mx-auto mb-2 h-6 w-6 text-neutral-400" aria-hidden />
-            No se compartió ubicación GPS en este evento.
-          </section>
-        )}
-
-        <Link href="/dashboard">
-          <Button type="button" variant="secondary" className="w-full">
-            Volver al panel
-          </Button>
-        </Link>
-      </main>
-    </div>
+      <Link href="/dashboard#actividad">
+        <Button type="button" variant="secondary" className="w-full sm:w-auto">
+          Volver al panel
+        </Button>
+      </Link>
+    </main>
   );
 }

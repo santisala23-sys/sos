@@ -27,9 +27,12 @@ export default function LogDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-dvh items-center justify-center text-neutral-500">
-        Cargando...
-      </div>
+      <main className="flex min-h-[50vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
+          <p className="text-sm font-medium text-neutral-500">Cargando evento...</p>
+        </div>
+      </main>
     );
   }
 
