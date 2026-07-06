@@ -442,9 +442,9 @@ export function AdminProductBatchesPanel() {
                                     </span>
                                   )}
                                 </div>
-                                <div className="overflow-x-auto rounded-xl border border-neutral-800">
+                                <div className="overflow-x-auto rounded-xl border border-violet-100">
                                 <table className="w-full min-w-[640px] text-left text-xs">
-                                  <thead className="border-b border-neutral-800 bg-neutral-900/80 text-neutral-400">
+                                  <thead className="border-b border-neutral-100 bg-neutral-50 text-neutral-500">
                                     <tr>
                                       <th className="px-3 py-2">Código</th>
                                       <th className="px-3 py-2">Estado</th>
