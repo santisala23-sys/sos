@@ -36,7 +36,7 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
   const registrationReady = acceptedTerms && declaredEligible;
 
   const inputClass =
-    "w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base transition-colors focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200";
+    "w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-base transition-colors focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -124,7 +124,7 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
 
   if (!isRegister) {
     return (
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
         {googleEnabled && <GoogleSignInButton mode="login" disabled={loading} />}
 
         {googleEnabled && (
@@ -137,8 +137,8 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1.5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
             <span className="text-sm font-medium text-neutral-700">Email</span>
             <input
               type="email"
@@ -151,7 +151,7 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
             />
           </label>
 
-          <label className="flex flex-col gap-1.5">
+          <label className="flex flex-col gap-1">
             <span className="text-sm font-medium text-neutral-700">Contraseña</span>
             <input
               type="password"
@@ -179,23 +179,13 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
             {loading ? "Procesando..." : "Iniciar sesión"}
           </Button>
         </form>
-
-        <p className="text-center text-sm text-neutral-600">
-          ¿No tenés cuenta?{" "}
-          <Link
-            href="/register"
-            className="font-semibold text-violet-700 underline-offset-2 hover:underline"
-          >
-            Registrate gratis
-          </Link>
-        </p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {googleEnabled && (
           <GoogleSignInButton
             mode="register"
@@ -214,64 +204,62 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="rounded-xl border border-violet-200/80 bg-violet-50/60 px-4 py-2.5 text-sm text-violet-950">
-            <strong>Plan gratis:</strong> 1 perfil QR incluido.{" "}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <p className="rounded-lg border border-violet-100 bg-violet-50/80 px-3 py-2 text-xs text-violet-900">
+            <strong>Plan gratis:</strong> 1 perfil QR.{" "}
             <Link href="/contacto" className="font-semibold underline-offset-2 hover:underline">
               Más perfiles
             </Link>
-          </div>
+          </p>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-1.5 sm:col-span-2">
-              <span className="text-sm font-medium text-neutral-700">Nombre completo</span>
-              <input
-                type="text"
-                required
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className={inputClass}
-                autoComplete="name"
-                placeholder="Ej: María García"
-              />
-            </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-neutral-700">Nombre completo</span>
+            <input
+              type="text"
+              required
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className={inputClass}
+              autoComplete="name"
+              placeholder="Ej: María García"
+            />
+          </label>
 
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-neutral-700">Email</span>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={inputClass}
-                autoComplete="email"
-                placeholder="tu@email.com"
-              />
-            </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-neutral-700">Email</span>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={inputClass}
+              autoComplete="email"
+              placeholder="tu@email.com"
+            />
+          </label>
 
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-neutral-700">Contraseña</span>
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={inputClass}
-                autoComplete="new-password"
-                placeholder="Mín. 8 caracteres, letra y número"
-              />
-            </label>
-          </div>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-neutral-700">Contraseña</span>
+            <input
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={inputClass}
+              autoComplete="new-password"
+              placeholder="Mín. 8 caracteres, letra y número"
+            />
+          </label>
 
           <fieldset
-            className={`grid gap-3 rounded-xl border bg-neutral-50/80 p-4 transition-all duration-500 lg:grid-cols-2 ${
+            className={`flex flex-col gap-2 rounded-xl border bg-neutral-50/80 p-3 transition-all duration-500 ${
               legalHighlight
-                ? "border-violet-400 shadow-lg shadow-violet-500/15"
+                ? "border-violet-400 shadow-md shadow-violet-500/10"
                 : "border-neutral-200"
             }`}
           >
-            <legend className="mb-1 px-1 text-sm font-semibold text-neutral-800 lg:col-span-2">
+            <legend className="px-1 text-xs font-semibold text-neutral-800">
               Confirmaciones finales
             </legend>
 
@@ -317,16 +305,6 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
             {loading ? "Procesando..." : "Crear cuenta"}
           </Button>
         </form>
-
-        <p className="text-center text-sm text-neutral-600">
-          ¿Ya tenés cuenta?{" "}
-          <Link
-            href="/login"
-            className="font-semibold text-violet-700 underline-offset-2 hover:underline"
-          >
-            Iniciá sesión
-          </Link>
-        </p>
       </div>
 
       <LegalAcceptanceModal
