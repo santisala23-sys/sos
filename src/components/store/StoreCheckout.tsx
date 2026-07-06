@@ -9,6 +9,7 @@ import {
   formatStorePrice,
   getStoreProductTypeLabel,
 } from "@/lib/store/product-types";
+import { getStoreProductImage } from "@/lib/store/product-images";
 import {
   buildStoreOrderWhatsAppMessage,
   buildWhatsAppUrl,
@@ -243,16 +244,17 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => {
           const qty = cart[product.id] ?? 0;
+          const imageSrc = getStoreProductImage(product);
           return (
             <article
               key={product.id}
               className="group flex flex-col overflow-hidden rounded-3xl border border-violet-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/10"
             >
               <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br from-violet-50 to-indigo-50">
-                {product.image_url ? (
+                {imageSrc ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={product.image_url}
+                    src={imageSrc}
                     alt={product.name}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
