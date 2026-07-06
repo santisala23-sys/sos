@@ -119,7 +119,7 @@ export default function HomePage() {
               <div className="relative overflow-hidden rounded-[2rem] border border-white/90 bg-white/70 p-2 shadow-2xl shadow-violet-500/20 backdrop-blur-sm">
                 <Image
                   src="/images/landing/hero-scan.png"
-                  alt="Persona mostrando su tarjeta QR mientras alguien la escanea con el celular"
+                  alt="Persona escaneando el código QR del colgante de identificación SOSme"
                   width={1024}
                   height={1024}
                   priority
