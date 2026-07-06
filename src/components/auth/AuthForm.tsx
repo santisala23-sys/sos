@@ -214,7 +214,7 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="rounded-xl border border-violet-200/80 bg-violet-50/60 px-4 py-2.5 text-sm text-violet-950">
             <strong>Plan gratis:</strong> 1 perfil QR incluido.{" "}
             <Link href="/contacto" className="font-semibold underline-offset-2 hover:underline">
@@ -222,54 +222,56 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
             </Link>
           </div>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-neutral-700">Nombre completo</span>
-            <input
-              type="text"
-              required
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className={inputClass}
-              autoComplete="name"
-              placeholder="Ej: María García"
-            />
-          </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="flex flex-col gap-1.5 sm:col-span-2">
+              <span className="text-sm font-medium text-neutral-700">Nombre completo</span>
+              <input
+                type="text"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className={inputClass}
+                autoComplete="name"
+                placeholder="Ej: María García"
+              />
+            </label>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-neutral-700">Email</span>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-              autoComplete="email"
-              placeholder="tu@email.com"
-            />
-          </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-neutral-700">Email</span>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+                autoComplete="email"
+                placeholder="tu@email.com"
+              />
+            </label>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-neutral-700">Contraseña</span>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputClass}
-              autoComplete="new-password"
-              placeholder="Mín. 8 caracteres, letra y número"
-            />
-          </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-neutral-700">Contraseña</span>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={inputClass}
+                autoComplete="new-password"
+                placeholder="Mín. 8 caracteres, letra y número"
+              />
+            </label>
+          </div>
 
           <fieldset
-            className={`flex flex-col gap-2 rounded-xl border bg-neutral-50/80 p-3 transition-all duration-500 ${
+            className={`grid gap-3 rounded-xl border bg-neutral-50/80 p-4 transition-all duration-500 lg:grid-cols-2 ${
               legalHighlight
                 ? "border-violet-400 shadow-lg shadow-violet-500/15"
                 : "border-neutral-200"
             }`}
           >
-            <legend className="px-1 text-sm font-semibold text-neutral-800">
+            <legend className="mb-1 px-1 text-sm font-semibold text-neutral-800 lg:col-span-2">
               Confirmaciones finales
             </legend>
 

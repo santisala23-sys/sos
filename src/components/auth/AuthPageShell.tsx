@@ -3,7 +3,6 @@ import { Bell, QrCode, Shield, Sparkles } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { LegalFooter } from "@/components/legal/LegalFooter";
 import { MarketingBackground } from "@/components/marketing/MarketingBackground";
-import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { AuthForm } from "@/components/auth/AuthForm";
 
 type AuthPageShellProps = {
@@ -33,75 +32,84 @@ export function AuthPageShell({ mode, error, redirectTo }: AuthPageShellProps) {
   if (!isLogin) {
     return (
       <MarketingBackground>
-        <MarketingNavbar variant="subpage" />
+        <div className="mx-auto flex min-h-dvh max-w-[96rem] flex-col px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+          <div className="mb-6 flex items-center justify-between">
+            <BrandLogo size="md" showMark />
+            <Link
+              href="/login"
+              className="text-sm font-medium text-neutral-600 transition-colors hover:text-violet-700"
+            >
+              ¿Ya tenés cuenta? Ingresá
+            </Link>
+          </div>
 
-        <div className="mx-auto flex min-h-[calc(100dvh-5rem)] max-w-[88rem] items-center px-4 py-6 sm:px-6 lg:px-8">
-          <div className="grid w-full items-center gap-10 lg:grid-cols-[1fr_420px] lg:gap-16">
-            <section className="hidden lg:block">
-              <p className="inline-flex items-center gap-2 rounded-full border border-violet-200/80 bg-white/90 px-4 py-1.5 text-sm font-semibold text-violet-800 shadow-sm">
-                <Sparkles className="h-4 w-4 text-violet-600" aria-hidden />
-                Empezá gratis en minutos
-              </p>
-              <h1 className="mt-6 text-4xl font-black leading-tight text-neutral-900">
-                Creá tu cuenta{" "}
-                <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
-                  SOSme
-                </span>
-              </h1>
-              <p className="mt-4 max-w-md text-lg leading-relaxed text-neutral-600">
-                Registrate con Google o email. Configurá tu perfil de emergencia y
-                descargá el QR para imprimir.
-              </p>
-              <ul className="mt-8 space-y-4">
-                {BENEFITS.map(({ icon: Icon, text }) => (
-                  <li key={text} className="flex items-start gap-3 text-neutral-700">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
-                      <Icon className="h-5 w-5" aria-hidden />
-                    </span>
-                    <span className="pt-2 text-sm leading-relaxed">{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section className="mx-auto w-full max-w-md lg:mx-0">
-              <div className="mb-5 text-center lg:hidden">
-                <BrandLogo size="lg" showMark className="justify-center" />
-                <h1 className="mt-4 text-2xl font-black text-neutral-900">
-                  Creá tu cuenta SOSme
-                </h1>
-                <p className="mt-2 text-sm text-neutral-600">
-                  Gratis con 1 perfil QR incluido
+          <div className="flex flex-1 items-center pb-6">
+            <div className="grid w-full items-center gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,640px)] xl:gap-14">
+              <section className="hidden xl:block">
+                <p className="inline-flex items-center gap-2 rounded-full border border-violet-200/80 bg-white/90 px-4 py-1.5 text-sm font-semibold text-violet-800 shadow-sm">
+                  <Sparkles className="h-4 w-4 text-violet-600" aria-hidden />
+                  Empezá gratis en minutos
                 </p>
-              </div>
+                <h1 className="mt-6 text-4xl font-black leading-tight text-neutral-900 2xl:text-5xl">
+                  Creá tu cuenta{" "}
+                  <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                    SOSme
+                  </span>
+                </h1>
+                <p className="mt-4 max-w-lg text-lg leading-relaxed text-neutral-600">
+                  Registrate con Google o email. Configurá tu perfil de emergencia y
+                  descargá el QR para imprimir.
+                </p>
+                <ul className="mt-8 space-y-4">
+                  {BENEFITS.map(({ icon: Icon, text }) => (
+                    <li key={text} className="flex items-start gap-3 text-neutral-700">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+                        <Icon className="h-5 w-5" aria-hidden />
+                      </span>
+                      <span className="pt-2 text-sm leading-relaxed">{text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
 
-              <div className="rounded-[1.75rem] border border-white/90 bg-white/95 p-6 shadow-2xl shadow-violet-500/15 backdrop-blur-sm sm:p-7">
-                <div className="hidden lg:block">
-                  <h2 className="text-xl font-bold text-neutral-900">Crear cuenta</h2>
-                  <p className="mt-1 text-sm text-neutral-500">
-                    Google al instante o registro con email
+              <section className="mx-auto w-full max-w-2xl xl:max-w-none">
+                <div className="mb-5 text-center xl:hidden">
+                  <h1 className="text-2xl font-black text-neutral-900 sm:text-3xl">
+                    Creá tu cuenta SOSme
+                  </h1>
+                  <p className="mt-2 text-sm text-neutral-600">
+                    Gratis con 1 perfil QR incluido
                   </p>
                 </div>
 
-                <div className="lg:mt-5">
-                  <AuthForm mode="register" initialError={error} redirectTo={redirectTo} />
-                </div>
-              </div>
+                <div className="rounded-[1.75rem] border border-white/90 bg-white/95 p-6 shadow-2xl shadow-violet-500/15 backdrop-blur-sm sm:p-8 lg:p-9">
+                  <div className="hidden xl:block">
+                    <h2 className="text-2xl font-bold text-neutral-900">Crear cuenta</h2>
+                    <p className="mt-1 text-sm text-neutral-500">
+                      Google al instante o registro con email
+                    </p>
+                  </div>
 
-              <p className="mt-5 text-center text-xs text-neutral-500">
-                <Link href="/tienda" className="font-medium text-violet-700 hover:underline">
-                  Tienda
-                </Link>
-                {" · "}
-                <Link href="/pricing" className="font-medium text-violet-700 hover:underline">
-                  Planes
-                </Link>
-                {" · "}
-                <Link href="/login" className="font-medium text-violet-700 hover:underline">
-                  Ingresar
-                </Link>
-              </p>
-            </section>
+                  <div className="xl:mt-6">
+                    <AuthForm mode="register" initialError={error} redirectTo={redirectTo} />
+                  </div>
+                </div>
+
+                <p className="mt-5 text-center text-xs text-neutral-500">
+                  <Link href="/" className="font-medium text-violet-700 hover:underline">
+                    Inicio
+                  </Link>
+                  {" · "}
+                  <Link href="/tienda" className="font-medium text-violet-700 hover:underline">
+                    Tienda
+                  </Link>
+                  {" · "}
+                  <Link href="/pricing" className="font-medium text-violet-700 hover:underline">
+                    Planes
+                  </Link>
+                </p>
+              </section>
+            </div>
           </div>
         </div>
 
