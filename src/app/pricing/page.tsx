@@ -9,7 +9,7 @@ import {
   ShoppingBag,
   Sparkles,
 } from "lucide-react";
-import { LegalFooter } from "@/components/legal/LegalFooter";
+import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { Button } from "@/components/ui/Button";
@@ -200,7 +200,7 @@ export default function PricingPage() {
         </section>
       </main>
 
-      <LegalFooter />
+      <MarketingFooter />
     </MarketingBackground>
   );
 }

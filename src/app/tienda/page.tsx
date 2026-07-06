@@ -11,7 +11,7 @@ import {
   Shield,
   Smartphone,
 } from "lucide-react";
-import { LegalFooter } from "@/components/legal/LegalFooter";
+import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { StoreCheckout } from "@/components/store/StoreCheckout";
@@ -249,7 +249,7 @@ export default async function TiendaPage() {
         </section>
       </main>
 
-      <LegalFooter />
+      <MarketingFooter />
     </MarketingBackground>
   );
 }

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { LegalFooter } from "@/components/legal/LegalFooter";
+import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { DemoVideoSection } from "@/components/marketing/DemoVideoSection";
 import { HowItWorksSection } from "@/components/marketing/HowItWorksSection";
 import { MarketingBackground } from "@/components/marketing/MarketingBackground";
@@ -431,7 +431,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      <LegalFooter />
+      <MarketingFooter />
     </MarketingBackground>
   );
 }
