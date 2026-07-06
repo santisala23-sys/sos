@@ -1,18 +1,14 @@
+import Image from "next/image";
 import Link from "next/link";
 import { LegalFooter } from "@/components/legal/LegalFooter";
-import { HeroVisual, PhoneMockup } from "@/components/marketing/LandingVisuals";
+import { HeroVisual } from "@/components/marketing/LandingVisuals";
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import {
   ArrowRight,
   Bell,
-  Check,
-  Heart,
-  Luggage,
   MapPin,
   MessageCircle,
   Package,
-  PawPrint,
-  Phone,
   QrCode,
   Shield,
   Smartphone,
@@ -33,30 +29,27 @@ const USE_CASES = [
     description:
       "Ideal para niños, adultos mayores o quien necesite un contacto de emergencia visible.",
     detail: "Alergias, medicación e instrucciones si hace falta ayuda.",
-    icon: Heart,
-    accent: "from-rose-500 to-orange-500",
-    bg: "from-rose-50 to-orange-50",
-    border: "border-rose-200/80",
+    accent: "from-rose-500/15 to-orange-500/10",
+    image: "/images/landing/use-case-personas.png",
+    imageAlt: "Tarjeta con código QR guardada en el bolsillo de una chaqueta",
   },
   {
     title: "Mascotas",
     description:
       "Collar o chapita con QR: quien encuentra a tu mascota sabe cómo avisarte.",
     detail: "Llamada o WhatsApp al dueño en segundos.",
-    icon: PawPrint,
-    accent: "from-amber-500 to-yellow-500",
-    bg: "from-amber-50 to-yellow-50",
-    border: "border-amber-200/80",
+    accent: "from-amber-500/15 to-yellow-500/10",
+    image: "/images/landing/use-case-mascotas.png",
+    imageAlt: "Perro con collar y chapita que muestra un código QR",
   },
   {
     title: "Objetos y valijas",
     description:
       "Pegá un QR en tu valija, mochila o notebook para que te contacten si se pierde.",
     detail: "Perfecto para viajes, colegio o el día a día.",
-    icon: Luggage,
-    accent: "from-sky-500 to-indigo-500",
-    bg: "from-sky-50 to-indigo-50",
-    border: "border-sky-200/80",
+    accent: "from-sky-500/15 to-indigo-500/10",
+    image: "/images/landing/use-case-valijas.png",
+    imageAlt: "Valija de viaje con un sticker de código QR en el aeropuerto",
   },
 ] as const;
 
@@ -65,19 +58,22 @@ const HOW_IT_WORKS = [
     step: "1",
     title: "Escanean el QR",
     text: "Con la cámara del celular. No hace falta descargar nada.",
-    mockup: "scan" as const,
+    image: "/images/landing/screenshots/scan-location.png",
+    imageAlt: "Celular escaneando un QR SOSme",
   },
   {
     step: "2",
     title: "Ven cómo contactarte",
     text: "WhatsApp, llamada y ubicación en el mapa, al instante.",
-    mockup: "contact" as const,
+    image: "/images/landing/screenshots/public-profile.png",
+    imageAlt: "Perfil público con contactos de emergencia",
   },
   {
     step: "3",
     title: "Vos recibís la alerta",
     text: "Notificación push en tu celular cuando alguien escanea.",
-    mockup: "alert" as const,
+    image: "/images/landing/screenshots/push-alert.png",
+    imageAlt: "Notificación push de alerta SOSme",
   },
 ] as const;
 
@@ -247,27 +243,33 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="mt-14 grid gap-6 lg:grid-cols-3">
+          <div className="mt-14 grid gap-6 sm:grid-cols-3">
             {USE_CASES.map(
-              ({ title, description, detail, icon: Icon, accent, bg, border }) => (
+              ({ title, description, detail, accent, image, imageAlt }) => (
                 <article
                   key={title}
-                  className={`group flex flex-col rounded-3xl border ${border} bg-gradient-to-br ${bg} p-7 shadow-sm transition-shadow hover:shadow-lg hover:shadow-violet-500/5`}
+                  className={`group overflow-hidden rounded-3xl border border-white/80 bg-gradient-to-br ${accent} shadow-sm transition-shadow hover:shadow-lg hover:shadow-violet-500/5`}
                 >
-                  <div
-                    className={`inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${accent} text-white shadow-lg`}
-                  >
-                    <Icon className="h-7 w-7" aria-hidden />
+                  <div className="relative aspect-[4/3] overflow-hidden bg-white/50">
+                    <Image
+                      src={image}
+                      alt={imageAlt}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                    />
                   </div>
-                  <h3 className="mt-6 text-2xl font-black text-neutral-900">
-                    {title}
-                  </h3>
-                  <p className="mt-3 flex-1 leading-relaxed text-neutral-700">
-                    {description}
-                  </p>
-                  <p className="mt-4 text-sm font-medium text-neutral-500">
-                    {detail}
-                  </p>
+                  <div className="p-6">
+                    <h3 className="text-xl font-black text-neutral-900">
+                      {title}
+                    </h3>
+                    <p className="mt-2 leading-relaxed text-neutral-700">
+                      {description}
+                    </p>
+                    <p className="mt-3 text-sm font-medium text-neutral-500">
+                      {detail}
+                    </p>
+                  </div>
                 </article>
               ),
             )}
@@ -293,24 +295,31 @@ export default function HomePage() {
               </p>
             </div>
 
-            <ol className="mt-16 grid gap-12 lg:grid-cols-3 lg:gap-8">
-              {HOW_IT_WORKS.map(({ step, title, text, mockup }, index) => (
+            <ol className="mt-16 grid gap-12 sm:grid-cols-3 lg:gap-8">
+              {HOW_IT_WORKS.map(({ step, title, text, image, imageAlt }, index) => (
                 <li key={step} className="relative flex flex-col text-center">
                   {index < HOW_IT_WORKS.length - 1 && (
                     <div
-                      className="absolute left-[calc(50%+6rem)] top-16 hidden h-px w-[calc(100%-8rem)] bg-gradient-to-r from-violet-300 to-indigo-300 lg:block"
+                      className="absolute left-[calc(50%+6rem)] top-16 hidden h-px w-[calc(100%-8rem)] bg-gradient-to-r from-violet-300 to-indigo-300 sm:block"
                       aria-hidden
                     />
                   )}
-                  <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-lg font-black text-white shadow-lg shadow-violet-500/25">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-xl font-black text-white shadow-lg shadow-violet-500/25">
                     {step}
                   </div>
                   <h3 className="mt-5 text-xl font-bold text-neutral-900">
                     {title}
                   </h3>
-                  <p className="mt-2 max-w-xs text-neutral-600">{text}</p>
-                  <div className="mt-8 flex justify-center">
-                    <PhoneMockup step={mockup} />
+                  <p className="mt-2 text-neutral-600">{text}</p>
+                  <div className="mx-auto mt-8 w-full max-w-[220px] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl shadow-violet-500/10">
+                    <Image
+                      src={image}
+                      alt={imageAlt}
+                      width={390}
+                      height={844}
+                      className="h-auto w-full"
+                      sizes="220px"
+                    />
                   </div>
                 </li>
               ))}
@@ -350,12 +359,15 @@ export default function HomePage() {
             </div>
 
             <div className="mt-10 flex items-center justify-center lg:mt-0">
-              <div className="relative w-full max-w-xs">
-                <div className="absolute -inset-4 rounded-full bg-violet-200/40 blur-2xl" />
-                <PhoneMockup step="contact" className="relative max-w-none" />
-                <div className="absolute -bottom-4 -right-2 w-[70%] rotate-3">
-                  <PhoneMockup step="alert" />
-                </div>
+              <div className="overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50 shadow-lg shadow-violet-500/10">
+                <Image
+                  src="/images/landing/screenshots/live-chat-map.png"
+                  alt="Panel de SOSme con mapa y chat en vivo"
+                  width={390}
+                  height={844}
+                  className="mx-auto h-auto w-full max-w-xs"
+                  sizes="320px"
+                />
               </div>
             </div>
           </div>

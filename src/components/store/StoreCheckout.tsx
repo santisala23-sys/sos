@@ -246,15 +246,15 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
           return (
             <article
               key={product.id}
-              className="flex flex-col rounded-2xl border border-neutral-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+              className="group flex flex-col overflow-hidden rounded-3xl border border-violet-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/10"
             >
-              <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-t-2xl bg-gradient-to-br from-violet-50 to-indigo-50">
+              <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br from-violet-50 to-indigo-50">
                 {product.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={product.image_url}
                     alt={product.name}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <span className="text-6xl" aria-hidden>
@@ -262,8 +262,8 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
                   </span>
                 )}
               </div>
-              <div className="flex flex-1 flex-col p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-violet-600">
+              <div className="flex flex-1 flex-col p-6">
+                <p className="text-xs font-bold uppercase tracking-wider text-violet-600">
                   {getStoreProductTypeLabel(product.product_type)}
                 </p>
                 <h2 className="mt-1 text-lg font-bold text-neutral-900">{product.name}</h2>
@@ -316,7 +316,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
 
       {cartCount > 0 && (
         <div className="sticky bottom-4 z-10 mx-auto mt-10 max-w-lg">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-violet-200 bg-white px-5 py-4 shadow-xl shadow-violet-500/15">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-violet-200 bg-white/95 px-5 py-4 shadow-2xl shadow-violet-500/20 backdrop-blur-sm">
             <div className="flex items-center gap-2 text-neutral-900">
               <ShoppingCart className="h-5 w-5 text-violet-600" aria-hidden />
               <span className="font-semibold">

@@ -1,8 +1,18 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Check } from "lucide-react";
-import { BrandLogo } from "@/components/shared/BrandLogo";
+import {
+  ArrowRight,
+  Bell,
+  MapPin,
+  MessageCircle,
+  Package,
+  QrCode,
+  ScanLine,
+  Shield,
+  Smartphone,
+} from "lucide-react";
 import { LegalFooter } from "@/components/legal/LegalFooter";
+import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { StoreCheckout } from "@/components/store/StoreCheckout";
 import { Button } from "@/components/ui/Button";
 import { listActiveStoreProducts } from "@/lib/db/queries-store";
@@ -19,27 +29,30 @@ const HOW_IT_WORKS = [
   {
     step: "1",
     title: "Comprás el producto",
-    text: "Collar, colgante, credencial, imán o sticker con QR.",
+    text: "Collar, colgante, credencial, imán o sticker con QR único.",
+    icon: Package,
   },
   {
     step: "2",
     title: "Escaneás una vez",
-    text: "Te registrás y vinculás el código a tu perfil.",
+    text: "Te registrás y vinculás el código a tu perfil de emergencia.",
+    icon: ScanLine,
   },
   {
     step: "3",
-    title: "Listo",
-    text: "Quien escanee después ve cómo contactarte. Vos recibís la alerta.",
+    title: "Listo para siempre",
+    text: "Quien escanee ve cómo contactarte. Vos recibís la alerta al instante.",
+    icon: Bell,
   },
 ] as const;
 
 const INCLUDES = [
-  "Producto físico con QR único",
-  "Perfil online con tus contactos",
-  "WhatsApp y llamada al instante",
-  "Alerta en tu celular al escanear",
-  "Ubicación opcional en el mapa",
-  "Sin apps ni cuotas mensuales",
+  { icon: QrCode, text: "Producto físico con QR único" },
+  { icon: MessageCircle, text: "WhatsApp y llamada al instante" },
+  { icon: Bell, text: "Alerta en tu celular al escanear" },
+  { icon: MapPin, text: "Ubicación opcional en el mapa" },
+  { icon: Smartphone, text: "Sin apps ni cuotas mensuales" },
+  { icon: Shield, text: "Perfil online con tus contactos" },
 ] as const;
 
 export default async function TiendaPage() {
@@ -51,78 +64,148 @@ export default async function TiendaPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[#faf9fc]">
-      <header className="border-b border-neutral-200/80 bg-white/90 px-4 py-4 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <Link href="/">
-            <BrandLogo size="sm" />
-          </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/activar" className="text-neutral-600 hover:text-violet-700">
-              Activar código
-            </Link>
-            <Link href="/register" className="font-medium text-violet-700 hover:underline">
-              QR gratis
-            </Link>
-          </nav>
-        </div>
-      </header>
+    <div className="relative min-h-dvh overflow-hidden bg-[#f8f6fc] text-neutral-900">
+      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
+        <div className="absolute -left-40 top-0 h-[28rem] w-[28rem] rounded-full bg-violet-300/30 blur-3xl" />
+        <div className="absolute right-0 top-1/4 h-96 w-96 rounded-full bg-indigo-200/40 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-rose-200/30 blur-3xl" />
+        <div
+          className="absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 1px 1px, rgb(139 92 246 / 0.08) 1px, transparent 0)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+      </div>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 sm:px-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-violet-600">
-            Tienda
-          </p>
-          <h1 className="mt-2 text-3xl font-black text-neutral-900 sm:text-4xl">
-            El accesorio con QR para lo que más importa
-          </h1>
-          <p className="mt-4 text-lg text-neutral-600">
-            Comprás, escaneás una vez y queda registrado. Quien lo encuentre te contacta —
-            sin instalar nada.
-          </p>
-        </div>
+      <MarketingNavbar variant="subpage" />
 
-        <section className="mt-12">
-          <h2 className="text-center text-xl font-bold text-neutral-900">
-            Cómo funciona
-          </h2>
-          <ol className="mt-8 grid gap-6 sm:grid-cols-3">
-            {HOW_IT_WORKS.map(({ step, title, text }) => (
-              <li
-                key={step}
-                className="rounded-2xl border border-neutral-200 bg-white p-6 text-center shadow-sm"
-              >
-                <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-violet-600 text-lg font-black text-white">
-                  {step}
-                </span>
-                <h3 className="mt-4 font-bold text-neutral-900">{title}</h3>
-                <p className="mt-2 text-sm text-neutral-600">{text}</p>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-6 text-center text-sm text-neutral-500">
-            ¿Ya compraste?{" "}
-            <Link href="/activar" className="font-semibold text-violet-700 hover:underline">
-              Activá tu código acá
-            </Link>
-          </p>
+      <main>
+        {/* Hero */}
+        <section className="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:pt-12">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white/90 px-4 py-1.5 text-sm font-semibold text-violet-800 shadow-sm">
+              <Package className="h-4 w-4" aria-hidden />
+              Productos físicos con QR
+            </p>
+            <h1 className="mt-6 text-4xl font-black leading-[1.08] tracking-tight text-neutral-900 sm:text-5xl">
+              El accesorio con QR para{" "}
+              <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-700 bg-clip-text text-transparent">
+                lo que más importa
+              </span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-neutral-600 sm:text-xl">
+              Comprás collar, chapita, credencial o sticker. Lo escaneás una sola
+              vez, lo vinculás a tu perfil y queda listo. Quien lo encuentre te
+              contacta sin instalar nada.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <a href="#catalogo">
+                <Button
+                  size="lg"
+                  className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 px-8 shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
+                >
+                  Ver catálogo
+                  <ArrowRight className="h-5 w-5" aria-hidden />
+                </Button>
+              </a>
+              <Link href="/activar">
+                <Button variant="secondary" size="lg">
+                  Ya tengo un código
+                </Button>
+              </Link>
+            </div>
+          </div>
         </section>
 
-        <section id="catalogo" className="mt-16 scroll-mt-24">
-          <h2 className="text-2xl font-black text-neutral-900">Elegí el tuyo</h2>
-          <p className="mt-2 text-neutral-600">
-            Sumá al pedido y completá tus datos. Te contactamos para pago y envío.
-          </p>
-          <div className="mt-8">
+        {/* Cómo funciona */}
+        <section className="border-y border-violet-100/80 bg-white/60 px-4 py-16 backdrop-blur-sm">
+          <div className="mx-auto max-w-6xl">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-sm font-bold uppercase tracking-widest text-violet-600">
+                Cómo funciona
+              </p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-neutral-900">
+                Comprás, activás una vez y listo
+              </h2>
+            </div>
+
+            <ol className="mt-12 grid gap-6 sm:grid-cols-3">
+              {HOW_IT_WORKS.map(({ step, title, text, icon: Icon }) => (
+                <li
+                  key={step}
+                  className="relative rounded-3xl border border-violet-100 bg-gradient-to-b from-white to-violet-50/30 p-7 text-center shadow-sm"
+                >
+                  <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-lg font-black text-white shadow-lg shadow-violet-500/20">
+                    {step}
+                  </span>
+                  <div className="mx-auto mt-4 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </div>
+                  <h3 className="mt-4 text-lg font-bold text-neutral-900">
+                    {title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                    {text}
+                  </p>
+                </li>
+              ))}
+            </ol>
+
+            <p className="mt-8 text-center text-sm text-neutral-500">
+              ¿Ya compraste?{" "}
+              <Link
+                href="/activar"
+                className="font-semibold text-violet-700 hover:underline"
+              >
+                Activá tu código acá
+              </Link>
+            </p>
+          </div>
+        </section>
+
+        {/* Catálogo */}
+        <section id="catalogo" className="scroll-mt-32 mx-auto max-w-6xl px-4 py-20">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-widest text-violet-600">
+                Catálogo
+              </p>
+              <h2 className="mt-2 text-3xl font-black text-neutral-900">
+                Elegí el tuyo
+              </h2>
+              <p className="mt-2 max-w-xl text-neutral-600">
+                Sumá al pedido y completá tus datos. Te contactamos para
+                coordinar pago y envío.
+              </p>
+            </div>
+            <Link
+              href="/register"
+              className="text-sm font-semibold text-violet-700 hover:underline"
+            >
+              ¿Preferís imprimir el QR gratis? →
+            </Link>
+          </div>
+
+          <div className="mt-10">
             {products.length === 0 ? (
-              <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center">
-                <p className="text-neutral-600">
-                  El catálogo se está preparando.{" "}
-                  <Link href="/contacto" className="font-semibold text-violet-700 hover:underline">
-                    Escribinos
-                  </Link>
-                  .
+              <div className="rounded-3xl border border-violet-100 bg-white p-12 text-center shadow-sm">
+                <Package className="mx-auto h-12 w-12 text-violet-400" aria-hidden />
+                <p className="mt-4 text-lg font-medium text-neutral-800">
+                  El catálogo se está preparando
                 </p>
+                <p className="mt-2 text-neutral-600">
+                  Mientras tanto podés crear tu perfil digital gratis.
+                </p>
+                <div className="mt-6 flex flex-wrap justify-center gap-3">
+                  <Link href="/contacto">
+                    <Button variant="secondary">Escribinos</Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button>Crear perfil gratis</Button>
+                  </Link>
+                </div>
               </div>
             ) : (
               <StoreCheckout products={products} />
@@ -130,28 +213,51 @@ export default async function TiendaPage() {
           </div>
         </section>
 
-        <section className="mt-16 grid gap-8 rounded-3xl border border-neutral-200 bg-white p-8 lg:grid-cols-2 lg:p-10">
-          <div>
-            <h2 className="text-xl font-bold text-neutral-900">Qué incluye</h2>
-            <ul className="mt-6 space-y-3">
-              {INCLUDES.map((item) => (
-                <li key={item} className="flex items-start gap-2 text-sm text-neutral-700">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" aria-hidden />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="rounded-2xl bg-violet-50 p-6">
-            <h2 className="text-xl font-bold text-neutral-900">
-              ¿Preferís imprimirlo vos?
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-neutral-700">
-              Creá tu cuenta gratis, configurá el perfil y descargá el QR en PNG o PDF.
-            </p>
-            <Link href="/register" className="mt-5 inline-block">
-              <Button variant="secondary">Crear perfil gratis</Button>
-            </Link>
+        {/* Qué incluye */}
+        <section className="mx-auto max-w-6xl px-4 pb-20">
+          <div className="overflow-hidden rounded-[2rem] border border-violet-100 bg-gradient-to-br from-white via-white to-violet-50/50 p-8 shadow-xl shadow-violet-500/5 lg:grid lg:grid-cols-2 lg:gap-12 lg:p-12">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-widest text-violet-600">
+                Todo incluido
+              </p>
+              <h2 className="mt-3 text-2xl font-black text-neutral-900 sm:text-3xl">
+                Cada producto trae el sistema completo
+              </h2>
+              <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+                {INCLUDES.map(({ icon: Icon, text }) => (
+                  <li
+                    key={text}
+                    className="flex items-start gap-3 rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+                      <Icon className="h-4 w-4" aria-hidden />
+                    </span>
+                    <span className="pt-1 text-sm font-medium text-neutral-800">
+                      {text}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mt-8 flex flex-col justify-center rounded-3xl bg-gradient-to-br from-violet-600 to-indigo-700 p-8 text-white lg:mt-0">
+              <QrCode className="h-10 w-10 text-violet-200" aria-hidden />
+              <h3 className="mt-4 text-2xl font-black">
+                ¿Preferís imprimirlo vos?
+              </h3>
+              <p className="mt-3 leading-relaxed text-violet-100">
+                Creá tu cuenta gratis, configurá el perfil y descargá el QR en
+                PNG o PDF. Ideal si querés probar antes de comprar.
+              </p>
+              <Link href="/register" className="mt-6">
+                <Button
+                  size="lg"
+                  className="w-full bg-white text-violet-700 shadow-lg hover:bg-violet-50 sm:w-auto"
+                >
+                  Crear perfil gratis
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
       </main>
