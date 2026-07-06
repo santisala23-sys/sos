@@ -29,30 +29,27 @@ function GoogleIcon() {
 type GoogleSignInButtonProps = {
   mode: "login" | "register";
   disabled?: boolean;
-  registrationReady?: boolean;
+  onRegisterClick?: () => void | Promise<void>;
 };
 
 export function GoogleSignInButton({
   mode,
   disabled,
-  registrationReady = true,
+  onRegisterClick,
 }: GoogleSignInButtonProps) {
   const [loading, setLoading] = useState(false);
   const isRegister = mode === "register";
-  const canProceed = !isRegister || registrationReady;
 
   async function handleClick() {
-    if (disabled || loading || !canProceed) return;
+    if (disabled || loading) return;
+
+    if (isRegister && onRegisterClick) {
+      await onRegisterClick();
+      return;
+    }
 
     setLoading(true);
     try {
-      if (isRegister) {
-        await fetch("/api/auth/terms-pending", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ declaredEligible: true }),
-        });
-      }
       window.location.href = "/api/auth/google";
     } catch {
       setLoading(false);
@@ -64,7 +61,7 @@ export function GoogleSignInButton({
       type="button"
       variant="secondary"
       size="lg"
-      disabled={disabled || loading || !canProceed}
+      disabled={disabled || loading}
       onClick={handleClick}
       className="w-full gap-3 border border-neutral-300 bg-white py-3 shadow-sm hover:bg-neutral-50"
     >
@@ -73,3 +70,14 @@ export function GoogleSignInButton({
     </Button>
   );
 }
+
+async function startGoogleRegister() {
+  await fetch("/api/auth/terms-pending", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ declaredEligible: true }),
+  });
+  window.location.href = "/api/auth/google";
+}
+
+export { startGoogleRegister };
