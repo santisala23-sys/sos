@@ -769,32 +769,21 @@ export function PrintTemplateCanvas({
     const canvas = new Canvas(canvasEl, {
       width: pageWidthPx + PAGE_OFFSET_PX * 2,
       height: pageHeightPx + PAGE_OFFSET_PX * 2,
-      backgroundColor: "#ffffff",
+      backgroundColor: "#f4f4f5",
       preserveObjectStacking: true,
     });
 
-    const pageBorder = new Rect({
+    const artboardFill = new Rect({
       left: PAGE_OFFSET_PX,
       top: PAGE_OFFSET_PX,
       width: pageWidthPx,
       height: pageHeightPx,
       fill: "#ffffff",
-      stroke: "#a78bfa",
-      strokeWidth: 1,
+      strokeWidth: 0,
       selectable: false,
       evented: false,
     });
-    canvas.add(pageBorder);
-
-    canvas.clipPath = new Rect({
-      left: PAGE_OFFSET_PX,
-      top: PAGE_OFFSET_PX,
-      width: pageWidthPx,
-      height: pageHeightPx,
-      absolutePositioned: true,
-      selectable: false,
-      evented: false,
-    });
+    canvas.add(artboardFill);
 
     fabricRef.current = canvas;
 
@@ -849,12 +838,31 @@ export function PrintTemplateCanvas({
 
   return (
     <div className="flex min-h-[480px] flex-col items-center justify-center overflow-auto rounded-xl border border-violet-200 bg-white p-6 shadow-inner">
-      <div ref={containerRef} className="rounded-lg shadow-md ring-1 ring-neutral-200" />
+      <div
+        className="relative rounded-lg bg-zinc-100 p-5 shadow-md ring-1 ring-neutral-200"
+        style={{
+          width: pageWidthPx + PAGE_OFFSET_PX * 2,
+          height: pageHeightPx + PAGE_OFFSET_PX * 2,
+        }}
+      >
+        <div
+          className="pointer-events-none absolute rounded-sm border-2 border-dashed border-violet-500 bg-white"
+          style={{
+            left: PAGE_OFFSET_PX,
+            top: PAGE_OFFSET_PX,
+            width: pageWidthPx,
+            height: pageHeightPx,
+          }}
+          aria-hidden
+        />
+        <div ref={containerRef} className="relative" />
+      </div>
       {!ready && (
         <p className="py-8 text-center text-sm text-neutral-500">Cargando lienzo...</p>
       )}
       <p className="mt-3 text-center text-xs text-neutral-500">
-        {pageWidthMm} × {pageHeightMm} mm · {EDITOR_PX_PER_MM}px/mm · Supr para borrar selección
+        Área imprimible: {pageWidthMm} × {pageHeightMm} mm
+        {pageWidthMm === 40 && pageHeightMm === 40 ? " (4×4 cm)" : ""} · Supr para borrar
       </p>
     </div>
   );

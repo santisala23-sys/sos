@@ -457,11 +457,13 @@ export function AdminPrintTemplatesPanel() {
               <h3 className="text-sm font-semibold text-neutral-800">Capas</h3>
             </div>
             <p className="mt-1 text-xs text-neutral-500">
-              Arriba = al frente. Arrastrá o escalá en el lienzo.
+              Arriba = al frente. El borde violeta punteado marca el tamaño final.
             </p>
 
             {layers.length === 0 ? (
-              <p className="mt-4 text-sm text-neutral-500">Sin capas todavía.</p>
+              <p className="mt-4 text-sm text-neutral-500">
+                Sin capas. Usá los botones de la izquierda para agregar QR, texto o imágenes.
+              </p>
             ) : (
               <ul className="mt-4 space-y-1.5">
                 {layers.map((layer) => {
