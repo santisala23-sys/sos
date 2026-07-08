@@ -58,6 +58,7 @@ export function AdminPrintTemplatesPanel() {
   const [layers, setLayers] = useState<CanvasLayerItem[]>([]);
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
   const [canvasReady, setCanvasReady] = useState(false);
+  const [showCutGuides, setShowCutGuides] = useState(true);
 
   const canvasRef = useRef<PrintTemplateCanvasHandle | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -277,6 +278,14 @@ export function AdminPrintTemplatesPanel() {
           </p>
         )}
 
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          <strong className="font-semibold">Sobre la plantilla «Llavero 40×40»:</strong> incluye
+          el diseño Canva pre-cargado (SCAN ME, logo sosme) en la capa{" "}
+          <em>Fondo</em>, más guías magenta de corte para imprenta. Podés reemplazar el fondo con{" "}
+          <em>Fondo blanco</em> o subir el tuyo. El patrón violeta del admin ya no debería verse
+          detrás del lienzo.
+        </div>
+
         <div className="grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)_260px]">
           <aside className="space-y-4">
             <div className={adminUi.formCard}>
@@ -340,7 +349,16 @@ export function AdminPrintTemplatesPanel() {
                   onChange={(e) => setCutLayerEnabled(e.target.checked)}
                   className="rounded border-neutral-300 text-violet-600"
                 />
-                Incluir capa de corte (magenta)
+                Incluir capa de corte en el PDF (magenta)
+              </label>
+              <label className="mt-2 flex items-center gap-2 text-sm text-neutral-600">
+                <input
+                  type="checkbox"
+                  checked={showCutGuides}
+                  onChange={(e) => setShowCutGuides(e.target.checked)}
+                  className="rounded border-neutral-300 text-violet-600"
+                />
+                Mostrar guías de corte en el editor
               </label>
             </div>
 
@@ -377,7 +395,15 @@ export function AdminPrintTemplatesPanel() {
                   className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 px-3 py-2 text-sm hover:bg-violet-50"
                 >
                   <LayoutTemplate className="h-4 w-4 text-violet-600" />
-                  Fondo
+                  Cambiar fondo (imagen)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => canvasRef.current?.setWhiteBackground()}
+                  className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 px-3 py-2 text-sm hover:bg-violet-50"
+                >
+                  <LayoutTemplate className="h-4 w-4 text-neutral-500" />
+                  Fondo blanco (quitar diseño)
                 </button>
                 <button
                   type="button"
@@ -452,6 +478,7 @@ export function AdminPrintTemplatesPanel() {
             pageWidthMm={pageWidthMm}
             pageHeightMm={pageHeightMm}
             layout={layout}
+            showCutGuides={showCutGuides}
             canvasRef={canvasRef}
             onLayersChange={(nextLayers) => {
               setLayers(nextLayers);

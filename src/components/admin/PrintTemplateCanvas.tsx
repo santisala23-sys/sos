@@ -86,6 +86,39 @@ function keepBackgroundAtBottom(canvas: Canvas): void {
   canvas.moveObjectTo(background, chromeCount);
 }
 
+async function loadArtboardImage(
+  url: string,
+  pageWidthPx: number,
+  pageHeightPx: number,
+): Promise<FabricImage> {
+  const img = await FabricImage.fromURL(url, { crossOrigin: "anonymous" });
+  const width = img.width || 1;
+  const height = img.height || 1;
+  const scale = Math.min(pageWidthPx / width, pageHeightPx / height);
+  img.set({
+    left: PAGE_OFFSET_PX,
+    top: PAGE_OFFSET_PX,
+    scaleX: scale,
+    scaleY: scale,
+    originX: "left",
+    originY: "top",
+  });
+  return img;
+}
+
+function applyCutGuideVisibility(obj: FabricObject, visible: boolean): void {
+  const meta = getMeta(obj);
+  if (meta?.sosType === "cut_circle" || meta?.sosType === "cut_hole") {
+    obj.set({ visible, evented: visible, selectable: visible });
+  }
+}
+
+function syncCutGuideVisibility(canvas: Canvas, showCutGuides: boolean): void {
+  for (const obj of canvas.getObjects()) {
+    applyCutGuideVisibility(obj, showCutGuides);
+  }
+}
+
 function buildLayerList(canvas: Canvas): CanvasLayerItem[] {
   const managed = canvas
     .getObjects()
@@ -231,24 +264,26 @@ export function layoutToCanvasObjects(
       if (element.type === "background") {
         if (element.assetUrl) {
           try {
-            const img = await FabricImage.fromURL(element.assetUrl, {
-              crossOrigin: "anonymous",
-            });
+            const img = await loadArtboardImage(
+              element.assetUrl,
+              mmToEditorPx(pageWidthMm),
+              mmToEditorPx(pageHeightMm),
+            );
             img.set({
-              left: 0,
-              top: 0,
-              scaleX: mmToEditorPx(pageWidthMm) / (img.width ?? 1),
-              scaleY: mmToEditorPx(pageHeightMm) / (img.height ?? 1),
               selectable: false,
               evented: false,
               hasControls: false,
             });
-            setMeta(img, { sosType: "background", sosId: element.id, assetUrl: element.assetUrl });
+            setMeta(img, {
+              sosType: "background",
+              sosId: element.id,
+              assetUrl: element.assetUrl,
+            });
             return img;
           } catch {
             const rect = new Rect({
-              left: 0,
-              top: 0,
+              left: PAGE_OFFSET_PX,
+              top: PAGE_OFFSET_PX,
               width: mmToEditorPx(pageWidthMm),
               height: mmToEditorPx(pageHeightMm),
               fill: element.fill ?? "#FFFFFF",
@@ -260,8 +295,8 @@ export function layoutToCanvasObjects(
           }
         }
         const rect = new Rect({
-          left: 0,
-          top: 0,
+          left: PAGE_OFFSET_PX,
+          top: PAGE_OFFSET_PX,
           width: mmToEditorPx(pageWidthMm),
           height: mmToEditorPx(pageHeightMm),
           fill: element.fill ?? "#FFFFFF",
@@ -275,20 +310,24 @@ export function layoutToCanvasObjects(
       if (element.type === "qr") {
         const sizePx = mmToEditorPx(element.sizeMm);
         const dataUrl = await renderQrPlaceholder(sizePx);
+        const left = PAGE_OFFSET_PX + mmToEditorPx(element.xMm);
+        const top = PAGE_OFFSET_PX + mmToEditorPx(element.yMm);
         if (dataUrl) {
           const img = await FabricImage.fromURL(dataUrl);
           img.set({
-            left: mmToEditorPx(element.xMm),
-            top: mmToEditorPx(element.yMm),
+            left,
+            top,
             scaleX: sizePx / (img.width ?? sizePx),
             scaleY: sizePx / (img.height ?? sizePx),
+            originX: "left",
+            originY: "top",
           });
           setMeta(img, { sosType: "qr", sosId: element.id });
           return img;
         }
         const rect = new Rect({
-          left: mmToEditorPx(element.xMm),
-          top: mmToEditorPx(element.yMm),
+          left,
+          top,
           width: sizePx,
           height: sizePx,
           fill: "#FFFFFF",
@@ -301,8 +340,8 @@ export function layoutToCanvasObjects(
 
       if (element.type === "text") {
         const text = new FabricText(element.content, {
-          left: mmToEditorPx(element.xMm),
-          top: mmToEditorPx(element.yMm),
+          left: PAGE_OFFSET_PX + mmToEditorPx(element.xMm),
+          top: PAGE_OFFSET_PX + mmToEditorPx(element.yMm),
           fontSize: element.fontSizePt * 1.33,
           fontFamily: element.fontFamily ?? "Helvetica, Arial, sans-serif",
           fontWeight: element.fontWeight ?? "normal",
@@ -330,10 +369,12 @@ export function layoutToCanvasObjects(
             crossOrigin: "anonymous",
           });
           img.set({
-            left: mmToEditorPx(element.xMm),
-            top: mmToEditorPx(element.yMm),
+            left: PAGE_OFFSET_PX + mmToEditorPx(element.xMm),
+            top: PAGE_OFFSET_PX + mmToEditorPx(element.yMm),
             scaleX: mmToEditorPx(element.widthMm) / (img.width ?? 1),
             scaleY: mmToEditorPx(element.heightMm) / (img.height ?? 1),
+            originX: "left",
+            originY: "top",
           });
           setMeta(img, {
             sosType: "image",
@@ -348,8 +389,8 @@ export function layoutToCanvasObjects(
 
       if (element.type === "cut_circle") {
         const circle = new Circle({
-          left: mmToEditorPx(element.centerXMm),
-          top: mmToEditorPx(element.centerYMm),
+          left: PAGE_OFFSET_PX + mmToEditorPx(element.centerXMm),
+          top: PAGE_OFFSET_PX + mmToEditorPx(element.centerYMm),
           radius: mmToEditorPx(element.radiusMm),
           originX: "center",
           originY: "center",
@@ -363,8 +404,8 @@ export function layoutToCanvasObjects(
 
       if (element.type === "cut_hole") {
         const circle = new Circle({
-          left: mmToEditorPx(element.xMm),
-          top: mmToEditorPx(element.yMm),
+          left: PAGE_OFFSET_PX + mmToEditorPx(element.xMm),
+          top: PAGE_OFFSET_PX + mmToEditorPx(element.yMm),
           radius: mmToEditorPx(element.radiusMm),
           originX: "center",
           originY: "center",
@@ -407,6 +448,7 @@ export type PrintTemplateCanvasHandle = {
   addCutCircle: () => void;
   addCutHole: () => void;
   setBackground: (url: string) => Promise<void>;
+  setWhiteBackground: () => void;
   alignSelected: (mode: "left" | "center-h" | "right" | "top" | "center-v" | "bottom") => void;
   deleteLayer: (id: string) => void;
   deleteSelected: () => void;
@@ -418,6 +460,7 @@ type PrintTemplateCanvasProps = {
   pageWidthMm: number;
   pageHeightMm: number;
   layout: PrintTemplateLayout;
+  showCutGuides?: boolean;
   onSelectionChange?: (meta: SosMeta | null) => void;
   onLayersChange?: (layers: CanvasLayerItem[]) => void;
   canvasRef?: React.RefObject<PrintTemplateCanvasHandle | null>;
@@ -427,6 +470,7 @@ export function PrintTemplateCanvas({
   pageWidthMm,
   pageHeightMm,
   layout,
+  showCutGuides = true,
   onSelectionChange,
   onLayersChange,
   canvasRef,
@@ -435,12 +479,14 @@ export function PrintTemplateCanvas({
   const fabricRef = useRef<Canvas | null>(null);
   const onSelectionChangeRef = useRef(onSelectionChange);
   const onLayersChangeRef = useRef(onLayersChange);
+  const showCutGuidesRef = useRef(showCutGuides);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     onSelectionChangeRef.current = onSelectionChange;
     onLayersChangeRef.current = onLayersChange;
-  }, [onSelectionChange, onLayersChange]);
+    showCutGuidesRef.current = showCutGuides;
+  }, [onSelectionChange, onLayersChange, showCutGuides]);
 
   const notifyLayersChange = useCallback(() => {
     const canvas = fabricRef.current;
@@ -567,6 +613,7 @@ export function PrintTemplateCanvas({
       strokeWidth: 1,
     });
     setMeta(circle, { sosType: "cut_circle", sosId: `cut-${Date.now()}` });
+    applyCutGuideVisibility(circle, showCutGuidesRef.current);
     canvas.add(circle);
     canvas.setActiveObject(circle);
     canvas.requestRenderAll();
@@ -588,6 +635,7 @@ export function PrintTemplateCanvas({
       strokeWidth: 1,
     });
     setMeta(circle, { sosType: "cut_hole", sosId: `hole-${Date.now()}` });
+    applyCutGuideVisibility(circle, showCutGuidesRef.current);
     canvas.add(circle);
     canvas.setActiveObject(circle);
     canvas.requestRenderAll();
@@ -604,12 +652,8 @@ export function PrintTemplateCanvas({
         .find((obj) => getMeta(obj)?.sosType === "background");
       if (existing) canvas.remove(existing);
 
-      const img = await FabricImage.fromURL(url, { crossOrigin: "anonymous" });
+      const img = await loadArtboardImage(url, pageWidthPx, pageHeightPx);
       img.set({
-        left: PAGE_OFFSET_PX,
-        top: PAGE_OFFSET_PX,
-        scaleX: pageWidthPx / (img.width ?? 1),
-        scaleY: pageHeightPx / (img.height ?? 1),
         selectable: false,
         evented: false,
         hasControls: false,
@@ -623,6 +667,32 @@ export function PrintTemplateCanvas({
     },
     [pageWidthPx, pageHeightPx, notifyLayersChange],
   );
+
+  const setWhiteBackground = useCallback(() => {
+    const canvas = fabricRef.current;
+    if (!canvas) return;
+    const existing = canvas
+      .getObjects()
+      .find((obj) => getMeta(obj)?.sosType === "background");
+    if (existing) canvas.remove(existing);
+
+    const rect = new Rect({
+      left: PAGE_OFFSET_PX,
+      top: PAGE_OFFSET_PX,
+      width: pageWidthPx,
+      height: pageHeightPx,
+      fill: "#FFFFFF",
+      selectable: false,
+      evented: false,
+      hasControls: false,
+    });
+    setMeta(rect, { sosType: "background", sosId: "bg", fill: "#FFFFFF" });
+    const chromeCount = canvas.getObjects().filter(isPageChrome).length;
+    canvas.insertAt(chromeCount, rect);
+    keepBackgroundAtBottom(canvas);
+    canvas.requestRenderAll();
+    notifyLayersChange();
+  }, [pageWidthPx, pageHeightPx, notifyLayersChange]);
 
   const deleteLayer = useCallback(
     (id: string) => {
@@ -731,6 +801,7 @@ export function PrintTemplateCanvas({
       addCutCircle,
       addCutHole,
       setBackground,
+      setWhiteBackground,
       alignSelected,
       deleteLayer,
       deleteSelected,
@@ -747,6 +818,7 @@ export function PrintTemplateCanvas({
     addCutCircle,
     addCutHole,
     setBackground,
+    setWhiteBackground,
     alignSelected,
     deleteLayer,
     deleteSelected,
@@ -762,35 +834,43 @@ export function PrintTemplateCanvas({
     containerRef.current.appendChild(canvasEl);
 
     const canvas = new Canvas(canvasEl, {
-      width: pageWidthPx + 40,
-      height: pageHeightPx + 40,
-      backgroundColor: "#e5e7eb",
+      width: pageWidthPx + PAGE_OFFSET_PX * 2,
+      height: pageHeightPx + PAGE_OFFSET_PX * 2,
+      backgroundColor: "#ffffff",
       preserveObjectStacking: true,
     });
 
     const pageBorder = new Rect({
-      left: 20,
-      top: 20,
+      left: PAGE_OFFSET_PX,
+      top: PAGE_OFFSET_PX,
       width: pageWidthPx,
       height: pageHeightPx,
       fill: "#ffffff",
-      stroke: "#c4b5fd",
+      stroke: "#a78bfa",
       strokeWidth: 1,
       selectable: false,
       evented: false,
     });
     canvas.add(pageBorder);
 
+    canvas.clipPath = new Rect({
+      left: PAGE_OFFSET_PX,
+      top: PAGE_OFFSET_PX,
+      width: pageWidthPx,
+      height: pageHeightPx,
+      absolutePositioned: true,
+      selectable: false,
+      evented: false,
+    });
+
     fabricRef.current = canvas;
 
     void layoutToCanvasObjects(layout, pageWidthMm, pageHeightMm).then((objects) => {
       for (const obj of objects) {
-        obj.set({
-          left: (obj.left ?? 0) + 20,
-          top: (obj.top ?? 0) + 20,
-        });
+        applyCutGuideVisibility(obj, showCutGuides);
         canvas.add(obj);
       }
+      keepBackgroundAtBottom(canvas);
       canvas.requestRenderAll();
       setReady(true);
       notifyLayersChange();
@@ -828,9 +908,16 @@ export function PrintTemplateCanvas({
     notifySelectionChange,
   ]);
 
+  useEffect(() => {
+    const canvas = fabricRef.current;
+    if (!canvas || !ready) return;
+    syncCutGuideVisibility(canvas, showCutGuides);
+    canvas.requestRenderAll();
+  }, [showCutGuides, ready]);
+
   return (
-    <div className="flex min-h-[480px] flex-col items-center justify-center overflow-auto rounded-xl border border-violet-100 bg-neutral-200/80 p-6">
-      <div ref={containerRef} className="shadow-lg shadow-violet-500/10" />
+    <div className="flex min-h-[480px] flex-col items-center justify-center overflow-auto rounded-xl border border-violet-200 bg-white p-6 shadow-inner">
+      <div ref={containerRef} className="rounded-lg shadow-md ring-1 ring-neutral-200" />
       {!ready && (
         <p className="py-8 text-center text-sm text-neutral-500">Cargando lienzo...</p>
       )}
