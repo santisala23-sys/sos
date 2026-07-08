@@ -5,6 +5,7 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
+  Clock,
   FileText,
   Globe,
   Package,
@@ -34,6 +35,7 @@ import {
   type AdminDetailTarget,
 } from "@/components/admin/AdminDetailPanel";
 import { AdminLegalPanel } from "@/components/admin/AdminLegalPanel";
+import { AdminMaintenancePanel } from "@/components/admin/AdminMaintenancePanel";
 import { AdminProductBatchesPanel } from "@/components/admin/AdminProductBatchesPanel";
 import { AdminStorePanel } from "@/components/admin/AdminStorePanel";
 import { adminStatAccents, adminUi } from "@/components/admin/adminUi";
@@ -47,7 +49,8 @@ type AdminTab =
   | "activity"
   | "api"
   | "security"
-  | "legal";
+  | "legal"
+  | "maintenance";
 
 function StatCard({
   label,
@@ -244,6 +247,7 @@ export function AdminDashboard() {
     { id: "api", label: "API & Errores", icon: <Server className="h-4 w-4" /> },
     { id: "security", label: "Seguridad", icon: <ShieldAlert className="h-4 w-4" /> },
     { id: "legal", label: "Legal", icon: <FileText className="h-4 w-4" /> },
+    { id: "maintenance", label: "Mantenimiento", icon: <Clock className="h-4 w-4" /> },
   ];
 
   return (
@@ -586,6 +590,7 @@ export function AdminDashboard() {
       )}
 
       {tab === "legal" && <AdminLegalPanel />}
+      {tab === "maintenance" && <AdminMaintenancePanel />}
 
       <AdminDetailPanel
         target={detail}

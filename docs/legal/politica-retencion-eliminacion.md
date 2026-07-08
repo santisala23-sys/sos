@@ -88,12 +88,12 @@ Funcionalidades **no disponibles hoy** (redacción transitoria):
 
 | Funcionalidad | Estado | Alternativa |
 |---------------|--------|-------------|
-| Eliminar cuenta desde dashboard | ❌ No implementado | Email a privacidad |
-| Exportar datos desde dashboard | ❌ No implementado | Solicitud ARCO por email |
-| Purga automática programada | ❌ No implementado | Retención manual / futuro cron |
+| Eliminar cuenta desde dashboard | ✅ Implementado (solicitud de baja) | También disponible por email |
+| Exportar datos desde dashboard | ✅ Implementado | También disponible por email ARCO |
+| Purga automática programada | ✅ Implementado (cron con retención) | — |
 | Desactivar perfil | ✅ `is_active = false` | Impide vista pública |
 
-Compromiso: implementar self-service de baja y exportación en versiones futuras.
+Compromiso: mejorar el detalle del proceso, auditoría y confirmaciones de baja en versiones futuras.
 
 ## 9. Contacto
 

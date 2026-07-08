@@ -17,6 +17,7 @@ import {
   recordEligibleDeclaration,
   recordTermsAcceptance,
 } from "@/lib/db/queries";
+import { getSql } from "@/lib/db/index";
 import {
   clearEligiblePendingCookieOptions,
   clearTermsPendingCookieOptions,
@@ -85,6 +86,27 @@ export async function GET(request: Request) {
 
     const legal = termsPending && eligiblePending ? legalAcceptancePayload() : undefined;
     const user = await findOrCreateGoogleUser(googleUser, legal);
+
+    const sql = getSql();
+    const statusRows = await sql`
+      SELECT deletion_requested_at, deleted_at
+      FROM users
+      WHERE id = ${user.id}
+      LIMIT 1
+    `;
+    const status = statusRows[0] as
+      | { deletion_requested_at: string | null; deleted_at: string | null }
+      | undefined;
+    if (status?.deleted_at) {
+      return NextResponse.redirect(
+        `${loginUrl}?error=${encodeURIComponent("Esta cuenta fue dada de baja")}`,
+      );
+    }
+    if (status?.deletion_requested_at) {
+      return NextResponse.redirect(
+        `${loginUrl}?error=${encodeURIComponent("Tu cuenta tiene una baja solicitada")}`,
+      );
+    }
 
     if (termsPending) {
       const payload = legalAcceptancePayload();

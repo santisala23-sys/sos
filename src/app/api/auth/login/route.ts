@@ -38,6 +38,23 @@ export const POST = withApi(
       );
     }
 
+    if (user.deleted_at) {
+      return NextResponse.json(
+        { error: "Esta cuenta fue dada de baja" },
+        { status: 403 },
+      );
+    }
+
+    if (user.deletion_requested_at) {
+      return NextResponse.json(
+        {
+          error:
+            "Tu cuenta tiene una baja solicitada. Si fue un error, contactanos desde /contacto.",
+        },
+        { status: 403 },
+      );
+    }
+
     const valid = user.password_hash
       ? await verifyPassword(password, user.password_hash)
       : false;

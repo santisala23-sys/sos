@@ -14,6 +14,8 @@ type UserRow = User & {
   password_hash: string | null;
   google_id: string | null;
   avatar_url: string | null;
+  deletion_requested_at?: string | null;
+  deleted_at?: string | null;
 };
 
 export async function findUserByEmail(
@@ -21,7 +23,9 @@ export async function findUserByEmail(
 ): Promise<UserRow | null> {
   const sql = getSql();
   const rows = await sql`
-    SELECT id, email, password_hash, google_id, avatar_url, full_name, updated_at, created_at
+    SELECT
+      id, email, password_hash, google_id, avatar_url, full_name, updated_at, created_at,
+      deletion_requested_at, deleted_at
     FROM users
     WHERE email = ${email.toLowerCase()}
     LIMIT 1
