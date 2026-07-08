@@ -1,10 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import {
-  GoogleTagManagerBody,
-  GoogleTagManagerHead,
-} from "@/components/analytics/GoogleTagManager";
+import { GoogleTagManager } from "@/components/analytics/GoogleTagManager";
 import { getAppUrl } from "@/lib/utils/app-url";
+import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getAppUrl()),
@@ -31,10 +29,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="h-full">
-      <GoogleTagManagerHead />
       <body className="min-h-full flex flex-col antialiased">
-        <GoogleTagManagerBody />
+        <GoogleTagManager />
         {children}
+        <CookieConsentBanner />
       </body>
     </html>
   );

@@ -26,7 +26,7 @@ Las **cookies** son archivos pequeños que el navegador guarda en tu dispositivo
 
 ## 2. Quién las utiliza
 
-**[COMPLETAR: razón social]** opera SOSme en https://sos-alpha-lime.vercel.app
+**{{legal_name}}** opera SOSme en {{website_url}}
 
 ## 3. Inventario detallado
 
@@ -35,6 +35,7 @@ Las **cookies** son archivos pequeños que el navegador guarda en tu dispositivo
 | `sos_session` | Cookie httpOnly | 7 días | Mantener sesión del Tutor autenticado (JWT) | Sí, para usar cuenta |
 | `google_oauth_state` | Cookie | 10 minutos | Protección CSRF en login con Google | Sí, si usás Google OAuth |
 | `sosme_scan_{slug}` | Cookie (no httpOnly) | 48 horas | Token de sesión de escaneo por perfil | Sí, para chat/PDF en escaneo |
+| `sos_cookie_consent` | Cookie | 180 días | Recordar tu preferencia de consentimiento de cookies | Sí, para guardar tu elección |
 | Service Worker (`/sw.js`) | SW + cache | Persistente | Recibir notificaciones Web Push | No; solo si activás push |
 
 ## 4. localStorage y sessionStorage
@@ -61,9 +62,10 @@ Podés revocar permisos desde la configuración del navegador o desuscribirte de
 | Tercero | Cuándo | Finalidad |
 |---------|--------|-----------|
 | **Google** | Login OAuth | Autenticación; sujetas a [políticas de Google](https://policies.google.com/privacy) |
+| **Google Tag Manager / Analytics** | Solo si aceptás cookies de analytics | Medición de uso del sitio; requiere consentimiento explícito |
 | **Google Maps** | Al abrir enlace de ubicación | Mapa externo; no embebemos API con tracking propio |
 
-No usamos cookies de publicidad ni analytics de terceros en la versión actual del producto.
+No usamos cookies de publicidad. Las de analytics solo se activan si las aceptás en el banner.
 
 ## 7. Base legal
 
@@ -79,9 +81,9 @@ Instrucciones: Chrome → Configuración → Privacidad → Cookies; Firefox →
 
 ## 9. Banner de cookies
 
-**Estado actual:** SOSme **no muestra** un banner de cookies de consentimiento porque, a la fecha, solo utiliza cookies/tecnologías **estrictamente necesarias** para el funcionamiento y consentimiento puntual (push, GPS) en el flujo correspondiente.
+**Estado actual:** SOSme **muestra** un aviso de cookies con dos opciones: aceptar solo las **necesarias** o **todas** (incluye analytics, si está habilitado en el sitio).
 
-Si en el futuro se incorporan analytics o marketing, deberá implementarse banner con granularidad de consentimiento.
+Si en el futuro se incorporan cookies de marketing adicionales, el banner deberá ofrecer granularidad de consentimiento.
 
 ## 10. Cambios
 
@@ -89,7 +91,7 @@ Actualizaremos esta Política cuando cambien las tecnologías usadas. Versión y
 
 ## 11. Contacto
 
-**somososme@gmail.com**
+**{{privacy_email}}**
 
 ## 12. No constituye asesoramiento legal
 

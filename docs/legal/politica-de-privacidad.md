@@ -26,11 +26,11 @@
 
 | Campo | Dato |
 |-------|------|
-| Responsable | **[COMPLETAR: razón social o titular]** |
-| CUIT/CUIL | **[COMPLETAR]** |
-| Domicilio | **[COMPLETAR, Argentina]** |
-| Email privacidad / ARCO | **somososme@gmail.com** |
-| Sitio web | https://sos-alpha-lime.vercel.app |
+| Responsable | **{{legal_name}}** |
+| CUIT/CUIL | **{{cuit}}** |
+| Domicilio | **{{address}}** |
+| Email privacidad / ARCO | **{{privacy_email}}** |
+| Sitio web | {{website_url}} |
 
 ## 2. Alcance
 

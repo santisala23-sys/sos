@@ -22,7 +22,7 @@
 
 Esta Política establece cuánto tiempo conservamos datos personales en SOSme y cómo podés solicitar su eliminación o exportación.
 
-**Responsable:** [COMPLETAR: razón social] — somososme@gmail.com
+**Responsable:** {{legal_name}} — {{privacy_email}}
 
 ## 2. Plazos de retención por categoría
 

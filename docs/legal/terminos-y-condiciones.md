@@ -29,11 +29,11 @@
 
 ## 1. Identificación del prestador
 
-El servicio **SOSme** (en adelante, el **Servicio**) es operado por **[COMPLETAR: razón social o nombre del responsable]** (en adelante, el **Operador**), con domicilio en **[COMPLETAR: domicilio legal, Argentina]**, CUIT/CUIL **[COMPLETAR]**.
+El servicio **SOSme** (en adelante, el **Servicio**) es operado por **{{legal_name}}** (en adelante, el **Operador**), con domicilio en **{{address}}**, CUIT/CUIL **{{cuit}}**.
 
-Contacto general y legal: **somososme@gmail.com**
+Contacto general y legal: **{{privacy_email}}**
 
-Sitio web: https://sos-alpha-lime.vercel.app
+Sitio web: {{website_url}}
 
 ## 2. Aceptación de los Términos
 
@@ -203,7 +203,7 @@ El uso continuado del Servicio después de la entrada en vigencia de cambios imp
 
 Estos Términos se rigen por las leyes de la **República Argentina**, incluyendo la Ley 25.326 de Protección de Datos Personales, el Decreto Reglamentario 1558/2001 y normativa de la Agencia de Acceso a la Información Pública (AAIP).
 
-Para controversias, las partes se someten a los tribunales ordinarios de **[COMPLETAR: ciudad/provincia del domicilio del Operador]**, renunciando a cualquier otro fuero, salvo normas imperativas en contrario.
+Para controversias, las partes se someten a los tribunales ordinarios de **{{jurisdiction}}**, renunciando a cualquier otro fuero, salvo normas imperativas en contrario.
 
 Si tenés domicilio en la Ciudad Autónoma de Buenos Aires o en otra jurisdicción con normativa de defensa del consumidor, conservás los derechos que no puedan ser limitados por acuerdo.
 

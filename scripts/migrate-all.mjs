@@ -43,6 +43,7 @@ const migrations = [
   "011_registration_eligibility.sql",
   "012_freemium_and_product_qr.sql",
   "013_store_products_orders.sql",
+  "014_legal_entity_settings.sql",
 ];
 
 for (const file of migrations) {

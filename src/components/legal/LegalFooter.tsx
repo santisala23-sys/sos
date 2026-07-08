@@ -5,9 +5,14 @@ import { LEGAL_FOOTER_LINKS } from "@/lib/legal/constants";
 type LegalFooterProps = {
   className?: string;
   compact?: boolean;
+  legalName?: string;
 };
 
-export function LegalFooter({ className = "", compact = false }: LegalFooterProps) {
+export function LegalFooter({
+  className = "",
+  compact = false,
+  legalName = "SOSme",
+}: LegalFooterProps) {
   return (
     <footer
       className={`border-t border-neutral-200/80 bg-white/80 px-4 py-6 text-center backdrop-blur-sm ${className}`}
@@ -38,7 +43,7 @@ export function LegalFooter({ className = "", compact = false }: LegalFooterProp
         ))}
       </nav>
       <p className="mt-3 text-xs text-neutral-500">
-        © {new Date().getFullYear()} [COMPLETAR: razón social]. Argentina.
+        © {new Date().getFullYear()} {legalName}. Argentina.
       </p>
     </footer>
   );

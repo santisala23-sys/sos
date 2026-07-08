@@ -19,8 +19,8 @@ export function legalMetadata(slug: LegalDocumentSlug): Metadata {
   };
 }
 
-export function LegalPage({ slug }: LegalPageProps) {
-  const doc = loadLegalDocument(slug);
+export async function LegalPage({ slug }: LegalPageProps) {
+  const doc = await loadLegalDocument(slug);
 
   return (
     <div className="flex min-h-dvh flex-col bg-[#faf9fc]">
@@ -45,7 +45,7 @@ export function LegalPage({ slug }: LegalPageProps) {
         </p>
       </main>
 
-      <LegalFooter />
+      <LegalFooter legalName={doc.legalName} />
     </div>
   );
 }

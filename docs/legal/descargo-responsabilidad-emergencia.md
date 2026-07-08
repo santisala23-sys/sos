@@ -51,7 +51,7 @@ Si vos o alguien más está en **peligro de vida**, sufrís una **emergencia mé
 
 ## Limitación
 
-El Operador de SOSme (**[COMPLETAR: razón social]**) no asume responsabilidad por daños, lesiones o pérdidas derivadas de confiar exclusivamente en SOSme en lugar de servicios de emergencia oficiales o atención médica profesional, en los términos permitidos por la ley aplicable.
+El Operador de SOSme (**{{legal_name}}**) no asume responsabilidad por daños, lesiones o pérdidas derivadas de confiar exclusivamente en SOSme en lugar de servicios de emergencia oficiales o atención médica profesional, en los términos permitidos por la ley aplicable.
 
 ---
 

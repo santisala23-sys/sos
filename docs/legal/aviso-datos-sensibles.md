@@ -16,8 +16,8 @@ Este aviso aplica cuando un **Tutor** carga en un perfil de tipo **persona** dat
 
 ## 2. Identificación del Operador
 
-**Responsable del tratamiento:** [COMPLETAR: razón social]  
-**Domicilio:** [COMPLETAR]  
+**Responsable del tratamiento:** {{legal_name}}
+**Domicilio:** {{address}}
 **Contacto privacidad:** somososme@gmail.com
 
 ## 3. Finalidad
