@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import {
+  GoogleTagManagerBody,
+  GoogleTagManagerHead,
+} from "@/components/analytics/GoogleTagManager";
 import { getAppUrl } from "@/lib/utils/app-url";
 
 export const metadata: Metadata = {
@@ -27,7 +31,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="h-full">
-      <body className="min-h-full flex flex-col antialiased">{children}</body>
+      <GoogleTagManagerHead />
+      <body className="min-h-full flex flex-col antialiased">
+        <GoogleTagManagerBody />
+        {children}
+      </body>
     </html>
   );
 }
