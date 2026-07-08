@@ -129,7 +129,7 @@ export default function PricingPage() {
               </h2>
               <p className="mt-3 text-neutral-600">
                 ¿Tu familia necesita 3, 5 o más QR? Contanos y ampliamos tu
-                cuenta manualmente.
+                cuenta a pedido.
               </p>
               <p className="mt-8 rounded-2xl bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
                 Precio a convenir · Sin tarjeta por ahora · Respuesta por
@@ -156,7 +156,7 @@ export default function PricingPage() {
                   <span className="block">
                     <Button variant="secondary" size="lg" className="w-full gap-2">
                       <MessageCircle className="h-5 w-5" aria-hidden />
-                      Pedir más perfiles
+                      Contactar por más perfiles
                     </Button>
                   </span>
                 </summary>
