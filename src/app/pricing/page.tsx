@@ -30,7 +30,7 @@ const FREE_FEATURES = [
   "Alertas push al escanear o SOS",
   "Ubicación opcional del escáner",
   "Chat en vivo por evento",
-  "Descarga del QR para imprimir",
+  "Descargá PNG/PDF para imprimir o usar como quieras",
   "Contactos de emergencia e instrucciones",
 ] as const;
 
@@ -62,7 +62,8 @@ export default function PricingPage() {
               o producto físico
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-neutral-600 sm:text-xl">
-              Creá tu perfil gratis e imprimí el QR (PNG/PDF), o comprá un
+              Creá tu perfil gratis, descargá el QR (PNG/PDF) y usalo como
+              quieras (imprimir o digital), o comprá un
               producto en la{" "}
               <Link
                 href="/tienda"
@@ -88,8 +89,12 @@ export default function PricingPage() {
               </h2>
               <p className="mt-3 text-neutral-600">{FREE_PLAN.description}</p>
               <p className="mt-8">
-                <span className="text-5xl font-black text-neutral-900">$0</span>
-                <span className="text-lg text-neutral-500"> / siempre</span>
+                <span className="text-4xl font-black text-neutral-900">
+                  Gratis
+                </span>
+                <span className="mt-2 block text-sm font-medium text-neutral-500">
+                  Sin tarjeta · Sin cuotas
+                </span>
               </p>
               <ul className="mt-8 flex-1 space-y-4">
                 {FREE_FEATURES.map((item) => (
@@ -146,17 +151,35 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <a
-                href={whatsappMore}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-10 block"
-              >
-                <Button variant="secondary" size="lg" className="w-full gap-2">
-                  <MessageCircle className="h-5 w-5" aria-hidden />
-                  Pedir más perfiles
-                </Button>
-              </a>
+              <details className="mt-10">
+                <summary className="list-none [&::-webkit-details-marker]:hidden">
+                  <span className="block">
+                    <Button variant="secondary" size="lg" className="w-full gap-2">
+                      <MessageCircle className="h-5 w-5" aria-hidden />
+                      Pedir más perfiles
+                    </Button>
+                  </span>
+                </summary>
+                <div className="mt-3 grid gap-2 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700">
+                  <p className="font-semibold text-neutral-900">
+                    ¿Cómo querés contactarnos?
+                  </p>
+                  <a
+                    href={whatsappMore}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-xl bg-white px-4 py-3 font-semibold text-violet-700 shadow-sm transition-colors hover:bg-violet-50"
+                  >
+                    WhatsApp (recomendado)
+                  </a>
+                  <Link
+                    href="/contacto"
+                    className="rounded-xl bg-white px-4 py-3 font-semibold text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100"
+                  >
+                    Formulario de contacto
+                  </Link>
+                </div>
+              </details>
             </article>
           </div>
         </section>
