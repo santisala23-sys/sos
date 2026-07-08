@@ -11,6 +11,7 @@ import {
   PRINT_DPI,
 } from "@/lib/activation/print-pdf-constants";
 import {
+  isCutGuideElement,
   resolveTemplateText,
   type PrintTemplateElement,
   type PrintTemplateRow,
@@ -91,27 +92,10 @@ async function drawDesignFromTemplate(
 
   doc.addContent(beginLayerMarker("DESIGN"));
 
+  doc.rect(0, 0, pageWidthPt, pageHeightPt).fill("#FFFFFF");
+
   for (const element of template.layout_json.elements) {
     if (element.type === "background") {
-      if (element.assetUrl) {
-        let buffer = assetCache.get(element.assetUrl);
-        if (buffer === undefined) {
-          buffer = await readAssetBuffer(element.assetUrl);
-          assetCache.set(element.assetUrl, buffer);
-        }
-        if (buffer) {
-          doc.image(buffer, 0, 0, {
-            width: pageWidthPt,
-            height: pageHeightPt,
-          });
-        } else if (element.fill) {
-          doc.rect(0, 0, pageWidthPt, pageHeightPt).fill(element.fill);
-        }
-      } else if (element.fill) {
-        doc.rect(0, 0, pageWidthPt, pageHeightPt).fill(element.fill);
-      } else {
-        doc.rect(0, 0, pageWidthPt, pageHeightPt).fill("#FFFFFF");
-      }
       continue;
     }
 
@@ -177,12 +161,7 @@ function drawCutFromTemplate(
   doc: InstanceType<typeof PDFDocument>,
   template: PrintTemplateRow,
 ): void {
-  const cutElements = template.layout_json.elements.filter(
-    (element): element is Extract<
-      PrintTemplateElement,
-      { type: "cut_circle" | "cut_hole" }
-    > => element.type === "cut_circle" || element.type === "cut_hole",
-  );
+  const cutElements = template.layout_json.elements.filter(isCutGuideElement);
 
   if (cutElements.length === 0) return;
 
@@ -198,6 +177,18 @@ function drawCutFromTemplate(
           mmToPt(element.centerXMm),
           mmToPt(element.centerYMm),
           mmToPt(element.radiusMm),
+        )
+        .stroke();
+      continue;
+    }
+
+    if (element.type === "cut_rect") {
+      doc
+        .rect(
+          mmToPt(element.xMm),
+          mmToPt(element.yMm),
+          mmToPt(element.widthMm),
+          mmToPt(element.heightMm),
         )
         .stroke();
       continue;

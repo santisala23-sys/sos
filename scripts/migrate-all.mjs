@@ -46,6 +46,7 @@ const migrations = [
   "014_legal_entity_settings.sql",
   "015_account_self_service_and_purge.sql",
   "016_print_templates.sql",
+  "017_print_template_white_canvas.sql",
 ];
 
 for (const file of migrations) {

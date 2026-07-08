@@ -2,6 +2,7 @@ import { getSql } from "@/lib/db/index";
 import {
   createDefaultLayoutForSize,
   parsePrintTemplateLayout,
+  sanitizeTemplateLayout,
   slugifyTemplateName,
   type PrintTemplateLayout,
   type PrintTemplateRow,
@@ -9,7 +10,10 @@ import {
 
 function mapPrintTemplateRow(row: Record<string, unknown>): PrintTemplateRow {
   const layout =
-    parsePrintTemplateLayout(row.layout_json) ?? createDefaultLayoutForSize(40, 40);
+    sanitizeTemplateLayout(
+      parsePrintTemplateLayout(row.layout_json) ??
+        createDefaultLayoutForSize(40, 40),
+    );
 
   return {
     id: String(row.id),
@@ -102,9 +106,10 @@ export async function createPrintTemplate(input: {
   const name = input.name.trim();
   const baseSlug = slugifyTemplateName(input.slug?.trim() || name);
   const slug = await ensureUniqueSlug(baseSlug);
-  const layout =
+  const layout = sanitizeTemplateLayout(
     input.layout_json ??
-    createDefaultLayoutForSize(input.page_width_mm, input.page_height_mm);
+      createDefaultLayoutForSize(input.page_width_mm, input.page_height_mm),
+  );
 
   if (input.is_default) {
     await sql`UPDATE print_templates SET is_default = false WHERE is_default = true`;
@@ -158,7 +163,9 @@ export async function updatePrintTemplate(
 
   const pageWidth = input.page_width_mm ?? existing.page_width_mm;
   const pageHeight = input.page_height_mm ?? existing.page_height_mm;
-  const layout = input.layout_json ?? existing.layout_json;
+  const layout = input.layout_json
+    ? sanitizeTemplateLayout(input.layout_json)
+    : existing.layout_json;
   const cutLayer =
     input.cut_layer_enabled ?? existing.cut_layer_enabled;
   const isDefault = input.is_default ?? existing.is_default;

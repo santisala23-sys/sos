@@ -25,6 +25,7 @@ import {
 import {
   PRINT_TEMPLATE_PRESETS,
   createDefaultLayoutForSize,
+  sanitizeTemplateLayout,
   type PrintTemplateRow,
 } from "@/lib/activation/print-template-types";
 import type {
@@ -62,7 +63,6 @@ export function AdminPrintTemplatesPanel() {
 
   const canvasRef = useRef<PrintTemplateCanvasHandle | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const bgInputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -102,7 +102,7 @@ export function AdminPrintTemplatesPanel() {
     setPageWidthMm(template.page_width_mm);
     setPageHeightMm(template.page_height_mm);
     setCutLayerEnabled(template.cut_layer_enabled);
-    setLayout(template.layout_json);
+    setLayout(sanitizeTemplateLayout(template.layout_json));
     setEditorKey((k) => k + 1);
     setLayers([]);
     setSelectedLayerId(null);
@@ -155,31 +155,13 @@ export function AdminPrintTemplatesPanel() {
     }
   }
 
-  async function handleBackgroundUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    if (!canvasReady || !canvasRef.current) {
-      setError("Esperá a que cargue el lienzo antes de cambiar el fondo.");
-      return;
-    }
-    setError(null);
-    try {
-      const url = await uploadFile(file);
-      if (!url) return;
-      await canvasRef.current.setBackground(url);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "No se pudo cargar el fondo.",
-      );
-    }
-  }
-
   async function handleSave() {
     setError(null);
     setSaving(true);
     try {
-      const layoutJson = canvasRef.current?.getLayout() ?? layout;
+      const layoutJson = sanitizeTemplateLayout(
+        canvasRef.current?.getLayout() ?? layout,
+      );
       const payload = {
         name: name.trim() || "Sin nombre",
         page_width_mm: pageWidthMm,
@@ -238,7 +220,8 @@ export function AdminPrintTemplatesPanel() {
               {editingId === "new" ? "Nueva plantilla" : "Editar plantilla"}
             </h2>
             <p className="text-sm text-neutral-500">
-              Armá el diseño, guardalo y usalo al generar lotes para imprenta.
+              Lienzo blanco fijo. Agregá QR, texto, logos e imágenes encima. Las guías
+              magenta son solo para la imprenta.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -278,13 +261,6 @@ export function AdminPrintTemplatesPanel() {
           </p>
         )}
 
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-          <strong className="font-semibold">Sobre la plantilla «Llavero 40×40»:</strong> incluye
-          el diseño Canva pre-cargado (SCAN ME, logo sosme) en la capa{" "}
-          <em>Fondo</em>, más guías magenta de corte para imprenta. Podés reemplazar el fondo con{" "}
-          <em>Fondo blanco</em> o subir el tuyo. El patrón violeta del admin ya no debería verse
-          detrás del lienzo.
-        </div>
 
         <div className="grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)_260px]">
           <aside className="space-y-4">
@@ -391,19 +367,11 @@ export function AdminPrintTemplatesPanel() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => bgInputRef.current?.click()}
+                  onClick={() => canvasRef.current?.addCutRect()}
                   className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 px-3 py-2 text-sm hover:bg-violet-50"
                 >
-                  <LayoutTemplate className="h-4 w-4 text-violet-600" />
-                  Cambiar fondo (imagen)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => canvasRef.current?.setWhiteBackground()}
-                  className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 px-3 py-2 text-sm hover:bg-violet-50"
-                >
-                  <LayoutTemplate className="h-4 w-4 text-neutral-500" />
-                  Fondo blanco (quitar diseño)
+                  <Scissors className="h-4 w-4 text-fuchsia-600" />
+                  Rectángulo de corte
                 </button>
                 <button
                   type="button"
@@ -419,22 +387,18 @@ export function AdminPrintTemplatesPanel() {
                   className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 px-3 py-2 text-sm hover:bg-violet-50"
                 >
                   <Scissors className="h-4 w-4 text-fuchsia-600" />
-                  Perforación
+                  Perforación (círculo)
                 </button>
               </div>
+              <p className="mt-2 text-xs text-neutral-500">
+                Seleccioná una guía de corte y arrastrá las esquinas para ajustar el tamaño.
+              </p>
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/png,image/jpeg,image/webp,image/svg+xml"
                 className="hidden"
                 onChange={(e) => void handleImageUpload(e)}
-              />
-              <input
-                ref={bgInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                className="hidden"
-                onChange={(e) => void handleBackgroundUpload(e)}
               />
             </div>
 
@@ -493,7 +457,7 @@ export function AdminPrintTemplatesPanel() {
               <h3 className="text-sm font-semibold text-neutral-800">Capas</h3>
             </div>
             <p className="mt-1 text-xs text-neutral-500">
-              Arriba = al frente. Fondo siempre queda atrás.
+              Arriba = al frente. Arrastrá o escalá en el lienzo.
             </p>
 
             {layers.length === 0 ? (
@@ -502,9 +466,10 @@ export function AdminPrintTemplatesPanel() {
               <ul className="mt-4 space-y-1.5">
                 {layers.map((layer) => {
                   const isSelected = selectedLayerId === layer.id;
-                  const isBackground = layer.type === "background";
                   const isCut =
-                    layer.type === "cut_circle" || layer.type === "cut_hole";
+                    layer.type === "cut_circle" ||
+                    layer.type === "cut_hole" ||
+                    layer.type === "cut_rect";
 
                   return (
                     <li
@@ -528,8 +493,7 @@ export function AdminPrintTemplatesPanel() {
                           {layer.label}
                         </span>
                       </button>
-                      {!isBackground && (
-                        <div className="mt-2 flex items-center gap-1">
+                      <div className="mt-2 flex items-center gap-1">
                           <button
                             type="button"
                             title="Subir capa"
@@ -558,10 +522,9 @@ export function AdminPrintTemplatesPanel() {
                             }
                             className="ml-auto rounded border border-red-200 p-1 text-red-700 hover:bg-red-50"
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      )}
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </li>
                   );
                 })}

@@ -55,7 +55,30 @@ export type PrintTemplateElement =
       xMm: number;
       yMm: number;
       radiusMm: number;
+    }
+  | {
+      id: string;
+      type: "cut_rect";
+      xMm: number;
+      yMm: number;
+      widthMm: number;
+      heightMm: number;
     };
+
+export type CutGuideElement = Extract<
+  PrintTemplateElement,
+  { type: "cut_circle" | "cut_hole" | "cut_rect" }
+>;
+
+export function isCutGuideElement(
+  element: PrintTemplateElement,
+): element is CutGuideElement {
+  return (
+    element.type === "cut_circle" ||
+    element.type === "cut_hole" ||
+    element.type === "cut_rect"
+  );
+}
 
 export type PrintTemplateRow = {
   id: string;
@@ -115,11 +138,6 @@ export function createDefaultLayoutForSize(
     version: 1,
     elements: [
       {
-        id: "bg",
-        type: "background",
-        fill: "#FFFFFF",
-      },
-      {
         id: "qr",
         type: "qr",
         xMm: roundMm(qrX),
@@ -127,6 +145,16 @@ export function createDefaultLayoutForSize(
         sizeMm: roundMm(qrSize),
       },
     ],
+  };
+}
+
+/** El lienzo es blanco por defecto; no persistimos capa "background". */
+export function sanitizeTemplateLayout(
+  layout: PrintTemplateLayout,
+): PrintTemplateLayout {
+  return {
+    version: 1,
+    elements: layout.elements.filter((element) => element.type !== "background"),
   };
 }
 

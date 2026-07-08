@@ -16,12 +16,27 @@ import {
   editorPxToMm,
   mmToEditorPx,
   roundMm,
+  sanitizeTemplateLayout,
   type PrintTemplateElement,
   type PrintTemplateLayout,
 } from "@/lib/activation/print-template-types";
 
 const PAGE_OFFSET_PX = 20;
 const SAMPLE_QR_URL = "https://sosme.app/activar/SOS-DEMO";
+const CUT_STROKE = "#FF00FF";
+
+function isCutType(type: PrintTemplateElement["type"]): boolean {
+  return type === "cut_circle" || type === "cut_hole" || type === "cut_rect";
+}
+
+function styleCutGuide(obj: FabricObject): void {
+  obj.set({
+    fill: "transparent",
+    stroke: CUT_STROKE,
+    strokeWidth: 1,
+    strokeUniform: true,
+  });
+}
 
 export type CanvasLayerItem = {
   id: string;
@@ -41,6 +56,8 @@ export function layerLabel(meta: SosMeta): string {
       return "Imagen / logo";
     case "cut_circle":
       return "Corte (círculo)";
+    case "cut_rect":
+      return "Corte (rectángulo)";
     case "cut_hole":
       return "Perforación";
     default:
@@ -78,37 +95,9 @@ function findObjectById(canvas: Canvas, id: string): FabricObject | undefined {
   return canvas.getObjects().find((obj) => getMeta(obj)?.sosId === id);
 }
 
-function keepBackgroundAtBottom(canvas: Canvas): void {
-  const objects = canvas.getObjects();
-  const background = objects.find((obj) => getMeta(obj)?.sosType === "background");
-  if (!background) return;
-  const chromeCount = objects.filter(isPageChrome).length;
-  canvas.moveObjectTo(background, chromeCount);
-}
-
-async function loadArtboardImage(
-  url: string,
-  pageWidthPx: number,
-  pageHeightPx: number,
-): Promise<FabricImage> {
-  const img = await FabricImage.fromURL(url, { crossOrigin: "anonymous" });
-  const width = img.width || 1;
-  const height = img.height || 1;
-  const scale = Math.min(pageWidthPx / width, pageHeightPx / height);
-  img.set({
-    left: PAGE_OFFSET_PX,
-    top: PAGE_OFFSET_PX,
-    scaleX: scale,
-    scaleY: scale,
-    originX: "left",
-    originY: "top",
-  });
-  return img;
-}
-
 function applyCutGuideVisibility(obj: FabricObject, visible: boolean): void {
   const meta = getMeta(obj);
-  if (meta?.sosType === "cut_circle" || meta?.sosType === "cut_hole") {
+  if (meta && isCutType(meta.sosType)) {
     obj.set({ visible, evented: visible, selectable: visible });
   }
 }
@@ -165,21 +154,12 @@ function objectToElement(
   pageHeightMm: number,
 ): PrintTemplateElement | null {
   const meta = getMeta(obj);
-  if (!meta) return null;
+  if (!meta || meta.sosType === "background") return null;
 
   const left = (obj.left ?? 0) - PAGE_OFFSET_PX;
   const top = (obj.top ?? 0) - PAGE_OFFSET_PX;
   const scaleX = obj.scaleX ?? 1;
   const scaleY = obj.scaleY ?? 1;
-
-  if (meta.sosType === "background") {
-    return {
-      id: meta.sosId,
-      type: "background",
-      assetUrl: meta.assetUrl,
-      fill: meta.fill ?? "#FFFFFF",
-    };
-  }
 
   if (meta.sosType === "qr") {
     const widthPx = (obj.width ?? 0) * scaleX;
@@ -249,6 +229,19 @@ function objectToElement(
     };
   }
 
+  if (meta.sosType === "cut_rect") {
+    const widthPx = (obj.width ?? 0) * scaleX;
+    const heightPx = (obj.height ?? 0) * scaleY;
+    return {
+      id: meta.sosId,
+      type: "cut_rect",
+      xMm: roundMm(editorPxToMm(left)),
+      yMm: roundMm(editorPxToMm(top)),
+      widthMm: roundMm(editorPxToMm(widthPx)),
+      heightMm: roundMm(editorPxToMm(heightPx)),
+    };
+  }
+
   void pageWidthMm;
   void pageHeightMm;
   return null;
@@ -259,52 +252,10 @@ export function layoutToCanvasObjects(
   pageWidthMm: number,
   pageHeightMm: number,
 ): Promise<FabricObject[]> {
-  const objects: Promise<FabricObject | null>[] = layout.elements.map(
+  const objects: Promise<FabricObject | null>[] = sanitizeTemplateLayout(layout).elements.map(
     async (element) => {
       if (element.type === "background") {
-        if (element.assetUrl) {
-          try {
-            const img = await loadArtboardImage(
-              element.assetUrl,
-              mmToEditorPx(pageWidthMm),
-              mmToEditorPx(pageHeightMm),
-            );
-            img.set({
-              selectable: false,
-              evented: false,
-              hasControls: false,
-            });
-            setMeta(img, {
-              sosType: "background",
-              sosId: element.id,
-              assetUrl: element.assetUrl,
-            });
-            return img;
-          } catch {
-            const rect = new Rect({
-              left: PAGE_OFFSET_PX,
-              top: PAGE_OFFSET_PX,
-              width: mmToEditorPx(pageWidthMm),
-              height: mmToEditorPx(pageHeightMm),
-              fill: element.fill ?? "#FFFFFF",
-              selectable: false,
-              evented: false,
-            });
-            setMeta(rect, { sosType: "background", sosId: element.id, fill: element.fill });
-            return rect;
-          }
-        }
-        const rect = new Rect({
-          left: PAGE_OFFSET_PX,
-          top: PAGE_OFFSET_PX,
-          width: mmToEditorPx(pageWidthMm),
-          height: mmToEditorPx(pageHeightMm),
-          fill: element.fill ?? "#FFFFFF",
-          selectable: false,
-          evented: false,
-        });
-        setMeta(rect, { sosType: "background", sosId: element.id, fill: element.fill });
-        return rect;
+        return null;
       }
 
       if (element.type === "qr") {
@@ -394,12 +345,24 @@ export function layoutToCanvasObjects(
           radius: mmToEditorPx(element.radiusMm),
           originX: "center",
           originY: "center",
-          fill: "transparent",
-          stroke: "#FF00FF",
-          strokeWidth: 1,
         });
+        styleCutGuide(circle);
         setMeta(circle, { sosType: "cut_circle", sosId: element.id });
         return circle;
+      }
+
+      if (element.type === "cut_rect") {
+        const rect = new Rect({
+          left: PAGE_OFFSET_PX + mmToEditorPx(element.xMm),
+          top: PAGE_OFFSET_PX + mmToEditorPx(element.yMm),
+          width: mmToEditorPx(element.widthMm),
+          height: mmToEditorPx(element.heightMm),
+          originX: "left",
+          originY: "top",
+        });
+        styleCutGuide(rect);
+        setMeta(rect, { sosType: "cut_rect", sosId: element.id });
+        return rect;
       }
 
       if (element.type === "cut_hole") {
@@ -409,10 +372,8 @@ export function layoutToCanvasObjects(
           radius: mmToEditorPx(element.radiusMm),
           originX: "center",
           originY: "center",
-          fill: "transparent",
-          stroke: "#FF00FF",
-          strokeWidth: 1,
         });
+        styleCutGuide(circle);
         setMeta(circle, { sosType: "cut_hole", sosId: element.id });
         return circle;
       }
@@ -436,7 +397,7 @@ export function canvasToLayout(
     const element = objectToElement(obj, pageWidthMm, pageHeightMm);
     if (element) elements.push(element);
   }
-  return { version: 1, elements };
+  return sanitizeTemplateLayout({ version: 1, elements });
 }
 
 export type PrintTemplateCanvasHandle = {
@@ -446,9 +407,8 @@ export type PrintTemplateCanvasHandle = {
   addText: () => void;
   addImage: (url: string) => Promise<void>;
   addCutCircle: () => void;
+  addCutRect: () => void;
   addCutHole: () => void;
-  setBackground: (url: string) => Promise<void>;
-  setWhiteBackground: () => void;
   alignSelected: (mode: "left" | "center-h" | "right" | "top" | "center-v" | "bottom") => void;
   deleteLayer: (id: string) => void;
   deleteSelected: () => void;
@@ -591,7 +551,6 @@ export function PrintTemplateCanvas({
       canvas.add(img);
       canvas.setActiveObject(img);
       canvas.bringObjectToFront(img);
-      keepBackgroundAtBottom(canvas);
       canvas.requestRenderAll();
       notifyLayersChange();
       notifySelectionChange();
@@ -608,14 +567,33 @@ export function PrintTemplateCanvas({
       radius: Math.min(pageWidthPx, pageHeightPx) / 2,
       originX: "center",
       originY: "center",
-      fill: "transparent",
-      stroke: "#FF00FF",
-      strokeWidth: 1,
     });
+    styleCutGuide(circle);
     setMeta(circle, { sosType: "cut_circle", sosId: `cut-${Date.now()}` });
     applyCutGuideVisibility(circle, showCutGuidesRef.current);
     canvas.add(circle);
     canvas.setActiveObject(circle);
+    canvas.requestRenderAll();
+    notifyLayersChange();
+    notifySelectionChange();
+  }, [pageWidthPx, pageHeightPx, notifyLayersChange, notifySelectionChange]);
+
+  const addCutRect = useCallback(() => {
+    const canvas = fabricRef.current;
+    if (!canvas) return;
+    const rect = new Rect({
+      left: PAGE_OFFSET_PX,
+      top: PAGE_OFFSET_PX,
+      width: pageWidthPx,
+      height: pageHeightPx,
+      originX: "left",
+      originY: "top",
+    });
+    styleCutGuide(rect);
+    setMeta(rect, { sosType: "cut_rect", sosId: `cut-rect-${Date.now()}` });
+    applyCutGuideVisibility(rect, showCutGuidesRef.current);
+    canvas.add(rect);
+    canvas.setActiveObject(rect);
     canvas.requestRenderAll();
     notifyLayersChange();
     notifySelectionChange();
@@ -630,10 +608,8 @@ export function PrintTemplateCanvas({
       radius: mmToEditorPx(1.5),
       originX: "center",
       originY: "center",
-      fill: "transparent",
-      stroke: "#FF00FF",
-      strokeWidth: 1,
     });
+    styleCutGuide(circle);
     setMeta(circle, { sosType: "cut_hole", sosId: `hole-${Date.now()}` });
     applyCutGuideVisibility(circle, showCutGuidesRef.current);
     canvas.add(circle);
@@ -643,64 +619,13 @@ export function PrintTemplateCanvas({
     notifySelectionChange();
   }, [pageWidthPx, pageHeightPx, notifyLayersChange, notifySelectionChange]);
 
-  const setBackground = useCallback(
-    async (url: string) => {
-      const canvas = fabricRef.current;
-      if (!canvas) return;
-      const existing = canvas
-        .getObjects()
-        .find((obj) => getMeta(obj)?.sosType === "background");
-      if (existing) canvas.remove(existing);
-
-      const img = await loadArtboardImage(url, pageWidthPx, pageHeightPx);
-      img.set({
-        selectable: false,
-        evented: false,
-        hasControls: false,
-      });
-      setMeta(img, { sosType: "background", sosId: "bg", assetUrl: url });
-      const chromeCount = canvas.getObjects().filter(isPageChrome).length;
-      canvas.insertAt(chromeCount, img);
-      keepBackgroundAtBottom(canvas);
-      canvas.requestRenderAll();
-      notifyLayersChange();
-    },
-    [pageWidthPx, pageHeightPx, notifyLayersChange],
-  );
-
-  const setWhiteBackground = useCallback(() => {
-    const canvas = fabricRef.current;
-    if (!canvas) return;
-    const existing = canvas
-      .getObjects()
-      .find((obj) => getMeta(obj)?.sosType === "background");
-    if (existing) canvas.remove(existing);
-
-    const rect = new Rect({
-      left: PAGE_OFFSET_PX,
-      top: PAGE_OFFSET_PX,
-      width: pageWidthPx,
-      height: pageHeightPx,
-      fill: "#FFFFFF",
-      selectable: false,
-      evented: false,
-      hasControls: false,
-    });
-    setMeta(rect, { sosType: "background", sosId: "bg", fill: "#FFFFFF" });
-    const chromeCount = canvas.getObjects().filter(isPageChrome).length;
-    canvas.insertAt(chromeCount, rect);
-    keepBackgroundAtBottom(canvas);
-    canvas.requestRenderAll();
-    notifyLayersChange();
-  }, [pageWidthPx, pageHeightPx, notifyLayersChange]);
-
   const deleteLayer = useCallback(
     (id: string) => {
       const canvas = fabricRef.current;
       if (!canvas) return;
       const obj = findObjectById(canvas, id);
       const meta = obj ? getMeta(obj) : null;
-      if (!obj || !meta || meta.sosType === "background") return;
+      if (!obj || !meta) return;
       canvas.remove(obj);
       canvas.discardActiveObject();
       canvas.requestRenderAll();
@@ -717,7 +642,7 @@ export function PrintTemplateCanvas({
     if (!canvas) return;
     const active = canvas.getActiveObject();
     const meta = active ? getMeta(active) : null;
-    if (!active || !meta || meta.sosType === "background") return;
+    if (!active || !meta) return;
     canvas.remove(active);
     canvas.discardActiveObject();
     canvas.requestRenderAll();
@@ -735,12 +660,11 @@ export function PrintTemplateCanvas({
       if (!canvas) return;
       const obj = findObjectById(canvas, id);
       const meta = obj ? getMeta(obj) : null;
-      if (!obj || !meta || meta.sosType === "background") return;
+      if (!obj || !meta) return;
 
       if (direction === "up") canvas.bringObjectForward(obj);
       else canvas.sendObjectBackwards(obj);
 
-      keepBackgroundAtBottom(canvas);
       canvas.requestRenderAll();
       notifyLayersChange();
     },
@@ -752,7 +676,7 @@ export function PrintTemplateCanvas({
       const canvas = fabricRef.current;
       if (!canvas) return;
       const obj = findObjectById(canvas, id);
-      if (!obj || getMeta(obj)?.sosType === "background") return;
+      if (!obj) return;
       canvas.setActiveObject(obj);
       canvas.requestRenderAll();
       notifySelectionChange();
@@ -771,17 +695,28 @@ export function PrintTemplateCanvas({
       const canvas = fabricRef.current;
       if (!canvas) return;
       const obj = canvas.getActiveObject();
-      if (!obj || getMeta(obj)?.sosType === "background") return;
+      if (!obj || !getMeta(obj)) return;
 
-      const width = (obj.width ?? 0) * (obj.scaleX ?? 1);
-      const height = (obj.height ?? 0) * (obj.scaleY ?? 1);
+      const bounds = obj.getBoundingRect();
+      const width = bounds.width;
+      const height = bounds.height;
+      const originOffsetX = (obj.left ?? 0) - bounds.left;
+      const originOffsetY = (obj.top ?? 0) - bounds.top;
 
-      if (mode === "left") obj.set("left", PAGE_OFFSET_PX);
-      if (mode === "center-h") obj.set("left", PAGE_OFFSET_PX + (pageWidthPx - width) / 2);
-      if (mode === "right") obj.set("left", PAGE_OFFSET_PX + pageWidthPx - width);
-      if (mode === "top") obj.set("top", PAGE_OFFSET_PX);
-      if (mode === "center-v") obj.set("top", PAGE_OFFSET_PX + (pageHeightPx - height) / 2);
-      if (mode === "bottom") obj.set("top", PAGE_OFFSET_PX + pageHeightPx - height);
+      if (mode === "left") obj.set("left", PAGE_OFFSET_PX + originOffsetX);
+      if (mode === "center-h") {
+        obj.set("left", PAGE_OFFSET_PX + (pageWidthPx - width) / 2 + originOffsetX);
+      }
+      if (mode === "right") {
+        obj.set("left", PAGE_OFFSET_PX + pageWidthPx - width + originOffsetX);
+      }
+      if (mode === "top") obj.set("top", PAGE_OFFSET_PX + originOffsetY);
+      if (mode === "center-v") {
+        obj.set("top", PAGE_OFFSET_PX + (pageHeightPx - height) / 2 + originOffsetY);
+      }
+      if (mode === "bottom") {
+        obj.set("top", PAGE_OFFSET_PX + pageHeightPx - height + originOffsetY);
+      }
 
       obj.setCoords();
       canvas.requestRenderAll();
@@ -799,9 +734,8 @@ export function PrintTemplateCanvas({
       addText,
       addImage,
       addCutCircle,
+      addCutRect,
       addCutHole,
-      setBackground,
-      setWhiteBackground,
       alignSelected,
       deleteLayer,
       deleteSelected,
@@ -816,9 +750,8 @@ export function PrintTemplateCanvas({
     addText,
     addImage,
     addCutCircle,
+    addCutRect,
     addCutHole,
-    setBackground,
-    setWhiteBackground,
     alignSelected,
     deleteLayer,
     deleteSelected,
@@ -870,7 +803,6 @@ export function PrintTemplateCanvas({
         applyCutGuideVisibility(obj, showCutGuides);
         canvas.add(obj);
       }
-      keepBackgroundAtBottom(canvas);
       canvas.requestRenderAll();
       setReady(true);
       notifyLayersChange();
