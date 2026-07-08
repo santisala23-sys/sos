@@ -47,6 +47,7 @@ export default function DashboardPage() {
     planName: string;
     maxProfiles: number;
     currentCount: number;
+    activeCount?: number;
     canCreateMore: boolean;
   } | null>(null);
   const push = usePushNotifications();
@@ -99,6 +100,9 @@ export default function DashboardPage() {
   const latestUnread = logs.find((l) => !l.read_at);
   const legalBlocked = legalStatus?.needsAcceptance ?? false;
   const atProfileLimit = planStatus != null && !planStatus.canCreateMore;
+  const activeProfilesCount = loading
+    ? null
+    : profiles.reduce((acc, p) => (p.is_active ? acc + 1 : acc), 0);
   async function handleExport() {
     setExporting(true);
     setAccountMsg(null);
@@ -182,11 +186,11 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2 text-violet-200">
                 <QrCode className="h-4 w-4" aria-hidden />
                 <span className="text-xs font-semibold uppercase tracking-wide">
-                  Perfiles
+                  Activos
                 </span>
               </div>
               <p className="mt-2 text-2xl font-black">
-                {loading ? "—" : profiles.length}
+                {loading ? "—" : (planStatus?.activeCount ?? activeProfilesCount ?? 0)}
                 {planStatus && (
                   <span className="text-lg font-semibold text-violet-200">
                     /{planStatus.maxProfiles}

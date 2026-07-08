@@ -1161,6 +1161,16 @@ export async function countQrProfilesByTutor(userId: string): Promise<number> {
   return (rows[0] as { count: number }).count ?? 0;
 }
 
+export async function countActiveQrProfilesByTutor(userId: string): Promise<number> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT COUNT(*)::int AS count
+    FROM qr_profiles
+    WHERE tutor_id = ${userId} AND is_active = TRUE
+  `;
+  return (rows[0] as { count: number }).count ?? 0;
+}
+
 export async function findAdminUserById(
   userId: string,
 ): Promise<(AdminUserRow & { google_id: string | null }) | null> {

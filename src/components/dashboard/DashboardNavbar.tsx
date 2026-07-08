@@ -26,6 +26,7 @@ type PlanStatus = {
   planName: string;
   maxProfiles: number;
   currentCount: number;
+  activeCount?: number;
 };
 
 export function DashboardNavbar() {
@@ -111,7 +112,7 @@ export function DashboardNavbar() {
             <br />
             <span className="font-semibold text-violet-700">
               {planStatus
-                ? `${planStatus.planName} · ${planStatus.currentCount}/${planStatus.maxProfiles} QR`
+                ? `${planStatus.planName} · ${(planStatus.activeCount ?? planStatus.currentCount)}/${planStatus.maxProfiles} QR activos`
                 : "Gestioná tus perfiles y alertas"}
             </span>
           </span>
@@ -183,7 +184,7 @@ export function DashboardNavbar() {
             <p className="mb-4 rounded-xl bg-violet-50 px-4 py-3 text-sm text-violet-800">
               <span className="font-semibold">{planStatus.planName}</span>
               {" · "}
-              {planStatus.currentCount}/{planStatus.maxProfiles} perfiles QR
+              {(planStatus.activeCount ?? planStatus.currentCount)}/{planStatus.maxProfiles} QR activos
             </p>
           )}
           <nav className="flex flex-col gap-1" aria-label="Navegación móvil del panel">

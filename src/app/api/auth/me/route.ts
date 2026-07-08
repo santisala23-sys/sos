@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import {
+  countActiveQrProfilesByTutor,
   countQrProfilesByTutor,
   findUserLegalStatus,
   findUserPlanById,
@@ -14,10 +15,11 @@ export async function GET() {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const [legal, plan, profileCount] = await Promise.all([
+  const [legal, plan, profileCount, activeProfileCount] = await Promise.all([
     findUserLegalStatus(session.userId),
     findUserPlanById(session.userId),
     countQrProfilesByTutor(session.userId),
+    countActiveQrProfilesByTutor(session.userId),
   ]);
 
   const planRecord = plan ?? { plan_tier: "free", max_profiles: null };
@@ -25,6 +27,9 @@ export async function GET() {
   return NextResponse.json({
     email: session.email,
     legal: getLegalStatus(legal),
-    plan: getProfileLimitStatus(planRecord, profileCount),
+    plan: {
+      ...getProfileLimitStatus(planRecord, profileCount),
+      activeCount: activeProfileCount,
+    },
   });
 }
