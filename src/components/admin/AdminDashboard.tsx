@@ -8,6 +8,7 @@ import {
   Clock,
   FileText,
   Globe,
+  LayoutTemplate,
   Package,
   Pencil,
   QrCode,
@@ -36,6 +37,7 @@ import {
 } from "@/components/admin/AdminDetailPanel";
 import { AdminLegalPanel } from "@/components/admin/AdminLegalPanel";
 import { AdminMaintenancePanel } from "@/components/admin/AdminMaintenancePanel";
+import { AdminPrintTemplatesPanel } from "@/components/admin/AdminPrintTemplatesPanel";
 import { AdminProductBatchesPanel } from "@/components/admin/AdminProductBatchesPanel";
 import { AdminStorePanel } from "@/components/admin/AdminStorePanel";
 import { adminStatAccents, adminUi } from "@/components/admin/adminUi";
@@ -45,6 +47,7 @@ type AdminTab =
   | "users"
   | "profiles"
   | "store"
+  | "templates"
   | "batches"
   | "activity"
   | "api"
@@ -242,6 +245,7 @@ export function AdminDashboard() {
     { id: "users", label: "Usuarios", icon: <Users className="h-4 w-4" /> },
     { id: "profiles", label: "Perfiles QR", icon: <QrCode className="h-4 w-4" /> },
     { id: "store", label: "Tienda", icon: <ShoppingBag className="h-4 w-4" /> },
+    { id: "templates", label: "Plantillas", icon: <LayoutTemplate className="h-4 w-4" /> },
     { id: "batches", label: "Lotes QR", icon: <Package className="h-4 w-4" /> },
     { id: "activity", label: "Escaneos", icon: <Activity className="h-4 w-4" /> },
     { id: "api", label: "API & Errores", icon: <Server className="h-4 w-4" /> },
@@ -296,7 +300,12 @@ export function AdminDashboard() {
         ))}
       </nav>
 
-      {tab !== "overview" && (
+      {tab !== "overview" &&
+        tab !== "templates" &&
+        tab !== "batches" &&
+        tab !== "store" &&
+        tab !== "legal" &&
+        tab !== "maintenance" && (
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
           <input
@@ -309,7 +318,13 @@ export function AdminDashboard() {
         </div>
       )}
 
-      {loading && tab !== "overview" && (
+      {loading &&
+        tab !== "overview" &&
+        tab !== "templates" &&
+        tab !== "batches" &&
+        tab !== "store" &&
+        tab !== "legal" &&
+        tab !== "maintenance" && (
         <p className={adminUi.loading}>Cargando...</p>
       )}
 
@@ -480,6 +495,8 @@ export function AdminDashboard() {
           ))}
         </DataTable>
       )}
+
+      {tab === "templates" && <AdminPrintTemplatesPanel />}
 
       {tab === "batches" && <AdminProductBatchesPanel />}
 

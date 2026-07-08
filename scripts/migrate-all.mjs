@@ -45,6 +45,7 @@ const migrations = [
   "013_store_products_orders.sql",
   "014_legal_entity_settings.sql",
   "015_account_self_service_and_purge.sql",
+  "016_print_templates.sql",
 ];
 
 for (const file of migrations) {

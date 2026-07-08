@@ -14,6 +14,7 @@ import type {
   QrActivationRow,
   QrProductBatchRow,
 } from "@/lib/db/queries-activation";
+import type { PrintTemplateRow } from "@/lib/activation/print-template-types";
 import { formatDateTime } from "@/lib/utils/format";
 import { adminStatAccents, adminUi } from "@/components/admin/adminUi";
 
@@ -97,6 +98,8 @@ export function AdminProductBatchesPanel() {
   const [productLabel, setProductLabel] = useState("");
   const [quantity, setQuantity] = useState(10);
   const [notes, setNotes] = useState("");
+  const [templateId, setTemplateId] = useState("");
+  const [templates, setTemplates] = useState<PrintTemplateRow[]>([]);
   const [expandedBatchId, setExpandedBatchId] = useState<string | null>(null);
   const [batchActivations, setBatchActivations] = useState<
     Record<string, QrActivationRow[]>
@@ -106,11 +109,24 @@ export function AdminProductBatchesPanel() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/product-batches");
-      if (res.ok) {
-        const data = await res.json();
+      const [batchRes, templateRes] = await Promise.all([
+        fetch("/api/admin/product-batches"),
+        fetch("/api/admin/print-templates"),
+      ]);
+      if (batchRes.ok) {
+        const data = await batchRes.json();
         setBatches(data.batches ?? []);
         setStats(data.stats ?? null);
+      }
+      if (templateRes.ok) {
+        const data = await templateRes.json();
+        const list = (data.templates ?? []) as PrintTemplateRow[];
+        setTemplates(list);
+        setTemplateId((current) => {
+          if (current) return current;
+          const defaultTemplate = list.find((t) => t.is_default) ?? list[0];
+          return defaultTemplate?.id ?? "";
+        });
       }
     } finally {
       setLoading(false);
@@ -159,6 +175,7 @@ export function AdminProductBatchesPanel() {
           product_label: productLabel || undefined,
           quantity,
           notes: notes || undefined,
+          template_id: templateId || null,
         }),
       });
       const data = await res.json();
@@ -261,6 +278,24 @@ export function AdminProductBatchesPanel() {
               className={`mt-1 w-full ${adminUi.inputPlain}`}
             />
           </label>
+          <label className="block text-sm text-neutral-300">
+            Plantilla de imprenta
+            <select
+              value={templateId}
+              onChange={(e) => setTemplateId(e.target.value)}
+              className={`mt-1 w-full ${adminUi.inputPlain}`}
+            >
+              {templates.length === 0 ? (
+                <option value="">Sin plantillas (creá una en Plantillas)</option>
+              ) : (
+                templates.map((template) => (
+                  <option key={template.id} value={template.id}>
+                    {template.name} ({template.page_width_mm}×{template.page_height_mm} mm)
+                  </option>
+                ))
+              )}
+            </select>
+          </label>
           <label className="block text-sm text-neutral-300 sm:col-span-2">
             Notas internas
             <input
@@ -316,6 +351,7 @@ export function AdminProductBatchesPanel() {
                   <th className="w-8 px-2 py-3" aria-hidden />
                   <th className="px-4 py-3">Partner</th>
                   <th className="px-4 py-3">Producto</th>
+                  <th className="px-4 py-3">Plantilla</th>
                   <th className="px-4 py-3">Generados</th>
                   <th className="px-4 py-3">Progreso</th>
                   <th className="px-4 py-3">Sin activar</th>
@@ -345,6 +381,9 @@ export function AdminProductBatchesPanel() {
                         <td className="px-4 py-3 font-medium">{batch.partner_name}</td>
                         <td className="px-4 py-3 text-neutral-400">
                           {batch.product_label ?? "—"}
+                        </td>
+                        <td className="px-4 py-3 text-neutral-400">
+                          {batch.template_name ?? "Default"}
                         </td>
                         <td className="px-4 py-3 tabular-nums">{batch.quantity}</td>
                         <td className="px-4 py-3">
@@ -394,7 +433,7 @@ export function AdminProductBatchesPanel() {
                       </tr>
                       {isExpanded && (
                         <tr className="bg-violet-50/30">
-                          <td colSpan={9} className="px-4 py-4">
+                          <td colSpan={10} className="px-4 py-4">
                             {loadingBatchId === batch.id ? (
                               <p className="text-sm text-neutral-500">
                                 Cargando códigos del lote...
@@ -411,8 +450,13 @@ export function AdminProductBatchesPanel() {
                                     className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-violet-500"
                                   >
                                     <Download className="h-3.5 w-3.5" aria-hidden />
-                                    PDF capas (40×40 mm)
+                                    PDF imprenta
                                   </a>
+                                  {batch.template_name && (
+                                    <span className="text-xs text-neutral-500">
+                                      Plantilla: {batch.template_name}
+                                    </span>
+                                  )}
                                   <a
                                     href={`/api/admin/product-batches/${batch.id}?format=zip`}
                                     className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50"
@@ -438,7 +482,7 @@ export function AdminProductBatchesPanel() {
                                   )}
                                   {batch.product_label && (
                                     <span className="text-xs text-neutral-500">
-                                      Plantilla auto: {batch.product_label}
+                                      Etiqueta: {batch.product_label}
                                     </span>
                                   )}
                                 </div>

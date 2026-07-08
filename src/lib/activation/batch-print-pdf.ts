@@ -3,25 +3,19 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
 import { injectPdfOptionalContentGroups } from "@/lib/activation/pdf-ocg-layers";
-import { getAppHostname } from "@/lib/utils/app-url";
 import {
-  CUT_CIRCLE_MM,
-  DEFAULT_PRINT_TEMPLATE_PATH,
-  KEYRING_HOLE_MM,
   LAYER_CUT,
   LAYER_DESIGN,
-  LLAVERO_QR_OFFSET_MM,
-  LLAVERO_QR_OFFSET_PT,
-  LLAVERO_QR_PT,
-  LLAVERO_QR_PX,
-  LLAVERO_QR_SIZE_MM,
   MM_TO_PT,
-  PAGE_MM,
-  PAGE_PT,
-  QR_OFFSET_PT,
-  QR_PT,
-  QR_PX,
+  MM_TO_PX,
+  PRINT_DPI,
 } from "@/lib/activation/print-pdf-constants";
+import {
+  resolveTemplateText,
+  type PrintTemplateElement,
+  type PrintTemplateRow,
+} from "@/lib/activation/print-template-types";
+import { getAppHostname } from "@/lib/utils/app-url";
 
 export type PrintPdfItem = {
   activationUrl: string;
@@ -30,7 +24,7 @@ export type PrintPdfItem = {
 
 export type BuildBatchPrintPdfOptions = {
   items: PrintPdfItem[];
-  templatePath?: string;
+  template?: PrintTemplateRow | null;
 };
 
 const MAGENTA = "#FF00FF";
@@ -43,12 +37,27 @@ function endLayerMarker(layer: "DESIGN" | "CUT"): string {
   return `%__LAYER_${layer}_END__`;
 }
 
-async function readTemplateImage(
-  templatePath = DEFAULT_PRINT_TEMPLATE_PATH,
-): Promise<Buffer | null> {
-  const absolutePath = path.isAbsolute(templatePath)
-    ? templatePath
-    : path.join(process.cwd(), templatePath);
+function mmToPt(mm: number): number {
+  return mm * MM_TO_PT;
+}
+
+function yMmToPt(yMm: number): number {
+  return mmToPt(yMm);
+}
+
+async function readAssetBuffer(assetUrl: string): Promise<Buffer | null> {
+  if (!assetUrl || assetUrl.startsWith("data:")) {
+    if (assetUrl?.startsWith("data:")) {
+      const base64 = assetUrl.split(",")[1];
+      if (base64) return Buffer.from(base64, "base64");
+    }
+    return null;
+  }
+
+  const relativePath = assetUrl.startsWith("/")
+    ? assetUrl.slice(1)
+    : assetUrl;
+  const absolutePath = path.join(process.cwd(), relativePath);
 
   try {
     return await fs.readFile(absolutePath);
@@ -70,102 +79,158 @@ async function generateQrPng(url: string, sizePx: number): Promise<Buffer> {
   });
 }
 
-function resolveQrLayout(templateImage: Buffer | null): {
-  qrPx: number;
-  qrPt: number;
-  qrOffsetPt: number;
-} {
-  if (templateImage) {
-    return {
-      qrPx: LLAVERO_QR_PX,
-      qrPt: LLAVERO_QR_PT,
-      qrOffsetPt: LLAVERO_QR_OFFSET_PT,
-    };
-  }
-
-  return {
-    qrPx: QR_PX,
-    qrPt: QR_PT,
-    qrOffsetPt: QR_OFFSET_PT,
-  };
-}
-
-function drawDesignLayer(
+async function drawDesignFromTemplate(
   doc: InstanceType<typeof PDFDocument>,
-  templateImage: Buffer | null,
-  qrPng: Buffer,
-  qrLayout: ReturnType<typeof resolveQrLayout>,
-): void {
+  template: PrintTemplateRow,
+  item: PrintPdfItem,
+  assetCache: Map<string, Buffer | null>,
+): Promise<void> {
+  const pageWidthPt = mmToPt(template.page_width_mm);
+  const pageHeightPt = mmToPt(template.page_height_mm);
+  const hostname = getAppHostname();
+
   doc.addContent(beginLayerMarker("DESIGN"));
 
-  if (templateImage) {
-    doc.image(templateImage, 0, 0, {
-      width: PAGE_PT,
-      height: PAGE_PT,
-    });
-  } else {
-    doc.rect(0, 0, PAGE_PT, PAGE_PT).fill("#FFFFFF");
+  for (const element of template.layout_json.elements) {
+    if (element.type === "background") {
+      if (element.assetUrl) {
+        let buffer = assetCache.get(element.assetUrl);
+        if (buffer === undefined) {
+          buffer = await readAssetBuffer(element.assetUrl);
+          assetCache.set(element.assetUrl, buffer);
+        }
+        if (buffer) {
+          doc.image(buffer, 0, 0, {
+            width: pageWidthPt,
+            height: pageHeightPt,
+          });
+        } else if (element.fill) {
+          doc.rect(0, 0, pageWidthPt, pageHeightPt).fill(element.fill);
+        }
+      } else if (element.fill) {
+        doc.rect(0, 0, pageWidthPt, pageHeightPt).fill(element.fill);
+      } else {
+        doc.rect(0, 0, pageWidthPt, pageHeightPt).fill("#FFFFFF");
+      }
+      continue;
+    }
+
+    if (element.type === "qr") {
+      const qrPx = Math.max(1, Math.round(element.sizeMm * MM_TO_PX));
+      const qrPt = mmToPt(element.sizeMm);
+      const qrX = mmToPt(element.xMm);
+      const qrY = yMmToPt(element.yMm);
+      const qrPng = await generateQrPng(item.activationUrl, qrPx);
+      doc.image(qrPng, qrX, qrY, { width: qrPt, height: qrPt });
+      continue;
+    }
+
+    if (element.type === "image") {
+      let buffer = assetCache.get(element.assetUrl);
+      if (buffer === undefined) {
+        buffer = await readAssetBuffer(element.assetUrl);
+        assetCache.set(element.assetUrl, buffer);
+      }
+      if (!buffer) continue;
+
+      const widthPt = mmToPt(element.widthMm);
+      const heightPt = mmToPt(element.heightMm);
+      const x = mmToPt(element.xMm);
+      const y = yMmToPt(element.yMm);
+      doc.image(buffer, x, y, { width: widthPt, height: heightPt });
+      continue;
+    }
+
+    if (element.type === "text") {
+      const content = resolveTemplateText(element, {
+        activationCode: item.label,
+        hostname,
+      });
+      const fontSize = element.fontSizePt;
+      const fontFamily = element.fontFamily ?? "Helvetica";
+      const fontWeight = element.fontWeight ?? "normal";
+      const fontName =
+        fontWeight === "bold" && fontFamily === "Helvetica"
+          ? "Helvetica-Bold"
+          : fontFamily;
+
+      doc.font(fontName).fontSize(fontSize).fillColor(element.fill ?? "#000000");
+
+      const widthPt = element.widthMm
+        ? mmToPt(element.widthMm)
+        : pageWidthPt - mmToPt(element.xMm);
+      const x = mmToPt(element.xMm);
+      const y = yMmToPt(element.yMm);
+
+      doc.text(content, x, y, {
+        width: widthPt,
+        align: element.align,
+        lineBreak: false,
+      });
+    }
   }
-
-  const qrX = qrLayout.qrOffsetPt;
-  const qrY = PAGE_PT - qrLayout.qrOffsetPt - qrLayout.qrPt;
-
-  doc.image(qrPng, qrX, qrY, {
-    width: qrLayout.qrPt,
-    height: qrLayout.qrPt,
-  });
 
   doc.addContent(endLayerMarker("DESIGN"));
 }
 
-function drawCutLayer(doc: InstanceType<typeof PDFDocument>): void {
+function drawCutFromTemplate(
+  doc: InstanceType<typeof PDFDocument>,
+  template: PrintTemplateRow,
+): void {
+  const cutElements = template.layout_json.elements.filter(
+    (element): element is Extract<
+      PrintTemplateElement,
+      { type: "cut_circle" | "cut_hole" }
+    > => element.type === "cut_circle" || element.type === "cut_hole",
+  );
+
+  if (cutElements.length === 0) return;
+
   doc.addContent(beginLayerMarker("CUT"));
-
-  const center = PAGE_PT / 2;
-  const outerRadius = (CUT_CIRCLE_MM / 2) * MM_TO_PT;
-  const holeRadius = (KEYRING_HOLE_MM / 2) * MM_TO_PT;
-
   doc.save();
   doc.lineWidth(0.25 * MM_TO_PT);
   doc.strokeColor(MAGENTA);
-  doc.circle(center, center, outerRadius).stroke();
-  doc.circle(center, PAGE_PT, holeRadius).stroke();
-  doc.restore();
 
+  for (const element of cutElements) {
+    if (element.type === "cut_circle") {
+      doc
+        .circle(
+          mmToPt(element.centerXMm),
+          mmToPt(element.centerYMm),
+          mmToPt(element.radiusMm),
+        )
+        .stroke();
+      continue;
+    }
+
+    doc
+      .circle(mmToPt(element.xMm), mmToPt(element.yMm), mmToPt(element.radiusMm))
+      .stroke();
+  }
+
+  doc.restore();
   doc.addContent(endLayerMarker("CUT"));
 }
 
-function drawPrintPage(
-  doc: InstanceType<typeof PDFDocument>,
-  templateImage: Buffer | null,
-  qrPng: Buffer,
-  qrLayout: ReturnType<typeof resolveQrLayout>,
-): void {
-  doc.addPage({ size: [PAGE_PT, PAGE_PT], margin: 0 });
-  drawDesignLayer(doc, templateImage, qrPng, qrLayout);
-  drawCutLayer(doc);
-}
-
-async function renderPdfKitDocument(
+async function renderTemplatePdf(
   options: BuildBatchPrintPdfOptions,
-  templateImage: Buffer | null,
+  template: PrintTemplateRow,
 ): Promise<Buffer> {
   const { items } = options;
-
-  if (items.length === 0) {
-    throw new Error("No hay URLs para generar el PDF de imprenta.");
-  }
-
-  const qrLayout = resolveQrLayout(templateImage);
+  const pageWidthPt = mmToPt(template.page_width_mm);
+  const pageHeightPt = mmToPt(template.page_height_mm);
+  const assetCache = new Map<string, Buffer | null>();
 
   const doc = new PDFDocument({
     autoFirstPage: false,
-    size: [PAGE_PT, PAGE_PT],
+    size: [pageWidthPt, pageHeightPt],
     margin: 0,
     info: {
-      Title: "SOSME — Lote imprenta",
+      Title: `SOSME — ${template.name}`,
       Author: getAppHostname(),
-      Subject: `Capas: ${LAYER_DESIGN}, ${LAYER_CUT}`,
+      Subject: template.cut_layer_enabled
+        ? `Capas: ${LAYER_DESIGN}, ${LAYER_CUT}`
+        : LAYER_DESIGN,
     },
   });
 
@@ -177,43 +242,37 @@ async function renderPdfKitDocument(
   });
 
   for (const item of items) {
-    const qrPng = await generateQrPng(item.activationUrl, qrLayout.qrPx);
-    drawPrintPage(doc, templateImage, qrPng, qrLayout);
+    doc.addPage({ size: [pageWidthPt, pageHeightPt], margin: 0 });
+    await drawDesignFromTemplate(doc, template, item, assetCache);
+    if (template.cut_layer_enabled) {
+      drawCutFromTemplate(doc, template);
+    }
   }
 
   doc.end();
   return done;
 }
 
-/**
- * Genera un PDF multipágina (40×40 mm) con capas OCG para imprenta y corte láser.
- *
- * Con plantilla Canva (`llavero-40x40.png`):
- * - QR ~22.2×22.2 mm dentro de los corchetes (offset ~8.5 mm)
- *
- * Sin plantilla (fallback):
- * - QR 25×25 mm centrado (offset 7.5 mm)
- */
+/** Genera PDF multipágina según plantilla con capas OCG opcionales. */
 export async function buildBatchPrintPdf(
   options: BuildBatchPrintPdfOptions,
 ): Promise<Buffer> {
-  const templateImage = await readTemplateImage(options.templatePath);
-  const rawPdf = await renderPdfKitDocument(options, templateImage);
+  const { items, template } = options;
+
+  if (items.length === 0) {
+    throw new Error("No hay URLs para generar el PDF de imprenta.");
+  }
+
+  if (!template) {
+    throw new Error("Se requiere una plantilla de imprenta.");
+  }
+
+  const rawPdf = await renderTemplatePdf(options, template);
   return injectPdfOptionalContentGroups(rawPdf);
 }
 
-/** @internal Exported for quick sanity checks in development. */
-export const printPdfLayout = {
-  pageMm: PAGE_MM,
-  pagePt: PAGE_PT,
-  pagePxAt300Dpi: 472,
-  llavero: {
-    qrMm: LLAVERO_QR_SIZE_MM,
-    qrOffsetMm: LLAVERO_QR_OFFSET_MM,
-    qrPx: LLAVERO_QR_PX,
-  },
-  fallback: {
-    qrMm: 25,
-    qrOffsetMm: 7.5,
-  },
+export const printPdfMeta = {
+  dpi: PRINT_DPI,
+  mmToPt: MM_TO_PT,
+  mmToPx: MM_TO_PX,
 } as const;

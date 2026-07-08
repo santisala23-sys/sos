@@ -12,6 +12,10 @@ import {
   getProductBatchById,
   listActivationsByBatch,
 } from "@/lib/db/queries-activation";
+import {
+  getDefaultPrintTemplate,
+  getPrintTemplateById,
+} from "@/lib/db/queries-print-templates";
 import { getAppUrl } from "@/lib/utils/app-url";
 import { getPublicProfileUrl } from "@/lib/utils/slug";
 
@@ -65,7 +69,20 @@ export const GET = withApi(
 
     if (format === "pdf") {
       const onlyUnclaimed = searchParams.get("only_unclaimed") === "1";
-      const templatePath = searchParams.get("template_path") ?? undefined;
+      const templateIdParam = searchParams.get("template_id");
+      const templateId = templateIdParam ?? batch.template_id ?? undefined;
+
+      let template = templateId ? await getPrintTemplateById(templateId) : null;
+      if (!template) {
+        template = await getDefaultPrintTemplate();
+      }
+      if (!template) {
+        return NextResponse.json(
+          { error: "No hay plantilla de imprenta configurada." },
+          { status: 400 },
+        );
+      }
+
       const activationsToExport = onlyUnclaimed
         ? activations.filter((activation) => activation.status === "unclaimed")
         : activations;
@@ -79,15 +96,13 @@ export const GET = withApi(
 
       try {
         const pdfBuffer = await buildBatchPrintPdf({
-          templatePath,
+          template,
           items: activationsToExport.map((activation) => ({
             activationUrl: getActivationUrl(activation.activation_code),
             label: activation.activation_code,
           })),
         });
-        const slug = batch.product_label
-          ? batch.product_label.toLowerCase().replace(/[^a-z0-9]+/g, "-")
-          : "llavero";
+        const slug = template.slug;
 
         return new NextResponse(new Uint8Array(pdfBuffer), {
           headers: {

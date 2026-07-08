@@ -1,0 +1,640 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Canvas,
+  Circle,
+  FabricImage,
+  FabricText,
+  Rect,
+  type FabricObject,
+} from "fabric";
+import QRCode from "react-qr-code";
+import { createRoot } from "react-dom/client";
+import {
+  EDITOR_PX_PER_MM,
+  editorPxToMm,
+  mmToEditorPx,
+  roundMm,
+  type PrintTemplateElement,
+  type PrintTemplateLayout,
+} from "@/lib/activation/print-template-types";
+
+const PAGE_OFFSET_PX = 20;
+const SAMPLE_QR_URL = "https://sosme.app/activar/SOS-DEMO";
+
+type SosMeta = {
+  sosType: PrintTemplateElement["type"];
+  sosId: string;
+  bindTo?: "activation_code" | "hostname" | null;
+  assetUrl?: string;
+  content?: string;
+  fontSizePt?: number;
+  fontFamily?: string;
+  fontWeight?: string;
+  align?: "left" | "center" | "right";
+  fill?: string;
+};
+
+function getMeta(obj: FabricObject): SosMeta | null {
+  const data = obj.get("data") as SosMeta | undefined;
+  return data?.sosType ? data : null;
+}
+
+function setMeta(obj: FabricObject, meta: SosMeta): void {
+  obj.set("data", meta);
+}
+
+async function renderQrPlaceholder(sizePx: number): Promise<string> {
+  const container = document.createElement("div");
+  container.style.position = "absolute";
+  container.style.left = "-9999px";
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  root.render(
+    <QRCode value={SAMPLE_QR_URL} size={sizePx} bgColor="#FFFFFF" fgColor="#000000" />,
+  );
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  const svg = container.querySelector("svg");
+  if (!svg) {
+    root.unmount();
+    container.remove();
+    return "";
+  }
+  const serialized = new XMLSerializer().serializeToString(svg);
+  const dataUrl = `data:image/svg+xml;base64,${btoa(serialized)}`;
+  root.unmount();
+  container.remove();
+  return dataUrl;
+}
+
+function objectToElement(
+  obj: FabricObject,
+  pageWidthMm: number,
+  pageHeightMm: number,
+): PrintTemplateElement | null {
+  const meta = getMeta(obj);
+  if (!meta) return null;
+
+  const left = (obj.left ?? 0) - PAGE_OFFSET_PX;
+  const top = (obj.top ?? 0) - PAGE_OFFSET_PX;
+  const scaleX = obj.scaleX ?? 1;
+  const scaleY = obj.scaleY ?? 1;
+
+  if (meta.sosType === "background") {
+    return {
+      id: meta.sosId,
+      type: "background",
+      assetUrl: meta.assetUrl,
+      fill: meta.fill ?? "#FFFFFF",
+    };
+  }
+
+  if (meta.sosType === "qr") {
+    const widthPx = (obj.width ?? 0) * scaleX;
+    return {
+      id: meta.sosId,
+      type: "qr",
+      xMm: roundMm(editorPxToMm(left)),
+      yMm: roundMm(editorPxToMm(top)),
+      sizeMm: roundMm(editorPxToMm(widthPx)),
+    };
+  }
+
+  if (meta.sosType === "text") {
+    const textObj = obj as FabricText;
+    return {
+      id: meta.sosId,
+      type: "text",
+      xMm: roundMm(editorPxToMm(left)),
+      yMm: roundMm(editorPxToMm(top)),
+      widthMm: roundMm(editorPxToMm((textObj.width ?? 0) * scaleX)),
+      content: meta.content ?? String(textObj.text ?? ""),
+      fontSizePt: meta.fontSizePt ?? 8,
+      fontFamily: meta.fontFamily ?? "Helvetica",
+      fontWeight: meta.fontWeight ?? "normal",
+      align: meta.align ?? "left",
+      fill: meta.fill ?? "#000000",
+      bindTo: meta.bindTo ?? null,
+    };
+  }
+
+  if (meta.sosType === "image") {
+    const widthPx = (obj.width ?? 0) * scaleX;
+    const heightPx = (obj.height ?? 0) * scaleY;
+    if (!meta.assetUrl) return null;
+    return {
+      id: meta.sosId,
+      type: "image",
+      xMm: roundMm(editorPxToMm(left)),
+      yMm: roundMm(editorPxToMm(top)),
+      widthMm: roundMm(editorPxToMm(widthPx)),
+      heightMm: roundMm(editorPxToMm(heightPx)),
+      assetUrl: meta.assetUrl,
+    };
+  }
+
+  if (meta.sosType === "cut_circle") {
+    const circle = obj as Circle;
+    const radiusPx = (circle.radius ?? 0) * scaleX;
+    return {
+      id: meta.sosId,
+      type: "cut_circle",
+      centerXMm: roundMm(editorPxToMm(left)),
+      centerYMm: roundMm(editorPxToMm(top)),
+      radiusMm: roundMm(editorPxToMm(radiusPx)),
+    };
+  }
+
+  if (meta.sosType === "cut_hole") {
+    const circle = obj as Circle;
+    const radiusPx = (circle.radius ?? 0) * scaleX;
+    return {
+      id: meta.sosId,
+      type: "cut_hole",
+      xMm: roundMm(editorPxToMm(left)),
+      yMm: roundMm(editorPxToMm(top)),
+      radiusMm: roundMm(editorPxToMm(radiusPx)),
+    };
+  }
+
+  void pageWidthMm;
+  void pageHeightMm;
+  return null;
+}
+
+export function layoutToCanvasObjects(
+  layout: PrintTemplateLayout,
+  pageWidthMm: number,
+  pageHeightMm: number,
+): Promise<FabricObject[]> {
+  const objects: Promise<FabricObject | null>[] = layout.elements.map(
+    async (element) => {
+      if (element.type === "background") {
+        if (element.assetUrl) {
+          try {
+            const img = await FabricImage.fromURL(element.assetUrl, {
+              crossOrigin: "anonymous",
+            });
+            img.set({
+              left: 0,
+              top: 0,
+              scaleX: mmToEditorPx(pageWidthMm) / (img.width ?? 1),
+              scaleY: mmToEditorPx(pageHeightMm) / (img.height ?? 1),
+              selectable: false,
+              evented: false,
+              hasControls: false,
+            });
+            setMeta(img, { sosType: "background", sosId: element.id, assetUrl: element.assetUrl });
+            return img;
+          } catch {
+            const rect = new Rect({
+              left: 0,
+              top: 0,
+              width: mmToEditorPx(pageWidthMm),
+              height: mmToEditorPx(pageHeightMm),
+              fill: element.fill ?? "#FFFFFF",
+              selectable: false,
+              evented: false,
+            });
+            setMeta(rect, { sosType: "background", sosId: element.id, fill: element.fill });
+            return rect;
+          }
+        }
+        const rect = new Rect({
+          left: 0,
+          top: 0,
+          width: mmToEditorPx(pageWidthMm),
+          height: mmToEditorPx(pageHeightMm),
+          fill: element.fill ?? "#FFFFFF",
+          selectable: false,
+          evented: false,
+        });
+        setMeta(rect, { sosType: "background", sosId: element.id, fill: element.fill });
+        return rect;
+      }
+
+      if (element.type === "qr") {
+        const sizePx = mmToEditorPx(element.sizeMm);
+        const dataUrl = await renderQrPlaceholder(sizePx);
+        if (dataUrl) {
+          const img = await FabricImage.fromURL(dataUrl);
+          img.set({
+            left: mmToEditorPx(element.xMm),
+            top: mmToEditorPx(element.yMm),
+            scaleX: sizePx / (img.width ?? sizePx),
+            scaleY: sizePx / (img.height ?? sizePx),
+          });
+          setMeta(img, { sosType: "qr", sosId: element.id });
+          return img;
+        }
+        const rect = new Rect({
+          left: mmToEditorPx(element.xMm),
+          top: mmToEditorPx(element.yMm),
+          width: sizePx,
+          height: sizePx,
+          fill: "#FFFFFF",
+          stroke: "#111827",
+          strokeDashArray: [6, 4],
+        });
+        setMeta(rect, { sosType: "qr", sosId: element.id });
+        return rect;
+      }
+
+      if (element.type === "text") {
+        const text = new FabricText(element.content, {
+          left: mmToEditorPx(element.xMm),
+          top: mmToEditorPx(element.yMm),
+          fontSize: element.fontSizePt * 1.33,
+          fontFamily: element.fontFamily ?? "Helvetica, Arial, sans-serif",
+          fontWeight: element.fontWeight ?? "normal",
+          fill: element.fill ?? "#000000",
+          textAlign: element.align,
+          width: element.widthMm ? mmToEditorPx(element.widthMm) : undefined,
+        });
+        setMeta(text, {
+          sosType: "text",
+          sosId: element.id,
+          content: element.content,
+          fontSizePt: element.fontSizePt,
+          fontFamily: element.fontFamily,
+          fontWeight: element.fontWeight,
+          align: element.align,
+          fill: element.fill,
+          bindTo: element.bindTo ?? null,
+        });
+        return text;
+      }
+
+      if (element.type === "image") {
+        try {
+          const img = await FabricImage.fromURL(element.assetUrl, {
+            crossOrigin: "anonymous",
+          });
+          img.set({
+            left: mmToEditorPx(element.xMm),
+            top: mmToEditorPx(element.yMm),
+            scaleX: mmToEditorPx(element.widthMm) / (img.width ?? 1),
+            scaleY: mmToEditorPx(element.heightMm) / (img.height ?? 1),
+          });
+          setMeta(img, {
+            sosType: "image",
+            sosId: element.id,
+            assetUrl: element.assetUrl,
+          });
+          return img;
+        } catch {
+          return null;
+        }
+      }
+
+      if (element.type === "cut_circle") {
+        const circle = new Circle({
+          left: mmToEditorPx(element.centerXMm),
+          top: mmToEditorPx(element.centerYMm),
+          radius: mmToEditorPx(element.radiusMm),
+          originX: "center",
+          originY: "center",
+          fill: "transparent",
+          stroke: "#FF00FF",
+          strokeWidth: 1,
+        });
+        setMeta(circle, { sosType: "cut_circle", sosId: element.id });
+        return circle;
+      }
+
+      if (element.type === "cut_hole") {
+        const circle = new Circle({
+          left: mmToEditorPx(element.xMm),
+          top: mmToEditorPx(element.yMm),
+          radius: mmToEditorPx(element.radiusMm),
+          originX: "center",
+          originY: "center",
+          fill: "transparent",
+          stroke: "#FF00FF",
+          strokeWidth: 1,
+        });
+        setMeta(circle, { sosType: "cut_hole", sosId: element.id });
+        return circle;
+      }
+
+      return null;
+    },
+  );
+
+  return Promise.all(objects).then((list) =>
+    list.filter((item): item is FabricObject => item !== null),
+  );
+}
+
+export function canvasToLayout(
+  canvas: Canvas,
+  pageWidthMm: number,
+  pageHeightMm: number,
+): PrintTemplateLayout {
+  const elements: PrintTemplateElement[] = [];
+  for (const obj of canvas.getObjects()) {
+    const element = objectToElement(obj, pageWidthMm, pageHeightMm);
+    if (element) elements.push(element);
+  }
+  return { version: 1, elements };
+}
+
+export type PrintTemplateCanvasHandle = {
+  getLayout: () => PrintTemplateLayout;
+  addQr: () => Promise<void>;
+  addText: () => void;
+  addImage: (url: string) => Promise<void>;
+  addCutCircle: () => void;
+  addCutHole: () => void;
+  setBackground: (url: string) => Promise<void>;
+  alignSelected: (mode: "left" | "center-h" | "right" | "top" | "center-v" | "bottom") => void;
+};
+
+type PrintTemplateCanvasProps = {
+  pageWidthMm: number;
+  pageHeightMm: number;
+  layout: PrintTemplateLayout;
+  onSelectionChange?: (meta: SosMeta | null) => void;
+  canvasRef?: React.RefObject<PrintTemplateCanvasHandle | null>;
+};
+
+export function PrintTemplateCanvas({
+  pageWidthMm,
+  pageHeightMm,
+  layout,
+  onSelectionChange,
+  canvasRef,
+}: PrintTemplateCanvasProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const fabricRef = useRef<Canvas | null>(null);
+  const [ready, setReady] = useState(false);
+
+  const pageWidthPx = mmToEditorPx(pageWidthMm);
+  const pageHeightPx = mmToEditorPx(pageHeightMm);
+
+  const getLayout = useCallback((): PrintTemplateLayout => {
+    if (!fabricRef.current) return layout;
+    return canvasToLayout(fabricRef.current, pageWidthMm, pageHeightMm);
+  }, [layout, pageWidthMm, pageHeightMm]);
+
+  const addQr = useCallback(async () => {
+    const canvas = fabricRef.current;
+    if (!canvas) return;
+    const sizeMm = Math.min(pageWidthMm, pageHeightMm) * 0.45;
+    const sizePx = mmToEditorPx(sizeMm);
+    const dataUrl = await renderQrPlaceholder(sizePx);
+    const left = PAGE_OFFSET_PX + mmToEditorPx((pageWidthMm - sizeMm) / 2);
+    const top = PAGE_OFFSET_PX + mmToEditorPx((pageHeightMm - sizeMm) / 2);
+    let obj: FabricObject;
+    if (dataUrl) {
+      const img = await FabricImage.fromURL(dataUrl);
+      img.set({
+        left,
+        top,
+        scaleX: sizePx / (img.width ?? sizePx),
+        scaleY: sizePx / (img.height ?? sizePx),
+      });
+      setMeta(img, { sosType: "qr", sosId: `qr-${Date.now()}` });
+      obj = img;
+    } else {
+      obj = new Rect({
+        left,
+        top,
+        width: sizePx,
+        height: sizePx,
+        fill: "#FFFFFF",
+        stroke: "#111827",
+        strokeDashArray: [6, 4],
+      });
+      setMeta(obj, { sosType: "qr", sosId: `qr-${Date.now()}` });
+    }
+    canvas.add(obj);
+    canvas.setActiveObject(obj);
+    canvas.requestRenderAll();
+  }, [pageWidthMm, pageHeightMm]);
+
+  const addText = useCallback(() => {
+    const canvas = fabricRef.current;
+    if (!canvas) return;
+    const text = new FabricText("Texto", {
+      left: PAGE_OFFSET_PX + mmToEditorPx(pageWidthMm / 4),
+      top: PAGE_OFFSET_PX + mmToEditorPx(pageHeightMm / 4),
+      fontSize: 10,
+      fill: "#000000",
+    });
+    setMeta(text, {
+      sosType: "text",
+      sosId: `text-${Date.now()}`,
+      content: "Texto",
+      fontSizePt: 8,
+      align: "left",
+      fill: "#000000",
+      bindTo: null,
+    });
+    canvas.add(text);
+    canvas.setActiveObject(text);
+    canvas.requestRenderAll();
+  }, [pageWidthMm, pageHeightMm]);
+
+  const addImage = useCallback(
+    async (url: string) => {
+      const canvas = fabricRef.current;
+      if (!canvas) return;
+      const img = await FabricImage.fromURL(url, { crossOrigin: "anonymous" });
+      const targetWidth = mmToEditorPx(pageWidthMm * 0.3);
+      img.set({
+        left: PAGE_OFFSET_PX + mmToEditorPx(pageWidthMm * 0.1),
+        top: PAGE_OFFSET_PX + mmToEditorPx(pageHeightMm * 0.1),
+        scaleX: targetWidth / (img.width ?? targetWidth),
+        scaleY: targetWidth / (img.width ?? targetWidth),
+      });
+      setMeta(img, { sosType: "image", sosId: `img-${Date.now()}`, assetUrl: url });
+      canvas.add(img);
+      canvas.setActiveObject(img);
+      canvas.requestRenderAll();
+    },
+    [pageWidthMm, pageHeightMm],
+  );
+
+  const addCutCircle = useCallback(() => {
+    const canvas = fabricRef.current;
+    if (!canvas) return;
+    const circle = new Circle({
+      left: PAGE_OFFSET_PX + pageWidthPx / 2,
+      top: PAGE_OFFSET_PX + pageHeightPx / 2,
+      radius: Math.min(pageWidthPx, pageHeightPx) / 2,
+      originX: "center",
+      originY: "center",
+      fill: "transparent",
+      stroke: "#FF00FF",
+      strokeWidth: 1,
+    });
+    setMeta(circle, { sosType: "cut_circle", sosId: `cut-${Date.now()}` });
+    canvas.add(circle);
+    canvas.setActiveObject(circle);
+    canvas.requestRenderAll();
+  }, [pageWidthPx, pageHeightPx]);
+
+  const addCutHole = useCallback(() => {
+    const canvas = fabricRef.current;
+    if (!canvas) return;
+    const circle = new Circle({
+      left: PAGE_OFFSET_PX + pageWidthPx / 2,
+      top: PAGE_OFFSET_PX + pageHeightPx,
+      radius: mmToEditorPx(1.5),
+      originX: "center",
+      originY: "center",
+      fill: "transparent",
+      stroke: "#FF00FF",
+      strokeWidth: 1,
+    });
+    setMeta(circle, { sosType: "cut_hole", sosId: `hole-${Date.now()}` });
+    canvas.add(circle);
+    canvas.setActiveObject(circle);
+    canvas.requestRenderAll();
+  }, [pageWidthPx, pageHeightPx]);
+
+  const setBackground = useCallback(
+    async (url: string) => {
+      const canvas = fabricRef.current;
+      if (!canvas) return;
+      const existing = canvas
+        .getObjects()
+        .find((obj) => getMeta(obj)?.sosType === "background");
+      if (existing) canvas.remove(existing);
+
+      const img = await FabricImage.fromURL(url, { crossOrigin: "anonymous" });
+      img.set({
+        left: PAGE_OFFSET_PX,
+        top: PAGE_OFFSET_PX,
+        scaleX: pageWidthPx / (img.width ?? 1),
+        scaleY: pageHeightPx / (img.height ?? 1),
+        selectable: false,
+        evented: false,
+        hasControls: false,
+      });
+      setMeta(img, { sosType: "background", sosId: "bg", assetUrl: url });
+      canvas.insertAt(0, img);
+      canvas.requestRenderAll();
+    },
+    [pageWidthPx, pageHeightPx],
+  );
+
+  const alignSelected = useCallback(
+    (mode: "left" | "center-h" | "right" | "top" | "center-v" | "bottom") => {
+      const canvas = fabricRef.current;
+      if (!canvas) return;
+      const obj = canvas.getActiveObject();
+      if (!obj || getMeta(obj)?.sosType === "background") return;
+
+      const width = (obj.width ?? 0) * (obj.scaleX ?? 1);
+      const height = (obj.height ?? 0) * (obj.scaleY ?? 1);
+
+      if (mode === "left") obj.set("left", PAGE_OFFSET_PX);
+      if (mode === "center-h") obj.set("left", PAGE_OFFSET_PX + (pageWidthPx - width) / 2);
+      if (mode === "right") obj.set("left", PAGE_OFFSET_PX + pageWidthPx - width);
+      if (mode === "top") obj.set("top", PAGE_OFFSET_PX);
+      if (mode === "center-v") obj.set("top", PAGE_OFFSET_PX + (pageHeightPx - height) / 2);
+      if (mode === "bottom") obj.set("top", PAGE_OFFSET_PX + pageHeightPx - height);
+
+      obj.setCoords();
+      canvas.requestRenderAll();
+    },
+    [pageWidthPx, pageHeightPx],
+  );
+
+  useEffect(() => {
+    if (!canvasRef) return;
+    canvasRef.current = {
+      getLayout,
+      addQr,
+      addText,
+      addImage,
+      addCutCircle,
+      addCutHole,
+      setBackground,
+      alignSelected,
+    };
+  }, [
+    canvasRef,
+    getLayout,
+    addQr,
+    addText,
+    addImage,
+    addCutCircle,
+    addCutHole,
+    setBackground,
+    alignSelected,
+  ]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const canvasEl = document.createElement("canvas");
+    containerRef.current.innerHTML = "";
+    containerRef.current.appendChild(canvasEl);
+
+    const canvas = new Canvas(canvasEl, {
+      width: pageWidthPx + 40,
+      height: pageHeightPx + 40,
+      backgroundColor: "#e5e7eb",
+      preserveObjectStacking: true,
+    });
+
+    const pageBorder = new Rect({
+      left: 20,
+      top: 20,
+      width: pageWidthPx,
+      height: pageHeightPx,
+      fill: "#ffffff",
+      stroke: "#c4b5fd",
+      strokeWidth: 1,
+      selectable: false,
+      evented: false,
+    });
+    canvas.add(pageBorder);
+
+    fabricRef.current = canvas;
+
+    void layoutToCanvasObjects(layout, pageWidthMm, pageHeightMm).then((objects) => {
+      for (const obj of objects) {
+        obj.set({
+          left: (obj.left ?? 0) + 20,
+          top: (obj.top ?? 0) + 20,
+        });
+        canvas.add(obj);
+      }
+      canvas.requestRenderAll();
+      setReady(true);
+    });
+
+    canvas.on("selection:created", () => {
+      const active = canvas.getActiveObject();
+      onSelectionChange?.(active ? getMeta(active) : null);
+    });
+    canvas.on("selection:updated", () => {
+      const active = canvas.getActiveObject();
+      onSelectionChange?.(active ? getMeta(active) : null);
+    });
+    canvas.on("selection:cleared", () => onSelectionChange?.(null));
+
+    return () => {
+      canvas.dispose();
+      fabricRef.current = null;
+      setReady(false);
+    };
+  }, [pageWidthMm, pageHeightMm, layout, pageWidthPx, pageHeightPx, onSelectionChange]);
+
+  return (
+    <div className="overflow-auto rounded-xl border border-violet-100 bg-neutral-100 p-4">
+      <div ref={containerRef} />
+      {!ready && (
+        <p className="py-8 text-center text-sm text-neutral-500">Cargando lienzo...</p>
+      )}
+      <p className="mt-2 text-center text-xs text-neutral-500">
+        {pageWidthMm} × {pageHeightMm} mm · escala {EDITOR_PX_PER_MM}px/mm
+      </p>
+    </div>
+  );
+}

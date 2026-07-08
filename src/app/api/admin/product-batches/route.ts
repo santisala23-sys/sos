@@ -25,6 +25,7 @@ export const POST = withApi(
       product_label?: string;
       notes?: string;
       quantity?: number;
+      template_id?: string | null;
     };
 
     try {
@@ -55,6 +56,7 @@ export const POST = withApi(
         product_label: body.product_label?.trim() || null,
         notes: body.notes?.trim() || null,
         quantity,
+        template_id: body.template_id ?? null,
       });
       return NextResponse.json(result, { status: 201 });
     } catch (error) {

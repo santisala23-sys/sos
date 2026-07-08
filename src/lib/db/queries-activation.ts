@@ -14,6 +14,8 @@ export type QrProductBatchRow = {
   product_label: string | null;
   notes: string | null;
   quantity: number;
+  template_id: string | null;
+  template_name: string | null;
   created_at: string;
   unclaimed_count: number;
   claimed_count: number;
@@ -217,15 +219,24 @@ export async function getActivationStats(): Promise<ActivationStats> {
 
 export async function getProductBatchById(
   batchId: string,
-): Promise<Omit<QrProductBatchRow, "unclaimed_count" | "claimed_count" | "disabled_count"> | null> {
+): Promise<Omit<
+  QrProductBatchRow,
+  "unclaimed_count" | "claimed_count" | "disabled_count"
+> | null> {
   const sql = getSql();
   const rows = await sql`
-    SELECT id, partner_name, product_label, notes, quantity, created_at
-    FROM qr_product_batches
-    WHERE id = ${batchId}
+    SELECT
+      b.id, b.partner_name, b.product_label, b.notes, b.quantity, b.created_at,
+      b.template_id, t.name AS template_name
+    FROM qr_product_batches b
+    LEFT JOIN print_templates t ON t.id = b.template_id
+    WHERE b.id = ${batchId}
     LIMIT 1
   `;
-  return (rows[0] as Omit<QrProductBatchRow, "unclaimed_count" | "claimed_count" | "disabled_count"> | undefined) ?? null;
+  return (rows[0] as Omit<
+    QrProductBatchRow,
+    "unclaimed_count" | "claimed_count" | "disabled_count"
+  > | undefined) ?? null;
 }
 
 export async function listProductBatches(): Promise<QrProductBatchRow[]> {
@@ -233,12 +244,14 @@ export async function listProductBatches(): Promise<QrProductBatchRow[]> {
   const rows = await sql`
     SELECT
       b.id, b.partner_name, b.product_label, b.notes, b.quantity, b.created_at,
+      b.template_id, t.name AS template_name,
       COUNT(*) FILTER (WHERE a.status = 'unclaimed')::int AS unclaimed_count,
       COUNT(*) FILTER (WHERE a.status = 'claimed')::int AS claimed_count,
       COUNT(*) FILTER (WHERE a.status = 'disabled')::int AS disabled_count
     FROM qr_product_batches b
     LEFT JOIN qr_activations a ON a.batch_id = b.id
-    GROUP BY b.id
+    LEFT JOIN print_templates t ON t.id = b.template_id
+    GROUP BY b.id, t.name
     ORDER BY b.created_at DESC
   `;
   return rows as QrProductBatchRow[];
@@ -266,19 +279,21 @@ export async function createProductBatch(input: {
   product_label?: string | null;
   notes?: string | null;
   quantity: number;
+  template_id?: string | null;
 }): Promise<{ batch: QrProductBatchRow; activations: QrActivationRow[] }> {
   const quantity = Math.min(Math.max(input.quantity, 1), 500);
   const sql = getSql();
 
   const batchRows = await sql`
-    INSERT INTO qr_product_batches (partner_name, product_label, notes, quantity)
+    INSERT INTO qr_product_batches (partner_name, product_label, notes, quantity, template_id)
     VALUES (
       ${input.partner_name.trim()},
       ${input.product_label?.trim() || null},
       ${input.notes?.trim() || null},
-      ${quantity}
+      ${quantity},
+      ${input.template_id ?? null}
     )
-    RETURNING id, partner_name, product_label, notes, quantity, created_at
+    RETURNING id, partner_name, product_label, notes, quantity, template_id, created_at
   `;
   const batch = batchRows[0] as {
     id: string;
@@ -286,8 +301,17 @@ export async function createProductBatch(input: {
     product_label: string | null;
     notes: string | null;
     quantity: number;
+    template_id: string | null;
     created_at: string;
   };
+
+  let templateName: string | null = null;
+  if (batch.template_id) {
+    const templateRows = await sql`
+      SELECT name FROM print_templates WHERE id = ${batch.template_id} LIMIT 1
+    `;
+    templateName = (templateRows[0] as { name: string } | undefined)?.name ?? null;
+  }
 
   const slugPrefix =
     input.product_label?.trim() || input.partner_name.trim() || "producto";
@@ -322,6 +346,7 @@ export async function createProductBatch(input: {
 
   const batchRow: QrProductBatchRow = {
     ...batch,
+    template_name: templateName,
     unclaimed_count: quantity,
     claimed_count: 0,
     disabled_count: 0,
