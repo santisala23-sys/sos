@@ -2,10 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MessageCircle } from "lucide-react";
+import { Mail, MessageCircle } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { LegalFooter } from "@/components/legal/LegalFooter";
 import { Button } from "@/components/ui/Button";
+import {
+  CONTACT_EMAIL,
+  getContactMailtoUrl,
+  getInstagramUrl,
+  getTikTokUrl,
+  INSTAGRAM_HANDLE,
+  TIKTOK_HANDLE,
+} from "@/lib/utils/brand";
 import {
   buildPartnerInquiryMessage,
   buildRequestMoreProfilesMessage,
@@ -64,9 +72,45 @@ export default function ContactoPage() {
       <main className="mx-auto w-full max-w-lg flex-1 px-4 py-10">
         <h1 className="text-2xl font-black text-neutral-900">Contacto</h1>
         <p className="mt-2 text-neutral-600">
-          Por ahora atendemos por <strong>WhatsApp</strong>. Completá el formulario y te
-          abrimos el chat con el mensaje listo.
+          Por ahora atendemos por <strong>WhatsApp</strong> y por{" "}
+          <strong>email</strong>. Completá el formulario y te abrimos el chat con el
+          mensaje listo.
         </p>
+
+        <div className="mt-6 flex flex-col gap-2 rounded-2xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600">
+          <a
+            href={buildWhatsAppUrl("Hola SOSme")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 font-medium text-violet-700 hover:underline"
+          >
+            <MessageCircle className="h-4 w-4" aria-hidden />
+            WhatsApp directo
+          </a>
+          <a
+            href={getContactMailtoUrl("Consulta SOSme")}
+            className="inline-flex items-center gap-2 font-medium text-violet-700 hover:underline"
+          >
+            <Mail className="h-4 w-4" aria-hidden />
+            {CONTACT_EMAIL}
+          </a>
+          <a
+            href={getInstagramUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-violet-700 hover:underline"
+          >
+            Instagram @{INSTAGRAM_HANDLE}
+          </a>
+          <a
+            href={getTikTokUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-violet-700 hover:underline"
+          >
+            TikTok @{TIKTOK_HANDLE}
+          </a>
+        </div>
 
         <form
           className="mt-8 flex flex-col gap-4"

@@ -3,6 +3,7 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
 import { injectPdfOptionalContentGroups } from "@/lib/activation/pdf-ocg-layers";
+import { getAppHostname } from "@/lib/utils/app-url";
 import {
   CUT_CIRCLE_MM,
   DEFAULT_PRINT_TEMPLATE_PATH,
@@ -163,7 +164,7 @@ async function renderPdfKitDocument(
     margin: 0,
     info: {
       Title: "SOSME — Lote imprenta",
-      Author: "sosme.app",
+      Author: getAppHostname(),
       Subject: `Capas: ${LAYER_DESIGN}, ${LAYER_CUT}`,
     },
   });

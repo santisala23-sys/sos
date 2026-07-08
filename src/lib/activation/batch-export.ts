@@ -2,6 +2,7 @@ import QRCode from "qrcode";
 import JSZip from "jszip";
 import { getActivationUrl } from "@/lib/activation/codes";
 import type { QrActivationRow } from "@/lib/db/queries-activation";
+import { getAppHostname } from "@/lib/utils/app-url";
 
 export type ExportTemplateKey =
   | "llavero"
@@ -16,6 +17,8 @@ export type ExportTemplate = {
   height: number;
   brand?: boolean;
   lines: string[];
+  /** Show app hostname (from NEXT_PUBLIC_APP_URL) below the text lines. */
+  domainFooter?: boolean;
   qrSize: number;
   qrY: number;
 };
@@ -25,7 +28,8 @@ export const EXPORT_TEMPLATES: Record<ExportTemplateKey, ExportTemplate> = {
     label: "Llavero",
     width: 500,
     height: 300,
-    lines: ["SCAN ME IF YOU FIND ME", "sosme.app"],
+    lines: ["SCAN ME IF YOU FIND ME"],
+    domainFooter: true,
     qrSize: 170,
     qrY: 85,
   },
@@ -34,7 +38,8 @@ export const EXPORT_TEMPLATES: Record<ExportTemplateKey, ExportTemplate> = {
     width: 856,
     height: 540,
     brand: true,
-    lines: ["EMERGENCIA", "Escaneá para contactar", "sosme.app"],
+    lines: ["EMERGENCIA", "Escaneá para contactar"],
+    domainFooter: true,
     qrSize: 260,
     qrY: 175,
   },
@@ -43,7 +48,8 @@ export const EXPORT_TEMPLATES: Record<ExportTemplateKey, ExportTemplate> = {
     width: 700,
     height: 400,
     brand: true,
-    lines: ["IF FOUND · SCAN ME", "sosme.app"],
+    lines: ["IF FOUND · SCAN ME"],
+    domainFooter: true,
     qrSize: 210,
     qrY: 110,
   },
@@ -52,7 +58,8 @@ export const EXPORT_TEMPLATES: Record<ExportTemplateKey, ExportTemplate> = {
     width: 500,
     height: 500,
     brand: true,
-    lines: ["sosme.app"],
+    lines: [],
+    domainFooter: true,
     qrSize: 300,
     qrY: 120,
   },
@@ -61,6 +68,7 @@ export const EXPORT_TEMPLATES: Record<ExportTemplateKey, ExportTemplate> = {
     width: 400,
     height: 400,
     lines: [],
+    domainFooter: false,
     qrSize: 340,
     qrY: 30,
   },
@@ -151,19 +159,21 @@ function buildLabelSvg({
   qrDataUri: string;
 }): string {
   const template = EXPORT_TEMPLATES[templateKey];
-  const { width, height, brand, lines, qrSize, qrY } = template;
+  const { width, height, brand, lines, domainFooter, qrSize, qrY } = template;
   const qrX = (width - qrSize) / 2;
   const codeY = height - 36;
+  const hostname = getAppHostname();
+  const displayLines = domainFooter ? [...lines, hostname] : lines;
 
   const brandSvg = brand
     ? `<text x="${width / 2}" y="42" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800"><tspan fill="#111111">SOS</tspan><tspan fill="#7C3AED">me</tspan></text>`
     : "";
 
   const lineStartY = brand ? 72 : 36;
-  const lineSvg = lines
+  const lineSvg = displayLines
     .map((line, idx) => {
       const y = lineStartY + idx * 22;
-      const isFooter = line === "sosme.app";
+      const isFooter = domainFooter && idx === displayLines.length - 1;
       return `<text x="${width / 2}" y="${y}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="${isFooter ? 16 : 14}" font-weight="${isFooter ? 600 : 700}" fill="${isFooter ? "#6B7280" : "#111111"}">${escapeXml(line)}</text>`;
     })
     .join("\n    ");

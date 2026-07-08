@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { getAppUrl } from "@/lib/utils/app-url";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getAppUrl()),
   title: {
     default: "SOSme — Tu QR personal de emergencia y contacto",
     template: "%s | SOSme",

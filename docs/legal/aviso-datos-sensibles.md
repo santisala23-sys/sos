@@ -18,7 +18,7 @@ Este aviso aplica cuando un **Tutor** carga en un perfil de tipo **persona** dat
 
 **Responsable del tratamiento:** [COMPLETAR: razón social]  
 **Domicilio:** [COMPLETAR]  
-**Contacto privacidad:** [COMPLETAR: privacidad@sosme.app]
+**Contacto privacidad:** somososme@gmail.com
 
 ## 3. Finalidad
 
@@ -58,7 +58,7 @@ Los plazos de conservación figuran en la [Política de Retención y Eliminació
 
 ## 8. Derechos del titular
 
-El titular de los datos (o su representante legal) puede ejercer derechos de **Acceso, Rectificación, Cancelación y Oposición (ARCO)** escribiendo a **[COMPLETAR: privacidad@sosme.app]**, acreditando identidad.
+El titular de los datos (o su representante legal) puede ejercer derechos de **Acceso, Rectificación, Cancelación y Oposición (ARCO)** escribiendo a **somososme@gmail.com**, acreditando identidad.
 
 La AAIP es la autoridad de control en Argentina: [www.argentina.gob.ar/aaip](https://www.argentina.gob.ar/aaip).
 

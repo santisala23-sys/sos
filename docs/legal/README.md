@@ -27,7 +27,7 @@
 | Razón social / responsable | **[COMPLETAR: ej. SOSme SRL o nombre y apellido]** |
 | CUIT/CUIL | **[COMPLETAR]** |
 | Domicilio legal | **[COMPLETAR: calle, localidad, provincia, Argentina]** |
-| Email legal / privacidad | **[COMPLETAR: ej. privacidad@sosme.app]** |
+| Email legal / privacidad | **somososme@gmail.com** |
 | País de operación principal | Argentina |
 | Público objetivo | Argentina y LATAM (español) |
 

@@ -31,7 +31,7 @@
 
 El servicio **SOSme** (en adelante, el **Servicio**) es operado por **[COMPLETAR: razón social o nombre del responsable]** (en adelante, el **Operador**), con domicilio en **[COMPLETAR: domicilio legal, Argentina]**, CUIT/CUIL **[COMPLETAR]**.
 
-Contacto general y legal: **[COMPLETAR: ej. privacidad@sosme.app]**
+Contacto general y legal: **somososme@gmail.com**
 
 Sitio web: https://sos-alpha-lime.vercel.app
 
@@ -88,7 +88,7 @@ Para crear una cuenta de Tutor debés:
 
 El Operador puede suspender o cancelar cuentas que incumplan estos Términos o que representen riesgo para terceros o para el Servicio.
 
-**Eliminación de cuenta:** al día de la vigencia de estos Términos, el Servicio **no ofrece eliminación automática de cuenta desde la interfaz de usuario**. Podés solicitar la baja y eliminación de tus datos conforme a la [Política de Retención y Eliminación de Datos](/retencion-datos), enviando un email a **[COMPLETAR: privacidad@sosme.app]**. Procesaremos la solicitud en un plazo razonable, generalmente dentro de los **30 días hábiles**.
+**Eliminación de cuenta:** al día de la vigencia de estos Términos, el Servicio **no ofrece eliminación automática de cuenta desde la interfaz de usuario**. Podés solicitar la baja y eliminación de tus datos conforme a la [Política de Retención y Eliminación de Datos](/retencion-datos), enviando un email a **somososme@gmail.com**. Procesaremos la solicitud en un plazo razonable, generalmente dentro de los **30 días hábiles**.
 
 ## 6. Perfiles QR y exposición de datos
 
@@ -209,7 +209,7 @@ Si tenés domicilio en la Ciudad Autónoma de Buenos Aires o en otra jurisdicci�
 
 ## 17. Contacto
 
-Consultas sobre estos Términos: **[COMPLETAR: privacidad@sosme.app]**
+Consultas sobre estos Términos: **somososme@gmail.com**
 
 Ejercicio de derechos de protección de datos (ARCO): ver [Política de Privacidad](/privacidad) y [Política de Retención y Eliminación](/retencion-datos).
 

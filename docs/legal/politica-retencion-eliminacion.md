@@ -22,7 +22,7 @@
 
 Esta Política establece cuánto tiempo conservamos datos personales en SOSme y cómo podés solicitar su eliminación o exportación.
 
-**Responsable:** [COMPLETAR: razón social] — [COMPLETAR: privacidad@sosme.app]
+**Responsable:** [COMPLETAR: razón social] — somososme@gmail.com
 
 ## 2. Plazos de retención por categoría
 
@@ -55,7 +55,7 @@ Según el esquema de base de datos:
 
 **Procedimiento actual (sin self-service):**
 
-1. Enviá email desde tu cuenta registrada a **[COMPLETAR: privacidad@sosme.app]**
+1. Enviá email desde tu cuenta registrada a **somososme@gmail.com**
 2. Asunto sugerido: «Solicitud de baja y eliminación de datos — SOSme»
 3. Indicá email de cuenta y si querés eliminar todos los perfiles
 4. Confirmaremos identidad y procesaremos en **30 días hábiles** como máximo
@@ -97,7 +97,7 @@ Compromiso: implementar self-service de baja y exportación en versiones futuras
 
 ## 9. Contacto
 
-**[COMPLETAR: privacidad@sosme.app]**
+**somososme@gmail.com**
 
 ## 10. No constituye asesoramiento legal
 

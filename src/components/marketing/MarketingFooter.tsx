@@ -11,6 +11,15 @@ import {
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { Button } from "@/components/ui/Button";
 import { LEGAL_FOOTER_LINKS } from "@/lib/legal/constants";
+import {
+  CONTACT_EMAIL,
+  getContactMailtoUrl,
+  getInstagramUrl,
+  getTikTokUrl,
+  INSTAGRAM_HANDLE,
+  TIKTOK_HANDLE,
+} from "@/lib/utils/brand";
+import { buildWhatsAppUrl } from "@/lib/utils/contact";
 
 const PRODUCT_LINKS = [
   { href: "/#que-es", label: "Qué es SOSme" },
@@ -70,6 +79,40 @@ export function MarketingFooter({ className = "" }: MarketingFooterProps) {
                   {text}
                 </span>
               ))}
+            </div>
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-neutral-400">
+              <a
+                href={getContactMailtoUrl()}
+                className="inline-flex items-center gap-1.5 transition-colors hover:text-violet-300"
+              >
+                <Mail className="h-4 w-4" aria-hidden />
+                {CONTACT_EMAIL}
+              </a>
+              <a
+                href={buildWhatsAppUrl("Hola SOSme")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 transition-colors hover:text-violet-300"
+              >
+                <MessageCircle className="h-4 w-4" aria-hidden />
+                WhatsApp
+              </a>
+              <a
+                href={getInstagramUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-violet-300"
+              >
+                Instagram @{INSTAGRAM_HANDLE}
+              </a>
+              <a
+                href={getTikTokUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-violet-300"
+              >
+                TikTok @{TIKTOK_HANDLE}
+              </a>
             </div>
             <Link href="/register" className="mt-8 inline-block">
               <Button

@@ -27,6 +27,34 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["pdfkit"],
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "sosme.app" }],
+        destination: "https://sosme.com.ar/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.sosme.app" }],
+        destination: "https://sosme.com.ar/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "sos-alpha-lime.vercel.app" }],
+        destination: "https://sosme.com.ar/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.sosme.com.ar" }],
+        destination: "https://sosme.com.ar/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

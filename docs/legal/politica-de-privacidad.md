@@ -29,7 +29,7 @@
 | Responsable | **[COMPLETAR: razón social o titular]** |
 | CUIT/CUIL | **[COMPLETAR]** |
 | Domicilio | **[COMPLETAR, Argentina]** |
-| Email privacidad / ARCO | **[COMPLETAR: privacidad@sosme.app]** |
+| Email privacidad / ARCO | **somososme@gmail.com** |
 | Sitio web | https://sos-alpha-lime.vercel.app |
 
 ## 2. Alcance
@@ -110,11 +110,11 @@ Medidas implementadas incluyen:
 - Panel admin restringido a emails en `ADMIN_EMAILS`
 - HTTPS en producción
 
-Ningún sistema es 100% seguro. Notificanos incidentes a **[COMPLETAR: privacidad@sosme.app]**.
+Ningún sistema es 100% seguro. Notificanos incidentes a **somososme@gmail.com**.
 
 ## 9. Derechos ARCO y consultas
 
-Podés ejercer **Acceso, Rectificación, Cancelación, Oposición**, revocar consentimientos y solicitar portabilidad cuando corresponda, escribiendo a **[COMPLETAR: privacidad@sosme.app]** con:
+Podés ejercer **Acceso, Rectificación, Cancelación, Oposición**, revocar consentimientos y solicitar portabilidad cuando corresponda, escribiendo a **somososme@gmail.com** con:
 
 - Nombre y email de la cuenta
 - Derecho que querés ejercer

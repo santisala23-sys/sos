@@ -1,4 +1,4 @@
-const DEFAULT_WHATSAPP = "5491112345678";
+const DEFAULT_WHATSAPP = "5491132939080";
 
 export function getContactWhatsAppNumber(): string {
   const raw =

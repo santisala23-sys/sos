@@ -12,7 +12,7 @@
 
 1. Marca contacta por `/productos` o WhatsApp.
 2. Vos generás lote de slugs o perfiles en admin.
-3. Imprimís etiquetas con QR apuntando a `https://sosme.app/p/{slug}` o a activación.
+3. Imprimís etiquetas con QR apuntando a `https://sosme.com.ar/p/{slug}` o a activación.
 
 ### Fase 2 — Activación por código ✅ implementado
 

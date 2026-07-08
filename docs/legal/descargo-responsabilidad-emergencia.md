@@ -55,7 +55,7 @@ El Operador de SOSme (**[COMPLETAR: razón social]**) no asume responsabilidad p
 
 ---
 
-**Contacto:** [COMPLETAR: privacidad@sosme.app]  
+**Contacto:** somososme@gmail.com  
 **Documentos relacionados:** [Términos y Condiciones](/terminos) · [Política de Privacidad](/privacidad)
 
 ## No constituye asesoramiento legal

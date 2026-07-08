@@ -89,7 +89,7 @@ Actualizaremos esta Política cuando cambien las tecnologías usadas. Versión y
 
 ## 11. Contacto
 
-**[COMPLETAR: privacidad@sosme.app]**
+**somososme@gmail.com**
 
 ## 12. No constituye asesoramiento legal
 

@@ -4,3 +4,12 @@ export function getAppUrl() {
     "http://localhost:3000"
   );
 }
+
+/** Hostname for print labels (e.g. sosme.com.ar). */
+export function getAppHostname(): string {
+  try {
+    return new URL(getAppUrl()).hostname;
+  } catch {
+    return "localhost";
+  }
+}
