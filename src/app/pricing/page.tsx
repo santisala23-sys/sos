@@ -152,13 +152,11 @@ export default function PricingPage() {
                 ))}
               </ul>
               <details className="mt-10">
-                <summary className="list-none [&::-webkit-details-marker]:hidden">
-                  <span className="block">
-                    <Button variant="secondary" size="lg" className="w-full gap-2">
-                      <MessageCircle className="h-5 w-5" aria-hidden />
-                      Contactar por más perfiles
-                    </Button>
-                  </span>
+                <summary className="cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
+                  <div className="flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-neutral-100 px-6 py-3 text-lg font-semibold text-neutral-900 transition-colors hover:bg-neutral-200">
+                    <MessageCircle className="h-5 w-5" aria-hidden />
+                    Contactar por más perfiles
+                  </div>
                 </summary>
                 <div className="mt-3 grid gap-2 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700">
                   <p className="font-semibold text-neutral-900">
