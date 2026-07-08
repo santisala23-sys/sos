@@ -45,11 +45,6 @@ export function HowItWorksSection() {
         </div>
 
         <ol className="relative mt-20 hidden sm:grid sm:grid-cols-3 sm:gap-8 lg:gap-12">
-          <div
-            className="pointer-events-none absolute left-[calc(16.666%+1.75rem)] right-[calc(16.666%+1.75rem)] top-7 h-0.5 bg-gradient-to-r from-violet-200 via-violet-500 to-violet-200"
-            aria-hidden
-          />
-
           {STEPS.map(({ step, title, text, image, imageAlt }) => (
             <li key={step} className="relative flex flex-col items-center text-center">
               <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-2xl font-black text-white shadow-xl shadow-violet-500/30 ring-4 ring-white">
@@ -76,13 +71,6 @@ export function HowItWorksSection() {
         <ol className="mt-16 flex flex-col gap-12 sm:hidden">
           {STEPS.map(({ step, title, text, image, imageAlt }, index) => (
             <li key={step} className="relative flex flex-col items-center text-center">
-              {index < STEPS.length - 1 && (
-                <div
-                  className="pointer-events-none absolute bottom-0 left-1/2 top-14 z-0 w-0.5 -translate-x-1/2 translate-y-8 bg-gradient-to-b from-violet-400 to-violet-200"
-                  style={{ height: "calc(100% - 3.5rem)" }}
-                  aria-hidden
-                />
-              )}
               <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-2xl font-black text-white shadow-xl shadow-violet-500/30 ring-4 ring-white">
                 {step}
               </div>
