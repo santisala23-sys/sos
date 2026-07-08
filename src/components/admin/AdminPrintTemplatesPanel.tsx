@@ -8,9 +8,12 @@ import {
   AlignRight,
   ArrowDown,
   ArrowUp,
+  ChevronDown,
+  ChevronUp,
   Download,
   ImagePlus,
   LayoutTemplate,
+  Layers,
   Plus,
   QrCode,
   RefreshCw,
@@ -24,7 +27,10 @@ import {
   createDefaultLayoutForSize,
   type PrintTemplateRow,
 } from "@/lib/activation/print-template-types";
-import type { PrintTemplateCanvasHandle } from "@/components/admin/PrintTemplateCanvas";
+import type {
+  CanvasLayerItem,
+  PrintTemplateCanvasHandle,
+} from "@/components/admin/PrintTemplateCanvas";
 import { adminUi } from "@/components/admin/adminUi";
 
 const PrintTemplateCanvas = dynamic(
@@ -49,6 +55,9 @@ export function AdminPrintTemplatesPanel() {
   const [presetKey, setPresetKey] = useState("0");
   const [layout, setLayout] = useState(createDefaultLayoutForSize(40, 40));
   const [editorKey, setEditorKey] = useState(0);
+  const [layers, setLayers] = useState<CanvasLayerItem[]>([]);
+  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
+  const [canvasReady, setCanvasReady] = useState(false);
 
   const canvasRef = useRef<PrintTemplateCanvasHandle | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +89,9 @@ export function AdminPrintTemplatesPanel() {
     setPresetKey("0");
     setLayout(createDefaultLayoutForSize(40, 40));
     setEditorKey((k) => k + 1);
+    setLayers([]);
+    setSelectedLayerId(null);
+    setCanvasReady(false);
     setError(null);
   }
 
@@ -91,6 +103,9 @@ export function AdminPrintTemplatesPanel() {
     setCutLayerEnabled(template.cut_layer_enabled);
     setLayout(template.layout_json);
     setEditorKey((k) => k + 1);
+    setLayers([]);
+    setSelectedLayerId(null);
+    setCanvasReady(false);
     setError(null);
   }
 
@@ -123,16 +138,40 @@ export function AdminPrintTemplatesPanel() {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    const url = await uploadFile(file);
-    if (url) await canvasRef.current?.addImage(url);
+    if (!canvasReady || !canvasRef.current) {
+      setError("Esperá a que cargue el lienzo antes de agregar imágenes.");
+      return;
+    }
+    setError(null);
+    try {
+      const url = await uploadFile(file);
+      if (!url) return;
+      await canvasRef.current.addImage(url);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "No se pudo agregar la imagen al lienzo.",
+      );
+    }
   }
 
   async function handleBackgroundUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    const url = await uploadFile(file);
-    if (url) await canvasRef.current?.setBackground(url);
+    if (!canvasReady || !canvasRef.current) {
+      setError("Esperá a que cargue el lienzo antes de cambiar el fondo.");
+      return;
+    }
+    setError(null);
+    try {
+      const url = await uploadFile(file);
+      if (!url) return;
+      await canvasRef.current.setBackground(url);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "No se pudo cargar el fondo.",
+      );
+    }
   }
 
   async function handleSave() {
@@ -238,7 +277,7 @@ export function AdminPrintTemplatesPanel() {
           </p>
         )}
 
-        <div className={`grid gap-6 xl:grid-cols-[280px_1fr]`}>
+        <div className="grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)_260px]">
           <aside className="space-y-4">
             <div className={adminUi.formCard}>
               <h3 className="text-sm font-semibold text-neutral-800">Configuración</h3>
@@ -397,6 +436,14 @@ export function AdminPrintTemplatesPanel() {
                   </button>
                 ))}
               </div>
+              <button
+                type="button"
+                onClick={() => canvasRef.current?.deleteSelected()}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-sm text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" />
+                Borrar selección
+              </button>
             </div>
           </aside>
 
@@ -406,7 +453,94 @@ export function AdminPrintTemplatesPanel() {
             pageHeightMm={pageHeightMm}
             layout={layout}
             canvasRef={canvasRef}
+            onLayersChange={(nextLayers) => {
+              setLayers(nextLayers);
+              setCanvasReady(true);
+            }}
+            onSelectionChange={(meta) => setSelectedLayerId(meta?.sosId ?? null)}
           />
+
+          <aside className={adminUi.formCard}>
+            <div className="flex items-center gap-2">
+              <Layers className="h-4 w-4 text-violet-600" />
+              <h3 className="text-sm font-semibold text-neutral-800">Capas</h3>
+            </div>
+            <p className="mt-1 text-xs text-neutral-500">
+              Arriba = al frente. Fondo siempre queda atrás.
+            </p>
+
+            {layers.length === 0 ? (
+              <p className="mt-4 text-sm text-neutral-500">Sin capas todavía.</p>
+            ) : (
+              <ul className="mt-4 space-y-1.5">
+                {layers.map((layer) => {
+                  const isSelected = selectedLayerId === layer.id;
+                  const isBackground = layer.type === "background";
+                  const isCut =
+                    layer.type === "cut_circle" || layer.type === "cut_hole";
+
+                  return (
+                    <li
+                      key={layer.id}
+                      className={`rounded-lg border px-2.5 py-2 ${
+                        isSelected
+                          ? "border-violet-300 bg-violet-50"
+                          : "border-neutral-200 bg-white"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => canvasRef.current?.selectLayer(layer.id)}
+                        className="w-full text-left text-sm font-medium text-neutral-800"
+                      >
+                        <span
+                          className={
+                            isCut ? "text-fuchsia-700" : "text-neutral-800"
+                          }
+                        >
+                          {layer.label}
+                        </span>
+                      </button>
+                      {!isBackground && (
+                        <div className="mt-2 flex items-center gap-1">
+                          <button
+                            type="button"
+                            title="Subir capa"
+                            onClick={() =>
+                              canvasRef.current?.moveLayer(layer.id, "up")
+                            }
+                            className="rounded border border-neutral-200 p-1 hover:bg-neutral-50"
+                          >
+                            <ChevronUp className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            title="Bajar capa"
+                            onClick={() =>
+                              canvasRef.current?.moveLayer(layer.id, "down")
+                            }
+                            className="rounded border border-neutral-200 p-1 hover:bg-neutral-50"
+                          >
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            title="Borrar capa"
+                            onClick={() =>
+                              canvasRef.current?.deleteLayer(layer.id)
+                            }
+                            className="ml-auto rounded border border-red-200 p-1 text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </aside>
         </div>
       </div>
     );

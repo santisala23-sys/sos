@@ -120,7 +120,7 @@ export async function createPrintTemplate(input: {
       ${slug},
       ${input.page_width_mm},
       ${input.page_height_mm},
-      ${JSON.stringify(layout)}::jsonb,
+      ${layout},
       ${input.cut_layer_enabled ?? false},
       ${input.is_default ?? false}
     )
@@ -174,7 +174,7 @@ export async function updatePrintTemplate(
       slug = ${slug},
       page_width_mm = ${pageWidth},
       page_height_mm = ${pageHeight},
-      layout_json = ${JSON.stringify(layout)}::jsonb,
+      layout_json = ${layout},
       cut_layer_enabled = ${cutLayer},
       is_default = ${isDefault},
       updated_at = NOW()
