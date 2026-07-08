@@ -66,8 +66,9 @@ export function MarketingFooter({ className = "" }: MarketingFooterProps) {
               className="[&_.text-neutral-900]:text-white"
             />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-neutral-400">
-              SOSme vincula un código QR a tu perfil de emergencia. Quien lo escanea
-              sabe cómo contactarte y vos recibís la alerta al instante.
+              SOSme vincula un código QR a tu perfil de emergencia. Una persona,
+              mascota u objeto — quien lo escanea sabe cómo contactarte y vos
+              recibís la alerta al instante.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               {TRUST_ITEMS.map(({ icon: Icon, text }) => (

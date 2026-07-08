@@ -193,7 +193,7 @@ export default function DashboardPage() {
                 {loading ? "—" : (planStatus?.activeCount ?? activeProfilesCount ?? 0)}
                 {planStatus && (
                   <span className="text-lg font-semibold text-violet-200">
-                    /{planStatus.maxProfiles}
+                    /{planStatus.currentCount}
                   </span>
                 )}
               </p>

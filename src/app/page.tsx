@@ -90,9 +90,9 @@ export default function HomePage() {
 
               <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-neutral-600 sm:text-xl lg:mx-0">
                 <strong className="font-semibold text-neutral-800">SOSme</strong>{" "}
-                vincula un código QR a tu perfil de emergencia. Lo pegás en una
-                persona, mascota u objeto — quien lo escanea te contacta al
-                instante y vos recibís la alerta.
+                vincula un código QR a tu perfil de emergencia. Una persona,
+                mascota u objeto — quien lo escanea te contacta al instante y
+                vos recibís la alerta.
               </p>
 
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3 lg:justify-start">

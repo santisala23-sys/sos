@@ -78,7 +78,7 @@ export function HowItWorksSection() {
             <li key={step} className="relative flex flex-col items-center text-center">
               {index < STEPS.length - 1 && (
                 <div
-                  className="absolute bottom-0 left-1/2 top-14 w-0.5 -translate-x-1/2 translate-y-8 bg-gradient-to-b from-violet-400 to-violet-200"
+                  className="pointer-events-none absolute bottom-0 left-1/2 top-14 z-0 w-0.5 -translate-x-1/2 translate-y-8 bg-gradient-to-b from-violet-400 to-violet-200"
                   style={{ height: "calc(100% - 3.5rem)" }}
                   aria-hidden
                 />
@@ -86,9 +86,9 @@ export function HowItWorksSection() {
               <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-2xl font-black text-white shadow-xl shadow-violet-500/30 ring-4 ring-white">
                 {step}
               </div>
-              <h3 className="mt-6 text-xl font-bold text-neutral-900">{title}</h3>
-              <p className="mt-3 text-neutral-600">{text}</p>
-              <div className="mt-8 w-full max-w-[220px] overflow-hidden rounded-[1.75rem] border-[5px] border-neutral-900 bg-neutral-950 p-1.5 shadow-2xl shadow-violet-500/15">
+              <h3 className="relative z-10 mt-6 text-xl font-bold text-neutral-900">{title}</h3>
+              <p className="relative z-10 mt-3 text-neutral-600">{text}</p>
+              <div className="relative z-10 mt-8 w-full max-w-[220px] overflow-hidden rounded-[1.75rem] border-[5px] border-neutral-900 bg-neutral-950 p-1.5 shadow-2xl shadow-violet-500/15">
                 <div className="overflow-hidden rounded-[1.25rem]">
                   <Image
                     src={image}
