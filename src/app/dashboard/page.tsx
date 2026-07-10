@@ -18,6 +18,7 @@ import {
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
+import { QrActivationScanner } from "@/components/dashboard/QrActivationScanner";
 import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBanner";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import {
@@ -35,6 +36,7 @@ export default function DashboardPage() {
   const [logs, setLogs] = useState<ScanLogWithProfile[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [highlightedSlug, setHighlightedSlug] = useState<string | null>(null);
   const [legalStatus, setLegalStatus] = useState<{
     needsAcceptance: boolean;
@@ -326,9 +328,21 @@ export default function DashboardPage() {
                 para vincularlo a tu cuenta y crear el perfil. No hace falta
                 ingresar ningún código.
               </p>
+              <Button
+                type="button"
+                className="mt-4 gap-2"
+                onClick={() => setScannerOpen(true)}
+              >
+                <QrCode className="h-4 w-4" aria-hidden />
+                Escanear ahora
+              </Button>
             </div>
           </div>
         </section>
+      )}
+
+      {scannerOpen && (
+        <QrActivationScanner onClose={() => setScannerOpen(false)} />
       )}
 
       <DashboardSection
