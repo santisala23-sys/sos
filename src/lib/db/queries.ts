@@ -16,6 +16,7 @@ type UserRow = User & {
   avatar_url: string | null;
   deletion_requested_at?: string | null;
   deleted_at?: string | null;
+  email_verified_at?: string | null;
 };
 
 export async function findUserByEmail(
@@ -25,12 +26,83 @@ export async function findUserByEmail(
   const rows = await sql`
     SELECT
       id, email, password_hash, google_id, avatar_url, full_name, updated_at, created_at,
-      deletion_requested_at, deleted_at
+      deletion_requested_at, deleted_at, email_verified_at
     FROM users
     WHERE email = ${email.toLowerCase()}
     LIMIT 1
   `;
   return (rows[0] as UserRow | undefined) ?? null;
+}
+
+export type EmailVerificationRow = {
+  email: string;
+  full_name: string | null;
+  email_verified_at: string | null;
+  email_verification_code_hash: string | null;
+  email_verification_expires_at: string | null;
+  email_verification_sent_at: string | null;
+  email_verification_attempts: number;
+};
+
+export async function getEmailVerification(
+  userId: string,
+): Promise<EmailVerificationRow | null> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      email,
+      full_name,
+      email_verified_at,
+      email_verification_code_hash,
+      email_verification_expires_at,
+      email_verification_sent_at,
+      email_verification_attempts
+    FROM users
+    WHERE id = ${userId}
+    LIMIT 1
+  `;
+  return (rows[0] as EmailVerificationRow | undefined) ?? null;
+}
+
+export async function setEmailVerificationCode(
+  userId: string,
+  codeHash: string,
+  expiresAt: Date,
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    UPDATE users
+    SET
+      email_verification_code_hash = ${codeHash},
+      email_verification_expires_at = ${expiresAt.toISOString()},
+      email_verification_sent_at = NOW(),
+      email_verification_attempts = 0
+    WHERE id = ${userId}
+  `;
+}
+
+export async function incrementEmailVerificationAttempts(
+  userId: string,
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    UPDATE users
+    SET email_verification_attempts = email_verification_attempts + 1
+    WHERE id = ${userId}
+  `;
+}
+
+export async function markEmailVerified(userId: string): Promise<void> {
+  const sql = getSql();
+  await sql`
+    UPDATE users
+    SET
+      email_verified_at = COALESCE(email_verified_at, NOW()),
+      email_verification_code_hash = NULL,
+      email_verification_expires_at = NULL,
+      email_verification_attempts = 0
+    WHERE id = ${userId}
+  `;
 }
 
 export async function findUserByGoogleId(
@@ -159,6 +231,7 @@ export async function createGoogleUser(data: {
       google_id,
       full_name,
       avatar_url,
+      email_verified_at,
       accepted_terms_at,
       terms_version,
       privacy_policy_version,
@@ -170,6 +243,7 @@ export async function createGoogleUser(data: {
       ${data.googleId},
       ${data.fullName},
       ${data.avatarUrl ?? null},
+      NOW(),
       ${acceptedAt},
       ${data.legal?.termsVersion ?? null},
       ${data.legal?.privacyVersion ?? null},

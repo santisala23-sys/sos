@@ -4,6 +4,7 @@ export type AuditEventType =
   | "login_failed"
   | "login_success"
   | "register"
+  | "email_verified"
   | "rate_limited"
   | "invalid_scan_token"
   | "admin_access"

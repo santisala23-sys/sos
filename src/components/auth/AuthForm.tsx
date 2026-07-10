@@ -76,6 +76,12 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
         return;
       }
 
+      if (data.needsVerification) {
+        router.push("/verificar");
+        router.refresh();
+        return;
+      }
+
       const destination =
         redirectTo && redirectTo.startsWith("/") ? redirectTo : "/dashboard";
       router.push(destination);

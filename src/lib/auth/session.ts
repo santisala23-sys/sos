@@ -7,7 +7,19 @@ const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 días
 export type SessionPayload = {
   userId: string;
   email: string;
+  /**
+   * Whether the account's email has been verified.
+   * `undefined` (legacy tokens) is treated as verified for backwards compatibility.
+   */
+  emailVerified?: boolean;
 };
+
+/** A session counts as verified unless the token explicitly says otherwise. */
+export function isSessionVerified(
+  session: Pick<SessionPayload, "emailVerified"> | null | undefined,
+): boolean {
+  return session ? session.emailVerified !== false : false;
+}
 
 function getSecret() {
   const secret = process.env.AUTH_SECRET;
@@ -18,7 +30,7 @@ function getSecret() {
 }
 
 export async function createSessionToken(payload: SessionPayload): Promise<string> {
-  return new SignJWT(payload)
+  return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_MAX_AGE}s`)
@@ -34,6 +46,10 @@ export async function verifySessionToken(
     return {
       userId: String(payload.userId),
       email: String(payload.email),
+      emailVerified:
+        typeof payload.emailVerified === "boolean"
+          ? payload.emailVerified
+          : undefined,
     };
   } catch {
     return null;

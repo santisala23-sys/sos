@@ -49,6 +49,7 @@ const migrations = [
   "016_print_templates.sql",
   "017_print_template_white_canvas.sql",
   "018_scan_message_media.sql",
+  "019_email_verification.sql",
 ];
 
 for (const file of migrations) {

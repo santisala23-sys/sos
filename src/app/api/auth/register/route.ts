@@ -7,6 +7,7 @@ import {
   sessionCookieOptions,
 } from "@/lib/auth/session";
 import { createUser, findUserByEmail } from "@/lib/db/queries";
+import { issueVerificationCode } from "@/lib/auth/issue-verification";
 import { legalAcceptancePayload } from "@/lib/legal/terms-cookie";
 import { logSecurityAudit } from "@/lib/security/audit";
 import { validatePassword } from "@/lib/security/password-policy";
@@ -62,9 +63,12 @@ export const POST = withApi(
 
     const passwordHash = await hashPassword(password);
     const user = await createUser(email, passwordHash, fullName, legalAcceptancePayload());
+
+    // Sesión "pendiente": permite llegar a /verificar pero no al dashboard.
     const token = await createSessionToken({
       userId: user.id,
       email: user.email,
+      emailVerified: false,
     });
 
     const cookieStore = await cookies();
@@ -76,7 +80,14 @@ export const POST = withApi(
       userId: user.id,
     });
 
+    await issueVerificationCode({
+      userId: user.id,
+      email: user.email,
+      name: user.full_name,
+    });
+
     return NextResponse.json({
+      needsVerification: true,
       user: {
         id: user.id,
         email: user.email,

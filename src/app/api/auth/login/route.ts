@@ -7,6 +7,7 @@ import {
   sessionCookieOptions,
 } from "@/lib/auth/session";
 import { findUserByEmail } from "@/lib/db/queries";
+import { issueVerificationCode } from "@/lib/auth/issue-verification";
 import { logSecurityAudit } from "@/lib/security/audit";
 
 export const POST = withApi(
@@ -72,13 +73,33 @@ export const POST = withApi(
       return NextResponse.json({ error: hint }, { status: 401 });
     }
 
+    const emailVerified = Boolean(user.email_verified_at);
+
     const token = await createSessionToken({
       userId: user.id,
       email: user.email,
+      emailVerified,
     });
 
     const cookieStore = await cookies();
     cookieStore.set(sessionCookieOptions(token));
+
+    // Cuenta sin verificar: reenviamos código y mandamos a /verificar.
+    if (!emailVerified) {
+      await issueVerificationCode({
+        userId: user.id,
+        email: user.email,
+        name: user.full_name,
+      });
+      return NextResponse.json({
+        needsVerification: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+        },
+      });
+    }
 
     await logSecurityAudit({
       eventType: "login_success",

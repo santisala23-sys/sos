@@ -14,25 +14,40 @@ export async function middleware(request: NextRequest) {
   const isAdmin = pathname.startsWith("/admin");
   const isAuthPage =
     pathname === "/login" || pathname === "/register";
+  const isVerifyPage = pathname === "/verificar";
 
-  if (isAdmin) {
+  // `emailVerified === false` marca una sesión pendiente de verificar el email.
+  const needsVerification = !!session && session.emailVerified === false;
+
+  if (isVerifyPage) {
     if (!session) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
-      url.searchParams.set("redirect", pathname);
       return NextResponse.redirect(url);
     }
-    const admin = await isUserAdmin(session.userId);
-    if (!admin) {
+    if (!needsVerification) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
+    return NextResponse.next();
   }
 
-  if (isDashboard && !session) {
+  if ((isDashboard || isAdmin) && !session) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
+  }
+
+  // Sesión sin verificar: forzamos el paso por /verificar.
+  if (needsVerification && (isDashboard || isAdmin || isAuthPage)) {
+    return NextResponse.redirect(new URL("/verificar", request.url));
+  }
+
+  if (isAdmin && session) {
+    const admin = await isUserAdmin(session.userId);
+    if (!admin) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
   }
 
   if (isAuthPage && session) {
@@ -48,5 +63,11 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/login", "/register"],
+  matcher: [
+    "/dashboard/:path*",
+    "/admin/:path*",
+    "/login",
+    "/register",
+    "/verificar",
+  ],
 };

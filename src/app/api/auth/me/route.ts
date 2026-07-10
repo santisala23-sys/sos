@@ -26,6 +26,7 @@ export async function GET() {
 
   return NextResponse.json({
     email: session.email,
+    emailVerified: session.emailVerified !== false,
     legal: getLegalStatus(legal),
     plan: {
       ...getProfileLimitStatus(planRecord, profileCount),

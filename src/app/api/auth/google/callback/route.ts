@@ -127,6 +127,7 @@ export async function GET(request: Request) {
     const token = await createSessionToken({
       userId: user.id,
       email: user.email,
+      emailVerified: true,
     });
     cookieStore.set(sessionCookieOptions(token));
 
