@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FileText, Trash2 } from "lucide-react";
 import type { ProfileType, QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
+import { PhoneInput } from "@/components/ui/PhoneInput";
 import {
   getProfileTypeConfig,
   PROFILE_TYPES,
@@ -281,14 +282,15 @@ export function QrProfileForm({
 
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">Teléfono de contacto *</span>
-        <input
+        <PhoneInput
           required
-          type="tel"
           value={emergencyContactPhone}
-          onChange={(e) => setEmergencyContactPhone(e.target.value)}
-          className={inputClass}
-          placeholder="+54911..."
+          onChange={setEmergencyContactPhone}
+          placeholder="11 2233 4455"
         />
+        <span className="text-xs text-neutral-500">
+          Elegí el país y escribí el número sin el prefijo.
+        </span>
       </label>
 
       <fieldset className="rounded-xl border border-neutral-200 p-4">
@@ -310,12 +312,10 @@ export function QrProfileForm({
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-sm font-medium">Teléfono / WhatsApp</span>
-            <input
-              type="tel"
+            <PhoneInput
               value={secondaryContactPhone}
-              onChange={(e) => setSecondaryContactPhone(e.target.value)}
-              className={inputClass}
-              placeholder="+54911..."
+              onChange={setSecondaryContactPhone}
+              placeholder="11 2233 4455"
             />
           </label>
         </div>
