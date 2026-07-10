@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getScanLogReadAt } from "@/lib/db/queries";
+// import { getScanLogReadAt } from "@/lib/db/queries";
 
 export const runtime = "nodejs";
 
@@ -27,18 +27,21 @@ export async function GET(request: Request, { params }: RouteContext) {
     return NextResponse.json({ error: "id inválido" }, { status: 400 });
   }
 
-  try {
-    const readAt = await getScanLogReadAt(id);
-    if (readAt === undefined) {
-      return NextResponse.json(
-        { error: "Scan log no encontrado" },
-        { status: 404 },
-      );
-    }
+  // TEMPORAL: respuesta estática para probar n8n sin consultar la DB.
+  return NextResponse.json({ read_at: null });
 
-    return NextResponse.json({ read_at: readAt });
-  } catch (error) {
-    console.error("[internal read-status GET]", error);
-    return NextResponse.json({ error: "Error interno" }, { status: 500 });
-  }
+  // try {
+  //   const readAt = await getScanLogReadAt(id);
+  //   if (readAt === undefined) {
+  //     return NextResponse.json(
+  //       { error: "Scan log no encontrado" },
+  //       { status: 404 },
+  //     );
+  //   }
+  //
+  //   return NextResponse.json({ read_at: readAt });
+  // } catch (error) {
+  //   console.error("[internal read-status GET]", error);
+  //   return NextResponse.json({ error: "Error interno" }, { status: 500 });
+  // }
 }
