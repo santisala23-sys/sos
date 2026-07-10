@@ -24,8 +24,11 @@ import { profileHasSensitiveData } from "@/lib/legal/sensitive-data";
 
 type QrProfileFormProps = {
   profile?: QrProfile;
-  onSuccess: () => void;
+  onSuccess: (profile?: QrProfile) => void;
   onCancel?: () => void;
+  /** Endpoint usado al crear (no editar). Permite reutilizar el form en la
+   *  activación de productos apuntando a /api/activar/[code]. */
+  createEndpoint?: string;
 };
 
 function readFileAsBase64(file: File): Promise<string> {
@@ -49,6 +52,7 @@ export function QrProfileForm({
   profile,
   onSuccess,
   onCancel,
+  createEndpoint = "/api/qr-profiles",
 }: QrProfileFormProps) {
   const isEditing = Boolean(profile);
   const [loading, setLoading] = useState(false);
@@ -127,7 +131,7 @@ export function QrProfileForm({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         })
-      : await fetch("/api/qr-profiles", {
+      : await fetch(createEndpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -149,7 +153,7 @@ export function QrProfileForm({
     }
 
     setLoading(false);
-    onSuccess();
+    onSuccess(data.profile as QrProfile | undefined);
   }
 
   async function handlePdfUpload(e: React.ChangeEvent<HTMLInputElement>) {

@@ -6,6 +6,12 @@ import {
   findActivationByCode,
   toActivationPublicView,
 } from "@/lib/db/queries-activation";
+import { isProfileType, type ProfileType } from "@/lib/profile-types";
+import { normalizeBloodType } from "@/lib/blood-types";
+import {
+  sensitiveConsentFields,
+  validateSensitiveDataConsent,
+} from "@/lib/legal/validate-sensitive";
 
 export const GET = withApi(
   { rateLimit: "api" },
@@ -39,8 +45,14 @@ export const POST = withApi(
       beneficiary_name?: string;
       emergency_contact_name?: string;
       emergency_contact_phone?: string;
+      secondary_contact_name?: string | null;
+      secondary_contact_phone?: string | null;
       instructions?: string;
+      medical_notes?: string;
+      allergies?: string;
+      blood_type?: string | null;
       profile_type?: string;
+      sensitiveDataConsent?: boolean;
     };
 
     try {
@@ -53,8 +65,14 @@ export const POST = withApi(
       beneficiary_name,
       emergency_contact_name,
       emergency_contact_phone,
+      secondary_contact_name,
+      secondary_contact_phone,
       instructions,
+      medical_notes,
+      allergies,
+      blood_type,
       profile_type,
+      sensitiveDataConsent,
     } = body;
 
     if (
@@ -69,17 +87,38 @@ export const POST = withApi(
       );
     }
 
+    const resolvedProfileType: ProfileType =
+      profile_type && isProfileType(profile_type) ? profile_type : "person";
+
+    const resolvedBloodType =
+      resolvedProfileType === "person" ? normalizeBloodType(blood_type) : null;
+
+    const consentError = validateSensitiveDataConsent({
+      profileType: resolvedProfileType,
+      allergies,
+      medicalNotes: medical_notes,
+      bloodType: resolvedBloodType,
+      sensitiveDataConsent,
+    });
+    if (consentError) {
+      return NextResponse.json({ error: consentError }, { status: 400 });
+    }
+
     const { claimActivationForUser } = await import("@/lib/db/queries-activation");
-    const { isProfileType } = await import("@/lib/profile-types");
 
     try {
       const result = await claimActivationForUser(code, meta.userId, {
         beneficiary_name: beneficiary_name.trim(),
         emergency_contact_name: emergency_contact_name.trim(),
         emergency_contact_phone: emergency_contact_phone.trim(),
+        secondary_contact_name: secondary_contact_name?.trim() || null,
+        secondary_contact_phone: secondary_contact_phone?.trim() || null,
         instructions: instructions.trim(),
-        profile_type:
-          profile_type && isProfileType(profile_type) ? profile_type : "person",
+        medical_notes: medical_notes ?? "",
+        allergies: allergies ?? "",
+        blood_type: resolvedBloodType,
+        profile_type: resolvedProfileType,
+        ...sensitiveConsentFields(Boolean(sensitiveDataConsent)),
       });
 
       return NextResponse.json({

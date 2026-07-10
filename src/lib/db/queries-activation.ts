@@ -102,6 +102,13 @@ export async function claimActivationForUser(
     emergency_contact_phone: string;
     instructions: string;
     profile_type?: ProfileType;
+    secondary_contact_name?: string | null;
+    secondary_contact_phone?: string | null;
+    medical_notes?: string;
+    allergies?: string;
+    blood_type?: string | null;
+    sensitive_data_consent_at?: string | null;
+    sensitive_data_consent_version?: string | null;
   },
 ): Promise<{ profile: QrProfile; activation: QrActivationRow }> {
   const code = normalizeActivationCode(rawCode);
@@ -150,7 +157,15 @@ export async function claimActivationForUser(
     beneficiary_name: profileData.beneficiary_name,
     emergency_contact_name: profileData.emergency_contact_name,
     emergency_contact_phone: profileData.emergency_contact_phone,
+    secondary_contact_name: profileData.secondary_contact_name ?? null,
+    secondary_contact_phone: profileData.secondary_contact_phone ?? null,
     instructions: profileData.instructions,
+    medical_notes: profileData.medical_notes ?? "",
+    allergies: profileData.allergies ?? "",
+    blood_type: profileData.blood_type ?? null,
+    sensitive_data_consent_at: profileData.sensitive_data_consent_at ?? null,
+    sensitive_data_consent_version:
+      profileData.sensitive_data_consent_version ?? null,
   });
 
   const sql = getSql();

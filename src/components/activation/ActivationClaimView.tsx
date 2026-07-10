@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Loader2, QrCode } from "lucide-react";
+import { CheckCircle2, QrCode } from "lucide-react";
 import type { ActivationPublicView } from "@/lib/db/queries-activation";
+import type { QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
-import { PROFILE_TYPES } from "@/lib/profile-types";
+import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
 
 type ActivationClaimViewProps = {
   code: string;
@@ -22,17 +22,6 @@ export function ActivationClaimView({
   redirectPath,
 }: ActivationClaimViewProps) {
   const router = useRouter();
-  const [beneficiaryName, setBeneficiaryName] = useState(
-    activation.productLabel ?? "",
-  );
-  const [contactName, setContactName] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [instructions, setInstructions] = useState(
-    "Si encontrás este producto o necesitás contactar al dueño, usá los datos de arriba.",
-  );
-  const [profileType, setProfileType] = useState("person");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const loginHref = `/login?redirect=${encodeURIComponent(redirectPath)}`;
   const registerHref = `/register?redirect=${encodeURIComponent(redirectPath)}`;
@@ -113,127 +102,28 @@ export function ActivationClaimView({
     );
   }
 
-  async function handleClaim(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    try {
-      const res = await fetch(`/api/activar/${encodeURIComponent(code)}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          beneficiary_name: beneficiaryName,
-          emergency_contact_name: contactName,
-          emergency_contact_phone: contactPhone,
-          instructions,
-          profile_type: profileType,
-        }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error ?? "No se pudo activar el código");
-        return;
-      }
-
-      router.push(`/dashboard?activado=${data.profile.slug}`);
-      router.refresh();
-    } catch {
-      setError("Error de conexión. Probá de nuevo.");
-    } finally {
-      setLoading(false);
+  function handleSuccess(profile?: QrProfile) {
+    if (profile?.slug) {
+      router.push(`/dashboard?activado=${profile.slug}`);
+    } else {
+      router.push("/dashboard#perfiles");
     }
+    router.refresh();
   }
 
   return (
-    <form
-      onSubmit={handleClaim}
-      className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8"
-    >
+    <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8">
       <h2 className="text-lg font-bold text-neutral-900">Configurá tu perfil</h2>
       <p className="mt-1 text-sm text-neutral-600">
         Completá los datos que verán quienes escaneen el QR en tu producto.
       </p>
 
-      <div className="mt-6 space-y-4">
-        <label className="block text-sm font-medium text-neutral-700">
-          Tipo de perfil
-          <select
-            value={profileType}
-            onChange={(e) => setProfileType(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
-          >
-            {PROFILE_TYPES.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="block text-sm font-medium text-neutral-700">
-          Nombre o identificación
-          <input
-            required
-            value={beneficiaryName}
-            onChange={(e) => setBeneficiaryName(e.target.value)}
-            placeholder="Ej. Chaqueta de Juan, Collar de Firu"
-            className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
-          />
-        </label>
-
-        <label className="block text-sm font-medium text-neutral-700">
-          Contacto de emergencia
-          <input
-            required
-            value={contactName}
-            onChange={(e) => setContactName(e.target.value)}
-            placeholder="Nombre del contacto"
-            className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
-          />
-        </label>
-
-        <label className="block text-sm font-medium text-neutral-700">
-          Teléfono / WhatsApp
-          <input
-            required
-            type="tel"
-            value={contactPhone}
-            onChange={(e) => setContactPhone(e.target.value)}
-            placeholder="+54 9 11 ..."
-            className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
-          />
-        </label>
-
-        <label className="block text-sm font-medium text-neutral-700">
-          Instrucciones para quien escanea
-          <textarea
-            required
-            rows={3}
-            value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
-          />
-        </label>
+      <div className="mt-6">
+        <QrProfileForm
+          createEndpoint={`/api/activar/${encodeURIComponent(code)}`}
+          onSuccess={handleSuccess}
+        />
       </div>
-
-      {error && (
-        <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
-          {error}
-        </p>
-      )}
-
-      <Button type="submit" size="lg" className="mt-6 w-full gap-2" disabled={loading}>
-        {loading ? (
-          <>
-            <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-            Activando...
-          </>
-        ) : (
-          "Activar QR"
-        )}
-      </Button>
-    </form>
+    </div>
   );
 }
