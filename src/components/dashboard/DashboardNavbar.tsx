@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  Shield,
   UserCircle2,
   X,
 } from "lucide-react";
@@ -35,7 +34,6 @@ export function DashboardNavbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hash, setHash] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
   const [planStatus, setPlanStatus] = useState<PlanStatus | null>(null);
 
   useEffect(() => {
@@ -66,10 +64,6 @@ export function DashboardNavbar() {
         if (d?.plan) setPlanStatus(d.plan);
       })
       .catch(() => setPlanStatus(null));
-    fetch("/api/admin/me")
-      .then((r) => r.json())
-      .then((d) => setIsAdmin(Boolean(d.isAdmin)))
-      .catch(() => setIsAdmin(false));
   }, []);
 
   const isLogDetail = pathname.startsWith("/dashboard/logs/");
@@ -143,14 +137,6 @@ export function DashboardNavbar() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          {isAdmin && (
-            <Link href="/admin">
-              <Button variant="ghost" size="md" className="gap-2 px-4 text-base">
-                <Shield className="h-4 w-4" aria-hidden />
-                Admin
-              </Button>
-            </Link>
-          )}
           <Button
             type="button"
             variant="ghost"
@@ -209,14 +195,6 @@ export function DashboardNavbar() {
             })}
           </nav>
           <div className="mt-5 flex flex-col gap-2.5 border-t border-neutral-100 pt-5">
-            {isAdmin && (
-              <Link href="/admin" onClick={() => setOpen(false)}>
-                <Button variant="secondary" size="lg" className="w-full gap-2">
-                  <Shield className="h-4 w-4" aria-hidden />
-                  Admin
-                </Button>
-              </Link>
-            )}
             <Button
               type="button"
               variant="secondary"

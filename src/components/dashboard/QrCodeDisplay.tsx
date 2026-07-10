@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import QRCode from "react-qr-code";
-import { Download, FileDown, Printer } from "lucide-react";
+import { Download, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { getPublicProfileUrl } from "@/lib/utils/slug";
 
@@ -161,10 +161,6 @@ export function QrCodeDisplay({ slug, beneficiaryName }: QrCodeDisplayProps) {
           Imprimir / PDF
         </Button>
       </div>
-      <p className="flex items-center gap-1.5 text-center text-xs text-neutral-500">
-        <Printer className="h-3.5 w-3.5 shrink-0" aria-hidden />
-        En el diálogo de impresión elegí «Guardar como PDF» o imprimí en papel.
-      </p>
     </div>
   );
 }

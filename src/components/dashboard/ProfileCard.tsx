@@ -6,7 +6,7 @@ import { Eye, Pencil, Trash2, QrCode, Smartphone, X } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
-import { getSosOnlyUrl } from "@/lib/utils/slug";
+import { getPublicProfileUrl, getSosOnlyUrl } from "@/lib/utils/slug";
 import { PROFILE_TYPES } from "@/lib/profile-types";
 import { cn } from "@/lib/utils/cn";
 
@@ -24,6 +24,7 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const sosOnlyUrl = getSosOnlyUrl(profile.slug);
+  const publicPath = getPublicProfileUrl(profile.slug);
   const typeLabel =
     PROFILE_TYPES.find((t) => t.value === profile.profile_type)?.label ??
     "Persona";
@@ -44,7 +45,7 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
         type="button"
         onClick={() => setConfirmDelete(true)}
         aria-label="Eliminar perfil"
-        className="absolute right-3 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-white/90 text-neutral-400 shadow-sm backdrop-blur-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+        className="absolute right-3 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-red-200 bg-red-50 text-red-600 shadow-sm backdrop-blur-sm transition-colors hover:border-red-300 hover:bg-red-100 hover:text-red-700"
       >
         <Trash2 className="h-4 w-4" aria-hidden />
       </button>
@@ -86,8 +87,13 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
               </dd>
             </div>
           )}
-          <div className="border-t border-neutral-200/80 pt-2 font-mono text-xs text-violet-600">
-            /p/{profile.slug}
+          <div className="border-t border-neutral-200/80 pt-2">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+              Link público del perfil
+            </dt>
+            <dd className="mt-0.5 break-all font-mono text-xs text-violet-600">
+              {publicPath}
+            </dd>
           </div>
         </dl>
 
