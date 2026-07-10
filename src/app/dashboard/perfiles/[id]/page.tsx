@@ -59,7 +59,7 @@ export default function ProfileDetailPage() {
           Volver a mis perfiles
         </Link>
         <Link
-          href={`/dashboard/perfiles/${profile.id}/editar`}
+          href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent(`/dashboard/perfiles/${profile.id}`)}`}
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-base font-semibold text-white transition-colors hover:from-violet-700 hover:to-indigo-700"
         >
           <Pencil className="h-4 w-4" aria-hidden />

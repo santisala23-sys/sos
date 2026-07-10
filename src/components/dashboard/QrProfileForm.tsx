@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FileText, Trash2 } from "lucide-react";
+import {
+  FileText,
+  HeartPulse,
+  Package,
+  PawPrint,
+  Phone,
+  Trash2,
+  User,
+  Users,
+} from "lucide-react";
 import type { ProfileType, QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { PhoneInput } from "@/components/ui/PhoneInput";
@@ -219,85 +228,117 @@ export function QrProfileForm({
   }
 
   const inputClass =
-    "w-full rounded-lg border border-neutral-300 px-4 py-3 text-base focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200";
+    "w-full rounded-lg border border-neutral-300 px-4 py-3 text-base transition-colors focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200";
+  const sectionClass =
+    "rounded-2xl border border-neutral-200 bg-neutral-50/60 p-4 sm:p-5";
+  const legendClass =
+    "flex items-center gap-2 px-1 text-sm font-bold text-neutral-800";
+
+  const typeIcons = {
+    person: User,
+    pet: PawPrint,
+    object: Package,
+  } as const;
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <fieldset className="rounded-xl border border-neutral-200 p-4">
-        <legend className="px-1 text-sm font-semibold text-neutral-800">
-          Tipo de perfil *
-        </legend>
-        <div className="flex flex-col gap-2">
-          {PROFILE_TYPES.map((option) => (
-            <label
-              key={option.value}
-              className={`flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors ${
-                profileType === option.value
-                  ? "border-violet-600 bg-violet-50"
-                  : "border-neutral-200 hover:bg-neutral-50"
-              }`}
-            >
-              <input
-                type="radio"
-                name="profile_type"
-                value={option.value}
-                checked={profileType === option.value}
-                onChange={() => setProfileType(option.value)}
-                className="mt-1"
-              />
-              <span>
-                <span className="block text-sm font-semibold text-neutral-900">
-                  {option.label}
-                </span>
-                <span className="block text-xs text-neutral-500">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <fieldset className={sectionClass}>
+        <legend className={legendClass}>Tipo de perfil *</legend>
+        <div className="mt-1 grid gap-2 sm:grid-cols-3">
+          {PROFILE_TYPES.map((option) => {
+            const OptionIcon = typeIcons[option.value];
+            const selected = profileType === option.value;
+            return (
+              <label
+                key={option.value}
+                className={`flex cursor-pointer flex-col gap-2 rounded-xl border-2 bg-white p-3 transition-all ${
+                  selected
+                    ? "border-violet-600 shadow-sm shadow-violet-500/20"
+                    : "border-neutral-200 hover:border-violet-300 hover:bg-violet-50/40"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                      selected
+                        ? "bg-violet-600 text-white"
+                        : "bg-neutral-100 text-neutral-500"
+                    }`}
+                  >
+                    <OptionIcon className="h-4 w-4" aria-hidden />
+                  </span>
+                  <span className="text-sm font-semibold text-neutral-900">
+                    {option.label}
+                  </span>
+                  <input
+                    type="radio"
+                    name="profile_type"
+                    value={option.value}
+                    checked={selected}
+                    onChange={() => setProfileType(option.value)}
+                    className="sr-only"
+                  />
+                </div>
+                <span className="text-xs leading-snug text-neutral-500">
                   {option.description}
                 </span>
-              </span>
-            </label>
-          ))}
+              </label>
+            );
+          })}
         </div>
       </fieldset>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">{typeConfig.beneficiaryLabel} *</span>
-        <input
-          required
-          value={beneficiaryName}
-          onChange={(e) => setBeneficiaryName(e.target.value)}
-          className={inputClass}
-          placeholder={typeConfig.beneficiaryPlaceholder}
-        />
-      </label>
+      <fieldset className={sectionClass}>
+        <legend className={legendClass}>
+          <Phone className="h-4 w-4 text-violet-600" aria-hidden />
+          Contacto principal
+        </legend>
+        <div className="mt-1 flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">
+              {typeConfig.beneficiaryLabel} *
+            </span>
+            <input
+              required
+              value={beneficiaryName}
+              onChange={(e) => setBeneficiaryName(e.target.value)}
+              className={inputClass}
+              placeholder={typeConfig.beneficiaryPlaceholder}
+            />
+          </label>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">{typeConfig.contactLabel} *</span>
-        <input
-          required
-          value={emergencyContactName}
-          onChange={(e) => setEmergencyContactName(e.target.value)}
-          className={inputClass}
-          placeholder={typeConfig.contactPlaceholder}
-        />
-      </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">{typeConfig.contactLabel} *</span>
+            <input
+              required
+              value={emergencyContactName}
+              onChange={(e) => setEmergencyContactName(e.target.value)}
+              className={inputClass}
+              placeholder={typeConfig.contactPlaceholder}
+            />
+          </label>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">Teléfono de contacto *</span>
-        <PhoneInput
-          required
-          value={emergencyContactPhone}
-          onChange={setEmergencyContactPhone}
-          placeholder="11 2233 4455"
-        />
-        <span className="text-xs text-neutral-500">
-          Elegí el país y escribí el número sin el prefijo.
-        </span>
-      </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">Teléfono de contacto *</span>
+            <PhoneInput
+              required
+              value={emergencyContactPhone}
+              onChange={setEmergencyContactPhone}
+              placeholder="11 2233 4455"
+            />
+            <span className="text-xs text-neutral-500">
+              Elegí el país y escribí el número sin el prefijo.
+            </span>
+          </label>
+        </div>
+      </fieldset>
 
-      <fieldset className="rounded-xl border border-neutral-200 p-4">
-        <legend className="px-1 text-sm font-semibold text-neutral-800">
+      <fieldset className={sectionClass}>
+        <legend className={legendClass}>
+          <Users className="h-4 w-4 text-violet-600" aria-hidden />
           Contacto secundario (opcional)
         </legend>
-        <p className="mb-3 text-xs text-neutral-500">
+        <p className="mb-3 mt-1 text-xs text-neutral-500">
           Otro familiar o persona de confianza. También recibe llamada y WhatsApp.
         </p>
         <div className="flex flex-col gap-3">
@@ -335,69 +376,83 @@ export function QrProfileForm({
         />
       </label>
 
-      {typeConfig.showBloodType && (
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Tipo de sangre (opcional)</span>
-          <select
-            value={bloodType}
-            onChange={(e) => setBloodType(e.target.value)}
-            className={inputClass}
-          >
-            <option value="">No especificado</option>
-            {BLOOD_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-          <span className="text-xs text-neutral-500">
-            Se muestra destacado en la vista de emergencia para personal de salud.
-          </span>
-        </label>
-      )}
+      {(typeConfig.showBloodType ||
+        typeConfig.showAllergies ||
+        typeConfig.showMedicalNotes) && (
+        <fieldset className={sectionClass}>
+          <legend className={legendClass}>
+            <HeartPulse className="h-4 w-4 text-rose-500" aria-hidden />
+            Datos médicos (opcional)
+          </legend>
+          <div className="mt-1 flex flex-col gap-3">
+            {typeConfig.showBloodType && (
+              <label className="flex flex-col gap-1">
+                <span className="text-sm font-medium">Tipo de sangre</span>
+                <select
+                  value={bloodType}
+                  onChange={(e) => setBloodType(e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">No especificado</option>
+                  {BLOOD_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+                <span className="text-xs text-neutral-500">
+                  Se muestra destacado en la vista de emergencia para personal de
+                  salud.
+                </span>
+              </label>
+            )}
 
-      {typeConfig.showAllergies && (
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">
-            {typeConfig.allergiesLabel} (opcional)
-          </span>
-          <textarea
-            rows={2}
-            value={allergies}
-            onChange={(e) => setAllergies(e.target.value)}
-            className={inputClass}
-            placeholder={
-              profileType === "pet"
-                ? "Ej: Alergia al pollo, no puede comer ciertos snacks..."
-                : "Ej: Penicilina, maní, látex..."
-            }
-          />
-          {profileType === "person" && (
-            <span className="text-xs text-neutral-500">
-              Se muestra en rojo y bien visible en la vista de emergencia.
-            </span>
-          )}
-        </label>
-      )}
+            {typeConfig.showAllergies && (
+              <label className="flex flex-col gap-1">
+                <span className="text-sm font-medium">
+                  {typeConfig.allergiesLabel}
+                </span>
+                <textarea
+                  rows={2}
+                  value={allergies}
+                  onChange={(e) => setAllergies(e.target.value)}
+                  className={inputClass}
+                  placeholder={
+                    profileType === "pet"
+                      ? "Ej: Alergia al pollo, no puede comer ciertos snacks..."
+                      : "Ej: Penicilina, maní, látex..."
+                  }
+                />
+                {profileType === "person" && (
+                  <span className="text-xs text-neutral-500">
+                    Se muestra en rojo y bien visible en la vista de emergencia.
+                  </span>
+                )}
+              </label>
+            )}
 
-      {typeConfig.showMedicalNotes && (
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">
-            {typeConfig.medicalNotesLabel} (opcional)
-          </span>
-          <textarea
-            rows={3}
-            value={medicalNotes}
-            onChange={(e) => setMedicalNotes(e.target.value)}
-            className={inputClass}
-            placeholder={typeConfig.medicalNotesPlaceholder}
-          />
-        </label>
+            {typeConfig.showMedicalNotes && (
+              <label className="flex flex-col gap-1">
+                <span className="text-sm font-medium">
+                  {typeConfig.medicalNotesLabel}
+                </span>
+                <textarea
+                  rows={3}
+                  value={medicalNotes}
+                  onChange={(e) => setMedicalNotes(e.target.value)}
+                  className={inputClass}
+                  placeholder={typeConfig.medicalNotesPlaceholder}
+                />
+              </label>
+            )}
+          </div>
+        </fieldset>
       )}
 
       {isEditing && typeConfig.showClinicalPdf && (
-        <fieldset className="rounded-xl border border-neutral-200 p-4">
-          <legend className="px-1 text-sm font-semibold text-neutral-800">
+        <fieldset className={sectionClass}>
+          <legend className={legendClass}>
+            <FileText className="h-4 w-4 text-violet-600" aria-hidden />
             Historial clínico PDF (opcional)
           </legend>
           <p className="mb-3 text-xs text-neutral-500">
@@ -449,14 +504,21 @@ export function QrProfileForm({
       )}
 
       {isEditing && (
-        <label className="flex items-center gap-2">
+        <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
           <input
             type="checkbox"
             checked={isActive}
             onChange={(e) => setIsActive(e.target.checked)}
-            className="h-4 w-4 rounded border-neutral-300"
+            className="h-4 w-4 rounded border-neutral-300 text-violet-600 focus:ring-violet-500"
           />
-          <span className="text-sm">Perfil activo (visible al escanear QR)</span>
+          <span className="flex flex-col">
+            <span className="text-sm font-semibold text-neutral-900">
+              Perfil activo
+            </span>
+            <span className="text-xs text-neutral-500">
+              Visible cuando alguien escanea el QR.
+            </span>
+          </span>
         </label>
       )}
 
@@ -490,8 +552,12 @@ export function QrProfileForm({
         </p>
       )}
 
-      <div className="flex flex-wrap gap-3">
-        <Button type="submit" disabled={loading || pdfLoading}>
+      <div className="sticky bottom-0 -mx-5 mt-1 flex flex-col-reverse gap-2 border-t border-neutral-200 bg-white/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:flex-row sm:px-8">
+        <Button
+          type="submit"
+          disabled={loading || pdfLoading}
+          className="flex-1 sm:flex-none"
+        >
           {loading
             ? "Guardando..."
             : isEditing
@@ -499,7 +565,12 @@ export function QrProfileForm({
               : "Crear perfil QR"}
         </Button>
         {onCancel && (
-          <Button type="button" variant="ghost" onClick={onCancel}>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onCancel}
+            className="flex-1 sm:flex-none"
+          >
             Cancelar
           </Button>
         )}

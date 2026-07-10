@@ -109,7 +109,7 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
               Ver perfil
             </Link>
             <Link
-              href={`/dashboard/perfiles/${profile.id}/editar`}
+              href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent("/dashboard#perfiles")}`}
               className={actionClass}
             >
               <Pencil className="h-4 w-4" aria-hidden />
