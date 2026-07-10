@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, Pencil, Trash2, QrCode, Smartphone, X } from "lucide-react";
+import { Eye, ExternalLink, Pencil, Trash2, QrCode, X } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
-import { getPublicProfileUrl, getSosOnlyUrl } from "@/lib/utils/slug";
+import { getPublicProfileUrl } from "@/lib/utils/slug";
 import { PROFILE_TYPES } from "@/lib/profile-types";
 import { cn } from "@/lib/utils/cn";
 
@@ -23,7 +23,6 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
   const [showQr, setShowQr] = useState(defaultShowQr);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const sosOnlyUrl = getSosOnlyUrl(profile.slug);
   const publicPath = getPublicProfileUrl(profile.slug);
   const typeLabel =
     PROFILE_TYPES.find((t) => t.value === profile.profile_type)?.label ??
@@ -137,18 +136,18 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
         </div>
       )}
 
-      <div className="mt-auto border-t border-amber-100 bg-gradient-to-r from-amber-50 to-orange-50/80 px-5 py-4 sm:px-6">
-        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-amber-900">
-          <Smartphone className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          Modo solo SOS
+      <div className="mt-auto border-t border-violet-100 bg-violet-50/40 px-5 py-4 sm:px-6">
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-violet-800">
+          <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          Perfil público
         </p>
         <a
-          href={sosOnlyUrl}
+          href={publicPath}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-1.5 block truncate text-sm font-medium text-violet-700 underline-offset-2 hover:underline"
         >
-          {sosOnlyUrl}
+          {publicPath}
         </a>
       </div>
 

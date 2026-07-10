@@ -33,19 +33,19 @@ export function LegalAcceptanceModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto overscroll-contain p-4 sm:items-center"
       role="dialog"
       aria-modal="true"
       aria-labelledby="legal-modal-title"
     >
       <button
         type="button"
-        className="absolute inset-0 bg-neutral-900/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm"
         aria-label="Cerrar"
         onClick={onCancel}
       />
-      <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-violet-100 bg-white shadow-2xl shadow-violet-500/20">
-        <div className="bg-gradient-to-br from-violet-600 to-indigo-600 px-6 py-5 text-white">
+      <div className="relative my-auto flex max-h-[90dvh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-violet-100 bg-white shadow-2xl shadow-violet-500/20">
+        <div className="shrink-0 bg-gradient-to-br from-violet-600 to-indigo-600 px-6 py-5 text-white">
           <h2 id="legal-modal-title" className="text-xl font-black">
             Confirmaciones finales
           </h2>
@@ -54,7 +54,7 @@ export function LegalAcceptanceModal({
           </p>
         </div>
 
-        <div className="space-y-4 px-6 py-5 text-sm leading-relaxed text-neutral-700">
+        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5 text-sm leading-relaxed text-neutral-700">
           <p>
             Declaro ser <strong>mayor de 18 años</strong> y contar con legitimación
             para usar SOSme como tutor responsable (titular, padre/madre/tutor legal,
@@ -82,7 +82,7 @@ export function LegalAcceptanceModal({
           </p>
         </div>
 
-        <div className="flex flex-col-reverse gap-2 border-t border-neutral-100 px-6 py-4 sm:flex-row sm:justify-end">
+        <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-neutral-100 px-6 py-4 sm:flex-row sm:justify-end">
           <Button type="button" variant="secondary" onClick={onCancel}>
             Cancelar
           </Button>

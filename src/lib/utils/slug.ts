@@ -19,7 +19,3 @@ export function generateSlug(beneficiaryName: string): string {
 export function getPublicProfileUrl(slug: string): string {
   return `${getAppUrl()}/p/${slug}`;
 }
-
-export function getSosOnlyUrl(slug: string): string {
-  return `${getAppUrl()}/p/${slug}/sos`;
-}

@@ -3,17 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  ExternalLink,
-  Pencil,
-  Smartphone,
-  QrCode,
-} from "lucide-react";
+import { ArrowLeft, ExternalLink, Pencil, QrCode } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { PROFILE_TYPES } from "@/lib/profile-types";
-import { getPublicProfileUrl, getSosOnlyUrl } from "@/lib/utils/slug";
+import { getPublicProfileUrl } from "@/lib/utils/slug";
 import { formatDateTime } from "@/lib/utils/format";
 
 export default function ProfileDetailPage() {
@@ -53,7 +47,6 @@ export default function ProfileDetailPage() {
     PROFILE_TYPES.find((t) => t.value === profile.profile_type)?.label ??
     "Persona";
   const publicUrl = getPublicProfileUrl(profile.slug);
-  const sosUrl = getSosOnlyUrl(profile.slug);
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
@@ -171,15 +164,6 @@ export default function ProfileDetailPage() {
             >
               <ExternalLink className="h-4 w-4" aria-hidden />
               Ver perfil público
-            </a>
-            <a
-              href={sosUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-neutral-100 px-4 py-2 text-base font-semibold text-neutral-900 transition-colors hover:bg-neutral-200"
-            >
-              <Smartphone className="h-4 w-4" aria-hidden />
-              Abrir modo SOS
             </a>
           </div>
         </div>

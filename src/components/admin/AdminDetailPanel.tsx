@@ -17,7 +17,7 @@ import type {
   AdminUserRow,
 } from "@/lib/db/queries";
 import { formatDateTime } from "@/lib/utils/format";
-import { getPublicProfileUrl, getSosOnlyUrl } from "@/lib/utils/slug";
+import { getPublicProfileUrl } from "@/lib/utils/slug";
 import { getGoogleMapsUrl } from "@/lib/alerts/send-alert";
 import { adminUi } from "@/components/admin/adminUi";
 import { Button } from "@/components/ui/Button";
@@ -369,15 +369,6 @@ export function AdminDetailPanel({
                 >
                   <ExternalLink className="h-3 w-3" />
                   Abrir perfil público
-                </a>
-                <a
-                  href={getSosOnlyUrl(profile.slug)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded-lg bg-red-900/50 px-3 py-1.5 text-xs text-red-200 hover:bg-red-900"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Modo SOS
                 </a>
               </div>
 
