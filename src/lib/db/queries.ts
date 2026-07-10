@@ -802,6 +802,18 @@ export type ScanMessageMediaInput = {
   base64Data: string;
 };
 
+// Normaliza el base64 antes de pasarlo a Postgres decode(): quita el prefijo
+// "data:<mime>;base64," (incluso con params tipo ;codecs=opus) y cualquier
+// símbolo fuera del alfabeto base64 (espacios, saltos de línea, ":", etc.).
+function sanitizeBase64(input: string): string {
+  const commaIdx = input.indexOf(",");
+  const withoutPrefix =
+    input.startsWith("data:") && commaIdx >= 0
+      ? input.slice(commaIdx + 1)
+      : input;
+  return withoutPrefix.replace(/[^A-Za-z0-9+/=]/g, "");
+}
+
 function assertValidScanMedia(media: ScanMessageMediaInput): void {
   const mime = media.mime.toLowerCase().split(";")[0]?.trim() ?? "";
   const allowed =
@@ -813,7 +825,10 @@ function assertValidScanMedia(media: ScanMessageMediaInput): void {
         : "Formato de audio no permitido",
     );
   }
-  const byteLength = Buffer.from(media.base64Data, "base64").byteLength;
+  const byteLength = Buffer.from(
+    sanitizeBase64(media.base64Data),
+    "base64",
+  ).byteLength;
   if (byteLength <= 0) {
     throw new Error("Archivo vacío");
   }
@@ -846,7 +861,7 @@ export async function addScanMessage(
     mediaFilename =
       media.filename.trim() ||
       `${media.type}.${media.type === "image" ? "jpg" : "webm"}`;
-    mediaB64 = media.base64Data;
+    mediaB64 = sanitizeBase64(media.base64Data);
   }
 
   const noteForLog =
