@@ -298,6 +298,16 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           onToggle={toggle}
           className="absolute right-4 top-4 z-10"
         />
+        {profile.avatar_b64 && (
+          <div className="mb-4 flex justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`data:${profile.avatar_mime ?? "image/jpeg"};base64,${profile.avatar_b64}`}
+              alt={profile.beneficiary_name}
+              className="h-28 w-28 rounded-full border-4 border-white/80 object-cover shadow-lg sm:h-32 sm:w-32"
+            />
+          </div>
+        )}
         <p className={t.badge}>
           <HeartPulse className="h-3.5 w-3.5" aria-hidden />
           {typeConfig.publicHeader}

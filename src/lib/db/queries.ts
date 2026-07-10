@@ -341,7 +341,9 @@ export async function findQrProfileBySlug(
           secondary_contact_name, secondary_contact_phone,
           instructions, medical_notes, allergies, blood_type,
           clinical_pdf_filename, clinical_pdf_uploaded_at,
-          is_active, created_at
+          is_active, created_at,
+          CASE WHEN avatar_data IS NOT NULL THEN encode(avatar_data, 'base64') ELSE NULL END AS avatar_b64,
+          avatar_mime
         FROM qr_profiles
         WHERE slug = ${slug} AND is_active = TRUE
         LIMIT 1
@@ -353,7 +355,9 @@ export async function findQrProfileBySlug(
           secondary_contact_name, secondary_contact_phone,
           instructions, medical_notes, allergies, blood_type,
           clinical_pdf_filename, clinical_pdf_uploaded_at,
-          is_active, created_at
+          is_active, created_at,
+          CASE WHEN avatar_data IS NOT NULL THEN encode(avatar_data, 'base64') ELSE NULL END AS avatar_b64,
+          avatar_mime
         FROM qr_profiles
         WHERE slug = ${slug}
         LIMIT 1
@@ -371,7 +375,9 @@ export async function findQrProfileById(id: string): Promise<QrProfile | null> {
       instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
       sensitive_data_consent_at, sensitive_data_consent_version,
-      is_active, created_at
+      is_active, created_at,
+      CASE WHEN avatar_data IS NOT NULL THEN encode(avatar_data, 'base64') ELSE NULL END AS avatar_b64,
+      avatar_mime
     FROM qr_profiles
     WHERE id = ${id}
     LIMIT 1
@@ -453,6 +459,64 @@ export async function createQrProfile(
       is_active, created_at
   `;
   return rows[0] as QrProfile;
+}
+
+const ALLOWED_AVATAR_MIMES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+const MAX_AVATAR_BYTES = 1.5 * 1024 * 1024;
+
+/**
+ * Guarda la foto de perfil (avatar). Si `tutorId` se pasa, solo actualiza si el
+ * perfil pertenece a ese tutor. Lanza si el formato o tamaño no son válidos.
+ */
+export async function setProfileAvatar(
+  profileId: string,
+  tutorId: string | null,
+  base64Data: string,
+  mime: string,
+): Promise<void> {
+  const cleanMime = mime.toLowerCase().split(";")[0]?.trim() ?? "";
+  if (!ALLOWED_AVATAR_MIMES.has(cleanMime)) {
+    throw new Error("Formato de imagen no permitido (JPEG, PNG o WebP)");
+  }
+  const clean = sanitizeBase64(base64Data);
+  const bytes = Buffer.from(clean, "base64").byteLength;
+  if (bytes <= 0) {
+    throw new Error("La foto está vacía");
+  }
+  if (bytes > MAX_AVATAR_BYTES) {
+    throw new Error("La foto supera el máximo de 1.5 MB");
+  }
+
+  const sql = getSql();
+  if (tutorId) {
+    await sql`
+      UPDATE qr_profiles
+      SET avatar_data = decode(${clean}, 'base64'), avatar_mime = ${cleanMime}
+      WHERE id = ${profileId} AND tutor_id = ${tutorId}
+    `;
+  } else {
+    await sql`
+      UPDATE qr_profiles
+      SET avatar_data = decode(${clean}, 'base64'), avatar_mime = ${cleanMime}
+      WHERE id = ${profileId}
+    `;
+  }
+}
+
+export async function clearProfileAvatar(
+  profileId: string,
+  tutorId: string,
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    UPDATE qr_profiles
+    SET avatar_data = NULL, avatar_mime = NULL
+    WHERE id = ${profileId} AND tutor_id = ${tutorId}
+  `;
 }
 
 export async function updateQrProfile(

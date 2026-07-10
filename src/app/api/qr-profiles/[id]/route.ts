@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import {
+  clearProfileAvatar,
   deleteQrProfile,
   findQrProfileById,
+  setProfileAvatar,
   updateQrProfile,
 } from "@/lib/db/queries";
 import { normalizeBloodType } from "@/lib/blood-types";
@@ -91,6 +93,25 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
     if (!profile) {
       return NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 });
+    }
+
+    const avatar = body.avatar as { mime?: string; data?: string } | null | undefined;
+    if (avatar === null) {
+      await clearProfileAvatar(id, session.userId);
+    } else if (avatar?.data && avatar?.mime) {
+      try {
+        await setProfileAvatar(id, session.userId, avatar.data, avatar.mime);
+      } catch (avatarError) {
+        return NextResponse.json(
+          {
+            error:
+              avatarError instanceof Error
+                ? avatarError.message
+                : "No se pudo guardar la foto de perfil",
+          },
+          { status: 400 },
+        );
+      }
     }
 
     return NextResponse.json({ profile });

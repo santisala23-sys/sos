@@ -53,6 +53,7 @@ export const POST = withApi(
       blood_type?: string | null;
       profile_type?: string;
       sensitiveDataConsent?: boolean;
+      avatar?: { mime?: string; data?: string } | null;
     };
 
     try {
@@ -73,6 +74,7 @@ export const POST = withApi(
       blood_type,
       profile_type,
       sensitiveDataConsent,
+      avatar,
     } = body;
 
     if (
@@ -120,6 +122,20 @@ export const POST = withApi(
         profile_type: resolvedProfileType,
         ...sensitiveConsentFields(Boolean(sensitiveDataConsent)),
       });
+
+      if (avatar?.data && avatar?.mime && result.profile?.id) {
+        const { setProfileAvatar } = await import("@/lib/db/queries");
+        try {
+          await setProfileAvatar(
+            result.profile.id,
+            meta.userId,
+            avatar.data,
+            avatar.mime,
+          );
+        } catch (avatarError) {
+          console.error("[activar POST] avatar", avatarError);
+        }
+      }
 
       return NextResponse.json({
         profile: result.profile,

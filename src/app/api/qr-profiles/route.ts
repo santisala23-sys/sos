@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
-import { createQrProfile, countQrProfilesByTutor, findUserPlanById, listQrProfilesByTutor } from "@/lib/db/queries";
+import { createQrProfile, countQrProfilesByTutor, findUserPlanById, listQrProfilesByTutor, setProfileAvatar } from "@/lib/db/queries";
 import { getProfileLimitStatus } from "@/lib/billing/limits";
 import { generateSlug } from "@/lib/utils/slug";
 import { isProfileType, type ProfileType } from "@/lib/profile-types";
@@ -40,6 +40,7 @@ export async function POST(request: Request) {
       blood_type,
       profile_type,
       sensitiveDataConsent,
+      avatar,
     } = body as {
       beneficiary_name?: string;
       emergency_contact_name?: string;
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
       blood_type?: string | null;
       profile_type?: string;
       sensitiveDataConsent?: boolean;
+      avatar?: { mime?: string; data?: string } | null;
     };
 
     if (
@@ -121,6 +123,27 @@ export async function POST(request: Request) {
       profile_type: resolvedProfileType,
       ...sensitiveConsentFields(Boolean(sensitiveDataConsent)),
     });
+
+    if (avatar?.data && avatar?.mime) {
+      try {
+        await setProfileAvatar(
+          profile.id,
+          session.userId,
+          avatar.data,
+          avatar.mime,
+        );
+      } catch (avatarError) {
+        return NextResponse.json(
+          {
+            error:
+              avatarError instanceof Error
+                ? avatarError.message
+                : "No se pudo guardar la foto de perfil",
+          },
+          { status: 400 },
+        );
+      }
+    }
 
     return NextResponse.json({ profile }, { status: 201 });
   } catch (error) {

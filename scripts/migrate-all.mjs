@@ -50,6 +50,7 @@ const migrations = [
   "017_print_template_white_canvas.sql",
   "018_scan_message_media.sql",
   "019_email_verification.sql",
+  "020_profile_avatar.sql",
 ];
 
 for (const file of migrations) {

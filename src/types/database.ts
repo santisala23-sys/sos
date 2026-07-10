@@ -34,6 +34,9 @@ export interface QrProfile {
   sensitive_data_consent_version?: string | null;
   is_active: boolean;
   created_at: string;
+  /** Foto de perfil (avatar) en base64, presente solo en queries que la incluyen. */
+  avatar_b64?: string | null;
+  avatar_mime?: string | null;
 }
 
 export interface ScanLog {

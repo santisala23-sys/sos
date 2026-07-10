@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import {
+  Camera,
   FileText,
   HeartPulse,
   Package,
@@ -48,6 +49,52 @@ function readFileAsBase64(file: File): Promise<string> {
   });
 }
 
+const AVATAR_MAX_SIZE = 512;
+
+/**
+ * Redimensiona (y recorta cuadrado) una imagen en el navegador y devuelve el
+ * data URL comprimido en JPEG para mantener la foto de perfil liviana.
+ */
+function resizeImageToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        const target = Math.min(side, AVATAR_MAX_SIZE);
+        const canvas = document.createElement("canvas");
+        canvas.width = target;
+        canvas.height = target;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("No se pudo procesar la imagen"));
+          return;
+        }
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, target, target);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = () => reject(new Error("No se pudo procesar la imagen"));
+      img.src = typeof reader.result === "string" ? reader.result : "";
+    };
+    reader.onerror = () => reject(new Error("No se pudo leer la imagen"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function dataUrlToAvatarPayload(dataUrl: string): { mime: string; data: string } {
+  const semi = dataUrl.indexOf(";");
+  const comma = dataUrl.indexOf(",");
+  const mime =
+    dataUrl.startsWith("data:") && semi > 5
+      ? dataUrl.slice(5, semi)
+      : "image/jpeg";
+  const data = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+  return { mime, data };
+}
+
 export function QrProfileForm({
   profile,
   onSuccess,
@@ -60,6 +107,17 @@ export function QrProfileForm({
   const [error, setError] = useState<string | null>(null);
   const [clinicalPdfFilename, setClinicalPdfFilename] = useState(
     profile?.clinical_pdf_filename ?? null,
+  );
+
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(
+    profile?.avatar_b64
+      ? `data:${profile.avatar_mime ?? "image/jpeg"};base64,${profile.avatar_b64}`
+      : null,
+  );
+  // undefined = sin cambios; null = quitar; string = nuevo data URL
+  const [avatarChange, setAvatarChange] = useState<string | null | undefined>(
+    undefined,
   );
 
   const [profileType, setProfileType] = useState<ProfileType>(
@@ -123,6 +181,14 @@ export function QrProfileForm({
       medical_notes: typeConfig.showMedicalNotes ? medicalNotes || null : null,
       ...(needsSensitiveConsent ? { sensitiveDataConsent } : {}),
       ...(isEditing ? { is_active: isActive } : {}),
+      ...(avatarChange !== undefined
+        ? {
+            avatar:
+              avatarChange === null
+                ? null
+                : dataUrlToAvatarPayload(avatarChange),
+          }
+        : {}),
     };
 
     const res = isEditing
@@ -231,6 +297,33 @@ export function QrProfileForm({
     }
   }
 
+  async function handleAvatarSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("La foto debe ser una imagen (JPG, PNG o WebP).");
+      e.target.value = "";
+      return;
+    }
+    try {
+      const dataUrl = await resizeImageToDataUrl(file);
+      setAvatarPreview(dataUrl);
+      setAvatarChange(dataUrl);
+      setError(null);
+    } catch {
+      setError("No se pudo procesar la imagen. Probá con otra foto.");
+    } finally {
+      e.target.value = "";
+    }
+  }
+
+  function handleAvatarRemove() {
+    setAvatarPreview(null);
+    setAvatarChange(null);
+  }
+
+  const AvatarIcon = { person: User, pet: PawPrint, object: Package }[profileType];
+
   const inputClass =
     "w-full rounded-lg border border-neutral-300 px-4 py-3 text-base transition-colors focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200";
   const sectionClass =
@@ -246,6 +339,56 @@ export function QrProfileForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative">
+          <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-neutral-100 shadow-md ring-1 ring-neutral-200">
+            {avatarPreview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarPreview}
+                alt="Foto de perfil"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <AvatarIcon className="h-12 w-12 text-neutral-400" aria-hidden />
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-violet-600 text-white shadow-md transition-colors hover:bg-violet-700"
+            aria-label="Agregar foto de perfil"
+          >
+            <Camera className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            className="text-sm font-semibold text-violet-700 hover:underline"
+          >
+            {avatarPreview ? "Cambiar foto" : "Agregar foto"}
+          </button>
+          {avatarPreview && (
+            <button
+              type="button"
+              onClick={handleAvatarRemove}
+              className="text-sm font-medium text-neutral-500 hover:text-red-600"
+            >
+              Quitar
+            </button>
+          )}
+        </div>
+        <input
+          ref={avatarInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleAvatarSelect}
+          className="hidden"
+        />
+      </div>
+
       <fieldset className={sectionClass}>
         <legend className={legendClass}>Tipo de perfil *</legend>
         <div className="mt-1 grid gap-2 sm:grid-cols-3">
