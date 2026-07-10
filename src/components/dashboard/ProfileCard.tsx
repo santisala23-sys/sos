@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2, QrCode, Smartphone } from "lucide-react";
+import Link from "next/link";
+import { Eye, Pencil, Trash2, QrCode, Smartphone } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
-import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
 import { Button } from "@/components/ui/Button";
 import { getSosOnlyUrl } from "@/lib/utils/slug";
 import { PROFILE_TYPES } from "@/lib/profile-types";
+import { cn } from "@/lib/utils/cn";
 
 type ProfileCardProps = {
   profile: QrProfile;
@@ -15,9 +16,11 @@ type ProfileCardProps = {
   defaultShowQr?: boolean;
 };
 
+const secondarySmClass =
+  "inline-flex items-center justify-center gap-1.5 rounded-lg border border-neutral-300 bg-neutral-100 px-3 py-1.5 text-sm font-semibold text-neutral-900 transition-colors hover:bg-neutral-200";
+
 export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: ProfileCardProps) {
   const [showQr, setShowQr] = useState(defaultShowQr);
-  const [editing, setEditing] = useState(false);
   const sosOnlyUrl = getSosOnlyUrl(profile.slug);
   const typeLabel =
     PROFILE_TYPES.find((t) => t.value === profile.profile_type)?.label ??
@@ -78,32 +81,33 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
         </dl>
 
         <div className="mt-5 flex flex-wrap gap-2">
+          <Link
+            href={`/dashboard/perfiles/${profile.id}`}
+            className={cn(
+              secondarySmClass,
+              "border-violet-100 bg-violet-50/50 hover:bg-violet-100",
+            )}
+          >
+            <Eye className="h-4 w-4" aria-hidden />
+            Ver perfil
+          </Link>
           <Button
             type="button"
             variant="secondary"
             size="sm"
-            onClick={() => {
-              setShowQr(!showQr);
-              if (!showQr) setEditing(false);
-            }}
-            className="gap-1.5 border-violet-100 bg-violet-50/50 hover:bg-violet-100"
+            onClick={() => setShowQr(!showQr)}
+            className="gap-1.5"
           >
             <QrCode className="h-4 w-4" aria-hidden />
             {showQr ? "Ocultar QR" : "Ver QR"}
           </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              setEditing(!editing);
-              if (!editing) setShowQr(false);
-            }}
-            className="gap-1.5"
+          <Link
+            href={`/dashboard/perfiles/${profile.id}/editar`}
+            className={secondarySmClass}
           >
             <Pencil className="h-4 w-4" aria-hidden />
             Editar
-          </Button>
+          </Link>
           <Button
             type="button"
             variant="danger"
@@ -122,19 +126,6 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
           <QrCodeDisplay
             slug={profile.slug}
             beneficiaryName={profile.beneficiary_name}
-          />
-        </div>
-      )}
-
-      {editing && (
-        <div className="border-t border-violet-100 bg-neutral-50/50 px-5 py-5 sm:px-6">
-          <QrProfileForm
-            profile={profile}
-            onSuccess={() => {
-              setEditing(false);
-              onRefresh();
-            }}
-            onCancel={() => setEditing(false)}
           />
         </div>
       )}

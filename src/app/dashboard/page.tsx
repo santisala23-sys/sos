@@ -8,6 +8,7 @@ import {
   Bell,
   CheckCircle2,
   FileDown,
+  KeyRound,
   Plus,
   QrCode,
   Sparkles,
@@ -35,7 +36,6 @@ export default function DashboardPage() {
   const [logs, setLogs] = useState<ScanLogWithProfile[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
   const [showActivateCode, setShowActivateCode] = useState(false);
   const [highlightedSlug, setHighlightedSlug] = useState<string | null>(null);
   const [legalStatus, setLegalStatus] = useState<{
@@ -103,6 +103,15 @@ export default function DashboardPage() {
   const activeProfilesCount = loading
     ? null
     : profiles.reduce((acc, p) => (p.is_active ? acc + 1 : acc), 0);
+
+  function handleCreateProfile() {
+    if (atProfileLimit) {
+      router.push("/pricing");
+      return;
+    }
+    router.push("/dashboard/perfiles/nuevo");
+  }
+
   async function handleExport() {
     setExporting(true);
     setAccountMsg(null);
@@ -221,6 +230,48 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
+
+          {!legalBlocked && (
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={handleCreateProfile}
+                className="flex items-center gap-3 rounded-2xl border border-white/30 bg-white px-5 py-4 text-left text-violet-900 shadow-lg transition hover:bg-violet-50"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white">
+                  <Plus className="h-5 w-5" aria-hidden />
+                </span>
+                <span>
+                  <span className="block text-base font-black">Crear perfil QR nuevo</span>
+                  <span className="mt-0.5 block text-sm text-violet-700/80">
+                    Persona, mascota u objeto
+                  </span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowActivateCode(true);
+                  document
+                    .getElementById("activar-codigo")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="flex items-center gap-3 rounded-2xl border border-white/30 bg-white/15 px-5 py-4 text-left text-white backdrop-blur-sm transition hover:bg-white/25"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-amber-950">
+                  <KeyRound className="h-5 w-5" aria-hidden />
+                </span>
+                <span>
+                  <span className="block text-base font-black">
+                    Activar código de producto
+                  </span>
+                  <span className="mt-0.5 block text-sm text-violet-100">
+                    Colgante, collar o sticker
+                  </span>
+                </span>
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -257,6 +308,43 @@ export default function DashboardPage() {
             </p>
           </div>
         </div>
+      )}
+
+      {!legalBlocked && (
+        <section
+          id="activar-codigo"
+          className="scroll-mt-28 rounded-3xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50 p-6 shadow-lg shadow-amber-500/10 sm:p-8"
+        >
+          <div className="flex items-start gap-4">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-md">
+              <KeyRound className="h-6 w-6" aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-xl font-black text-neutral-900">
+                Activar código de colgante o producto
+              </h2>
+              <p className="mt-1 text-sm leading-relaxed text-neutral-600">
+                Si compraste un producto SOSme, ingresá el código que viene en el
+                packaging para vincularlo a tu cuenta.
+              </p>
+              {(showActivateCode || profiles.length === 0) && (
+                <div className="mt-5 rounded-2xl border border-white/80 bg-white p-4 shadow-sm sm:p-5">
+                  <ActivateCodeInput buttonLabel="Ir a activar" />
+                </div>
+              )}
+              {profiles.length > 0 && !showActivateCode && (
+                <Button
+                  type="button"
+                  className="mt-4 gap-2"
+                  onClick={() => setShowActivateCode(true)}
+                >
+                  <KeyRound className="h-4 w-4" aria-hidden />
+                  Ingresar código
+                </Button>
+              )}
+            </div>
+          </div>
+        </section>
       )}
 
       <DashboardSection
@@ -296,17 +384,28 @@ export default function DashboardPage() {
             <div className="mt-6 rounded-2xl border border-white/80 bg-white p-5 shadow-sm">
               <QrProfileForm onSuccess={loadData} />
             </div>
-            <details className="mt-6 overflow-hidden rounded-2xl border border-violet-100 bg-white">
-              <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-neutral-700 transition-colors hover:bg-violet-50/50">
-                ¿Tenés un código en un colgante o producto?
-              </summary>
-              <div className="border-t border-violet-100 px-5 py-5">
-                <ActivateCodeInput buttonLabel="Ir a activar" />
-              </div>
-            </details>
           </div>
         ) : (
           <>
+            <div className="mb-5">
+              <Button
+                type="button"
+                onClick={handleCreateProfile}
+                className="w-full gap-2 sm:w-auto"
+                size="lg"
+              >
+                <Plus className="h-5 w-5" aria-hidden />
+                Crear perfil QR nuevo
+              </Button>
+              {atProfileLimit && (
+                <p className="mt-2 text-sm text-neutral-500">
+                  Llegaste al límite de tu plan.{" "}
+                  <Link href="/pricing" className="font-semibold text-violet-700 hover:underline">
+                    Ver planes
+                  </Link>
+                </p>
+              )}
+            </div>
             <div className="grid gap-5 lg:grid-cols-2">
               {profiles.map((profile) => (
                 <ProfileCard
@@ -316,60 +415,6 @@ export default function DashboardPage() {
                   defaultShowQr={profile.slug === highlightedSlug}
                 />
               ))}
-            </div>
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <details
-                className="overflow-hidden rounded-2xl border border-violet-100 bg-violet-50/40 transition-colors open:bg-white"
-                open={showActivateCode}
-                onToggle={(e) =>
-                  setShowActivateCode((e.target as HTMLDetailsElement).open)
-                }
-              >
-                <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-neutral-800 transition-colors hover:bg-violet-50/80">
-                  Activar código de colgante o producto
-                </summary>
-                <div className="border-t border-violet-100 px-5 py-5">
-                  <ActivateCodeInput buttonLabel="Ir a activar" />
-                </div>
-              </details>
-
-              <details
-                className="overflow-hidden rounded-2xl border border-violet-100 bg-violet-50/40 transition-colors open:bg-white"
-                open={showAddForm && !atProfileLimit}
-                onToggle={(e) => {
-                  const open = (e.target as HTMLDetailsElement).open;
-                  if (atProfileLimit && open) {
-                    router.push("/pricing");
-                    return;
-                  }
-                  setShowAddForm(open);
-                }}
-              >
-                <summary
-                  className="flex cursor-pointer items-center gap-2 px-5 py-4 text-sm font-semibold text-neutral-800 transition-colors hover:bg-violet-50/80"
-                  onClick={(e) => {
-                    if (atProfileLimit) {
-                      e.preventDefault();
-                      router.push("/pricing");
-                    }
-                  }}
-                >
-                  <Plus className="h-4 w-4 text-violet-600" aria-hidden />
-                  Crear perfil QR nuevo
-                </summary>
-                {!atProfileLimit && (
-                  <div className="border-t border-violet-100 px-5 py-5">
-                    <QrProfileForm
-                      onSuccess={() => {
-                        loadData();
-                        setShowAddForm(false);
-                      }}
-                      onCancel={() => setShowAddForm(false)}
-                    />
-                  </div>
-                )}
-              </details>
             </div>
           </>
         )}

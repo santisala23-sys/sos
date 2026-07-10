@@ -1,3 +1,5 @@
+import { getAppUrl } from "@/lib/utils/app-url";
+
 export function slugify(text: string): string {
   return text
     .normalize("NFD")
@@ -15,15 +17,9 @@ export function generateSlug(beneficiaryName: string): string {
 }
 
 export function getPublicProfileUrl(slug: string): string {
-  const base =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
-    "http://localhost:3000";
-  return `${base}/p/${slug}`;
+  return `${getAppUrl()}/p/${slug}`;
 }
 
 export function getSosOnlyUrl(slug: string): string {
-  const base =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
-    "http://localhost:3000";
-  return `${base}/p/${slug}/sos`;
+  return `${getAppUrl()}/p/${slug}/sos`;
 }

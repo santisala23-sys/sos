@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
 const envPath = join(root, ".env.local");
 
-const PRODUCTION_URL = "https://sos-alpha-lime.vercel.app";
+const PRODUCTION_URL = "https://sosme.com.ar";
 
 function loadEnv() {
   const env = {};

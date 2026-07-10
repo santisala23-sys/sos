@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, MessageSquare, AlertTriangle, QrCode, ChevronRight } from "lucide-react";
+import {
+  MapPin,
+  MessageSquare,
+  AlertTriangle,
+  QrCode,
+  ChevronRight,
+  MessageCircle,
+} from "lucide-react";
 import type { ScanLogWithProfile } from "@/types/database";
 import { alertTypeLabel, formatDateTime } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
@@ -89,6 +96,10 @@ export function ScanLogsList({ logs }: ScanLogsListProps) {
                     </span>
                   )}
                 </div>
+                <p className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-3 py-2 text-xs font-bold text-white shadow-sm shadow-violet-500/25 sm:text-sm">
+                  <MessageCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  Para chatear en vivo y ver la ubicación, tocá acá
+                </p>
               </div>
               <ChevronRight
                 className="mt-2 h-5 w-5 shrink-0 text-neutral-300 transition-transform group-hover:translate-x-0.5 group-hover:text-violet-500"
