@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Send } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import { ImagePlus, Mic, Send, Square } from "lucide-react";
 import type { ScanMessage } from "@/types/database";
 import { formatDateTime } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,8 @@ import { scannerAuthHeaders } from "@/lib/scan-session/storage";
 const POLL_INTERVAL_MS = 6000;
 const POLL_INTERVAL_HIDDEN_MS = 20000;
 const RATE_LIMIT_BACKOFF_MS = 30000;
+const MAX_MEDIA_BYTES = 2 * 1024 * 1024;
+const MAX_AUDIO_MS = 60000;
 
 type ScanMessageThreadProps = {
   scanLogId: string;
@@ -18,6 +20,31 @@ type ScanMessageThreadProps = {
   mode: "public" | "tutor";
   dark?: boolean;
 };
+
+type PendingMedia = {
+  type: "image" | "audio";
+  mime: string;
+  filename: string;
+  dataUrl: string;
+  base64: string;
+};
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") resolve(reader.result);
+      else reject(new Error("No se pudo leer el archivo"));
+    };
+    reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function mediaSrc(msg: ScanMessage): string | null {
+  if (!msg.media_b64 || !msg.media_mime) return null;
+  return `data:${msg.media_mime};base64,${msg.media_b64}`;
+}
 
 export function ScanMessageThread({
   scanLogId,
@@ -28,9 +55,16 @@ export function ScanMessageThread({
 }: ScanMessageThreadProps) {
   const [messages, setMessages] = useState<ScanMessage[]>([]);
   const [draft, setDraft] = useState("");
+  const [pendingMedia, setPendingMedia] = useState<PendingMedia | null>(null);
   const [sending, setSending] = useState(false);
+  const [recording, setRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const prevCountRef = useRef(0);
   const shouldStickToBottomRef = useRef(true);
   const pollBackoffUntilRef = useRef(0);
@@ -64,7 +98,11 @@ export function ScanMessageThread({
       setMessages((prev) => {
         if (
           prev.length === next.length &&
-          prev.every((msg, index) => msg.id === next[index]?.id)
+          prev.every(
+            (msg, index) =>
+              msg.id === next[index]?.id &&
+              msg.media_b64 === next[index]?.media_b64,
+          )
         ) {
           return prev;
         }
@@ -114,6 +152,14 @@ export function ScanMessageThread({
   }, [loadMessages]);
 
   useEffect(() => {
+    return () => {
+      if (recordingTimerRef.current) clearTimeout(recordingTimerRef.current);
+      mediaRecorderRef.current?.stop();
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
+
+  useEffect(() => {
     const el = listRef.current;
     if (!el) return;
 
@@ -134,8 +180,135 @@ export function ScanMessageThread({
     shouldStickToBottomRef.current = distanceFromBottom < 80;
   }
 
+  async function attachImageFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      setError("Solo se permiten imágenes.");
+      return;
+    }
+    if (file.size > MAX_MEDIA_BYTES) {
+      setError("La imagen supera el máximo de 2 MB.");
+      return;
+    }
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      const base64 = dataUrl.replace(/^data:[^;]+;base64,/, "");
+      setPendingMedia({
+        type: "image",
+        mime: file.type || "image/jpeg",
+        filename: file.name || "foto.jpg",
+        dataUrl,
+        base64,
+      });
+      setError(null);
+    } catch {
+      setError("No se pudo cargar la imagen.");
+    }
+  }
+
+  async function handlePhotoChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    await attachImageFile(file);
+  }
+
+  function stopRecordingTracks() {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+  }
+
+  async function toggleRecording() {
+    if (recording) {
+      mediaRecorderRef.current?.stop();
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError("Este dispositivo no permite grabar audio.");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      audioChunksRef.current = [];
+
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : MediaRecorder.isTypeSupported("audio/mp4")
+          ? "audio/mp4"
+          : "";
+
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
+
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+
+      recorder.onstop = async () => {
+        setRecording(false);
+        if (recordingTimerRef.current) {
+          clearTimeout(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+        }
+        stopRecordingTracks();
+
+        const blob = new Blob(audioChunksRef.current, {
+          type: recorder.mimeType || "audio/webm",
+        });
+        audioChunksRef.current = [];
+
+        if (blob.size === 0) {
+          setError("No se capturó audio. Intentá de nuevo.");
+          return;
+        }
+        if (blob.size > MAX_MEDIA_BYTES) {
+          setError("El audio supera el máximo de 2 MB.");
+          return;
+        }
+
+        try {
+          const file = new File(
+            [blob],
+            `audio.${blob.type.includes("mp4") ? "m4a" : "webm"}`,
+            { type: blob.type || "audio/webm" },
+          );
+          const dataUrl = await readFileAsDataUrl(file);
+          const base64 = dataUrl.replace(/^data:[^;]+;base64,/, "");
+          setPendingMedia({
+            type: "audio",
+            mime: file.type,
+            filename: file.name,
+            dataUrl,
+            base64,
+          });
+          setError(null);
+        } catch {
+          setError("No se pudo preparar el audio.");
+        }
+      };
+
+      recorder.start();
+      setRecording(true);
+      setError(null);
+      recordingTimerRef.current = setTimeout(() => {
+        if (mediaRecorderRef.current?.state === "recording") {
+          mediaRecorderRef.current.stop();
+        }
+      }, MAX_AUDIO_MS);
+    } catch {
+      stopRecordingTracks();
+      setRecording(false);
+      setError("No se pudo acceder al micrófono.");
+    }
+  }
+
   async function handleSend() {
-    if (!draft.trim()) return;
+    if (!draft.trim() && !pendingMedia) return;
     setSending(true);
     setError(null);
 
@@ -150,6 +323,16 @@ export function ScanMessageThread({
       body: JSON.stringify({
         message: draft.trim(),
         ...(mode === "public" && slug && !scanToken ? { slug } : {}),
+        ...(pendingMedia
+          ? {
+              media: {
+                type: pendingMedia.type,
+                mime: pendingMedia.mime,
+                filename: pendingMedia.filename,
+                data: pendingMedia.base64,
+              },
+            }
+          : {}),
       }),
     });
 
@@ -175,11 +358,13 @@ export function ScanMessageThread({
     }
 
     setDraft("");
+    setPendingMedia(null);
     setSending(false);
     shouldStickToBottomRef.current = true;
     await loadMessages();
   }
 
+  const canSend = Boolean(draft.trim() || pendingMedia) && !sending && !recording;
   const containerClass = dark
     ? "border-neutral-700 bg-neutral-900"
     : "border-neutral-200 bg-white";
@@ -189,6 +374,9 @@ export function ScanMessageThread({
   const bubbleTutor = dark
     ? "bg-violet-900 text-violet-50"
     : "bg-violet-100 text-violet-950";
+  const iconBtnClass = dark
+    ? "border-neutral-600 bg-neutral-950 text-neutral-200 hover:bg-neutral-800"
+    : "border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50";
 
   return (
     <section
@@ -201,8 +389,8 @@ export function ScanMessageThread({
         </p>
         <p className={`text-xs ${dark ? "text-neutral-500" : "text-neutral-500"}`}>
           {mode === "public"
-            ? "Escribí acá y la familia puede responder desde su panel."
-            : "Respondé acá; quien escaneó ve los mensajes al instante."}
+            ? "Escribí, mandá una foto o un audio. La familia puede responder desde su panel."
+            : "Respondé con texto, foto o audio; quien escaneó ve los mensajes al instante."}
         </p>
       </div>
 
@@ -220,6 +408,7 @@ export function ScanMessageThread({
         ) : (
           messages.map((msg) => {
             const isTutor = msg.sender === "tutor";
+            const src = mediaSrc(msg);
             return (
               <div
                 key={msg.id}
@@ -233,11 +422,29 @@ export function ScanMessageThread({
                   {isTutor ? "Familia" : "En el lugar"}
                 </span>
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${
+                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                     isTutor ? bubbleTutor : bubblePublic
                   } ${isTutor ? "rounded-br-md" : "rounded-bl-md"}`}
                 >
-                  {msg.body}
+                  {msg.media_type === "image" && src && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={src}
+                      alt={msg.media_filename || "Foto"}
+                      className="mb-1 max-h-48 w-full rounded-lg object-contain"
+                    />
+                  )}
+                  {msg.media_type === "audio" && src && (
+                    <audio
+                      controls
+                      preload="metadata"
+                      src={src}
+                      className="mb-1 max-w-full"
+                    />
+                  )}
+                  {msg.body ? (
+                    <p className="whitespace-pre-wrap">{msg.body}</p>
+                  ) : null}
                 </div>
                 <span className={`mt-0.5 text-[10px] ${dark ? "text-neutral-600" : "text-neutral-400"}`}>
                   {formatDateTime(msg.created_at)}
@@ -248,7 +455,69 @@ export function ScanMessageThread({
         )}
       </div>
 
-      <div className={`flex gap-2 border-t border-inherit p-3 ${dark ? "bg-neutral-900" : "bg-white"}`}>
+      {pendingMedia && (
+        <div
+          className={`flex items-center gap-3 border-t border-inherit px-3 py-2 ${
+            dark ? "bg-neutral-950" : "bg-neutral-50"
+          }`}
+        >
+          {pendingMedia.type === "image" ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={pendingMedia.dataUrl}
+              alt="Vista previa"
+              className="h-14 w-14 rounded-lg object-cover"
+            />
+          ) : (
+            <audio controls src={pendingMedia.dataUrl} className="min-w-0 flex-1" />
+          )}
+          <button
+            type="button"
+            onClick={() => setPendingMedia(null)}
+            className={`shrink-0 text-xs font-medium ${
+              dark ? "text-neutral-400 hover:text-white" : "text-neutral-500 hover:text-neutral-800"
+            }`}
+          >
+            Quitar
+          </button>
+        </div>
+      )}
+
+      <div className={`flex items-end gap-2 border-t border-inherit p-3 ${dark ? "bg-neutral-900" : "bg-white"}`}>
+        <input
+          ref={photoInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={handlePhotoChange}
+        />
+        <button
+          type="button"
+          disabled={sending || recording}
+          onClick={() => photoInputRef.current?.click()}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${iconBtnClass} disabled:opacity-50`}
+          aria-label="Adjuntar foto"
+        >
+          <ImagePlus className="h-4 w-4" aria-hidden />
+        </button>
+        <button
+          type="button"
+          disabled={sending}
+          onClick={() => void toggleRecording()}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${
+            recording
+              ? "border-red-500 bg-red-600 text-white"
+              : iconBtnClass
+          } disabled:opacity-50`}
+          aria-label={recording ? "Detener grabación" : "Grabar audio"}
+        >
+          {recording ? (
+            <Square className="h-4 w-4" aria-hidden />
+          ) : (
+            <Mic className="h-4 w-4" aria-hidden />
+          )}
+        </button>
         <input
           type="text"
           value={draft}
@@ -256,10 +525,11 @@ export function ScanMessageThread({
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              handleSend();
+              void handleSend();
             }
           }}
-          placeholder="Escribí un mensaje..."
+          placeholder={recording ? "Grabando audio..." : "Escribí un mensaje..."}
+          disabled={recording}
           className={`min-w-0 flex-1 rounded-lg border px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-violet-500 ${
             dark
               ? "border-neutral-600 bg-neutral-950 text-white placeholder:text-neutral-500"
@@ -268,8 +538,8 @@ export function ScanMessageThread({
         />
         <Button
           type="button"
-          disabled={sending || !draft.trim()}
-          onClick={handleSend}
+          disabled={!canSend}
+          onClick={() => void handleSend()}
           className="shrink-0 gap-1 px-4"
           aria-label="Enviar mensaje"
         >

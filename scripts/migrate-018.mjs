@@ -29,13 +29,13 @@ neonConfig.webSocketConstructor = ws;
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 const sql = readFileSync(
-  join(root, "db/migrations/015_account_self_service_and_purge.sql"),
+  join(root, "db/migrations/018_scan_message_media.sql"),
   "utf8",
 );
 
 try {
   await pool.query(sql);
-  console.log("Migración 015 aplicada.");
+  console.log("Migración 018 aplicada.");
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);
   process.exit(1);

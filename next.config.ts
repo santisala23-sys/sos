@@ -44,7 +44,7 @@ const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
+  { key: "Permissions-Policy", value: "camera=(self), microphone=(self), geolocation=(self)" },
   {
     key: "Content-Security-Policy",
     value: [
@@ -53,6 +53,7 @@ const securityHeaders = [
       `script-src-elem ${scriptSrc}`,
       "style-src 'self' 'unsafe-inline'",
       `img-src 'self' data: https: blob: ${gtmImgSources}`,
+      "media-src 'self' data: blob:",
       "font-src 'self' data:",
       `connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com ${gtmConnectSources}`,
       "frame-src https://accounts.google.com https://maps.google.com https://www.google.com https://www.youtube-nocookie.com https://www.youtube.com https://www.googletagmanager.com",

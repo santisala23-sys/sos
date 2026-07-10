@@ -44,9 +44,11 @@ const migrations = [
   "012_freemium_and_product_qr.sql",
   "013_store_products_orders.sql",
   "014_legal_entity_settings.sql",
+  "014_store_product_images.sql",
   "015_account_self_service_and_purge.sql",
   "016_print_templates.sql",
   "017_print_template_white_canvas.sql",
+  "018_scan_message_media.sql",
 ];
 
 for (const file of migrations) {

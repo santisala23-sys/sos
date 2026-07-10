@@ -200,6 +200,8 @@ export default function HomePage() {
           </div>
         </section>
 
+        <HowItWorksSection />
+
         {/* Casos de uso */}
         <section
           id="casos"
@@ -246,8 +248,6 @@ export default function HomePage() {
         </section>
 
         <DemoVideoSection className="bg-white/50" />
-
-        <HowItWorksSection />
 
         {/* Qué incluye */}
         <section className="mx-auto max-w-[88rem] px-4 py-24 sm:px-6 lg:px-8">

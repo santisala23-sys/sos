@@ -669,7 +669,20 @@ export async function listPushSubscriptionsByUser(userId: string) {
 export async function listScanMessages(scanLogId: string): Promise<ScanMessage[]> {
   const sql = getSql();
   const rows = await sql`
-    SELECT * FROM scan_messages
+    SELECT
+      id,
+      scan_log_id,
+      sender,
+      body,
+      created_at,
+      media_type,
+      media_mime,
+      media_filename,
+      CASE
+        WHEN media_data IS NOT NULL THEN encode(media_data, 'base64')
+        ELSE NULL
+      END AS media_b64
+    FROM scan_messages
     WHERE scan_log_id = ${scanLogId}
     ORDER BY created_at ASC
   `;
@@ -691,17 +704,110 @@ export async function findScanLogBySlugAccess(
   return (rows[0] as (ScanLog & { beneficiary_name: string; tutor_id: string }) | undefined) ?? null;
 }
 
+const MAX_SCAN_MEDIA_BYTES = 2 * 1024 * 1024;
+const ALLOWED_IMAGE_MIMES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+const ALLOWED_AUDIO_MIMES = new Set([
+  "audio/webm",
+  "audio/mp4",
+  "audio/mpeg",
+  "audio/ogg",
+  "audio/wav",
+  "audio/x-m4a",
+  "audio/aac",
+]);
+
+export type ScanMessageMediaInput = {
+  type: "image" | "audio";
+  mime: string;
+  filename: string;
+  base64Data: string;
+};
+
+function assertValidScanMedia(media: ScanMessageMediaInput): void {
+  const mime = media.mime.toLowerCase().split(";")[0]?.trim() ?? "";
+  const allowed =
+    media.type === "image" ? ALLOWED_IMAGE_MIMES : ALLOWED_AUDIO_MIMES;
+  if (!allowed.has(mime)) {
+    throw new Error(
+      media.type === "image"
+        ? "Formato de imagen no permitido (JPEG, PNG, WebP o GIF)"
+        : "Formato de audio no permitido",
+    );
+  }
+  const byteLength = Buffer.from(media.base64Data, "base64").byteLength;
+  if (byteLength <= 0) {
+    throw new Error("Archivo vacío");
+  }
+  if (byteLength > MAX_SCAN_MEDIA_BYTES) {
+    throw new Error("El archivo supera el máximo de 2 MB");
+  }
+}
+
 export async function addScanMessage(
   scanLogId: string,
   sender: MessageSender,
   body: string,
+  media?: ScanMessageMediaInput | null,
 ): Promise<ScanMessage | null> {
   const sql = getSql();
-  const rows = await sql`
-    INSERT INTO scan_messages (scan_log_id, sender, body)
-    VALUES (${scanLogId}, ${sender}, ${body.trim()})
-    RETURNING *
-  `;
+  const trimmed = body.trim();
+  if (!trimmed && !media) {
+    throw new Error("Mensaje o archivo requerido");
+  }
+
+  let mediaType: string | null = null;
+  let mediaMime: string | null = null;
+  let mediaFilename: string | null = null;
+  let mediaB64: string | null = null;
+
+  if (media) {
+    assertValidScanMedia(media);
+    mediaType = media.type;
+    mediaMime = media.mime.toLowerCase().split(";")[0]?.trim() ?? media.mime;
+    mediaFilename =
+      media.filename.trim() ||
+      `${media.type}.${media.type === "image" ? "jpg" : "webm"}`;
+    mediaB64 = media.base64Data;
+  }
+
+  const noteForLog =
+    trimmed ||
+    (mediaType === "image" ? "[Foto]" : mediaType === "audio" ? "[Audio]" : "");
+
+  const rows = mediaB64
+    ? await sql`
+        INSERT INTO scan_messages (
+          scan_log_id, sender, body,
+          media_type, media_mime, media_filename, media_data
+        )
+        VALUES (
+          ${scanLogId},
+          ${sender},
+          ${trimmed},
+          ${mediaType},
+          ${mediaMime},
+          ${mediaFilename},
+          decode(${mediaB64}, 'base64')
+        )
+        RETURNING
+          id, scan_log_id, sender, body, created_at,
+          media_type, media_mime, media_filename,
+          encode(media_data, 'base64') AS media_b64
+      `
+    : await sql`
+        INSERT INTO scan_messages (scan_log_id, sender, body)
+        VALUES (${scanLogId}, ${sender}, ${trimmed})
+        RETURNING
+          id, scan_log_id, sender, body, created_at,
+          media_type, media_mime, media_filename,
+          NULL::text AS media_b64
+      `;
+
   const message = rows[0] as ScanMessage | undefined;
   if (!message) return null;
 
@@ -709,7 +815,7 @@ export async function addScanMessage(
     await sql`
       UPDATE scan_logs
       SET
-        scanner_note = ${body.trim()},
+        scanner_note = ${noteForLog},
         note_added_at = NOW(),
         read_at = NULL
       WHERE id = ${scanLogId}

@@ -86,6 +86,7 @@ export type QrProfileUpdate = Partial<
 >;
 
 export type MessageSender = "public" | "tutor";
+export type ScanMessageMediaType = "image" | "audio";
 
 export interface ScanMessage {
   id: string;
@@ -93,6 +94,11 @@ export interface ScanMessage {
   sender: MessageSender;
   body: string;
   created_at: string;
+  media_type?: ScanMessageMediaType | null;
+  media_mime?: string | null;
+  media_filename?: string | null;
+  /** Present when listing messages that include media (base64). */
+  media_b64?: string | null;
 }
 
 export interface PushSubscriptionRow {

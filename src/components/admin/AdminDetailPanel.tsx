@@ -608,7 +608,25 @@ export function AdminDetailPanel({
                           {msg.sender === "tutor" ? "Familia" : "Escáner"} ·{" "}
                           {formatDateTime(msg.created_at)}
                         </span>
-                        <p className="mt-0.5 whitespace-pre-wrap">{msg.body}</p>
+                        {msg.media_type === "image" && msg.media_b64 && msg.media_mime ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={`data:${msg.media_mime};base64,${msg.media_b64}`}
+                            alt={msg.media_filename || "Foto"}
+                            className="mt-1 max-h-40 w-full rounded object-contain"
+                          />
+                        ) : null}
+                        {msg.media_type === "audio" && msg.media_b64 && msg.media_mime ? (
+                          <audio
+                            controls
+                            preload="metadata"
+                            src={`data:${msg.media_mime};base64,${msg.media_b64}`}
+                            className="mt-1 max-w-full"
+                          />
+                        ) : null}
+                        {msg.body ? (
+                          <p className="mt-0.5 whitespace-pre-wrap">{msg.body}</p>
+                        ) : null}
                       </li>
                     ))}
                   </ul>
