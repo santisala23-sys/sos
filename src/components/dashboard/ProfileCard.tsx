@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, ExternalLink, Pencil, Trash2, QrCode, X } from "lucide-react";
+import { Eye, Pencil, Trash2, QrCode, X } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
-import { getPublicProfileUrl } from "@/lib/utils/slug";
 import { PROFILE_TYPES } from "@/lib/profile-types";
 import { cn } from "@/lib/utils/cn";
 
@@ -23,7 +22,6 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
   const [showQr, setShowQr] = useState(defaultShowQr);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const publicPath = getPublicProfileUrl(profile.slug);
   const typeLabel =
     PROFILE_TYPES.find((t) => t.value === profile.profile_type)?.label ??
     "Persona";
@@ -86,14 +84,6 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
               </dd>
             </div>
           )}
-          <div className="border-t border-neutral-200/80 pt-2">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
-              Link público del perfil
-            </dt>
-            <dd className="mt-0.5 break-all font-mono text-xs text-violet-600">
-              {publicPath}
-            </dd>
-          </div>
         </dl>
 
         <div className="mt-5 space-y-2">
@@ -128,28 +118,13 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
       </div>
 
       {showQr && (
-        <div className="border-t border-violet-100 bg-violet-50/30 px-5 py-5 sm:px-6">
+        <div className="mt-auto border-t border-violet-100 bg-violet-50/30 px-5 py-5 sm:px-6">
           <QrCodeDisplay
             slug={profile.slug}
             beneficiaryName={profile.beneficiary_name}
           />
         </div>
       )}
-
-      <div className="mt-auto border-t border-violet-100 bg-violet-50/40 px-5 py-4 sm:px-6">
-        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-violet-800">
-          <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          Perfil público
-        </p>
-        <a
-          href={publicPath}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-1.5 block truncate text-sm font-medium text-violet-700 underline-offset-2 hover:underline"
-        >
-          {publicPath}
-        </a>
-      </div>
 
       {confirmDelete && (
         <div
