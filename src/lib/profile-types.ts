@@ -30,6 +30,8 @@ export type ProfileTypeConfig = {
   instructionsLabel: string;
   instructionsPlaceholder: string;
   publicHeader: string;
+  /** Etiqueta corta para la vista pública: "Persona", "Mascota", "Objeto". */
+  publicTypeLabel: string;
   showAllergies: boolean;
   showMedicalNotes: boolean;
   showBloodType: boolean;
@@ -49,6 +51,7 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     instructionsPlaceholder:
       "Ej: No tolera contacto físico. Hablarle pausado. Sensible a sirenas.",
     publicHeader: "Perfil de asistencia",
+    publicTypeLabel: "Persona",
     showAllergies: true,
     showMedicalNotes: true,
     showBloodType: true,
@@ -67,6 +70,7 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     instructionsPlaceholder:
       "Ej: Es tranquilo pero asusta con ruidos fuertes. Llamar al dueño antes de acercarse.",
     publicHeader: "Mascota — contacto del dueño",
+    publicTypeLabel: "Mascota",
     showAllergies: true,
     showMedicalNotes: true,
     showBloodType: false,
@@ -84,6 +88,7 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     instructionsPlaceholder:
       "Ej: Contiene documentación importante. Hay recompensa. Llamar o escribir al contacto.",
     publicHeader: "Objeto perdido — contacto",
+    publicTypeLabel: "Objeto",
     showAllergies: false,
     showMedicalNotes: false,
     showBloodType: false,

@@ -49,7 +49,15 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
 
       <div className="p-5 sm:p-6">
         <div className="flex items-start justify-between gap-3 pr-10">
-          <div className="min-w-0">
+          {profile.avatar_b64 && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`data:${profile.avatar_mime ?? "image/jpeg"};base64,${profile.avatar_b64}`}
+              alt={profile.beneficiary_name}
+              className="h-14 w-14 shrink-0 rounded-full border-2 border-violet-100 object-cover shadow-sm"
+            />
+          )}
+          <div className="min-w-0 flex-1">
             <h3 className="truncate text-lg font-bold text-neutral-900 sm:text-xl">
               {profile.beneficiary_name}
             </h3>

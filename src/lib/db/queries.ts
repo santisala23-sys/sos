@@ -320,7 +320,9 @@ export async function listQrProfilesByTutor(tutorId: string): Promise<QrProfile[
       instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
       sensitive_data_consent_at, sensitive_data_consent_version,
-      is_active, created_at
+      is_active, created_at,
+      CASE WHEN avatar_data IS NOT NULL THEN encode(avatar_data, 'base64') ELSE NULL END AS avatar_b64,
+      avatar_mime
     FROM qr_profiles
     WHERE tutor_id = ${tutorId}
     ORDER BY created_at DESC

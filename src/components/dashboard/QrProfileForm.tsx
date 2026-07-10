@@ -16,6 +16,7 @@ import {
 import type { ProfileType, QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { PhoneInput } from "@/components/ui/PhoneInput";
+import { AvatarCropper } from "@/components/dashboard/AvatarCropper";
 import {
   getProfileTypeConfig,
   PROFILE_TYPES,
@@ -45,41 +46,6 @@ function readFileAsBase64(file: File): Promise<string> {
       resolve(comma >= 0 ? result.slice(comma + 1) : result);
     };
     reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
-    reader.readAsDataURL(file);
-  });
-}
-
-const AVATAR_MAX_SIZE = 512;
-
-/**
- * Redimensiona (y recorta cuadrado) una imagen en el navegador y devuelve el
- * data URL comprimido en JPEG para mantener la foto de perfil liviana.
- */
-function resizeImageToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        const side = Math.min(img.width, img.height);
-        const sx = (img.width - side) / 2;
-        const sy = (img.height - side) / 2;
-        const target = Math.min(side, AVATAR_MAX_SIZE);
-        const canvas = document.createElement("canvas");
-        canvas.width = target;
-        canvas.height = target;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          reject(new Error("No se pudo procesar la imagen"));
-          return;
-        }
-        ctx.drawImage(img, sx, sy, side, side, 0, 0, target, target);
-        resolve(canvas.toDataURL("image/jpeg", 0.85));
-      };
-      img.onerror = () => reject(new Error("No se pudo procesar la imagen"));
-      img.src = typeof reader.result === "string" ? reader.result : "";
-    };
-    reader.onerror = () => reject(new Error("No se pudo leer la imagen"));
     reader.readAsDataURL(file);
   });
 }
@@ -119,6 +85,7 @@ export function QrProfileForm({
   const [avatarChange, setAvatarChange] = useState<string | null | undefined>(
     undefined,
   );
+  const [cropFile, setCropFile] = useState<File | null>(null);
 
   const [profileType, setProfileType] = useState<ProfileType>(
     profile?.profile_type ?? "person",
@@ -297,7 +264,7 @@ export function QrProfileForm({
     }
   }
 
-  async function handleAvatarSelect(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleAvatarSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
@@ -305,16 +272,15 @@ export function QrProfileForm({
       e.target.value = "";
       return;
     }
-    try {
-      const dataUrl = await resizeImageToDataUrl(file);
-      setAvatarPreview(dataUrl);
-      setAvatarChange(dataUrl);
-      setError(null);
-    } catch {
-      setError("No se pudo procesar la imagen. Probá con otra foto.");
-    } finally {
-      e.target.value = "";
-    }
+    setError(null);
+    setCropFile(file);
+    e.target.value = "";
+  }
+
+  function handleCropConfirm(dataUrl: string) {
+    setAvatarPreview(dataUrl);
+    setAvatarChange(dataUrl);
+    setCropFile(null);
   }
 
   function handleAvatarRemove() {
@@ -339,6 +305,14 @@ export function QrProfileForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      {cropFile && (
+        <AvatarCropper
+          file={cropFile}
+          onCancel={() => setCropFile(null)}
+          onConfirm={handleCropConfirm}
+        />
+      )}
+
       <div className="flex flex-col items-center gap-3">
         <div className="relative">
           <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-neutral-100 shadow-md ring-1 ring-neutral-200">

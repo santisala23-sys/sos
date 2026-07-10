@@ -298,8 +298,15 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           onToggle={toggle}
           className="absolute right-4 top-4 z-10"
         />
+        <p className={t.badge}>
+          <HeartPulse className="h-3.5 w-3.5" aria-hidden />
+          {typeConfig.publicTypeLabel}
+        </p>
+        <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-4xl">
+          {profile.beneficiary_name}
+        </h1>
         {profile.avatar_b64 && (
-          <div className="mb-4 flex justify-center">
+          <div className="mt-5 flex justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`data:${profile.avatar_mime ?? "image/jpeg"};base64,${profile.avatar_b64}`}
@@ -308,13 +315,6 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
             />
           </div>
         )}
-        <p className={t.badge}>
-          <HeartPulse className="h-3.5 w-3.5" aria-hidden />
-          {typeConfig.publicHeader}
-        </p>
-        <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-4xl">
-          {profile.beneficiary_name}
-        </h1>
       </header>
 
       <aside className={t.strip}>
