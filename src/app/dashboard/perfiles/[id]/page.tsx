@@ -163,17 +163,23 @@ export default function ProfileDetailPage() {
           )}
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-              <Button type="button" variant="secondary" className="w-full gap-2">
-                <ExternalLink className="h-4 w-4" aria-hidden />
-                Ver perfil público
-              </Button>
+            <a
+              href={publicUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-neutral-100 px-4 py-2 text-base font-semibold text-neutral-900 transition-colors hover:bg-neutral-200"
+            >
+              <ExternalLink className="h-4 w-4" aria-hidden />
+              Ver perfil público
             </a>
-            <a href={sosUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-              <Button type="button" variant="secondary" className="w-full gap-2">
-                <Smartphone className="h-4 w-4" aria-hidden />
-                Abrir modo SOS
-              </Button>
+            <a
+              href={sosUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-neutral-100 px-4 py-2 text-base font-semibold text-neutral-900 transition-colors hover:bg-neutral-200"
+            >
+              <Smartphone className="h-4 w-4" aria-hidden />
+              Abrir modo SOS
             </a>
           </div>
         </div>
