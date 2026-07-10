@@ -52,21 +52,43 @@ const STEPS = [
   },
 ] as const;
 
-function StepCard({
-  step,
-  title,
-  text,
-  image,
-  imageAlt,
-}: (typeof STEPS)[number]) {
+const ROWS = [
+  {
+    label: "Escaneo y primer contacto",
+    description: "Desde que alguien lee el QR hasta que la familia sabe qué pasa.",
+    steps: STEPS.slice(0, 3),
+  },
+  {
+    label: "Información y coordinación",
+    description: "Chat, alertas y datos clave para actuar con seguridad.",
+    steps: STEPS.slice(3, 6),
+  },
+  {
+    label: "Comunicación enriquecida",
+    description: "Más allá del texto: imágenes y audios en tiempo real.",
+    steps: STEPS.slice(6, 7),
+  },
+] as const;
+
+type Step = (typeof STEPS)[number];
+
+function StepCard({ step, title, text, image, imageAlt, featured = false }: Step & { featured?: boolean }) {
   return (
-    <li className="flex w-[min(100%,17.5rem)] shrink-0 snap-center flex-col sm:w-[15.5rem] lg:w-[13.75rem]">
-      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-lg font-black text-white shadow-lg shadow-violet-500/25 ring-4 ring-white">
+    <li
+      className={`flex flex-col items-center text-center ${
+        featured ? "mx-auto w-full max-w-sm" : "w-full"
+      }`}
+    >
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-lg font-black text-white shadow-lg shadow-violet-500/25 ring-4 ring-white">
         {step}
       </div>
-      <h3 className="mt-5 text-lg font-bold leading-snug text-neutral-900">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-600">{text}</p>
-      <div className="mt-5 overflow-hidden rounded-[1.75rem] border-[5px] border-neutral-900 bg-neutral-950 p-1.5 shadow-2xl shadow-violet-500/15">
+      <h3 className="mt-6 text-xl font-bold leading-snug text-neutral-900">{title}</h3>
+      <p className="mt-3 max-w-xs text-sm leading-relaxed text-neutral-600">{text}</p>
+      <div
+        className={`mt-8 overflow-hidden rounded-[1.75rem] border-[5px] border-neutral-900 bg-neutral-950 p-1.5 shadow-2xl shadow-violet-500/15 ${
+          featured ? "w-full max-w-[17.5rem]" : "w-full max-w-[15rem]"
+        }`}
+      >
         <div className="overflow-hidden rounded-[1.25rem]">
           <Image
             src={image}
@@ -74,11 +96,46 @@ function StepCard({
             width={503}
             height={1024}
             className="h-auto w-full"
-            sizes="(max-width: 640px) 280px, 220px"
+            sizes={featured ? "(max-width: 640px) 280px, 280px" : "(max-width: 640px) 240px, 240px"}
           />
         </div>
       </div>
     </li>
+  );
+}
+
+function StepRow({
+  label,
+  description,
+  steps,
+  featuredLast = false,
+}: {
+  label: string;
+  description: string;
+  steps: readonly Step[];
+  featuredLast?: boolean;
+}) {
+  const isSingle = steps.length === 1;
+
+  return (
+    <div className="rounded-[2rem] border border-violet-100/80 bg-gradient-to-b from-violet-50/40 to-white px-5 py-12 sm:px-8 sm:py-14 lg:px-12">
+      <div className={`mx-auto max-w-2xl text-center ${isSingle ? "mb-10" : "mb-12 lg:mb-14"}`}>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-600">{label}</p>
+        <p className="mt-3 text-base leading-relaxed text-neutral-600 sm:text-lg">{description}</p>
+      </div>
+
+      <ol
+        className={
+          isSingle
+            ? "flex justify-center"
+            : "grid gap-12 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-14 lg:grid-cols-3 lg:gap-x-10 lg:gap-y-16"
+        }
+      >
+        {steps.map((step) => (
+          <StepCard key={step.step} {...step} featured={featuredLast && isSingle} />
+        ))}
+      </ol>
+    </div>
   );
 }
 
@@ -102,25 +159,14 @@ export function HowItWorksSection() {
           </p>
         </div>
 
-        <div className="relative mt-16">
-          <div
-            className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-16 bg-gradient-to-r from-white to-transparent lg:block"
-            aria-hidden
-          />
-          <div
-            className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden w-16 bg-gradient-to-l from-white to-transparent lg:block"
-            aria-hidden
-          />
-
-          <ol className="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {STEPS.map((step) => (
-              <StepCard key={step.step} {...step} />
-            ))}
-          </ol>
-
-          <p className="mt-6 text-center text-sm text-neutral-500">
-            Deslizá horizontalmente para ver los 7 pasos →
-          </p>
+        <div className="mt-20 flex flex-col gap-10 lg:gap-14">
+          {ROWS.map((row, index) => (
+            <StepRow
+              key={row.label}
+              {...row}
+              featuredLast={index === ROWS.length - 1}
+            />
+          ))}
         </div>
       </div>
     </section>
