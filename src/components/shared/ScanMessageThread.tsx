@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
-import { ImagePlus, Mic, Send, Square } from "lucide-react";
+import { Camera, ImagePlus, Mic, Send, Square, X } from "lucide-react";
 import type { ScanMessage } from "@/types/database";
 import { formatDateTime } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
@@ -41,6 +41,21 @@ function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
+// Quita el prefijo "data:<mime>;base64," de forma robusta. El regex anterior
+// fallaba con mimes que traen parámetros, ej: "data:audio/webm;codecs=opus;base64,".
+function stripDataUrlPrefix(dataUrl: string): string {
+  if (!dataUrl.startsWith("data:")) return dataUrl;
+  const comma = dataUrl.indexOf(",");
+  return comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+}
+
+function formatElapsed(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
 function mediaSrc(msg: ScanMessage): string | null {
   if (!msg.media_b64 || !msg.media_mime) return null;
   return `data:${msg.media_mime};base64,${msg.media_b64}`;
@@ -58,13 +73,21 @@ export function ScanMessageThread({
   const [pendingMedia, setPendingMedia] = useState<PendingMedia | null>(null);
   const [sending, setSending] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [recordingMs, setRecordingMs] = useState(0);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const recordingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordingStartRef = useRef(0);
   const streamRef = useRef<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
   const prevCountRef = useRef(0);
   const shouldStickToBottomRef = useRef(true);
   const pollBackoffUntilRef = useRef(0);
@@ -154,10 +177,47 @@ export function ScanMessageThread({
   useEffect(() => {
     return () => {
       if (recordingTimerRef.current) clearTimeout(recordingTimerRef.current);
+      if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
       mediaRecorderRef.current?.stop();
       streamRef.current?.getTracks().forEach((t) => t.stop());
+      cameraStreamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, []);
+
+  useEffect(() => {
+    if (!cameraOpen) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+          audio: false,
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        cameraStreamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play().catch(() => {});
+        }
+        setCameraReady(true);
+      } catch {
+        if (!cancelled) {
+          setCameraOpen(false);
+          setError("No se pudo acceder a la cámara.");
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      cameraStreamRef.current?.getTracks().forEach((t) => t.stop());
+      cameraStreamRef.current = null;
+    };
+  }, [cameraOpen]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -191,7 +251,7 @@ export function ScanMessageThread({
     }
     try {
       const dataUrl = await readFileAsDataUrl(file);
-      const base64 = dataUrl.replace(/^data:[^;]+;base64,/, "");
+      const base64 = stripDataUrlPrefix(dataUrl);
       setPendingMedia({
         type: "image",
         mime: file.type || "image/jpeg",
@@ -255,6 +315,10 @@ export function ScanMessageThread({
           clearTimeout(recordingTimerRef.current);
           recordingTimerRef.current = null;
         }
+        if (recordingIntervalRef.current) {
+          clearInterval(recordingIntervalRef.current);
+          recordingIntervalRef.current = null;
+        }
         stopRecordingTracks();
 
         const blob = new Blob(audioChunksRef.current, {
@@ -278,7 +342,7 @@ export function ScanMessageThread({
             { type: blob.type || "audio/webm" },
           );
           const dataUrl = await readFileAsDataUrl(file);
-          const base64 = dataUrl.replace(/^data:[^;]+;base64,/, "");
+          const base64 = stripDataUrlPrefix(dataUrl);
           setPendingMedia({
             type: "audio",
             mime: file.type,
@@ -294,6 +358,11 @@ export function ScanMessageThread({
 
       recorder.start();
       setRecording(true);
+      setRecordingMs(0);
+      recordingStartRef.current = Date.now();
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingMs(Date.now() - recordingStartRef.current);
+      }, 200);
       setError(null);
       recordingTimerRef.current = setTimeout(() => {
         if (mediaRecorderRef.current?.state === "recording") {
@@ -305,6 +374,57 @@ export function ScanMessageThread({
       setRecording(false);
       setError("No se pudo acceder al micrófono.");
     }
+  }
+
+  function openCamera() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError("Este dispositivo no permite abrir la cámara.");
+      return;
+    }
+    setError(null);
+    setCameraReady(false);
+    setCameraOpen(true);
+  }
+
+  function closeCamera() {
+    setCameraReady(false);
+    setCameraOpen(false);
+  }
+
+  async function capturePhoto() {
+    const video = videoRef.current;
+    if (!video || !cameraReady) return;
+
+    const maxDim = 1280;
+    const vw = video.videoWidth || 1280;
+    const vh = video.videoHeight || 720;
+    const scale = Math.min(1, maxDim / Math.max(vw, vh));
+    const width = Math.round(vw * scale);
+    const height = Math.round(vh * scale);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      setError("No se pudo capturar la foto.");
+      return;
+    }
+    ctx.drawImage(video, 0, 0, width, height);
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/jpeg", 0.85),
+    );
+    if (!blob) {
+      setError("No se pudo capturar la foto.");
+      return;
+    }
+
+    const file = new File([blob], `foto-${Date.now()}.jpg`, {
+      type: "image/jpeg",
+    });
+    closeCamera();
+    await attachImageFile(file);
   }
 
   async function handleSend() {
@@ -427,12 +547,19 @@ export function ScanMessageThread({
                   } ${isTutor ? "rounded-br-md" : "rounded-bl-md"}`}
                 >
                   {msg.media_type === "image" && src && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={src}
-                      alt={msg.media_filename || "Foto"}
-                      className="mb-1 max-h-48 w-full rounded-lg object-contain"
-                    />
+                    <button
+                      type="button"
+                      onClick={() => setLightboxSrc(src)}
+                      className="group mb-1 block w-full cursor-zoom-in overflow-hidden rounded-lg"
+                      aria-label="Ver foto en pantalla completa"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={src}
+                        alt={msg.media_filename || "Foto"}
+                        className="max-h-48 w-full rounded-lg object-contain transition-transform group-hover:scale-[1.02]"
+                      />
+                    </button>
                   )}
                   {msg.media_type === "audio" && src && (
                     <audio
@@ -483,74 +610,197 @@ export function ScanMessageThread({
         </div>
       )}
 
-      <div className={`flex items-end gap-2 border-t border-inherit p-3 ${dark ? "bg-neutral-900" : "bg-white"}`}>
-        <input
-          ref={photoInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-          onChange={handlePhotoChange}
-        />
-        <button
-          type="button"
-          disabled={sending || recording}
-          onClick={() => photoInputRef.current?.click()}
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${iconBtnClass} disabled:opacity-50`}
-          aria-label="Adjuntar foto"
-        >
-          <ImagePlus className="h-4 w-4" aria-hidden />
-        </button>
-        <button
-          type="button"
-          disabled={sending}
-          onClick={() => void toggleRecording()}
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${
-            recording
-              ? "border-red-500 bg-red-600 text-white"
-              : iconBtnClass
-          } disabled:opacity-50`}
-          aria-label={recording ? "Detener grabación" : "Grabar audio"}
-        >
-          {recording ? (
-            <Square className="h-4 w-4" aria-hidden />
-          ) : (
-            <Mic className="h-4 w-4" aria-hidden />
-          )}
-        </button>
-        <input
-          type="text"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              void handleSend();
-            }
-          }}
-          placeholder={recording ? "Grabando audio..." : "Escribí un mensaje..."}
-          disabled={recording}
-          className={`min-w-0 flex-1 rounded-lg border px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-violet-500 ${
-            dark
-              ? "border-neutral-600 bg-neutral-950 text-white placeholder:text-neutral-500"
-              : "border-neutral-300 bg-white text-neutral-900"
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handlePhotoChange}
+      />
+
+      {recording ? (
+        <div
+          className={`flex items-center gap-3 border-t border-inherit p-3 ${
+            dark ? "bg-neutral-900" : "bg-white"
           }`}
-        />
-        <Button
-          type="button"
-          disabled={!canSend}
-          onClick={() => void handleSend()}
-          className="shrink-0 gap-1 px-4"
-          aria-label="Enviar mensaje"
         >
-          <Send className="h-4 w-4" aria-hidden />
-        </Button>
-      </div>
+          <div
+            className={`flex flex-1 items-center gap-3 rounded-lg border border-red-500/50 px-3 py-2.5 ${
+              dark ? "bg-red-950/40" : "bg-red-50"
+            }`}
+          >
+            <span className="relative flex h-3 w-3 shrink-0">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600" />
+            </span>
+            <span className="text-sm font-semibold text-red-600">Grabando</span>
+            <span className="flex h-4 items-end gap-0.5" aria-hidden>
+              {[0, 1, 2, 3, 4].map((i) => (
+                <span
+                  key={i}
+                  className="w-1 animate-pulse rounded-full bg-red-500"
+                  style={{
+                    height: `${[10, 16, 8, 14, 11][i]}px`,
+                    animationDelay: `${i * 120}ms`,
+                  }}
+                />
+              ))}
+            </span>
+            <span className="ml-auto font-mono text-sm tabular-nums text-red-600">
+              {formatElapsed(recordingMs)}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => void toggleRecording()}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-red-500 bg-red-600 text-white transition-colors hover:bg-red-700"
+            aria-label="Detener grabación"
+          >
+            <Square className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+      ) : (
+        <div className={`flex items-end gap-1.5 border-t border-inherit p-3 ${dark ? "bg-neutral-900" : "bg-white"}`}>
+          <button
+            type="button"
+            disabled={sending}
+            onClick={() => photoInputRef.current?.click()}
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${iconBtnClass} disabled:opacity-50`}
+            aria-label="Adjuntar foto"
+          >
+            <ImagePlus className="h-4 w-4" aria-hidden />
+          </button>
+          <button
+            type="button"
+            disabled={sending}
+            onClick={() => void openCamera()}
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${iconBtnClass} disabled:opacity-50`}
+            aria-label="Sacar foto con la cámara"
+          >
+            <Camera className="h-4 w-4" aria-hidden />
+          </button>
+          <button
+            type="button"
+            disabled={sending}
+            onClick={() => void toggleRecording()}
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${iconBtnClass} disabled:opacity-50`}
+            aria-label="Grabar audio"
+          >
+            <Mic className="h-4 w-4" aria-hidden />
+          </button>
+          <input
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                void handleSend();
+              }
+            }}
+            placeholder="Escribí un mensaje..."
+            className={`min-w-0 flex-1 rounded-lg border px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+              dark
+                ? "border-neutral-600 bg-neutral-950 text-white placeholder:text-neutral-500"
+                : "border-neutral-300 bg-white text-neutral-900"
+            }`}
+          />
+          <Button
+            type="button"
+            disabled={!canSend}
+            onClick={() => void handleSend()}
+            className="shrink-0 gap-1 px-4"
+            aria-label="Enviar mensaje"
+          >
+            <Send className="h-4 w-4" aria-hidden />
+          </Button>
+        </div>
+      )}
 
       {error && (
         <p className="px-3 pb-3 text-sm text-red-600" role="alert">
           {error}
         </p>
+      )}
+
+      {cameraOpen && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-black"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Cámara"
+        >
+          <div className="flex items-center justify-between px-4 py-3 text-white">
+            <span className="text-sm font-semibold">Tomar foto</span>
+            <button
+              type="button"
+              onClick={closeCamera}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
+              aria-label="Cerrar cámara"
+            >
+              <X className="h-5 w-5" aria-hidden />
+            </button>
+          </div>
+          <div className="relative flex flex-1 items-center justify-center overflow-hidden">
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+            <video
+              ref={videoRef}
+              playsInline
+              muted
+              className="max-h-full max-w-full"
+            />
+            {!cameraReady && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              </div>
+            )}
+          </div>
+          <div className="flex items-center justify-center gap-8 px-4 py-6">
+            <button
+              type="button"
+              onClick={closeCamera}
+              className="text-sm font-medium text-white/80 transition-colors hover:text-white"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={() => void capturePhoto()}
+              disabled={!cameraReady}
+              className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-white/20 backdrop-blur transition-transform active:scale-95 disabled:opacity-50"
+              aria-label="Capturar foto"
+            >
+              <Camera className="h-7 w-7 text-white" aria-hidden />
+            </button>
+            <span className="w-14" aria-hidden />
+          </div>
+        </div>
+      )}
+
+      {lightboxSrc && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Foto en pantalla completa"
+          onClick={() => setLightboxSrc(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxSrc(null)}
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
+            aria-label="Cerrar"
+          >
+            <X className="h-5 w-5" aria-hidden />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightboxSrc}
+            alt="Foto"
+            className="max-h-full max-w-full rounded-lg object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
       )}
     </section>
   );

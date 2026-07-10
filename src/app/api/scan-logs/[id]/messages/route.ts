@@ -69,11 +69,15 @@ function parseMedia(
   if (media.type !== "image" && media.type !== "audio") {
     throw new Error("Tipo de media inválido");
   }
+  const raw = media.data.trim();
+  const comma = raw.indexOf(",");
+  const base64Data =
+    raw.startsWith("data:") && comma >= 0 ? raw.slice(comma + 1) : raw;
   return {
     type: media.type,
     mime: media.mime?.trim() || (media.type === "image" ? "image/jpeg" : "audio/webm"),
     filename: media.filename?.trim() || `${media.type}`,
-    base64Data: media.data.replace(/^data:[^;]+;base64,/, ""),
+    base64Data,
   };
 }
 
