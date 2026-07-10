@@ -25,9 +25,9 @@ const STEPS = [
   {
     step: "4",
     title: "Chat en vivo",
-    text: "Coordinación en tiempo real. Activá notificaciones para no perderte respuestas.",
-    image: "/images/landing/screenshots/step-04-chat.png",
-    imageAlt: "Conversación en vivo y activación de notificaciones push",
+    text: "Mensajes, fotos y audios en tiempo real. La familia responde desde su panel.",
+    image: "/images/landing/screenshots/step-07-media.png",
+    imageAlt: "Chat SOSme con foto de mascota y mensaje de audio de la familia",
   },
   {
     step: "5",
@@ -43,13 +43,6 @@ const STEPS = [
     image: "/images/landing/screenshots/step-06-instructions.png",
     imageAlt: "Instrucciones de encuentro e información veterinaria",
   },
-  {
-    step: "7",
-    title: "Fotos y audios",
-    text: "Quien escanea puede mandar imagen o audio; la familia responde desde su panel.",
-    image: "/images/landing/screenshots/step-07-media.png",
-    imageAlt: "Chat SOSme con foto de mascota y mensaje de audio de la familia",
-  },
 ] as const;
 
 const ROWS = [
@@ -63,43 +56,26 @@ const ROWS = [
     description: "Chat, alertas y datos clave para actuar con seguridad.",
     steps: STEPS.slice(3, 6),
   },
-  {
-    label: "Comunicación enriquecida",
-    description: "Más allá del texto: imágenes y audios en tiempo real.",
-    steps: STEPS.slice(6, 7),
-  },
 ] as const;
 
 type Step = (typeof STEPS)[number];
 
-function StepCard({ step, title, text, image, imageAlt, featured = false }: Step & { featured?: boolean }) {
+function StepCard({ step, title, text, image, imageAlt }: Step) {
   return (
-    <li
-      className={`flex flex-col items-center text-center ${
-        featured ? "mx-auto w-full max-w-sm" : "w-full"
-      }`}
-    >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-lg font-black text-white shadow-lg shadow-violet-500/25 ring-4 ring-white">
+    <li className="flex w-full flex-col items-center text-center">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-base font-black text-white shadow-md shadow-violet-500/20 ring-2 ring-white">
         {step}
       </div>
-      <h3 className="mt-6 text-xl font-bold leading-snug text-neutral-900">{title}</h3>
-      <p className="mt-3 max-w-xs text-sm leading-relaxed text-neutral-600">{text}</p>
-      <div
-        className={`mt-8 overflow-hidden rounded-[1.75rem] border-[5px] border-neutral-900 bg-neutral-950 p-1.5 shadow-2xl shadow-violet-500/15 ${
-          featured ? "w-full max-w-[17.5rem]" : "w-full max-w-[15rem]"
-        }`}
-      >
-        <div className="overflow-hidden rounded-[1.25rem]">
-          <Image
-            src={image}
-            alt={imageAlt}
-            width={503}
-            height={1024}
-            className="h-auto w-full"
-            sizes={featured ? "(max-width: 640px) 280px, 280px" : "(max-width: 640px) 240px, 240px"}
-          />
-        </div>
-      </div>
+      <h3 className="mt-4 text-lg font-bold leading-snug text-neutral-900">{title}</h3>
+      <p className="mt-2 max-w-xs text-sm leading-relaxed text-neutral-600">{text}</p>
+      <Image
+        src={image}
+        alt={imageAlt}
+        width={503}
+        height={1024}
+        className="mt-5 h-auto w-full max-w-[14rem] rounded-2xl"
+        sizes="(max-width: 640px) 224px, 224px"
+      />
     </li>
   );
 }
@@ -108,31 +84,21 @@ function StepRow({
   label,
   description,
   steps,
-  featuredLast = false,
 }: {
   label: string;
   description: string;
   steps: readonly Step[];
-  featuredLast?: boolean;
 }) {
-  const isSingle = steps.length === 1;
-
   return (
-    <div className="rounded-[2rem] border border-violet-100/80 bg-gradient-to-b from-violet-50/40 to-white px-5 py-12 sm:px-8 sm:py-14 lg:px-12">
-      <div className={`mx-auto max-w-2xl text-center ${isSingle ? "mb-10" : "mb-12 lg:mb-14"}`}>
+    <div className="rounded-[1.75rem] border border-violet-100/80 bg-gradient-to-b from-violet-50/40 to-white px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <div className="mx-auto mb-8 max-w-2xl text-center">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-600">{label}</p>
-        <p className="mt-3 text-base leading-relaxed text-neutral-600 sm:text-lg">{description}</p>
+        <p className="mt-2 text-base leading-relaxed text-neutral-600">{description}</p>
       </div>
 
-      <ol
-        className={
-          isSingle
-            ? "flex justify-center"
-            : "grid gap-12 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-14 lg:grid-cols-3 lg:gap-x-10 lg:gap-y-16"
-        }
-      >
+      <ol className="grid gap-8 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-10">
         {steps.map((step) => (
-          <StepCard key={step.step} {...step} featured={featuredLast && isSingle} />
+          <StepCard key={step.step} {...step} />
         ))}
       </ol>
     </div>
@@ -143,7 +109,7 @@ export function HowItWorksSection() {
   return (
     <section
       id="como-funciona"
-      className="scroll-mt-32 border-y border-neutral-200/50 bg-white px-4 py-24 sm:px-6 lg:px-8"
+      className="scroll-mt-32 border-y border-neutral-200/50 bg-white px-4 py-20 sm:px-6 lg:px-8"
     >
       <div className="mx-auto max-w-[88rem]">
         <div className="mx-auto max-w-3xl text-center">
@@ -153,19 +119,15 @@ export function HowItWorksSection() {
           <h2 className="mt-3 text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
             Así se ve cuando alguien escanea tu QR
           </h2>
-          <p className="mt-5 text-lg leading-relaxed text-neutral-600">
+          <p className="mt-4 text-lg leading-relaxed text-neutral-600">
             Capturas reales del flujo completo: ubicación, contacto, chat, datos
             médicos y botón SOS. Funciona en cualquier celular, sin instalar nada.
           </p>
         </div>
 
-        <div className="mt-20 flex flex-col gap-10 lg:gap-14">
-          {ROWS.map((row, index) => (
-            <StepRow
-              key={row.label}
-              {...row}
-              featuredLast={index === ROWS.length - 1}
-            />
+        <div className="mt-14 flex flex-col gap-8">
+          {ROWS.map((row) => (
+            <StepRow key={row.label} {...row} />
           ))}
         </div>
       </div>
