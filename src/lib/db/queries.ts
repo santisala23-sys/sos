@@ -674,6 +674,21 @@ export async function markScanLogRead(
   return rows.length > 0;
 }
 
+/** Devuelve `read_at` del scan log, o `undefined` si no existe. */
+export async function getScanLogReadAt(
+  scanLogId: string,
+): Promise<string | null | undefined> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT read_at
+    FROM scan_logs
+    WHERE id = ${scanLogId}
+    LIMIT 1
+  `;
+  const row = rows[0] as { read_at: string | null } | undefined;
+  return row?.read_at;
+}
+
 export async function findScanLogById(
   scanLogId: string,
 ): Promise<(ScanLog & { beneficiary_name: string }) | null> {
