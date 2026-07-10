@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Activity,
+  AlertTriangle,
   Bell,
   CheckCircle2,
   FileDown,
@@ -387,25 +388,38 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            <div className="mb-5">
-              <Button
-                type="button"
-                onClick={handleCreateProfile}
-                className="w-full gap-2 sm:w-auto"
-                size="lg"
-              >
-                <Plus className="h-5 w-5" aria-hidden />
-                Crear perfil QR nuevo
-              </Button>
-              {atProfileLimit && (
-                <p className="mt-2 text-sm text-neutral-500">
-                  Llegaste al límite de tu plan.{" "}
-                  <Link href="/pricing" className="font-semibold text-violet-700 hover:underline">
-                    Ver planes
-                  </Link>
-                </p>
-              )}
-            </div>
+            {atProfileLimit && (
+              <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-600">
+                    <AlertTriangle className="h-5 w-5" aria-hidden />
+                  </span>
+                  <p className="text-sm font-semibold text-red-800">
+                    Llegaste al límite de perfiles de tu plan. Mejorá tu plan para
+                    crear más perfiles.
+                  </p>
+                </div>
+                <Link
+                  href="/pricing"
+                  className="inline-flex shrink-0 items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-700"
+                >
+                  Ver planes
+                </Link>
+              </div>
+            )}
+            {!atProfileLimit && (
+              <div className="mb-5">
+                <Button
+                  type="button"
+                  onClick={handleCreateProfile}
+                  className="w-full gap-2 sm:w-auto"
+                  size="lg"
+                >
+                  <Plus className="h-5 w-5" aria-hidden />
+                  Crear perfil QR nuevo
+                </Button>
+              </div>
+            )}
             <div className="grid gap-5 lg:grid-cols-2">
               {profiles.map((profile) => (
                 <ProfileCard

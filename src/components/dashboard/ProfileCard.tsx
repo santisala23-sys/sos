@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, Pencil, Trash2, QrCode, Smartphone } from "lucide-react";
+import { Eye, Pencil, Trash2, QrCode, Smartphone, X } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
@@ -16,30 +16,41 @@ type ProfileCardProps = {
   defaultShowQr?: boolean;
 };
 
-const secondarySmClass =
-  "inline-flex items-center justify-center gap-1.5 rounded-lg border border-neutral-300 bg-neutral-100 px-3 py-1.5 text-sm font-semibold text-neutral-900 transition-colors hover:bg-neutral-200";
+const actionClass =
+  "inline-flex items-center justify-center gap-1.5 rounded-lg border border-neutral-300 bg-neutral-100 px-3 py-2 text-sm font-semibold text-neutral-900 transition-colors hover:bg-neutral-200";
 
 export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: ProfileCardProps) {
   const [showQr, setShowQr] = useState(defaultShowQr);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const sosOnlyUrl = getSosOnlyUrl(profile.slug);
   const typeLabel =
     PROFILE_TYPES.find((t) => t.value === profile.profile_type)?.label ??
     "Persona";
 
   async function handleDelete() {
-    if (!confirm("¿Eliminar este perfil QR? Esta acción no se puede deshacer.")) {
-      return;
-    }
+    setDeleting(true);
     await fetch(`/api/qr-profiles/${profile.id}`, { method: "DELETE" });
+    setDeleting(false);
+    setConfirmDelete(false);
     onRefresh();
   }
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-violet-100/80 bg-white shadow-lg shadow-violet-500/8 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/15">
+    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-violet-100/80 bg-white shadow-lg shadow-violet-500/8 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/15">
       <div className="h-1 bg-gradient-to-r from-violet-500 via-indigo-500 to-violet-600" />
 
+      <button
+        type="button"
+        onClick={() => setConfirmDelete(true)}
+        aria-label="Eliminar perfil"
+        className="absolute right-3 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-white/90 text-neutral-400 shadow-sm backdrop-blur-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+      >
+        <Trash2 className="h-4 w-4" aria-hidden />
+      </button>
+
       <div className="p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-3 pr-10">
           <div className="min-w-0">
             <h3 className="truncate text-lg font-bold text-neutral-900 sm:text-xl">
               {profile.beneficiary_name}
@@ -80,44 +91,34 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
           </div>
         </dl>
 
-        <div className="mt-5 flex flex-wrap gap-2">
-          <Link
-            href={`/dashboard/perfiles/${profile.id}`}
-            className={cn(
-              secondarySmClass,
-              "border-violet-100 bg-violet-50/50 hover:bg-violet-100",
-            )}
-          >
-            <Eye className="h-4 w-4" aria-hidden />
-            Ver perfil
-          </Link>
-          <Button
+        <div className="mt-5 space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              href={`/dashboard/perfiles/${profile.id}`}
+              className={cn(
+                actionClass,
+                "border-violet-100 bg-violet-50/60 text-violet-800 hover:bg-violet-100",
+              )}
+            >
+              <Eye className="h-4 w-4" aria-hidden />
+              Ver perfil
+            </Link>
+            <Link
+              href={`/dashboard/perfiles/${profile.id}/editar`}
+              className={actionClass}
+            >
+              <Pencil className="h-4 w-4" aria-hidden />
+              Editar perfil
+            </Link>
+          </div>
+          <button
             type="button"
-            variant="secondary"
-            size="sm"
             onClick={() => setShowQr(!showQr)}
-            className="gap-1.5"
+            className={cn(actionClass, "w-full")}
           >
             <QrCode className="h-4 w-4" aria-hidden />
             {showQr ? "Ocultar QR" : "Ver QR"}
-          </Button>
-          <Link
-            href={`/dashboard/perfiles/${profile.id}/editar`}
-            className={secondarySmClass}
-          >
-            <Pencil className="h-4 w-4" aria-hidden />
-            Editar
-          </Link>
-          <Button
-            type="button"
-            variant="danger"
-            size="sm"
-            onClick={handleDelete}
-            className="gap-1.5"
-          >
-            <Trash2 className="h-4 w-4" aria-hidden />
-            Eliminar
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -144,6 +145,58 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
           {sosOnlyUrl}
         </a>
       </div>
+
+      {confirmDelete && (
+        <div
+          className="absolute inset-0 z-20 flex items-center justify-center bg-neutral-900/40 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirmar eliminación"
+        >
+          <div className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-5 shadow-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+                <Trash2 className="h-5 w-5" aria-hidden />
+              </div>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                aria-label="Cancelar"
+                className="text-neutral-400 transition-colors hover:text-neutral-700"
+              >
+                <X className="h-5 w-5" aria-hidden />
+              </button>
+            </div>
+            <h4 className="mt-3 text-lg font-black text-neutral-900">
+              ¿Estás seguro que querés eliminar este perfil?
+            </h4>
+            <p className="mt-1 text-sm text-neutral-600">
+              Se eliminará <strong>{profile.beneficiary_name}</strong> y su QR
+              dejará de funcionar. Esta acción no se puede deshacer.
+            </p>
+            <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setConfirmDelete(false)}
+                disabled={deleting}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="gap-1.5"
+              >
+                <Trash2 className="h-4 w-4" aria-hidden />
+                {deleting ? "Eliminando..." : "Eliminar perfil"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </article>
   );
 }
