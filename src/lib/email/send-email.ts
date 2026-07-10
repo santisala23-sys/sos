@@ -1,3 +1,5 @@
+import nodemailer, { type Transporter } from "nodemailer";
+
 type SendEmailParams = {
   to: string;
   subject: string;
@@ -11,16 +13,40 @@ type SendEmailResult = {
   error?: string;
 };
 
-const RESEND_ENDPOINT = "https://api.resend.com/emails";
+let cachedTransporter: Transporter | null = null;
 
 function getFromAddress(): string {
-  return process.env.EMAIL_FROM?.trim() || "SOSme <no-reply@sosme.com.ar>";
+  return (
+    process.env.EMAIL_FROM?.trim() ||
+    (process.env.SMTP_USER
+      ? `SOSme <${process.env.SMTP_USER}>`
+      : "SOSme <no-reply@sosme.com.ar>")
+  );
+}
+
+function getTransporter(): Transporter | null {
+  const host = process.env.SMTP_HOST?.trim() || "smtp.gmail.com";
+  const user = process.env.SMTP_USER?.trim();
+  const pass = process.env.SMTP_PASS?.trim();
+
+  if (!user || !pass) return null;
+
+  if (cachedTransporter) return cachedTransporter;
+
+  const port = Number(process.env.SMTP_PORT ?? 587);
+  cachedTransporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465, // 465 = SSL; 587 = STARTTLS
+    auth: { user, pass },
+  });
+  return cachedTransporter;
 }
 
 /**
- * Envía un email transaccional vía Resend (HTTP API, sin dependencias extra).
- * Si no hay `RESEND_API_KEY` configurada, en desarrollo loguea el contenido y
- * no falla, para poder probar el flujo sin proveedor de email.
+ * Envía un email transaccional vía SMTP (por defecto Gmail).
+ * Si no hay credenciales SMTP configuradas, en desarrollo loguea el contenido
+ * y no falla, para poder probar el flujo sin proveedor de email.
  */
 export async function sendEmail({
   to,
@@ -28,45 +54,31 @@ export async function sendEmail({
   html,
   text,
 }: SendEmailParams): Promise<SendEmailResult> {
-  const apiKey = process.env.RESEND_API_KEY?.trim();
+  const transporter = getTransporter();
 
-  if (!apiKey) {
+  if (!transporter) {
     if (process.env.NODE_ENV !== "production") {
       console.warn(
-        `[email] RESEND_API_KEY no configurada. Email NO enviado a ${to}.\n` +
+        `[email] SMTP no configurado (SMTP_USER/SMTP_PASS). Email NO enviado a ${to}.\n` +
           `Asunto: ${subject}\n${text ?? "(ver HTML)"}`,
       );
       return { ok: true, skipped: true };
     }
-    console.error("[email] RESEND_API_KEY no configurada en producción.");
+    console.error("[email] SMTP no configurado en producción.");
     return { ok: false, error: "Email no configurado" };
   }
 
   try {
-    const res = await fetch(RESEND_ENDPOINT, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: getFromAddress(),
-        to: [to],
-        subject,
-        html,
-        ...(text ? { text } : {}),
-      }),
+    await transporter.sendMail({
+      from: getFromAddress(),
+      to,
+      subject,
+      html,
+      ...(text ? { text } : {}),
     });
-
-    if (!res.ok) {
-      const detail = await res.text().catch(() => "");
-      console.error("[email] Resend error:", res.status, detail);
-      return { ok: false, error: `Resend ${res.status}` };
-    }
-
     return { ok: true };
   } catch (error) {
-    console.error("[email] Error de red al enviar:", error);
-    return { ok: false, error: "Error de red" };
+    console.error("[email] Error al enviar por SMTP:", error);
+    return { ok: false, error: "Error al enviar el email" };
   }
 }

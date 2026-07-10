@@ -72,4 +72,19 @@ for (const key of vapidKeys) {
   }
 }
 
+// Email transaccional (verificación de cuenta) vía SMTP
+const emailKeys = [
+  "SMTP_HOST",
+  "SMTP_PORT",
+  "SMTP_USER",
+  "SMTP_PASS",
+  "EMAIL_FROM",
+];
+for (const key of emailKeys) {
+  if (local[key]) {
+    vercelEnvAdd(key, local[key], ["preview"]);
+    vercelEnvAdd(key, local[key], ["production"]);
+  }
+}
+
 console.log("\nListo. Redeploy en Vercel para aplicar cambios.");
