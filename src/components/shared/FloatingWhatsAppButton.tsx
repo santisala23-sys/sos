@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { buildWhatsAppUrl } from "@/lib/utils/contact";
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -9,6 +12,9 @@ function WhatsAppIcon({ className }: { className?: string }) {
 }
 
 export function FloatingWhatsAppButton() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/p/")) return null;
+
   const href = buildWhatsAppUrl("Hola SOSme");
   return (
     <a
@@ -23,4 +29,3 @@ export function FloatingWhatsAppButton() {
     </a>
   );
 }
-

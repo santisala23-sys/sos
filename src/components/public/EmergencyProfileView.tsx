@@ -302,7 +302,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           <HeartPulse className="h-3.5 w-3.5" aria-hidden />
           {typeConfig.publicTypeLabel}
         </p>
-        <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-4xl">
+        <h1 className="mt-4 break-words text-3xl font-black leading-tight tracking-tight sm:text-4xl">
           {profile.beneficiary_name}
         </h1>
         {profile.avatar_b64 && (
@@ -510,9 +510,9 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           size="xl"
           disabled={sosLoading || sosSent}
           onClick={handleSos}
-          className="w-full gap-3 py-6 text-2xl shadow-2xl shadow-red-900/50"
+          className="w-full gap-2 whitespace-normal px-4 py-5 text-lg leading-tight sm:gap-3 sm:py-6 sm:text-2xl"
         >
-          <AlertTriangle className="h-8 w-8" aria-hidden />
+          <AlertTriangle className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" aria-hidden />
           {sosSent
             ? "Alerta enviada"
             : sosLoading

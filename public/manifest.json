@@ -12,6 +12,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

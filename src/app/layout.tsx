@@ -15,6 +15,36 @@ export const metadata: Metadata = {
     "Creá perfiles QR para personas, mascotas u objetos. Alertas push, ubicación y contacto directo cuando alguien escanea.",
   applicationName: "SOSme",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  openGraph: {
+    type: "website",
+    locale: "es_AR",
+    siteName: "SOSme",
+    title: "SOSme — Tu QR personal de emergencia y contacto",
+    description:
+      "SOSme vincula un código QR a tu perfil de emergencia. Quien lo escanea sabe cómo contactarte y vos recibís la alerta al instante.",
+    images: [
+      {
+        url: "/icon.png",
+        width: 512,
+        height: 512,
+        alt: "SOSme",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "SOSme — Tu QR personal de emergencia y contacto",
+    description:
+      "SOSme vincula un código QR a tu perfil de emergencia. Quien lo escanea sabe cómo contactarte y vos recibís la alerta al instante.",
+    images: ["/icon.png"],
+  },
 };
 
 export const viewport: Viewport = {

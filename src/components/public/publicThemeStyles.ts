@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils/cn";
 export function publicThemeStyles(isLight: boolean) {
   return {
     page: cn(
-      "relative mx-auto min-h-dvh max-w-lg",
+      "relative mx-auto min-h-dvh max-w-lg overflow-x-clip",
       isLight ? "bg-[#f6f4fb] text-neutral-900" : "bg-neutral-950 text-white",
     ),
     headerAssistance: cn(
@@ -19,7 +19,7 @@ export function publicThemeStyles(isLight: boolean) {
         : "border-red-900/50 bg-gradient-to-br from-red-700 via-red-800 to-red-950 shadow-red-950/50",
     ),
     badge: cn(
-      "inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em]",
+      "inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.12em] sm:tracking-[0.18em]",
       isLight
         ? "border-white/30 bg-white/15 text-white"
         : "border-white/20 bg-black/20 text-white/95",
@@ -81,7 +81,7 @@ export function publicThemeStyles(isLight: boolean) {
     placeholderTitle: isLight ? "mt-2 text-sm font-medium text-neutral-700" : "mt-2 text-sm font-medium text-neutral-400",
     placeholderText: isLight ? "mt-1 text-xs leading-relaxed text-neutral-500" : "mt-1 text-xs leading-relaxed text-neutral-500",
     footer: cn(
-      "fixed inset-x-0 bottom-0 z-20 mx-auto max-w-lg border-t px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md",
+      "fixed bottom-0 left-1/2 z-20 w-full max-w-lg -translate-x-1/2 border-t px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md",
       isLight
         ? "border-red-200/60 bg-white/95 shadow-[0_-8px_30px_rgba(124,58,237,0.08)]"
         : "border-red-900/60 bg-neutral-950/95",
@@ -90,13 +90,13 @@ export function publicThemeStyles(isLight: boolean) {
     footerNoteStrong: isLight ? "text-red-900" : "text-white",
     footerBrand: isLight ? "text-center text-[11px] text-neutral-400" : "text-center text-[11px] text-neutral-600",
     infoAllergies: cn(
-      "rounded-2xl border-2 px-5 py-4 text-lg font-semibold leading-relaxed shadow-md",
+      "break-words rounded-2xl border-2 px-5 py-4 text-lg font-semibold leading-relaxed shadow-md",
       isLight
         ? "border-red-300 bg-red-50 text-red-900 shadow-red-500/10"
         : "border-red-500 bg-red-950 text-red-50 shadow-red-900/20",
     ),
     infoInstructions: cn(
-      "rounded-2xl border-2 px-5 py-4 text-lg leading-relaxed shadow-md",
+      "break-words rounded-2xl border-2 px-5 py-4 text-lg leading-relaxed shadow-md",
       isLight
         ? "border-amber-300 bg-amber-50 text-amber-950 shadow-amber-500/10"
         : "border-yellow-500 bg-yellow-950 text-yellow-50 shadow-amber-900/20",
@@ -120,7 +120,7 @@ export function publicThemeStyles(isLight: boolean) {
     bloodType: isLight ? "text-3xl font-black tracking-wide text-violet-900 sm:text-4xl" : "text-3xl font-black tracking-wide text-white sm:text-4xl",
     bloodIcon: isLight ? "h-8 w-8 shrink-0 text-violet-600" : "h-8 w-8 shrink-0 text-violet-300",
     pdfButton: cn(
-      "flex min-h-[56px] w-full items-center justify-center gap-3 rounded-2xl border-2 px-4 py-4 text-base font-bold shadow-md transition-transform active:scale-[0.98]",
+      "flex min-h-[56px] w-full items-center justify-center gap-3 break-words rounded-2xl border-2 px-4 py-4 text-center text-base font-bold shadow-md transition-transform active:scale-[0.98]",
       isLight
         ? "border-violet-300 bg-violet-50 text-violet-900 hover:bg-violet-100"
         : "border-violet-500 bg-violet-950 text-violet-100",
