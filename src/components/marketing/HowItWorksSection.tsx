@@ -71,9 +71,9 @@ function StepCard({ step, title, text, image, imageAlt }: Step) {
       <Image
         src={image}
         alt={imageAlt}
-        width={503}
-        height={1024}
-        className="mt-5 h-auto w-full max-w-[14rem] rounded-2xl"
+        width={496}
+        height={896}
+        className="mt-5 block h-auto w-full max-w-[14rem]"
         sizes="(max-width: 640px) 224px, 224px"
       />
     </li>
