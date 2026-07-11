@@ -301,39 +301,38 @@ export default function HomePage() {
           />
 
           <div className="mt-14 grid gap-8 lg:grid-cols-2">
-            <article className="relative flex flex-col overflow-hidden rounded-[2rem] border-2 border-violet-300 bg-white p-9 shadow-2xl shadow-violet-500/15">
-              <div className="absolute right-0 top-0 h-40 w-40 rounded-bl-[5rem] bg-gradient-to-bl from-violet-100 to-transparent" />
-              <p className="relative inline-flex w-fit items-center gap-2 rounded-full bg-violet-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-violet-800">
+            <article className="flex flex-col rounded-[2rem] border border-neutral-200 bg-white p-9 shadow-lg">
+              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-neutral-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-neutral-700">
                 <Package className="h-3.5 w-3.5" aria-hidden />
                 Producto físico
               </p>
-              <h3 className="relative mt-5 text-2xl font-black text-neutral-900 sm:text-3xl">
+              <h3 className="mt-5 text-2xl font-black text-neutral-900 sm:text-3xl">
                 Comprás y activás una vez
               </h3>
-              <p className="relative mt-3 text-neutral-600">
+              <p className="mt-3 text-neutral-600">
                 Ideal si querés collar, chapita o credencial listos para usar.
               </p>
-              <ol className="relative mt-8 flex-1 space-y-5 text-neutral-700">
+              <ol className="mt-8 flex-1 space-y-5 text-neutral-700">
                 {[
                   "Pedís el collar, colgante o credencial",
                   "Escaneás el QR una sola vez y te registrás",
                   "Listo: queda vinculado a tu perfil para siempre",
                 ].map((item, i) => (
                   <li key={item} className="flex gap-4">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-sm font-bold text-white">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-sm font-bold text-neutral-700">
                       {i + 1}
                     </span>
                     <span className="pt-0.5">{item}</span>
                   </li>
                 ))}
               </ol>
-              <Link href="/tienda" className="relative mt-10 block">
-                <Button size="lg" className="w-full gap-2">
+              <Link href="/tienda" className="mt-10 block">
+                <Button variant="secondary" size="lg" className="w-full gap-2">
                   Ver tienda
                   <ArrowRight className="h-5 w-5" aria-hidden />
                 </Button>
               </Link>
-              <p className="relative mt-4 text-center text-sm text-neutral-500">
+              <p className="mt-4 text-center text-sm text-neutral-500">
                 ¿Ya lo tenés?{" "}
                 <Link
                   href="/activar"

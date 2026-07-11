@@ -2,22 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  Activity,
   AlertTriangle,
-  BarChart3,
-  Clock,
-  FileText,
   Globe,
-  LayoutTemplate,
-  Package,
   Pencil,
-  QrCode,
   RefreshCw,
   Search,
-  Server,
-  ShieldAlert,
-  ShoppingBag,
-  Users,
 } from "lucide-react";
 import type {
   AdminOverviewStats,
@@ -40,20 +29,12 @@ import { AdminMaintenancePanel } from "@/components/admin/AdminMaintenancePanel"
 import { AdminPrintTemplatesPanel } from "@/components/admin/AdminPrintTemplatesPanel";
 import { AdminProductBatchesPanel } from "@/components/admin/AdminProductBatchesPanel";
 import { AdminStorePanel } from "@/components/admin/AdminStorePanel";
+import {
+  ADMIN_TABS,
+  AdminSidebar,
+  type AdminTab,
+} from "@/components/admin/AdminSidebar";
 import { adminStatAccents, adminUi } from "@/components/admin/adminUi";
-
-type AdminTab =
-  | "overview"
-  | "users"
-  | "profiles"
-  | "store"
-  | "templates"
-  | "batches"
-  | "activity"
-  | "api"
-  | "security"
-  | "legal"
-  | "maintenance";
 
 function StatCard({
   label,
@@ -177,6 +158,7 @@ function filterRows<T>(rows: T[], query: string, keys: (keyof T)[]): T[] {
 
 export function AdminDashboard() {
   const [tab, setTab] = useState<AdminTab>("overview");
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState<AdminOverviewStats | null>(null);
   const [scanSeries, setScanSeries] = useState<AdminTimeSeriesPoint[]>([]);
@@ -233,6 +215,13 @@ export function AdminDashboard() {
   }, [tab, apiErrorsOnly, loadOverview]);
 
   useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
     loadTab();
     const interval = setInterval(() => {
       if (tab === "overview") loadOverview();
@@ -240,65 +229,46 @@ export function AdminDashboard() {
     return () => clearInterval(interval);
   }, [loadTab, tab, loadOverview]);
 
-  const tabs: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
-    { id: "overview", label: "Overview", icon: <BarChart3 className="h-4 w-4" /> },
-    { id: "users", label: "Usuarios", icon: <Users className="h-4 w-4" /> },
-    { id: "profiles", label: "Perfiles QR", icon: <QrCode className="h-4 w-4" /> },
-    { id: "store", label: "Tienda", icon: <ShoppingBag className="h-4 w-4" /> },
-    { id: "templates", label: "Plantillas", icon: <LayoutTemplate className="h-4 w-4" /> },
-    { id: "batches", label: "Lotes QR", icon: <Package className="h-4 w-4" /> },
-    { id: "activity", label: "Escaneos", icon: <Activity className="h-4 w-4" /> },
-    { id: "api", label: "API & Errores", icon: <Server className="h-4 w-4" /> },
-    { id: "security", label: "Seguridad", icon: <ShieldAlert className="h-4 w-4" /> },
-    { id: "legal", label: "Legal", icon: <FileText className="h-4 w-4" /> },
-    { id: "maintenance", label: "Mantenimiento", icon: <Clock className="h-4 w-4" /> },
-  ];
+  const activeTab = ADMIN_TABS.find((item) => item.id === tab);
+  const pageTitle =
+    tab === "overview" ? "Estadísticas" : (activeTab?.label ?? "Administración");
 
   return (
-    <div className={adminUi.page}>
-      <section className={adminUi.hero}>
-        <p className={adminUi.heroBadge}>
-          <BarChart3 className="h-4 w-4" aria-hidden />
-          Administración
-        </p>
-        <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
-          Panel de control
-        </h1>
-        <p className="mt-2 max-w-2xl text-base text-violet-100">
-          Métricas, usuarios, tienda, API, errores y auditoría de seguridad en
-          tiempo real.
-        </p>
-      </section>
+    <div className="min-h-screen lg:pl-64">
+      <AdminSidebar
+        tab={tab}
+        onTabChange={(nextTab) => {
+          setTab(nextTab);
+          setSearch("");
+        }}
+        mobileOpen={mobileOpen}
+        onMobileOpenChange={setMobileOpen}
+      />
 
-      <div className="flex flex-wrap items-center justify-end gap-4">
-        <button
-          type="button"
-          onClick={() => loadTab()}
-          className={adminUi.refreshBtn}
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          Actualizar
-        </button>
-      </div>
+      <main className="mx-auto max-w-[88rem] px-4 py-6 sm:px-6 lg:px-8">
+        <div className={adminUi.page}>
+          <section className={adminUi.hero}>
+            <p className={adminUi.heroBadge}>Administración</p>
+            <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
+              {pageTitle}
+            </h1>
+            <p className="mt-2 max-w-2xl text-base text-violet-100">
+              {tab === "overview"
+                ? "Métricas en tiempo real de usuarios, escaneos, API y alertas."
+                : "Gestioná usuarios, tienda, plantillas, escaneos y auditoría de seguridad."}
+            </p>
+          </section>
 
-      <nav className="flex flex-wrap gap-2">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => {
-              setTab(t.id);
-              setSearch("");
-            }}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
-              tab === t.id ? adminUi.tabActive : adminUi.tabInactive
-            }`}
-          >
-            {t.icon}
-            {t.label}
-          </button>
-        ))}
-      </nav>
+          <div className="flex flex-wrap items-center justify-end gap-4">
+            <button
+              type="button"
+              onClick={() => loadTab()}
+              className={adminUi.refreshBtn}
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+              Actualizar
+            </button>
+          </div>
 
       {tab !== "overview" &&
         tab !== "templates" &&
@@ -614,6 +584,8 @@ export function AdminDashboard() {
         onClose={() => setDetail(null)}
         onUpdated={loadTab}
       />
+        </div>
+      </main>
     </div>
   );
 }
