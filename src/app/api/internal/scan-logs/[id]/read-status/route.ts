@@ -31,21 +31,24 @@ async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   }
 }
 
-export async function GET(request: Request, { params }: RouteContext) {
-  const expectedKey = process.env.INTERNAL_N8N_KEY;
-  if (!expectedKey) {
-    return NextResponse.json(
-      { error: "Endpoint interno no configurado" },
-      { status: 500 },
-    );
-  }
+export async function GET(_request: Request, { params }: RouteContext) {
+  // TEMPORAL: auth deshabilitada para debug — restaurar antes de producción estable.
+  // const expectedKey = process.env.INTERNAL_N8N_KEY;
+  // if (!expectedKey) {
+  //   return NextResponse.json(
+  //     { error: "Endpoint interno no configurado" },
+  //     { status: 500 },
+  //   );
+  // }
+  //
+  // const providedKey = request.headers.get("x-n8n-api-key");
+  // if (!providedKey || providedKey !== expectedKey) {
+  //   return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  // }
+  //
+  // console.log(`${LOG_PREFIX} API key validada OK`);
 
-  const providedKey = request.headers.get("x-n8n-api-key");
-  if (!providedKey || providedKey !== expectedKey) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
-
-  console.log(`${LOG_PREFIX} API key validada OK`);
+  console.log(`${LOG_PREFIX} Auth omitida (temporal), consultando DB...`);
 
   let id: string;
   try {
