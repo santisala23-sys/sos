@@ -1,4 +1,7 @@
-import { neon } from "@neondatabase/serverless";
+import { neon, neonConfig } from "@neondatabase/serverless";
+
+// Reutiliza conexiones HTTP entre invocaciones en la misma instancia serverless (Vercel).
+neonConfig.fetchConnectionCache = true;
 
 export function getSql() {
   const url = process.env.DATABASE_URL;
