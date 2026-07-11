@@ -7,11 +7,11 @@ import {
   BarChart3,
   Home,
   LayoutDashboard,
-  Menu,
   Shield,
-  X,
 } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
+import { HamburgerButton } from "@/components/shared/HamburgerButton";
+import { MobileNavDrawer } from "@/components/shared/MobileNavDrawer";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
 
@@ -34,6 +34,10 @@ export function AdminNavbar() {
   }, []);
 
   useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
@@ -43,16 +47,16 @@ export function AdminNavbar() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 px-3 transition-[padding] duration-300 sm:px-6 lg:px-8",
+        "sticky top-0 z-50 px-3 transition-[padding] duration-200 sm:px-6 lg:px-8",
         scrolled ? "py-2" : "py-4",
       )}
     >
       <div
         className={cn(
-          "mx-auto flex w-full max-w-[96rem] items-center justify-between gap-4 rounded-2xl border px-5 py-3.5 transition-all duration-300 sm:px-8 sm:py-4",
+          "mx-auto flex w-full max-w-[96rem] items-center justify-between gap-4 rounded-2xl border px-5 py-3.5 transition-[box-shadow,background-color,border-color] duration-200 sm:px-8 sm:py-4",
           scrolled
-            ? "border-violet-200/70 bg-white/94 shadow-xl shadow-violet-500/10 backdrop-blur-xl"
-            : "border-white/80 bg-white/85 shadow-lg shadow-violet-500/10 backdrop-blur-lg",
+            ? "border-violet-200/70 bg-white/95 shadow-xl shadow-violet-500/10"
+            : "border-white/80 bg-white/90 shadow-lg shadow-violet-500/10",
         )}
       >
         <div className="flex min-w-0 items-center gap-4 lg:gap-5">
@@ -91,56 +95,53 @@ export function AdminNavbar() {
           })}
         </nav>
 
-        <button
-          type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700 transition-colors hover:bg-neutral-50 lg:hidden"
-          aria-expanded={open}
-          aria-controls="admin-mobile-nav"
-          aria-label={open ? "Cerrar menú" : "Abrir menú"}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <HamburgerButton
+          open={open}
+          controls="admin-mobile-nav"
+          className="lg:hidden"
+          onClick={() => setOpen((value) => !value)}
+        />
       </div>
 
-      {open && (
-        <div
-          id="admin-mobile-nav"
-          className="mx-auto mt-3 w-full max-w-[96rem] overflow-hidden rounded-2xl border border-violet-200/60 bg-white/96 p-5 shadow-2xl shadow-violet-500/10 backdrop-blur-xl lg:hidden"
-        >
-          <nav className="flex flex-col gap-1" aria-label="Navegación móvil admin">
-            {NAV_LINKS.map(({ href, label, icon: Icon }) => {
-              const active = pathname === href;
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    "inline-flex items-center gap-3 rounded-xl px-4 py-3.5 text-base font-medium transition-colors",
-                    active
-                      ? "bg-violet-100 text-violet-800"
-                      : "text-neutral-700 hover:bg-violet-50 hover:text-violet-800",
-                  )}
-                  onClick={() => setOpen(false)}
-                >
-                  <Icon className="h-5 w-5" aria-hidden />
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
-          <div className="mt-5 border-t border-neutral-100 pt-5">
-            <Link href="/dashboard" onClick={() => setOpen(false)}>
-              <Button
-                size="lg"
-                className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+      <MobileNavDrawer
+        open={open}
+        onClose={() => setOpen(false)}
+        id="admin-mobile-nav"
+        title="Admin"
+        hiddenFrom="lg"
+      >
+        <nav className="flex flex-col gap-1.5" aria-label="Navegación móvil admin">
+          {NAV_LINKS.map(({ href, label, icon: Icon }) => {
+            const active = pathname === href;
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  "inline-flex items-center gap-3 rounded-2xl px-4 py-3.5 text-base font-semibold transition-colors",
+                  active
+                    ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
+                    : "text-neutral-800 hover:bg-violet-50 hover:text-violet-800",
+                )}
+                onClick={() => setOpen(false)}
               >
-                Ir al panel tutor
-              </Button>
-            </Link>
-          </div>
+                <Icon className="h-5 w-5 shrink-0" aria-hidden />
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="mt-6 border-t border-neutral-100 pt-6">
+          <Link href="/dashboard" onClick={() => setOpen(false)}>
+            <Button
+              size="lg"
+              className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+            >
+              Ir al panel tutor
+            </Button>
+          </Link>
         </div>
-      )}
+      </MobileNavDrawer>
     </header>
   );
 }

@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
+import { HamburgerButton } from "@/components/shared/HamburgerButton";
+import { MobileNavDrawer } from "@/components/shared/MobileNavDrawer";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
 
@@ -46,6 +48,10 @@ export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
     };
   }, [open]);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   const isActive = (href: string) => {
     if (href.startsWith("#")) return false;
     return pathname === href || pathname.startsWith(`${href}/`);
@@ -54,16 +60,16 @@ export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 px-3 transition-[padding] duration-300 sm:px-6 lg:px-8",
+        "sticky top-0 z-50 px-3 transition-[padding] duration-200 sm:px-6 lg:px-8",
         scrolled ? "py-2" : "py-4",
       )}
     >
       <div
         className={cn(
-          "mx-auto flex w-full max-w-[96rem] items-center justify-between gap-6 rounded-2xl border px-5 py-3.5 transition-all duration-300 sm:px-8 sm:py-4",
+          "mx-auto flex w-full max-w-[96rem] items-center justify-between gap-6 rounded-2xl border px-5 py-3.5 transition-[box-shadow,background-color,border-color] duration-200 sm:px-8 sm:py-4",
           scrolled
-            ? "border-violet-200/70 bg-white/94 shadow-xl shadow-violet-500/10 backdrop-blur-xl"
-            : "border-white/80 bg-white/85 shadow-lg shadow-violet-500/10 backdrop-blur-lg",
+            ? "border-violet-200/70 bg-white/95 shadow-xl shadow-violet-500/10"
+            : "border-white/80 bg-white/90 shadow-lg shadow-violet-500/10",
         )}
       >
         <div className="flex min-w-0 items-center gap-4 lg:gap-5">
@@ -117,61 +123,65 @@ export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
           </Link>
         </div>
 
-        <button
-          type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700 transition-colors hover:bg-neutral-50 xl:hidden"
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          aria-label={open ? "Cerrar menú" : "Abrir menú"}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <HamburgerButton
+          open={open}
+          controls="mobile-nav"
+          className="xl:hidden"
+          onClick={() => setOpen((value) => !value)}
+        />
       </div>
 
-      {open && (
-        <div
-          id="mobile-nav"
-          className="mx-auto mt-3 w-full max-w-[96rem] overflow-hidden rounded-2xl border border-violet-200/60 bg-white/96 p-5 shadow-2xl shadow-violet-500/10 backdrop-blur-xl xl:hidden"
-        >
-          <nav className="flex flex-col gap-1" aria-label="Navegación móvil">
-            {NAV_LINKS.map(({ href, label }) => {
-              const resolved = resolveHref(href, variant);
-              const active = isActive(href);
-              return (
-                <Link
-                  key={href}
-                  href={resolved}
-                  className={cn(
-                    "rounded-xl px-4 py-3.5 text-base font-medium transition-colors",
-                    active
-                      ? "bg-violet-100 text-violet-800"
-                      : "text-neutral-700 hover:bg-violet-50 hover:text-violet-800",
-                  )}
-                  onClick={() => setOpen(false)}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
-          <div className="mt-5 flex flex-col gap-2.5 border-t border-neutral-100 pt-5">
-            <Link href="/login" onClick={() => setOpen(false)}>
-              <Button variant="secondary" size="lg" className="w-full">
-                Ingresar
-              </Button>
-            </Link>
-            <Link href="/register" onClick={() => setOpen(false)}>
-              <Button
-                size="lg"
-                className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+      <MobileNavDrawer
+        open={open}
+        onClose={() => setOpen(false)}
+        id="mobile-nav"
+        hiddenFrom="xl"
+      >
+        <nav className="flex flex-col gap-1.5" aria-label="Navegación móvil">
+          {NAV_LINKS.map(({ href, label }) => {
+            const resolved = resolveHref(href, variant);
+            const active = isActive(href);
+            return (
+              <Link
+                key={href}
+                href={resolved}
+                className={cn(
+                  "flex items-center justify-between rounded-2xl px-4 py-3.5 text-base font-semibold transition-colors",
+                  active
+                    ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
+                    : "text-neutral-800 hover:bg-violet-50 hover:text-violet-800",
+                )}
+                onClick={() => setOpen(false)}
               >
-                Empezar gratis
-              </Button>
-            </Link>
-          </div>
+                {label}
+                <ArrowRight
+                  className={cn(
+                    "h-4 w-4 shrink-0 transition-opacity",
+                    active ? "opacity-90" : "opacity-35",
+                  )}
+                  aria-hidden
+                />
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="mt-6 flex flex-col gap-2.5 border-t border-neutral-100 pt-6">
+          <Link href="/login" onClick={() => setOpen(false)}>
+            <Button variant="secondary" size="lg" className="w-full">
+              Ingresar
+            </Button>
+          </Link>
+          <Link href="/register" onClick={() => setOpen(false)}>
+            <Button
+              size="lg"
+              className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+            >
+              Empezar gratis
+            </Button>
+          </Link>
         </div>
-      )}
+      </MobileNavDrawer>
     </header>
   );
 }
