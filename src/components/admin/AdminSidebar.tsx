@@ -133,13 +133,10 @@ function SidebarPanel({ children }: { children: ReactNode }) {
       <div className="border-b border-white/10 px-5 py-5">
         <BrandLogo size="md" showMark tone="dark" />
         <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-violet-200">
-          Control Center
+          Panel Administración
         </p>
       </div>
       <div className="flex-1 overflow-y-auto overscroll-contain">{children}</div>
-      <div className="border-t border-white/10 px-5 py-4">
-        <p className="text-xs text-violet-200/60">SOSme Admin · v1</p>
-      </div>
     </aside>
   );
 }
