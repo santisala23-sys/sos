@@ -2,11 +2,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
+  Activity,
   AlertTriangle,
+  Bell,
   Globe,
   Pencil,
+  QrCode,
   RefreshCw,
   Search,
+  Server,
+  ShieldAlert,
+  Users,
 } from "lucide-react";
 import type {
   AdminOverviewStats,
@@ -34,31 +40,13 @@ import {
   AdminSidebar,
   type AdminTab,
 } from "@/components/admin/AdminSidebar";
-import { adminStatAccents, adminUi } from "@/components/admin/adminUi";
-
-function StatCard({
-  label,
-  value,
-  sub,
-  accent = "violet",
-}: {
-  label: string;
-  value: string | number;
-  sub?: string;
-  accent?: "violet" | "red" | "green" | "amber" | "blue";
-}) {
-  return (
-    <div
-      className={`rounded-2xl border p-5 shadow-lg ${adminStatAccents[accent]}`}
-    >
-      <p className="text-xs font-semibold uppercase tracking-wider opacity-70">
-        {label}
-      </p>
-      <p className="mt-2 text-3xl font-black tabular-nums">{value}</p>
-      {sub && <p className="mt-1 text-xs opacity-70">{sub}</p>}
-    </div>
-  );
-}
+import {
+  AdminLoading,
+  AdminPageHeader,
+  AdminStatCard,
+  AdminStatusCode,
+} from "@/components/admin/AdminUiParts";
+import { adminUi } from "@/components/admin/adminUi";
 
 function MiniBarChart({
   data,
@@ -70,8 +58,9 @@ function MiniBarChart({
   const max = Math.max(...data.map((d) => d.count), 1);
   return (
     <div className={adminUi.card}>
-      <p className={`mb-4 ${adminUi.cardTitle}`}>{label}</p>
-      <div className="flex h-32 items-end gap-1">
+      <p className={`mb-1 ${adminUi.cardTitle}`}>{label}</p>
+      <p className="mb-4 text-xs text-neutral-500">Tendencia reciente</p>
+      <div className="flex h-36 items-end gap-1.5 rounded-xl bg-gradient-to-t from-violet-50/80 to-transparent p-2 pt-4">
         {data.length === 0 ? (
           <p className="text-sm text-neutral-500">Sin datos aún</p>
         ) : (
@@ -81,11 +70,11 @@ function MiniBarChart({
               className="group relative flex flex-1 flex-col items-center"
             >
               <div
-                className="w-full rounded-t bg-gradient-to-t from-violet-600 to-indigo-500 transition-all group-hover:from-violet-500 group-hover:to-indigo-400"
-                style={{ height: `${Math.max(4, (point.count / max) * 100)}%` }}
+                className="w-full min-h-[4px] rounded-t-md bg-gradient-to-t from-violet-600 to-indigo-400 shadow-sm shadow-violet-500/20 transition-all group-hover:from-violet-500 group-hover:to-indigo-300"
+                style={{ height: `${Math.max(6, (point.count / max) * 100)}%` }}
                 title={`${point.bucket}: ${point.count}`}
               />
-              <span className="mt-1 hidden text-[9px] text-neutral-500 sm:block">
+              <span className="mt-2 hidden text-[9px] font-medium text-neutral-400 sm:block">
                 {point.bucket.slice(-5)}
               </span>
             </div>
@@ -122,17 +111,7 @@ function DataTable({
 }
 
 function StatusBadge({ code }: { code: number }) {
-  const color =
-    code >= 500
-      ? "bg-red-100 text-red-800"
-      : code >= 400
-        ? "bg-amber-100 text-amber-900"
-        : "bg-green-100 text-green-800";
-  return (
-    <span className={`rounded px-2 py-0.5 font-mono text-xs ${color}`}>
-      {code}
-    </span>
-  );
+  return <AdminStatusCode code={code} />;
 }
 
 function EditButton({ onClick }: { onClick: () => void }) {
@@ -232,9 +211,20 @@ export function AdminDashboard() {
   const activeTab = ADMIN_TABS.find((item) => item.id === tab);
   const pageTitle =
     tab === "overview" ? "Estadísticas" : (activeTab?.label ?? "Administración");
+  const pageDescription =
+    tab === "overview"
+      ? "Métricas en tiempo real de usuarios, escaneos, API y alertas."
+      : "Gestioná usuarios, tienda, plantillas, escaneos y auditoría de seguridad.";
+  const showSearch =
+    tab !== "overview" &&
+    tab !== "templates" &&
+    tab !== "batches" &&
+    tab !== "store" &&
+    tab !== "legal" &&
+    tab !== "maintenance";
 
   return (
-    <div className="min-h-screen lg:pl-64">
+    <div className={adminUi.shell}>
       <AdminSidebar
         tab={tab}
         onTabChange={(nextTab) => {
@@ -245,103 +235,96 @@ export function AdminDashboard() {
         onMobileOpenChange={setMobileOpen}
       />
 
-      <main className="mx-auto max-w-[88rem] px-4 py-6 sm:px-6 lg:px-8">
+      <main className={adminUi.main}>
         <div className={adminUi.page}>
-          <section className={adminUi.hero}>
-            <p className={adminUi.heroBadge}>Administración</p>
-            <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
-              {pageTitle}
-            </h1>
-            <p className="mt-2 max-w-2xl text-base text-violet-100">
-              {tab === "overview"
-                ? "Métricas en tiempo real de usuarios, escaneos, API y alertas."
-                : "Gestioná usuarios, tienda, plantillas, escaneos y auditoría de seguridad."}
-            </p>
-          </section>
-
-          <div className="flex flex-wrap items-center justify-end gap-4">
-            <button
-              type="button"
-              onClick={() => loadTab()}
-              className={adminUi.refreshBtn}
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-              Actualizar
-            </button>
-          </div>
-
-      {tab !== "overview" &&
-        tab !== "templates" &&
-        tab !== "batches" &&
-        tab !== "store" &&
-        tab !== "legal" &&
-        tab !== "maintenance" && (
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar en esta tabla..."
-            className={adminUi.input}
+          <AdminPageHeader
+            title={pageTitle}
+            description={pageDescription}
+            actions={
+              <button
+                type="button"
+                onClick={() => loadTab()}
+                className={adminUi.refreshBtn}
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                Actualizar
+              </button>
+            }
           />
-        </div>
-      )}
 
-      {loading &&
-        tab !== "overview" &&
-        tab !== "templates" &&
-        tab !== "batches" &&
-        tab !== "store" &&
-        tab !== "legal" &&
-        tab !== "maintenance" && (
-        <p className={adminUi.loading}>Cargando...</p>
-      )}
+          {showSearch && (
+            <div className={adminUi.toolbar}>
+              <div className="relative min-w-[min(100%,20rem)] flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar en esta tabla..."
+                  className={adminUi.input}
+                />
+              </div>
+            </div>
+          )}
+
+      {loading && showSearch && <AdminLoading />}
 
       {tab === "overview" && overview && (
         <div className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Usuarios" value={overview.totalUsers} accent="blue" />
-            <StatCard
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <AdminStatCard
+              label="Usuarios"
+              value={overview.totalUsers}
+              accent="blue"
+              icon={<Users className="h-5 w-5" />}
+            />
+            <AdminStatCard
               label="Perfiles QR"
               value={overview.activeProfiles}
               sub={`${overview.totalProfiles} total`}
               accent="violet"
+              icon={<QrCode className="h-5 w-5" />}
             />
-            <StatCard
+            <AdminStatCard
               label="Escaneos (24h)"
               value={overview.scansToday}
               sub={`${overview.scansWeek} esta semana`}
               accent="green"
+              icon={<Activity className="h-5 w-5" />}
             />
-            <StatCard
+            <AdminStatCard
               label="Alertas SOS"
               value={overview.sosCount}
               sub={`${overview.unreadScans} sin leer`}
               accent="red"
+              icon={<AlertTriangle className="h-5 w-5" />}
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <AdminStatCard
               label="API requests (24h)"
               value={overview.apiRequests24h}
               accent="blue"
+              icon={<Server className="h-5 w-5" />}
             />
-            <StatCard
+            <AdminStatCard
               label="Errores API (24h)"
               value={overview.apiErrors24h}
               accent="amber"
+              icon={<AlertTriangle className="h-5 w-5" />}
             />
-            <StatCard
+            <AdminStatCard
               label="Eventos seguridad (24h)"
               value={overview.securityEvents24h}
               accent="red"
+              icon={<ShieldAlert className="h-5 w-5" />}
             />
-            <StatCard
+            <AdminStatCard
               label="Push subscriptions"
               value={overview.pushSubscriptions}
               accent="violet"
+              icon={<Bell className="h-5 w-5" />}
             />
           </div>
 
@@ -360,9 +343,9 @@ export function AdminDashboard() {
                 {topEndpoints.map((ep) => (
                   <div
                     key={ep.path}
-                    className="flex items-center justify-between rounded-xl bg-neutral-50 px-3 py-2 text-sm"
+                    className="flex items-center justify-between rounded-xl border border-neutral-100 bg-neutral-50/80 px-3 py-2.5 text-sm transition-colors hover:border-violet-100 hover:bg-violet-50/50"
                   >
-                    <code className="truncate text-violet-700">{ep.path}</code>
+                    <code className="truncate font-mono text-xs text-violet-700">{ep.path}</code>
                     <div className="flex shrink-0 items-center gap-3 tabular-nums">
                       <span className="font-medium text-neutral-800">{ep.count}</span>
                       {ep.error_count > 0 && (
@@ -388,7 +371,7 @@ export function AdminDashboard() {
                 {statusBreakdown.map((s) => (
                   <div
                     key={s.status_code}
-                    className="flex items-center gap-2 rounded-xl bg-neutral-50 px-3 py-2"
+                    className="flex items-center gap-2 rounded-xl border border-neutral-100 bg-neutral-50/80 px-3 py-2"
                   >
                     <StatusBadge code={s.status_code} />
                     <span className="tabular-nums font-medium text-neutral-800">{s.count}</span>
@@ -531,14 +514,14 @@ export function AdminDashboard() {
             {apiLogs.map((log) => (
               <tr key={log.id} className={adminUi.tableRow}>
                 <td className="px-4 py-3 font-mono text-xs">{log.method}</td>
-                <td className="max-w-xs truncate px-4 py-3 font-mono text-xs text-violet-300">
+                <td className="max-w-xs truncate px-4 py-3 font-mono text-xs text-violet-700">
                   {log.path}
                 </td>
                 <td className="px-4 py-3">
                   <StatusBadge code={log.status_code} />
                 </td>
                 <td className="px-4 py-3 tabular-nums text-xs">{log.duration_ms}ms</td>
-                <td className="max-w-xs truncate px-4 py-3 text-xs text-red-400">
+                <td className="max-w-xs truncate px-4 py-3 text-xs text-red-600">
                   {log.error_message ?? "—"}
                 </td>
                 <td className="px-4 py-3 text-xs text-neutral-500">

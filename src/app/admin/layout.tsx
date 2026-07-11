@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MarketingBackground } from "@/components/marketing/MarketingBackground";
+import { AdminBackground } from "@/components/admin/AdminBackground";
 
 export const metadata: Metadata = {
   title: "Panel de control",
@@ -11,5 +11,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <MarketingBackground>{children}</MarketingBackground>;
+  return <AdminBackground>{children}</AdminBackground>;
 }

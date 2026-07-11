@@ -32,6 +32,7 @@ import type {
   CanvasLayerItem,
   PrintTemplateCanvasHandle,
 } from "@/components/admin/PrintTemplateCanvas";
+import { AdminEmptyState, AdminLoading, AdminPageHeader } from "@/components/admin/AdminUiParts";
 import { adminUi } from "@/components/admin/adminUi";
 
 const PrintTemplateCanvas = dynamic(
@@ -540,54 +541,44 @@ export function AdminPrintTemplatesPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-bold text-neutral-900">Plantillas de imprenta</h2>
-          <p className="text-sm text-neutral-500">
-            Diseños reutilizables para PDFs con QR listos para mandar a la gráfica.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => load()}
-            disabled={loading}
-            className={adminUi.refreshBtn}
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            Actualizar
-          </button>
-          <button
-            type="button"
-            onClick={startNew}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500"
-          >
-            <Plus className="h-4 w-4" />
-            Nueva plantilla
-          </button>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Plantillas de imprenta"
+        description="Diseños reutilizables para PDFs con QR listos para mandar a la gráfica."
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => load()}
+              disabled={loading}
+              className={adminUi.refreshBtn}
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+              Actualizar
+            </button>
+            <button type="button" onClick={startNew} className={adminUi.primaryBtn}>
+              <Plus className="h-4 w-4" />
+              Nueva plantilla
+            </button>
+          </>
+        }
+      />
 
       {error && (
-        <p className="text-sm text-red-600" role="alert">
+        <p className={adminUi.alertError} role="alert">
           {error}
         </p>
       )}
 
       {loading && templates.length === 0 ? (
-        <p className="text-neutral-500">Cargando plantillas...</p>
+        <AdminLoading label="Cargando plantillas..." />
       ) : templates.length === 0 ? (
-        <div className={`${adminUi.formCard} text-center`}>
+        <AdminEmptyState>
           <LayoutTemplate className="mx-auto h-10 w-10 text-violet-400" />
-          <p className="mt-3 text-neutral-600">Todavía no hay plantillas.</p>
-          <button
-            type="button"
-            onClick={startNew}
-            className="mt-4 rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500"
-          >
+          <p className="mt-3 font-medium text-neutral-700">Todavía no hay plantillas.</p>
+          <button type="button" onClick={startNew} className={`mt-4 ${adminUi.primaryBtn}`}>
             Crear la primera
           </button>
-        </div>
+        </AdminEmptyState>
       ) : (
         <div className={adminUi.tableWrap}>
           <table className="w-full text-left text-sm">

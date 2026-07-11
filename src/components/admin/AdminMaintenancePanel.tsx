@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Clock, Play, RotateCcw, UserX } from "lucide-react";
+import { AdminLoading, AdminSectionCard } from "@/components/admin/AdminUiParts";
 import { adminUi } from "@/components/admin/adminUi";
 import { Button } from "@/components/ui/Button";
 import { formatDateTime } from "@/lib/utils/format";
@@ -132,27 +133,23 @@ export function AdminMaintenancePanel() {
     }
   }
 
-  if (loading) return <p className={adminUi.loading}>Cargando mantenimiento...</p>;
+  if (loading) return <AdminLoading label="Cargando mantenimiento..." />;
 
   return (
     <div className="space-y-6">
-      <div className={adminUi.card}>
-        <p className={`mb-2 flex items-center gap-2 ${adminUi.cardTitle}`}>
-          <Clock className="h-4 w-4 text-violet-600" />
-          Baja solicitada (gracia 30 días)
-        </p>
-        <p className="text-sm text-neutral-600">
-          Una cuenta solo se anonimiza cuando el usuario solicita la baja y vence el plazo.{" "}
-          <strong>No</strong> se elimina por inactividad.
-        </p>
+      <AdminSectionCard
+        title="Baja solicitada (gracia 30 días)"
+        subtitle="Una cuenta solo se anonimiza cuando el usuario solicita la baja y vence el plazo. No se elimina por inactividad."
+        icon={<Clock className="h-5 w-5" />}
+      >
 
         {error && (
-          <p className="mt-3 text-sm text-red-700" role="alert">
+          <p className={`mt-3 ${adminUi.alertError}`} role="alert">
             {error}
           </p>
         )}
         {success && (
-          <p className="mt-3 text-sm text-green-700" role="status">
+          <p className={`mt-3 ${adminUi.alertSuccess}`} role="status">
             {success}
           </p>
         )}
@@ -186,7 +183,7 @@ export function AdminMaintenancePanel() {
             </ul>
           </div>
         )}
-      </div>
+      </AdminSectionCard>
 
       <div className={adminUi.card}>
         <p className={`mb-3 ${adminUi.cardTitle}`}>Solicitudes de baja</p>

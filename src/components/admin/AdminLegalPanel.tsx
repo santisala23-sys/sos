@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FileText, Save } from "lucide-react";
 import type { LegalEntitySettings } from "@/lib/legal/entity-settings";
 import { adminUi } from "@/components/admin/adminUi";
+import { AdminLoading, AdminSectionCard } from "@/components/admin/AdminUiParts";
 import { Button } from "@/components/ui/Button";
 
 const emptyForm = {
@@ -93,22 +94,16 @@ export function AdminLegalPanel() {
   }
 
   if (loading) {
-    return <p className={adminUi.loading}>Cargando datos legales...</p>;
+    return <AdminLoading label="Cargando datos legales..." />;
   }
 
   return (
     <div className="space-y-6">
-      <div className={adminUi.card}>
-        <p className={`mb-2 flex items-center gap-2 ${adminUi.cardTitle}`}>
-          <FileText className="h-4 w-4 text-violet-600" />
-          Datos del responsable legal
-        </p>
-        <p className="text-sm text-neutral-600">
-          Estos valores reemplazan las variables{" "}
-          <code className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs">{"{{legal_name}}"}</code>,{" "}
-          <code className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs">{"{{cuit}}"}</code>, etc. en
-          Términos, Privacidad, Cookies y avisos públicos.
-        </p>
+      <AdminSectionCard
+        title="Datos del responsable legal"
+        subtitle="Estos valores reemplazan las variables legales en Términos, Privacidad, Cookies y avisos públicos."
+        icon={<FileText className="h-5 w-5" />}
+      >
         {!complete && (
           <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             Faltan campos obligatorios. Hasta completarlos, en las políticas se mostrará texto
@@ -120,9 +115,9 @@ export function AdminLegalPanel() {
             Última actualización: {new Date(updatedAt).toLocaleString("es-AR")}
           </p>
         )}
-      </div>
+      </AdminSectionCard>
 
-      <form onSubmit={handleSave} className={`${adminUi.card} space-y-4`}>
+      <form onSubmit={handleSave} className={`${adminUi.formCard} space-y-4`}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block text-sm">
             <span className="font-medium text-neutral-800">Razón social / titular *</span>
@@ -195,31 +190,32 @@ export function AdminLegalPanel() {
         </div>
       </form>
 
-      <div className={adminUi.card}>
-        <p className={`mb-3 ${adminUi.cardTitle}`}>Vista previa de políticas</p>
+      <AdminSectionCard
+        title="Vista previa de políticas"
+        subtitle="Abrí cada página pública para verificar que los datos legales se reflejan correctamente."
+      >
         <div className="flex flex-wrap gap-2">
           {PREVIEW_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               target="_blank"
-              className="rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-sm font-medium text-violet-700 hover:bg-violet-50"
+              className="rounded-xl border border-violet-100 bg-violet-50/80 px-3.5 py-2 text-sm font-semibold text-violet-800 transition-colors hover:border-violet-200 hover:bg-violet-100"
             >
               {link.label}
             </Link>
           ))}
         </div>
-      </div>
+      </AdminSectionCard>
 
-      <div className={adminUi.card}>
-        <p className={`mb-2 ${adminUi.cardTitle}`}>Google Tag Manager (analytics)</p>
+      <AdminSectionCard
+        title="Google Tag Manager (analytics)"
+        subtitle="GTM no se carga con solo «Aceptar necesarias». Solo corre si el visitante acepta analytics y tenés NEXT_PUBLIC_GTM_ID configurado."
+      >
         <p className="text-sm text-neutral-600">
-          GTM <strong>no se carga</strong> con solo «Aceptar necesarias». Solo corre si el visitante
-          acepta analytics («Aceptar todas») y tenés{" "}
-          <code className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs">NEXT_PUBLIC_GTM_ID</code>{" "}
-          configurado. Esto alinea el sitio con la Política de Cookies.
+          Esto alinea el sitio con la Política de Cookies.
         </p>
-      </div>
+      </AdminSectionCard>
     </div>
   );
 }

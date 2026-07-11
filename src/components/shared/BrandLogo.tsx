@@ -7,6 +7,7 @@ type BrandLogoProps = {
   className?: string;
   size?: "sm" | "md" | "lg";
   showMark?: boolean;
+  tone?: "light" | "dark";
 };
 
 const sizes = {
@@ -20,6 +21,7 @@ export function BrandLogo({
   className,
   size = "md",
   showMark = false,
+  tone = "light",
 }: BrandLogoProps) {
   const mark = (
     <span
@@ -40,7 +42,7 @@ export function BrandLogo({
         </span>
       )}
       <span className="inline-flex items-baseline">
-        <span className="text-neutral-900">SOS</span>
+        <span className={tone === "dark" ? "text-white" : "text-neutral-900"}>SOS</span>
         <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
           me
         </span>

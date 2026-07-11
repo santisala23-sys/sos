@@ -11,6 +11,7 @@ import {
   getStoreProductTypeLabel,
 } from "@/lib/store/product-types";
 import { formatDateTime } from "@/lib/utils/format";
+import { AdminLoading, AdminSubTabs } from "@/components/admin/AdminUiParts";
 import { adminUi } from "@/components/admin/adminUi";
 
 type StoreSubTab = "products" | "orders";
@@ -131,66 +132,50 @@ export function AdminStorePanel() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => setSubTab("products")}
-          className={`rounded-xl px-4 py-2 text-sm font-medium ${
-            subTab === "products"
-              ? adminUi.subTabActive
-              : adminUi.subTabInactive
-          }`}
-        >
-          Productos
-        </button>
-        <button
-          type="button"
-          onClick={() => setSubTab("orders")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium ${
-            subTab === "orders"
-              ? adminUi.subTabActive
-              : adminUi.subTabInactive
-          }`}
-        >
-          <ShoppingBag className="h-4 w-4" />
-          Pedidos
-          {orders.filter((o) => o.status === "pending").length > 0 && subTab !== "orders" && (
-            <span className="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-black">
-              {orders.filter((o) => o.status === "pending").length}
-            </span>
-          )}
-        </button>
-      </div>
+      <AdminSubTabs
+        active={subTab}
+        onChange={(id) => setSubTab(id as StoreSubTab)}
+        tabs={[
+          { id: "products", label: "Productos" },
+          {
+            id: "orders",
+            label: "Pedidos",
+            icon: <ShoppingBag className="h-4 w-4" />,
+            badge: orders.filter((o) => o.status === "pending").length,
+          },
+        ]}
+      />
 
       {subTab === "products" && (
         <>
-          <form
-            onSubmit={handleSaveProduct}
-            className={adminUi.formCard}
-          >
+          <form onSubmit={handleSaveProduct} className={adminUi.formCard}>
             <div className="flex items-center gap-2 text-neutral-900">
-              {editingId ? <Pencil className="h-5 w-5 text-violet-400" /> : <Plus className="h-5 w-5 text-violet-400" />}
+              {editingId ? (
+                <Pencil className="h-5 w-5 text-violet-600" />
+              ) : (
+                <Plus className="h-5 w-5 text-violet-600" />
+              )}
               <h2 className="text-lg font-bold">
                 {editingId ? "Editar producto" : "Nuevo producto"}
               </h2>
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm text-neutral-300 sm:col-span-2">
+              <label className={`${adminUi.label} sm:col-span-2`}>
                 Nombre *
                 <input
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className={`mt-1 w-full ${adminUi.inputPlain}`}
+                  className={`mt-1.5 w-full ${adminUi.inputPlain}`}
                 />
               </label>
-              <label className="block text-sm text-neutral-300">
+              <label className={adminUi.label}>
                 Tipo
                 <select
                   value={form.product_type}
                   onChange={(e) => setForm({ ...form, product_type: e.target.value })}
-                  className={`mt-1 w-full ${adminUi.inputPlain}`}
+                  className={`mt-1.5 w-full ${adminUi.inputPlain}`}
                 >
                   {STORE_PRODUCT_TYPES.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -199,16 +184,16 @@ export function AdminStorePanel() {
                   ))}
                 </select>
               </label>
-              <label className="block text-sm text-neutral-300">
+              <label className={adminUi.label}>
                 Orden
                 <input
                   type="number"
                   value={form.sort_order}
                   onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
-                  className={`mt-1 w-full ${adminUi.inputPlain}`}
+                  className={`mt-1.5 w-full ${adminUi.inputPlain}`}
                 />
               </label>
-              <label className="block text-sm text-neutral-300">
+              <label className={adminUi.label}>
                 Precio (centavos ARS, opcional)
                 <input
                   type="number"
@@ -216,63 +201,55 @@ export function AdminStorePanel() {
                   value={form.price_cents}
                   onChange={(e) => setForm({ ...form, price_cents: e.target.value })}
                   placeholder="Ej. 450000 = $4500"
-                  className={`mt-1 w-full ${adminUi.inputPlain}`}
+                  className={`mt-1.5 w-full ${adminUi.inputPlain}`}
                 />
               </label>
-              <label className="block text-sm text-neutral-300">
+              <label className={adminUi.label}>
                 Etiqueta de precio
                 <input
                   value={form.price_label}
                   onChange={(e) => setForm({ ...form, price_label: e.target.value })}
                   placeholder="Consultar"
-                  className={`mt-1 w-full ${adminUi.inputPlain}`}
+                  className={`mt-1.5 w-full ${adminUi.inputPlain}`}
                 />
               </label>
-              <label className="block text-sm text-neutral-300 sm:col-span-2">
+              <label className={`${adminUi.label} sm:col-span-2`}>
                 URL de imagen (opcional)
                 <input
                   value={form.image_url}
                   onChange={(e) => setForm({ ...form, image_url: e.target.value })}
                   placeholder="https://..."
-                  className={`mt-1 w-full ${adminUi.inputPlain}`}
+                  className={`mt-1.5 w-full ${adminUi.inputPlain}`}
                 />
               </label>
-              <label className="block text-sm text-neutral-300 sm:col-span-2">
+              <label className={`${adminUi.label} sm:col-span-2`}>
                 Descripción
                 <textarea
                   rows={3}
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className={`mt-1 w-full ${adminUi.inputPlain}`}
+                  className={`mt-1.5 w-full ${adminUi.inputPlain}`}
                 />
               </label>
-              <label className="flex items-center gap-2 text-sm text-neutral-300">
+              <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
                 <input
                   type="checkbox"
                   checked={form.is_active}
                   onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                  className="rounded"
+                  className="rounded border-neutral-300 text-violet-600 focus:ring-violet-500"
                 />
                 Visible en la tienda
               </label>
             </div>
 
-            {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+            {error && <p className={`mt-4 ${adminUi.alertError}`}>{error}</p>}
 
             <div className="mt-6 flex flex-wrap gap-2">
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-violet-500 disabled:opacity-60"
-              >
+              <button type="submit" disabled={saving} className={adminUi.primaryBtn}>
                 {saving ? "Guardando..." : editingId ? "Actualizar" : "Crear producto"}
               </button>
               {editingId && (
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="rounded-xl border border-neutral-200 px-5 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50"
-                >
+                <button type="button" onClick={resetForm} className={adminUi.secondaryBtn}>
                   Cancelar edición
                 </button>
               )}
@@ -280,7 +257,7 @@ export function AdminStorePanel() {
           </form>
 
           {loading ? (
-            <p className="text-neutral-500">Cargando productos...</p>
+            <AdminLoading label="Cargando productos..." />
           ) : (
             <div className={adminUi.tableWrap}>
               <table className="w-full min-w-[720px] text-left text-sm">
@@ -296,27 +273,27 @@ export function AdminStorePanel() {
                 </thead>
                 <tbody className="divide-y divide-neutral-100">
                   {products.map((p) => (
-                    <tr key={p.id} className="text-neutral-200">
-                      <td className="px-4 py-3 font-medium">{p.name}</td>
-                      <td className="px-4 py-3 text-neutral-400">
+                    <tr key={p.id} className={adminUi.tableRow}>
+                      <td className={`${adminUi.tableCell} font-medium`}>{p.name}</td>
+                      <td className={`${adminUi.tableCell} text-neutral-500`}>
                         {getStoreProductTypeLabel(p.product_type)}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className={adminUi.tableCell}>
                         {formatStorePrice(p.price_cents, p.price_label)}
                       </td>
-                      <td className="px-4 py-3 tabular-nums">{p.sort_order}</td>
-                      <td className="px-4 py-3">
+                      <td className={`${adminUi.tableCell} tabular-nums`}>{p.sort_order}</td>
+                      <td className={adminUi.tableCell}>
                         <span
-                          className={`rounded px-2 py-0.5 text-xs ${
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                             p.is_active
-                              ? "bg-green-900/50 text-green-300"
+                              ? "bg-green-100 text-green-800"
                               : "bg-neutral-100 text-neutral-600"
                           }`}
                         >
                           {p.is_active ? "activo" : "oculto"}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className={adminUi.tableCell}>
                         <div className="flex gap-2">
                           <button
                             type="button"
@@ -328,7 +305,7 @@ export function AdminStorePanel() {
                           <button
                             type="button"
                             onClick={() => handleDelete(p.id)}
-                            className="rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100"
+                            className="rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-100"
                           >
                             <Trash2 className="h-3 w-3" />
                           </button>
@@ -346,16 +323,13 @@ export function AdminStorePanel() {
       {subTab === "orders" && (
         <>
           {loading ? (
-            <p className="text-neutral-500">Cargando pedidos...</p>
+            <AdminLoading label="Cargando pedidos..." />
           ) : orders.length === 0 ? (
-            <p className="text-neutral-500">Todavía no hay pedidos.</p>
+            <p className={adminUi.empty}>Todavía no hay pedidos.</p>
           ) : (
             <div className="space-y-4">
               {orders.map((order) => (
-                <article
-                  key={order.id}
-                  className="rounded-2xl border border-violet-100 bg-white p-5 shadow-md"
-                >
+                <article key={order.id} className={adminUi.card}>
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="font-bold text-neutral-900">
@@ -364,7 +338,7 @@ export function AdminStorePanel() {
                           #{order.id.slice(0, 8)}
                         </span>
                       </p>
-                      <p className="mt-1 text-sm text-neutral-400">
+                      <p className="mt-1 text-sm text-neutral-600">
                         {order.customer_email} · {order.customer_phone}
                       </p>
                       <p className="mt-1 text-xs text-neutral-500">
@@ -375,7 +349,7 @@ export function AdminStorePanel() {
                     <select
                       value={order.status}
                       onChange={(e) => handleOrderStatus(order.id, e.target.value)}
-                      className={`rounded-lg ${adminUi.inputPlain}`}
+                      className={adminUi.inputPlain}
                     >
                       {STORE_ORDER_STATUSES.map((s) => (
                         <option key={s.value} value={s.value}>
@@ -385,7 +359,7 @@ export function AdminStorePanel() {
                     </select>
                   </div>
 
-                  <ul className="mt-4 space-y-1 text-sm text-neutral-300">
+                  <ul className="mt-4 space-y-1 text-sm text-neutral-700">
                     {order.items?.map((item) => (
                       <li key={item.id}>
                         {item.quantity}x {item.product_name}{" "}
@@ -395,17 +369,19 @@ export function AdminStorePanel() {
                   </ul>
 
                   {order.shipping_address && (
-                    <p className="mt-3 text-sm text-neutral-400">
-                      <span className="text-neutral-500">Envío:</span> {order.shipping_address}
+                    <p className="mt-3 text-sm text-neutral-600">
+                      <span className="font-medium text-neutral-500">Envío:</span>{" "}
+                      {order.shipping_address}
                     </p>
                   )}
                   {order.customer_notes && (
-                    <p className="mt-2 text-sm text-neutral-400">
-                      <span className="text-neutral-500">Notas:</span> {order.customer_notes}
+                    <p className="mt-2 text-sm text-neutral-600">
+                      <span className="font-medium text-neutral-500">Notas:</span>{" "}
+                      {order.customer_notes}
                     </p>
                   )}
 
-                  <p className="mt-3 text-xs text-neutral-500">
+                  <p className="mt-3 text-xs font-medium text-violet-700">
                     Estado: {getStoreOrderStatusLabel(order.status)}
                   </p>
                 </article>

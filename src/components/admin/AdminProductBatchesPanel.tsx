@@ -8,6 +8,9 @@ import {
   Package,
   Plus,
   RefreshCw,
+  Ban,
+  CheckCircle2,
+  Clock3,
 } from "lucide-react";
 import type {
   ActivationStats,
@@ -16,31 +19,8 @@ import type {
 } from "@/lib/db/queries-activation";
 import type { PrintTemplateRow } from "@/lib/activation/print-template-types";
 import { formatDateTime } from "@/lib/utils/format";
-import { adminStatAccents, adminUi } from "@/components/admin/adminUi";
-
-function StatCard({
-  label,
-  value,
-  sub,
-  accent = "violet",
-}: {
-  label: string;
-  value: string | number;
-  sub?: string;
-  accent?: "violet" | "green" | "amber" | "neutral";
-}) {
-  const colors = adminStatAccents;
-
-  return (
-    <div className={`rounded-2xl border p-4 shadow-md ${colors[accent]}`}>
-      <p className="text-xs font-medium uppercase tracking-wider opacity-70">
-        {label}
-      </p>
-      <p className="mt-1 text-2xl font-black tabular-nums">{value}</p>
-      {sub && <p className="mt-0.5 text-xs opacity-60">{sub}</p>}
-    </div>
-  );
-}
+import { AdminStatCard } from "@/components/admin/AdminUiParts";
+import { adminUi } from "@/components/admin/adminUi";
 
 function ActivationProgress({
   claimed,
@@ -201,33 +181,35 @@ export function AdminProductBatchesPanel() {
     <div className="space-y-8">
       {stats && (
         <section>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-neutral-400">
-            Resumen general
-          </h2>
+          <h2 className={`mb-4 ${adminUi.sectionTitle}`}>Resumen general</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard
+            <AdminStatCard
               label="Códigos generados"
               value={stats.total_codes}
               sub={`${stats.batch_count} lote${stats.batch_count === 1 ? "" : "s"}`}
               accent="violet"
+              icon={<Package className="h-5 w-5" />}
             />
-            <StatCard
+            <AdminStatCard
               label="Activados"
               value={stats.claimed}
               sub={`${stats.activation_rate}% del total`}
               accent="green"
+              icon={<CheckCircle2 className="h-5 w-5" />}
             />
-            <StatCard
+            <AdminStatCard
               label="Sin activar"
               value={stats.unclaimed}
               sub="Stock / pendientes"
               accent="amber"
+              icon={<Clock3 className="h-5 w-5" />}
             />
-            <StatCard
+            <AdminStatCard
               label="Deshabilitados"
               value={stats.disabled}
               sub="Códigos anulados"
               accent="neutral"
+              icon={<Ban className="h-5 w-5" />}
             />
           </div>
         </section>
