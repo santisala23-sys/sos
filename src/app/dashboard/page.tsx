@@ -9,6 +9,7 @@ import {
   Bell,
   CheckCircle2,
   FileDown,
+  PawPrint,
   Plus,
   QrCode,
   Sparkles,
@@ -20,6 +21,7 @@ import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { QrActivationScanner } from "@/components/dashboard/QrActivationScanner";
 import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBanner";
+import { PetCard } from "@/components/dashboard/PetCard";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import {
   PushNotificationAlert,
@@ -103,6 +105,9 @@ export default function DashboardPage() {
   const activeProfilesCount = loading
     ? null
     : profiles.reduce((acc, p) => (p.is_active ? acc + 1 : acc), 0);
+  const emergencyProfiles = profiles.filter((p) => p.profile_type !== "pet");
+  const petProfiles = profiles.filter((p) => p.profile_type === "pet");
+  const hasAnyProfiles = profiles.length > 0;
 
   function handleCreateProfile() {
     if (atProfileLimit) {
@@ -186,8 +191,8 @@ export default function DashboardPage() {
             Hola, este es tu panel
           </h1>
           <p className="mt-2 max-w-xl text-base text-violet-100 sm:text-lg">
-            Gestioná perfiles QR, revisá escaneos y mantené tus contactos de
-            emergencia siempre actualizados.
+            Gestioná perfiles QR de emergencia, la libreta de tus mascotas y
+            las alertas de escaneo.
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -250,11 +255,7 @@ export default function DashboardPage() {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  document
-                    .getElementById("activar-producto")
-                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
+                onClick={() => setScannerOpen(true)}
                 className="flex items-center gap-3 rounded-2xl border border-white/30 bg-white/15 px-5 py-4 text-left text-white backdrop-blur-sm transition hover:bg-white/25"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-amber-950">
@@ -303,42 +304,13 @@ export default function DashboardPage() {
             <p className="font-bold text-green-900">QR activado correctamente</p>
             <p className="mt-1 text-sm leading-relaxed text-green-800">
               El perfil <strong>{activatedProfile.beneficiary_name}</strong> está
-              listo. Descargá el PNG con &quot;Ver QR&quot;.
+              listo.
+              {activatedProfile.profile_type === "pet"
+                ? " Abrilo desde Mascotas para ver la libreta sanitaria."
+                : ' Descargá el PNG con "Ver QR".'}
             </p>
           </div>
         </div>
-      )}
-
-      {!legalBlocked && (
-        <section
-          id="activar-producto"
-          className="scroll-mt-28 rounded-3xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50 p-6 shadow-lg shadow-amber-500/10 sm:p-8"
-        >
-          <div className="flex items-start gap-4">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-md">
-              <QrCode className="h-6 w-6" aria-hidden />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-xl font-black text-neutral-900">
-                Activar tu producto SOSme
-              </h2>
-              <p className="mt-1 text-sm leading-relaxed text-neutral-600">
-                Tu colgante, collar o sticker ya viene con un QR único.
-                Escaneá ese QR con la cámara del teléfono y seguí los pasos
-                para vincularlo a tu cuenta y crear el perfil. No hace falta
-                ingresar ningún código.
-              </p>
-              <Button
-                type="button"
-                className="mt-4 gap-2"
-                onClick={() => setScannerOpen(true)}
-              >
-                <QrCode className="h-4 w-4" aria-hidden />
-                Escanear ahora
-              </Button>
-            </div>
-          </div>
-        </section>
       )}
 
       {scannerOpen && (
@@ -348,8 +320,8 @@ export default function DashboardPage() {
       <DashboardSection
         id="perfiles"
         icon={UserCircle2}
-        title="Mis perfiles"
-        description="Cada perfil tiene su QR, contactos de emergencia y modo solo SOS."
+        title="Perfiles QR de emergencia"
+        description="Personas y objetos con QR, contactos de emergencia y alertas SOS."
         disabled={legalBlocked}
       >
         {loading ? (
@@ -357,7 +329,7 @@ export default function DashboardPage() {
             <div className="h-32 animate-pulse rounded-2xl bg-violet-50" />
             <div className="h-32 animate-pulse rounded-2xl bg-violet-50" />
           </div>
-        ) : profiles.length === 0 ? (
+        ) : !hasAnyProfiles ? (
           <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/50 p-6 sm:p-8">
             <h3 className="text-lg font-bold text-neutral-900">
               Creá tu primer perfil QR
@@ -417,17 +389,65 @@ export default function DashboardPage() {
                 </Button>
               </div>
             )}
-            <div className="grid gap-5 lg:grid-cols-2">
-              {profiles.map((profile) => (
-                <ProfileCard
-                  key={profile.id}
-                  profile={profile}
-                  onRefresh={loadData}
-                  defaultShowQr={profile.slug === highlightedSlug}
-                />
-              ))}
-            </div>
+            {emergencyProfiles.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-6 text-sm text-neutral-500">
+                Todavía no tenés perfiles de persona u objeto. Las mascotas
+                aparecen en la sección Mascotas.
+              </p>
+            ) : (
+              <div className="grid gap-5 lg:grid-cols-2">
+                {emergencyProfiles.map((profile) => (
+                  <ProfileCard
+                    key={profile.id}
+                    profile={profile}
+                    onRefresh={loadData}
+                    defaultShowQr={profile.slug === highlightedSlug}
+                  />
+                ))}
+              </div>
+            )}
           </>
+        )}
+      </DashboardSection>
+
+      <DashboardSection
+        id="mascotas"
+        icon={PawPrint}
+        title="Mascotas"
+        description="Seleccioná una mascota para su libreta sanitaria, vacunas, visitas y QR para el veterinario."
+        disabled={legalBlocked}
+      >
+        {loading ? (
+          <div className="space-y-3">
+            <div className="h-32 animate-pulse rounded-2xl bg-teal-50" />
+          </div>
+        ) : petProfiles.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-teal-200 bg-teal-50/40 p-6 sm:p-8">
+            <h3 className="text-lg font-bold text-neutral-900">
+              Todavía no tenés mascotas
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+              Creá un perfil con tipo <strong>Mascota</strong> o activá el QR de
+              un collar/chapita. Después vas a poder cargar la libreta sanitaria
+              acá.
+            </p>
+            {!atProfileLimit && hasAnyProfiles && (
+              <Button
+                type="button"
+                onClick={handleCreateProfile}
+                className="mt-4 gap-2"
+              >
+                <Plus className="h-4 w-4" aria-hidden />
+                Crear perfil de mascota
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="grid gap-5 lg:grid-cols-2">
+            {petProfiles.map((profile) => (
+              <PetCard key={profile.id} profile={profile} />
+            ))}
+          </div>
         )}
       </DashboardSection>
 

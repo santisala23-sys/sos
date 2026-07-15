@@ -7,6 +7,7 @@ import {
   Activity,
   LayoutDashboard,
   LogOut,
+  PawPrint,
   UserCircle2,
 } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
@@ -17,7 +18,8 @@ import { cn } from "@/lib/utils/cn";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Panel", icon: LayoutDashboard, hash: null },
-  { href: "/dashboard#perfiles", label: "Mis perfiles", icon: UserCircle2, hash: "perfiles" },
+  { href: "/dashboard#perfiles", label: "Perfiles QR", icon: UserCircle2, hash: "perfiles" },
+  { href: "/dashboard#mascotas", label: "Mascotas", icon: PawPrint, hash: "mascotas" },
   { href: "/dashboard#actividad", label: "Actividad", icon: Activity, hash: "actividad" },
 ] as const;
 
@@ -78,6 +80,9 @@ export function DashboardNavbar() {
     }
     if (linkHash === "perfiles") {
       return pathname === "/dashboard" && hash === "#perfiles";
+    }
+    if (linkHash === "mascotas") {
+      return pathname === "/dashboard" && hash === "#mascotas";
     }
     return pathname === "/dashboard" && !hash && !isLogDetail;
   }

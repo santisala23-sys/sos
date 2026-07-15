@@ -53,11 +53,17 @@ export default function ProfileDetailPage() {
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
-          href="/dashboard#perfiles"
+          href={
+            profile.profile_type === "pet"
+              ? "/dashboard#mascotas"
+              : "/dashboard#perfiles"
+          }
           className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 hover:underline"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
-          Volver a mis perfiles
+          {profile.profile_type === "pet"
+            ? "Volver a mascotas"
+            : "Volver a perfiles QR"}
         </Link>
         <Link
           href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent(`/dashboard/perfiles/${profile.id}`)}`}
