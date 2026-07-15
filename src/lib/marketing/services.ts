@@ -44,7 +44,7 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
     eyebrow: "Personas",
     heroHeadline: "Todo lo necesario cuando alguien necesita ayuda ya",
     heroSupport:
-      "Un QR con contactos, alergias, medicación e instrucciones. Ideal si se pierde un niño, un adulto mayor o una persona con discapacidad.",
+      "Un QR con contactos de emergencia, alergias, medicación e instrucciones. Ideal si se pierde un niño, un adulto mayor o una persona con discapacidad.",
     image: "/images/landing/use-case-personas.png",
     imageAlt: "Tarjeta con código QR guardada en el bolsillo de una chaqueta",
     accentFrom: "from-rose-600",
