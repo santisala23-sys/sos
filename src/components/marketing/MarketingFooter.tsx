@@ -25,7 +25,7 @@ const PRODUCT_LINKS = [
   { href: "/#que-es", label: "Qué es SOSme" },
   { href: "/#como-funciona", label: "Cómo funciona" },
   { href: "/#casos", label: "Casos de uso" },
-  { href: "/#demo", label: "Demo en video" },
+  { href: "/#libreta-sanitaria", label: "Libreta sanitaria" },
   { href: "/tienda", label: "Tienda" },
   { href: "/pricing", label: "Planes" },
 ] as const;

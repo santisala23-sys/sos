@@ -1,14 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
-import { DemoVideoSection } from "@/components/marketing/DemoVideoSection";
 import { HowItWorksSection } from "@/components/marketing/HowItWorksSection";
 import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
+import { PetHealthBookletSection } from "@/components/marketing/PetHealthBookletSection";
 import { SectionHeading } from "@/components/marketing/SectionHeading";
 import {
   ArrowRight,
   Bell,
+  ClipboardList,
   MapPin,
   MessageCircle,
   Package,
@@ -40,8 +41,8 @@ const USE_CASES = [
   {
     title: "Mascotas",
     description:
-      "Collar o chapita con QR: quien encuentra a tu mascota sabe cómo avisarte.",
-    detail: "Llamada o WhatsApp al dueño en segundos.",
+      "Collar o chapita con QR: si se pierde, te contactan al toque. Además llevás su libreta sanitaria digital.",
+    detail: "Vacunas, visitas, indicaciones del vet y acceso temporal por QR.",
     accent: "from-amber-500/20 to-yellow-500/10",
     image: "/images/landing/use-case-mascotas.png",
     imageAlt: "Perro con collar y chapita que muestra un código QR",
@@ -62,6 +63,10 @@ const INCLUDES = [
   { icon: MessageCircle, text: "WhatsApp y llamada al instante" },
   { icon: MapPin, text: "Ubicación cuando escanean (opcional)" },
   { icon: Bell, text: "Alerta en tu celular al escanear" },
+  {
+    icon: ClipboardList,
+    text: "Libreta sanitaria para mascotas (vacunas, visitas y acceso al vet)",
+  },
   { icon: Smartphone, text: "Sin apps: funciona en el navegador" },
   { icon: Zap, text: "Sin cuotas mensuales" },
 ] as const;
@@ -247,7 +252,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <DemoVideoSection className="bg-white/50" />
+        <PetHealthBookletSection />
 
         {/* Qué incluye */}
         <section className="mx-auto max-w-[88rem] px-4 py-24 sm:px-6 lg:px-8">
