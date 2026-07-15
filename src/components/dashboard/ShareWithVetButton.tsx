@@ -10,9 +10,16 @@ import { formatDateTime } from "@/lib/utils/format";
 type ShareWithVetButtonProps = {
   petId: string;
   petName: string;
+  className?: string;
+  label?: string;
 };
 
-export function ShareWithVetButton({ petId, petName }: ShareWithVetButtonProps) {
+export function ShareWithVetButton({
+  petId,
+  petName,
+  className,
+  label = "Compartir con veterinario",
+}: ShareWithVetButtonProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -89,14 +96,14 @@ export function ShareWithVetButton({ petId, petName }: ShareWithVetButtonProps) 
         type="button"
         onClick={() => void generateLink()}
         disabled={loading}
-        className="gap-2"
+        className={`gap-2 ${className ?? ""}`}
       >
         {loading ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
         ) : (
           <Stethoscope className="h-4 w-4" aria-hidden />
         )}
-        Compartir con veterinario
+        {label}
       </Button>
 
       {open && mounted

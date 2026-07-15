@@ -3,13 +3,14 @@ import { getSession } from "@/lib/auth/session";
 import {
   insertVisitByTutor,
   listPetVetVisitsForTutor,
+  listPreventiveItemsForTutor,
 } from "@/lib/db/queries-pet-medical";
 import { isUuid } from "@/lib/pet-medical";
 import { parseVisitBody } from "@/lib/pet-visit-validate";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-/** Lista visitas de la libreta sanitaria (tutor). */
+/** Lista visitas + vacunas/desparasitaciones (tutor). */
 export async function GET(_request: Request, { params }: RouteContext) {
   const session = await getSession();
   if (!session) {
@@ -22,14 +23,17 @@ export async function GET(_request: Request, { params }: RouteContext) {
   }
 
   try {
-    const visits = await listPetVetVisitsForTutor(petId, session.userId);
-    if (visits === null) {
+    const [visits, preventive] = await Promise.all([
+      listPetVetVisitsForTutor(petId, session.userId),
+      listPreventiveItemsForTutor(petId, session.userId),
+    ]);
+    if (visits === null || preventive === null) {
       return NextResponse.json(
         { error: "Perfil de mascota no encontrado" },
         { status: 404 },
       );
     }
-    return NextResponse.json({ visits, records: visits });
+    return NextResponse.json({ visits, records: visits, preventive });
   } catch (error) {
     console.error("[medical-records GET]", error);
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
@@ -70,7 +74,19 @@ export async function POST(request: Request, { params }: RouteContext) {
     }
     return NextResponse.json({ visit }, { status: 201 });
   } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Error interno";
     console.error("[medical-records POST]", error);
-    return NextResponse.json({ error: "Error interno" }, { status: 500 });
+    const status =
+      message.includes("MB") ||
+      message.includes("permitido") ||
+      message.includes("Máximo") ||
+      message.includes("vacío")
+        ? 400
+        : 500;
+    return NextResponse.json(
+      { error: status === 400 ? message : "Error interno" },
+      { status },
+    );
   }
 }

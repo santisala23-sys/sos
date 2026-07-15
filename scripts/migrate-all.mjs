@@ -53,6 +53,7 @@ const migrations = [
   "020_profile_avatar.sql",
   "021_pet_medical_records_and_vet_tokens.sql",
   "022_pet_vet_visits.sql",
+  "023_pet_preventive_and_attachments.sql",
 ];
 
 for (const file of migrations) {

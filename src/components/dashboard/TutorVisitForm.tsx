@@ -1,18 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Loader2, Plus } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import {
+  VisitFilePicker,
+  type PendingVisitFile,
+} from "@/components/vet/VisitFilePicker";
 import { VISIT_TAGS } from "@/lib/pet-medical";
 import type { PetVetVisit, VisitTag } from "@/types/database";
 
 type TutorVisitFormProps = {
   petId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onCreated: (visit: PetVetVisit) => void;
 };
 
-export function TutorVisitForm({ petId, onCreated }: TutorVisitFormProps) {
-  const [open, setOpen] = useState(false);
+export function TutorVisitForm({
+  petId,
+  open,
+  onOpenChange,
+  onCreated,
+}: TutorVisitFormProps) {
   const [visitDate, setVisitDate] = useState(
     () => new Date().toISOString().slice(0, 10),
   );
@@ -21,6 +31,7 @@ export function TutorVisitForm({ petId, onCreated }: TutorVisitFormProps) {
   const [tags, setTags] = useState<VisitTag[]>([]);
   const [vetName, setVetName] = useState("");
   const [vetLicense, setVetLicense] = useState("");
+  const [files, setFiles] = useState<PendingVisitFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -29,6 +40,16 @@ export function TutorVisitForm({ petId, onCreated }: TutorVisitFormProps) {
     setTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
+  }
+
+  function resetForm() {
+    setSummary("");
+    setIndications("");
+    setTags([]);
+    setVetName("");
+    setVetLicense("");
+    setFiles([]);
+    setError(null);
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -48,6 +69,7 @@ export function TutorVisitForm({ petId, onCreated }: TutorVisitFormProps) {
           tags,
           vet_name: vetName || null,
           vet_license: vetLicense || null,
+          attachments: files,
         }),
       });
       const data = (await res.json()) as {
@@ -62,12 +84,8 @@ export function TutorVisitForm({ petId, onCreated }: TutorVisitFormProps) {
 
       onCreated(data.visit);
       setSuccess(true);
-      setSummary("");
-      setIndications("");
-      setTags([]);
-      setVetName("");
-      setVetLicense("");
-      setOpen(false);
+      resetForm();
+      onOpenChange(false);
       window.setTimeout(() => setSuccess(false), 3000);
     } catch {
       setError("Error de conexión. Intentá de nuevo.");
@@ -80,27 +98,15 @@ export function TutorVisitForm({ petId, onCreated }: TutorVisitFormProps) {
     "mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-base text-neutral-900 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20";
 
   if (!open) {
+    if (!success) return null;
     return (
-      <div className="mt-4 space-y-2">
-        {success && (
-          <p
-            role="status"
-            className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800"
-          >
-            <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
-            Visita agregada a la libreta
-          </p>
-        )}
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => setOpen(true)}
-          className="w-full gap-2 sm:w-auto"
-        >
-          <Plus className="h-4 w-4" aria-hidden />
-          Agregar visita
-        </Button>
-      </div>
+      <p
+        role="status"
+        className="mt-3 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800"
+      >
+        <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
+        Visita agregada a la libreta
+      </p>
     );
   }
 
@@ -113,7 +119,10 @@ export function TutorVisitForm({ petId, onCreated }: TutorVisitFormProps) {
         <h3 className="font-bold text-neutral-900">Nueva visita</h3>
         <button
           type="button"
-          onClick={() => setOpen(false)}
+          onClick={() => {
+            onOpenChange(false);
+            setError(null);
+          }}
           className="text-sm font-semibold text-neutral-500 hover:text-neutral-800"
         >
           Cancelar
@@ -191,6 +200,8 @@ export function TutorVisitForm({ petId, onCreated }: TutorVisitFormProps) {
           maxLength={4000}
         />
       </div>
+
+      <VisitFilePicker files={files} onChange={setFiles} accent="violet" />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>

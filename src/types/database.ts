@@ -115,6 +115,26 @@ export interface PushSubscriptionRow {
 
 export type VisitTag = "vaccine" | "deworming" | "treatment" | "checkup";
 
+export type PreventiveKind = "vaccine" | "deworming";
+
+export interface PetPreventiveItem {
+  id: string;
+  pet_id: string;
+  kind: PreventiveKind;
+  name: string;
+  last_applied_at: string | null;
+  next_due_at: string | null;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PetVisitAttachmentMeta {
+  id: string;
+  filename: string;
+  mime: string;
+}
+
 /** Visita clínica de mascota (historial + indicaciones opcionales). */
 export interface PetVetVisit {
   id: string;
@@ -127,6 +147,7 @@ export interface PetVetVisit {
   vet_name: string | null;
   vet_license: string | null;
   created_at: string;
+  attachments?: PetVisitAttachmentMeta[];
 }
 
 export interface VetAccessToken {

@@ -32,34 +32,52 @@ export const POST = withApi(
       return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
 
-    const result = await insertVisitByVet(token, {
-      visit_date: parsed.data.visit_date,
-      summary: parsed.data.summary,
-      indications: parsed.data.indications,
-      tags: parsed.data.tags,
-      vet_name: parsed.data.vet_name!,
-      vet_license: parsed.data.vet_license!,
-    });
+    try {
+      const result = await insertVisitByVet(token, {
+        visit_date: parsed.data.visit_date,
+        summary: parsed.data.summary,
+        indications: parsed.data.indications,
+        tags: parsed.data.tags,
+        vet_name: parsed.data.vet_name!,
+        vet_license: parsed.data.vet_license!,
+        attachments: parsed.data.attachments,
+      });
 
-    if (!result) {
+      if (!result) {
+        return NextResponse.json(
+          { error: "Enlace inválido o expirado" },
+          { status: 404 },
+        );
+      }
+
+      try {
+        await notifyTutorPetVisit({
+          tutorId: result.tutor_id,
+          petId: result.visit.pet_id,
+          petName: result.pet_name,
+          vetName: result.visit.vet_name,
+          hasIndications: Boolean(result.visit.indications?.trim()),
+        });
+      } catch (error) {
+        console.error("[vet-view visit notify]", error);
+      }
+
+      return NextResponse.json({ visit: result.visit }, { status: 201 });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error interno";
+      console.error("[vet-view visit POST]", error);
+      const status =
+        message.includes("MB") ||
+        message.includes("permitido") ||
+        message.includes("Máximo") ||
+        message.includes("vacío")
+          ? 400
+          : 500;
       return NextResponse.json(
-        { error: "Enlace inválido o expirado" },
-        { status: 404 },
+        { error: status === 400 ? message : "Error interno" },
+        { status },
       );
     }
-
-    try {
-      await notifyTutorPetVisit({
-        tutorId: result.tutor_id,
-        petId: result.visit.pet_id,
-        petName: result.pet_name,
-        vetName: result.visit.vet_name,
-        hasIndications: Boolean(result.visit.indications?.trim()),
-      });
-    } catch (error) {
-      console.error("[vet-view visit notify]", error);
-    }
-
-    return NextResponse.json({ visit: result.visit }, { status: 201 });
   },
 );

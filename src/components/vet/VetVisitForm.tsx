@@ -4,14 +4,19 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import {
+  VisitFilePicker,
+  type PendingVisitFile,
+} from "@/components/vet/VisitFilePicker";
 import { VISIT_TAGS } from "@/lib/pet-medical";
-import type { VisitTag } from "@/types/database";
+import type { PreventiveKind, VisitTag } from "@/types/database";
 
 type VetVisitFormProps = {
   token: string;
+  onPreventiveAdded?: () => void;
 };
 
-export function VetVisitForm({ token }: VetVisitFormProps) {
+export function VetVisitForm({ token, onPreventiveAdded }: VetVisitFormProps) {
   const router = useRouter();
   const [visitDate, setVisitDate] = useState(
     () => new Date().toISOString().slice(0, 10),
@@ -21,6 +26,11 @@ export function VetVisitForm({ token }: VetVisitFormProps) {
   const [tags, setTags] = useState<VisitTag[]>(["checkup"]);
   const [vetName, setVetName] = useState("");
   const [vetLicense, setVetLicense] = useState("");
+  const [files, setFiles] = useState<PendingVisitFile[]>([]);
+  const [updateCalendar, setUpdateCalendar] = useState(false);
+  const [preventiveKind, setPreventiveKind] = useState<PreventiveKind>("vaccine");
+  const [preventiveName, setPreventiveName] = useState("");
+  const [preventiveNextDue, setPreventiveNextDue] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -48,6 +58,7 @@ export function VetVisitForm({ token }: VetVisitFormProps) {
           tags,
           vet_name: vetName,
           vet_license: vetLicense,
+          attachments: files,
         }),
       });
       const data = (await res.json()) as { error?: string };
@@ -57,10 +68,28 @@ export function VetVisitForm({ token }: VetVisitFormProps) {
         return;
       }
 
+      if (updateCalendar && preventiveName.trim()) {
+        const prevRes = await fetch(`/api/vet-view/${token}/preventive`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            kind: preventiveKind,
+            name: preventiveName.trim(),
+            last_applied_at: visitDate,
+            next_due_at: preventiveNextDue || null,
+          }),
+        });
+        if (prevRes.ok) onPreventiveAdded?.();
+      }
+
       setSuccess(true);
       setSummary("");
       setIndications("");
       setTags(["checkup"]);
+      setFiles([]);
+      setUpdateCalendar(false);
+      setPreventiveName("");
+      setPreventiveNextDue("");
       router.refresh();
       window.setTimeout(() => setSuccess(false), 4000);
     } catch {
@@ -145,6 +174,72 @@ export function VetVisitForm({ token }: VetVisitFormProps) {
           placeholder="Ej. Reposo 24 hs, dar medicación cada 12 hs..."
           maxLength={4000}
         />
+      </div>
+
+      <VisitFilePicker files={files} onChange={setFiles} accent="teal" />
+
+      <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3">
+        <label className="flex items-start gap-2 text-sm text-neutral-800">
+          <input
+            type="checkbox"
+            checked={updateCalendar}
+            onChange={(e) => setUpdateCalendar(e.target.checked)}
+            className="mt-0.5"
+          />
+          <span>
+            También actualizar calendario de vacunas / desparasitaciones
+          </span>
+        </label>
+        {updateCalendar && (
+          <div className="mt-3 space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  ["vaccine", "Vacuna"],
+                  ["deworming", "Desparasitación"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setPreventiveKind(value)}
+                  className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
+                    preventiveKind === value
+                      ? "bg-teal-700 text-white"
+                      : "border border-neutral-300 bg-white text-neutral-700"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-neutral-700">
+                Nombre
+              </label>
+              <input
+                value={preventiveName}
+                onChange={(e) => setPreventiveName(e.target.value)}
+                className={inputClass}
+                placeholder="Ej. Antirrábica"
+                maxLength={200}
+                required={updateCalendar}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-neutral-700">
+                Próxima aplicación{" "}
+                <span className="font-normal text-neutral-400">(opcional)</span>
+              </label>
+              <input
+                type="date"
+                value={preventiveNextDue}
+                onChange={(e) => setPreventiveNextDue(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

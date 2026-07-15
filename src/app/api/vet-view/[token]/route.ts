@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   getPetByValidVetToken,
   listPetVetVisits,
+  listPreventiveItems,
 } from "@/lib/db/queries-pet-medical";
 import { isUuid } from "@/lib/pet-medical";
 import { withApi } from "@/lib/api/with-api";
@@ -26,7 +27,10 @@ export const GET = withApi({ rateLimit: "api" }, async (_request, context) => {
     );
   }
 
-  const visits = await listPetVetVisits(pet.id);
+  const [visits, preventive] = await Promise.all([
+    listPetVetVisits(pet.id),
+    listPreventiveItems(pet.id),
+  ]);
 
   return NextResponse.json({
     pet: {
@@ -39,5 +43,6 @@ export const GET = withApi({ rateLimit: "api" }, async (_request, context) => {
       avatar_mime: pet.avatar_mime,
     },
     visits,
+    preventive,
   });
 });

@@ -3,10 +3,12 @@ import { AlertTriangle, PawPrint } from "lucide-react";
 import {
   getPetByValidVetToken,
   listPetVetVisits,
+  listPreventiveItems,
 } from "@/lib/db/queries-pet-medical";
 import { isUuid } from "@/lib/pet-medical";
 import { VetVisitsList } from "@/components/vet/VetVisitsList";
 import { VetVisitForm } from "@/components/vet/VetVisitForm";
+import { VetPreventiveReadOnly } from "@/components/vet/VetPreventiveReadOnly";
 
 type PageProps = {
   params: Promise<{ token: string }>;
@@ -50,7 +52,10 @@ export default async function VetViewPage({ params }: PageProps) {
     return <InvalidLinkScreen />;
   }
 
-  const visits = await listPetVetVisits(pet.id);
+  const [visits, preventive] = await Promise.all([
+    listPetVetVisits(pet.id),
+    listPreventiveItems(pet.id),
+  ]);
 
   return (
     <main className="min-h-dvh bg-gradient-to-b from-teal-50 via-white to-neutral-100">
@@ -104,12 +109,21 @@ export default async function VetViewPage({ params }: PageProps) {
             </div>
           )}
 
-          <div className="px-6 py-5">
+          <div className="border-b border-neutral-100 px-6 py-5">
             <h2 className="text-sm font-bold uppercase tracking-wide text-neutral-400">
-              Historial clínico
+              Vacunas y desparasitaciones
             </h2>
             <div className="mt-3">
-              <VetVisitsList visits={visits} />
+              <VetPreventiveReadOnly items={preventive} />
+            </div>
+          </div>
+
+          <div className="px-6 py-5">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-neutral-400">
+              Historial de visitas
+            </h2>
+            <div className="mt-3">
+              <VetVisitsList visits={visits} vetToken={token} />
             </div>
           </div>
         </section>
@@ -119,8 +133,8 @@ export default async function VetViewPage({ params }: PageProps) {
             Registrar visita
           </h2>
           <p className="mt-1 text-sm text-neutral-500">
-            Cargá qué se hizo y, si hace falta, las indicaciones para el hogar.
-            El tutor recibe una notificación.
+            Cargá qué se hizo, indicaciones, archivos y, si corresponde, la
+            próxima vacuna o desparasitación.
           </p>
           <div className="mt-5">
             <VetVisitForm token={token} />

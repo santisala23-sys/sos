@@ -1,4 +1,4 @@
-import type { VisitTag } from "@/types/database";
+import type { PreventiveKind, VisitTag } from "@/types/database";
 
 export const VISIT_TAGS: { value: VisitTag; label: string }[] = [
   { value: "checkup", label: "Consulta" },
@@ -6,6 +6,11 @@ export const VISIT_TAGS: { value: VisitTag; label: string }[] = [
   { value: "deworming", label: "Desparasitación" },
   { value: "treatment", label: "Tratamiento" },
 ];
+
+export const PREVENTIVE_KIND_LABELS: Record<PreventiveKind, string> = {
+  vaccine: "Vacuna",
+  deworming: "Desparasitación",
+};
 
 export function isVisitTag(value: unknown): value is VisitTag {
   return (

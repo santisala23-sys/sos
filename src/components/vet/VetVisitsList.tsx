@@ -1,4 +1,4 @@
-import { ClipboardList, ShieldCheck } from "lucide-react";
+import { ClipboardList, FileText, ImageIcon, ShieldCheck } from "lucide-react";
 import type { PetVetVisit } from "@/types/database";
 import { formatVisitDate, visitTagLabel } from "@/lib/pet-medical";
 import { formatDateTime } from "@/lib/utils/format";
@@ -6,11 +6,31 @@ import { formatDateTime } from "@/lib/utils/format";
 type VetVisitsListProps = {
   visits: PetVetVisit[];
   emptyLabel?: string;
+  /** Tutor: usa /api/qr-profiles/:petId/visit-attachments/:id */
+  petId?: string;
+  /** Vet: usa /api/vet-view/:token/attachments/:id */
+  vetToken?: string;
 };
+
+function attachmentHref(
+  attachmentId: string,
+  petId?: string,
+  vetToken?: string,
+): string | null {
+  if (vetToken) {
+    return `/api/vet-view/${vetToken}/attachments/${attachmentId}`;
+  }
+  if (petId) {
+    return `/api/qr-profiles/${petId}/visit-attachments/${attachmentId}`;
+  }
+  return null;
+}
 
 export function VetVisitsList({
   visits,
   emptyLabel = "Sin visitas registradas todavía.",
+  petId,
+  vetToken,
 }: VetVisitsListProps) {
   if (visits.length === 0) {
     return (
@@ -70,6 +90,43 @@ export function VetVisitsList({
               </p>
             </div>
           ) : null}
+
+          {visit.attachments && visit.attachments.length > 0 && (
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {visit.attachments.map((att) => {
+                const href = attachmentHref(att.id, petId, vetToken);
+                const isPdf = att.mime === "application/pdf";
+                const content = (
+                  <>
+                    {isPdf ? (
+                      <FileText className="h-3.5 w-3.5" aria-hidden />
+                    ) : (
+                      <ImageIcon className="h-3.5 w-3.5" aria-hidden />
+                    )}
+                    <span className="max-w-[140px] truncate">{att.filename}</span>
+                  </>
+                );
+                return (
+                  <li key={att.id}>
+                    {href ? (
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-100"
+                      >
+                        {content}
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-xs font-semibold text-neutral-700">
+                        {content}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
 
           {visit.verified_by_vet ? (
             <p className="mt-2 inline-flex flex-wrap items-center gap-1.5 text-xs font-medium text-emerald-700">
