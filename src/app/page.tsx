@@ -6,6 +6,7 @@ import { MarketingBackground } from "@/components/marketing/MarketingBackground"
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { PetHealthBookletSection } from "@/components/marketing/PetHealthBookletSection";
 import { SectionHeading } from "@/components/marketing/SectionHeading";
+import { USE_CASE_CARDS } from "@/lib/marketing/services";
 import {
   ArrowRight,
   Bell,
@@ -24,38 +25,8 @@ import { Button } from "@/components/ui/Button";
 const TRUST_PILLS = [
   { icon: Smartphone, label: "Sin instalar apps" },
   { icon: Bell, label: "Alerta al instante" },
-  { icon: MessageCircle, label: "WhatsApp directo" },
+  { icon: ClipboardList, label: "Libreta sanitaria" },
   { icon: Shield, label: "Gratis para empezar" },
-] as const;
-
-const USE_CASES = [
-  {
-    title: "Personas",
-    description:
-      "Ideal para niños, adultos mayores o quien necesite un contacto de emergencia visible.",
-    detail: "Alergias, medicación e instrucciones si hace falta ayuda.",
-    accent: "from-rose-500/20 to-orange-500/10",
-    image: "/images/landing/use-case-personas.png",
-    imageAlt: "Tarjeta con código QR guardada en el bolsillo de una chaqueta",
-  },
-  {
-    title: "Mascotas",
-    description:
-      "Collar o chapita con QR: si se pierde, te contactan al toque. Además llevás su libreta sanitaria digital.",
-    detail: "Vacunas, visitas, indicaciones del vet y acceso temporal por QR.",
-    accent: "from-amber-500/20 to-yellow-500/10",
-    image: "/images/landing/use-case-mascotas.png",
-    imageAlt: "Perro con collar y chapita que muestra un código QR",
-  },
-  {
-    title: "Objetos y valijas",
-    description:
-      "Pegá un QR en tu valija, mochila o notebook para que te contacten si se pierde.",
-    detail: "Perfecto para viajes, colegio o el día a día.",
-    accent: "from-sky-500/20 to-indigo-500/10",
-    image: "/images/landing/use-case-valijas.png",
-    imageAlt: "Valija de viaje con un sticker de código QR en el aeropuerto",
-  },
 ] as const;
 
 const INCLUDES = [
@@ -83,7 +54,7 @@ export default function HomePage() {
             <div className="text-center lg:text-left">
               <p className="inline-flex items-center gap-2 rounded-full border border-violet-200/80 bg-white/90 px-4 py-2 text-sm font-semibold text-violet-800 shadow-sm backdrop-blur-sm">
                 <Sparkles className="h-4 w-4 text-violet-600" aria-hidden />
-                Sistema de contacto y emergencia por QR
+                SOSme
               </p>
 
               <h1 className="mt-7 text-4xl font-black leading-[1.05] tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
@@ -91,13 +62,14 @@ export default function HomePage() {
                 <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-700 bg-clip-text text-transparent">
                   sabe cómo ayudarte
                 </span>
+                .
               </h1>
 
               <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-neutral-600 sm:text-xl lg:mx-0">
-                <strong className="font-semibold text-neutral-800">SOSme</strong>{" "}
-                vincula un código QR a tu perfil de emergencia. Una persona,
-                mascota u objeto — quien lo escanea te contacta al instante y
-                vos recibís la alerta.
+                SOSme vincula un código QR a tu perfil de emergencia. Una
+                persona, mascota u objeto — quien lo escanea te contacta al
+                instante y vos recibís la alerta. En mascotas, sumás la libreta
+                sanitaria: vacunas, visitas e indicaciones del vet.
               </p>
 
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
@@ -113,7 +85,7 @@ export default function HomePage() {
                 <Link href="/tienda">
                   <Button variant="secondary" size="lg" className="gap-2 px-8">
                     <Package className="h-5 w-5" aria-hidden />
-                    Ver productos físicos
+                    Ver productos
                   </Button>
                 </Link>
               </div>
@@ -219,34 +191,48 @@ export default function HomePage() {
           />
 
           <div className="mt-16 grid gap-8 sm:grid-cols-3">
-            {USE_CASES.map(
-              ({ title, description, detail, accent, image, imageAlt }) => (
-                <article
+            {USE_CASE_CARDS.map(
+              ({
+                href,
+                title,
+                description,
+                detail,
+                accent,
+                image,
+                imageAlt,
+              }) => (
+                <Link
                   key={title}
-                  className={`group mx-auto w-full max-w-[280px] overflow-hidden rounded-[1.75rem] border border-white/90 bg-gradient-to-br ${accent} shadow-lg shadow-violet-500/5 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-500/15 sm:max-w-none`}
+                  href={href}
+                  className={`group mx-auto block w-full max-w-[280px] overflow-hidden rounded-[1.75rem] border border-white/90 bg-gradient-to-br ${accent} shadow-lg shadow-violet-500/5 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-500/15 sm:max-w-none`}
                 >
-                  <div className="relative aspect-[4/5] overflow-hidden bg-white/40">
-                    <Image
-                      src={image}
-                      alt={imageAlt}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, 33vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/70 via-neutral-900/10 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                      <h3 className="text-2xl font-black">{title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-white/90">
-                        {description}
-                      </p>
+                  <article>
+                    <div className="relative aspect-[4/5] overflow-hidden bg-white/40">
+                      <Image
+                        src={image}
+                        alt={imageAlt}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, 33vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/70 via-neutral-900/10 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <h3 className="text-2xl font-black">{title}</h3>
+                        <p className="mt-2 text-sm leading-relaxed text-white/90">
+                          {description}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="border-t border-white/50 bg-white/60 px-6 py-4 backdrop-blur-sm">
-                    <p className="text-sm font-medium text-neutral-600">
-                      {detail}
-                    </p>
-                  </div>
-                </article>
+                    <div className="flex items-center justify-between gap-2 border-t border-white/50 bg-white/60 px-6 py-4 backdrop-blur-sm">
+                      <p className="text-sm font-medium text-neutral-600">
+                        {detail}
+                      </p>
+                      <span className="shrink-0 text-sm font-bold text-violet-700">
+                        Ver →
+                      </span>
+                    </div>
+                  </article>
+                </Link>
               ),
             )}
           </div>

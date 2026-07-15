@@ -1,10 +1,13 @@
+import Link from "next/link";
 import {
+  ArrowRight,
   Bell,
   ClipboardList,
   QrCode,
   Stethoscope,
 } from "lucide-react";
 import { SectionHeading } from "@/components/marketing/SectionHeading";
+import { Button } from "@/components/ui/Button";
 
 const STEPS = [
   {
@@ -63,6 +66,18 @@ export function PetHealthBookletSection() {
               <p className="mt-3 leading-relaxed text-neutral-600">{text}</p>
             </article>
           ))}
+        </div>
+
+        <div className="mt-12 text-center">
+          <Link href="/servicios/mascotas">
+            <Button
+              size="lg"
+              className="gap-2 !from-teal-600 !to-emerald-700 hover:!from-teal-700 hover:!to-emerald-800"
+            >
+              Ver servicio para mascotas
+              <ArrowRight className="h-5 w-5" aria-hidden />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
