@@ -7,14 +7,21 @@ import {
   VisitFilePicker,
   type PendingVisitFile,
 } from "@/components/vet/VisitFilePicker";
+import { VisitCalendarUpdate } from "@/components/vet/VisitCalendarUpdate";
 import { VISIT_TAGS } from "@/lib/pet-medical";
-import type { PetVetVisit, VisitTag } from "@/types/database";
+import type {
+  PetPreventiveItem,
+  PetVetVisit,
+  PreventiveKind,
+  VisitTag,
+} from "@/types/database";
 
 type TutorVisitFormProps = {
   petId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: (visit: PetVetVisit) => void;
+  onPreventiveAdded?: (item: PetPreventiveItem) => void;
 };
 
 export function TutorVisitForm({
@@ -22,6 +29,7 @@ export function TutorVisitForm({
   open,
   onOpenChange,
   onCreated,
+  onPreventiveAdded,
 }: TutorVisitFormProps) {
   const [visitDate, setVisitDate] = useState(
     () => new Date().toISOString().slice(0, 10),
@@ -32,6 +40,10 @@ export function TutorVisitForm({
   const [vetName, setVetName] = useState("");
   const [vetLicense, setVetLicense] = useState("");
   const [files, setFiles] = useState<PendingVisitFile[]>([]);
+  const [updateCalendar, setUpdateCalendar] = useState(false);
+  const [preventiveKind, setPreventiveKind] = useState<PreventiveKind>("vaccine");
+  const [preventiveName, setPreventiveName] = useState("");
+  const [preventiveNextDue, setPreventiveNextDue] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -49,6 +61,9 @@ export function TutorVisitForm({
     setVetName("");
     setVetLicense("");
     setFiles([]);
+    setUpdateCalendar(false);
+    setPreventiveName("");
+    setPreventiveNextDue("");
     setError(null);
   }
 
@@ -80,6 +95,25 @@ export function TutorVisitForm({
       if (!res.ok || !data.visit) {
         setError(data.error ?? "No se pudo guardar la visita");
         return;
+      }
+
+      if (updateCalendar && preventiveName.trim()) {
+        const prevRes = await fetch(`/api/qr-profiles/${petId}/preventive`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            kind: preventiveKind,
+            name: preventiveName.trim(),
+            last_applied_at: visitDate,
+            next_due_at: preventiveNextDue || null,
+          }),
+        });
+        const prevData = (await prevRes.json()) as {
+          item?: PetPreventiveItem;
+        };
+        if (prevRes.ok && prevData.item) {
+          onPreventiveAdded?.(prevData.item);
+        }
       }
 
       onCreated(data.visit);
@@ -200,6 +234,19 @@ export function TutorVisitForm({
           maxLength={4000}
         />
       </div>
+
+      <VisitCalendarUpdate
+        enabled={updateCalendar}
+        onEnabledChange={setUpdateCalendar}
+        kind={preventiveKind}
+        onKindChange={setPreventiveKind}
+        name={preventiveName}
+        onNameChange={setPreventiveName}
+        nextDue={preventiveNextDue}
+        onNextDueChange={setPreventiveNextDue}
+        accent="violet"
+        inputClass={inputClass}
+      />
 
       <VisitFilePicker files={files} onChange={setFiles} accent="violet" />
 

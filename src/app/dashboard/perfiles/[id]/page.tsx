@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, Pencil, QrCode } from "lucide-react";
+import { ArrowLeft, ExternalLink, Pencil } from "lucide-react";
 import type { QrProfile } from "@/types/database";
-import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { PetMedicalHistory } from "@/components/dashboard/PetMedicalHistory";
+import { PublicQrButton } from "@/components/dashboard/PublicQrButton";
 import { PROFILE_TYPES } from "@/lib/profile-types";
 import { getPublicProfileUrl } from "@/lib/utils/slug";
 import { formatDateTime } from "@/lib/utils/format";
@@ -162,16 +162,21 @@ export default function ProfileDetailPage() {
             </p>
           )}
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-col gap-3">
             <a
               href={publicUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-neutral-100 px-4 py-2 text-base font-semibold text-neutral-900 transition-colors hover:bg-neutral-200"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-neutral-100 px-4 py-2 text-base font-semibold text-neutral-900 transition-colors hover:bg-neutral-200"
             >
               <ExternalLink className="h-4 w-4" aria-hidden />
               Ver perfil público
             </a>
+            <PublicQrButton
+              slug={profile.slug}
+              beneficiaryName={profile.beneficiary_name}
+              className="w-full"
+            />
           </div>
         </div>
       </section>
@@ -182,19 +187,6 @@ export default function ProfileDetailPage() {
           petName={profile.beneficiary_name}
         />
       )}
-
-      <section className="rounded-3xl border border-violet-100 bg-white p-6 shadow-lg shadow-violet-500/8 sm:p-8">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-neutral-900">
-          <QrCode className="h-5 w-5 text-violet-600" aria-hidden />
-          Código QR
-        </h2>
-        <div className="mt-4">
-          <QrCodeDisplay
-            slug={profile.slug}
-            beneficiaryName={profile.beneficiary_name}
-          />
-        </div>
-      </section>
     </main>
   );
 }

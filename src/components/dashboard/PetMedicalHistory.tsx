@@ -109,6 +109,9 @@ export function PetMedicalHistory({ petId, petName }: PetMedicalHistoryProps) {
               open={visitFormOpen}
               onOpenChange={setVisitFormOpen}
               onCreated={(visit) => setVisits((prev) => [visit, ...prev])}
+              onPreventiveAdded={(item) =>
+                setPreventive((prev) => [...prev, item])
+              }
             />
 
             <div className="mt-5">

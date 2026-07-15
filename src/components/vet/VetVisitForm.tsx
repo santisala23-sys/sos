@@ -8,6 +8,7 @@ import {
   VisitFilePicker,
   type PendingVisitFile,
 } from "@/components/vet/VisitFilePicker";
+import { VisitCalendarUpdate } from "@/components/vet/VisitCalendarUpdate";
 import { VISIT_TAGS } from "@/lib/pet-medical";
 import type { PreventiveKind, VisitTag } from "@/types/database";
 
@@ -176,71 +177,20 @@ export function VetVisitForm({ token, onPreventiveAdded }: VetVisitFormProps) {
         />
       </div>
 
-      <VisitFilePicker files={files} onChange={setFiles} accent="teal" />
+      <VisitCalendarUpdate
+        enabled={updateCalendar}
+        onEnabledChange={setUpdateCalendar}
+        kind={preventiveKind}
+        onKindChange={setPreventiveKind}
+        name={preventiveName}
+        onNameChange={setPreventiveName}
+        nextDue={preventiveNextDue}
+        onNextDueChange={setPreventiveNextDue}
+        accent="teal"
+        inputClass={inputClass}
+      />
 
-      <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-3">
-        <label className="flex items-start gap-2 text-sm text-neutral-800">
-          <input
-            type="checkbox"
-            checked={updateCalendar}
-            onChange={(e) => setUpdateCalendar(e.target.checked)}
-            className="mt-0.5"
-          />
-          <span>
-            También actualizar calendario de vacunas / desparasitaciones
-          </span>
-        </label>
-        {updateCalendar && (
-          <div className="mt-3 space-y-3">
-            <div className="flex flex-wrap gap-2">
-              {(
-                [
-                  ["vaccine", "Vacuna"],
-                  ["deworming", "Desparasitación"],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setPreventiveKind(value)}
-                  className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-                    preventiveKind === value
-                      ? "bg-teal-700 text-white"
-                      : "border border-neutral-300 bg-white text-neutral-700"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-neutral-700">
-                Nombre
-              </label>
-              <input
-                value={preventiveName}
-                onChange={(e) => setPreventiveName(e.target.value)}
-                className={inputClass}
-                placeholder="Ej. Antirrábica"
-                maxLength={200}
-                required={updateCalendar}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-neutral-700">
-                Próxima aplicación{" "}
-                <span className="font-normal text-neutral-400">(opcional)</span>
-              </label>
-              <input
-                type="date"
-                value={preventiveNextDue}
-                onChange={(e) => setPreventiveNextDue(e.target.value)}
-                className={inputClass}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      <VisitFilePicker files={files} onChange={setFiles} accent="teal" />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
