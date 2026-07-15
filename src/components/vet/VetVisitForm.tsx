@@ -1,0 +1,211 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { CheckCircle2, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { VISIT_TAGS } from "@/lib/pet-medical";
+import type { VisitTag } from "@/types/database";
+
+type VetVisitFormProps = {
+  token: string;
+};
+
+export function VetVisitForm({ token }: VetVisitFormProps) {
+  const router = useRouter();
+  const [visitDate, setVisitDate] = useState(
+    () => new Date().toISOString().slice(0, 10),
+  );
+  const [summary, setSummary] = useState("");
+  const [indications, setIndications] = useState("");
+  const [tags, setTags] = useState<VisitTag[]>(["checkup"]);
+  const [vetName, setVetName] = useState("");
+  const [vetLicense, setVetLicense] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  function toggleTag(tag: VisitTag) {
+    setTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+    );
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const res = await fetch(`/api/vet-view/${token}/records`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          visit_date: visitDate,
+          summary,
+          indications,
+          tags,
+          vet_name: vetName,
+          vet_license: vetLicense,
+        }),
+      });
+      const data = (await res.json()) as { error?: string };
+
+      if (!res.ok) {
+        setError(data.error ?? "No se pudo guardar la visita");
+        return;
+      }
+
+      setSuccess(true);
+      setSummary("");
+      setIndications("");
+      setTags(["checkup"]);
+      router.refresh();
+      window.setTimeout(() => setSuccess(false), 4000);
+    } catch {
+      setError("Error de conexión. Intentá de nuevo.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const inputClass =
+    "mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-base text-neutral-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20";
+
+  return (
+    <form onSubmit={(e) => void onSubmit(e)} className="space-y-4">
+      <div>
+        <label htmlFor="visit_date" className="text-sm font-semibold text-neutral-700">
+          Fecha de la visita
+        </label>
+        <input
+          id="visit_date"
+          type="date"
+          value={visitDate}
+          onChange={(e) => setVisitDate(e.target.value)}
+          className={inputClass}
+          required
+        />
+      </div>
+
+      <fieldset>
+        <legend className="text-sm font-semibold text-neutral-700">
+          Tipo (opcional)
+        </legend>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {VISIT_TAGS.map((t) => {
+            const active = tags.includes(t.value);
+            return (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => toggleTag(t.value)}
+                className={`rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
+                  active
+                    ? "bg-teal-600 text-white"
+                    : "border border-neutral-300 bg-neutral-50 text-neutral-700 hover:bg-neutral-100"
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      <div>
+        <label htmlFor="summary" className="text-sm font-semibold text-neutral-700">
+          Qué se hizo
+        </label>
+        <textarea
+          id="summary"
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
+          className={`${inputClass} min-h-[110px] resize-y`}
+          placeholder="Ej. Aplicación de antirrábica, control general, peso 12 kg..."
+          maxLength={4000}
+          required
+        />
+      </div>
+
+      <div>
+        <label
+          htmlFor="indications"
+          className="text-sm font-semibold text-neutral-700"
+        >
+          Indicaciones para el tutor{" "}
+          <span className="font-normal text-neutral-400">(opcional)</span>
+        </label>
+        <textarea
+          id="indications"
+          value={indications}
+          onChange={(e) => setIndications(e.target.value)}
+          className={`${inputClass} min-h-[88px] resize-y`}
+          placeholder="Ej. Reposo 24 hs, dar medicación cada 12 hs..."
+          maxLength={4000}
+        />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="vet_name" className="text-sm font-semibold text-neutral-700">
+            Nombre del veterinario
+          </label>
+          <input
+            id="vet_name"
+            type="text"
+            value={vetName}
+            onChange={(e) => setVetName(e.target.value)}
+            className={inputClass}
+            maxLength={120}
+            required
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="vet_license"
+            className="text-sm font-semibold text-neutral-700"
+          >
+            Matrícula
+          </label>
+          <input
+            id="vet_license"
+            type="text"
+            value={vetLicense}
+            onChange={(e) => setVetLicense(e.target.value)}
+            className={inputClass}
+            placeholder="Ej. MP 12345"
+            maxLength={60}
+            required
+          />
+        </div>
+      </div>
+
+      {error && (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          {error}
+        </p>
+      )}
+
+      {success && (
+        <p
+          role="status"
+          className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800"
+        >
+          <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
+          Visita guardada. El tutor será notificado.
+        </p>
+      )}
+
+      <Button
+        type="submit"
+        disabled={loading}
+        className="w-full gap-2 !from-teal-600 !to-emerald-700 hover:!from-teal-700 hover:!to-emerald-800"
+      >
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
+        Guardar visita
+      </Button>
+    </form>
+  );
+}

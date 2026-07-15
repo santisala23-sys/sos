@@ -112,3 +112,27 @@ export interface PushSubscriptionRow {
   auth: string;
   created_at: string;
 }
+
+export type VisitTag = "vaccine" | "deworming" | "treatment" | "checkup";
+
+/** Visita clínica de mascota (historial + indicaciones opcionales). */
+export interface PetVetVisit {
+  id: string;
+  pet_id: string;
+  visit_date: string;
+  summary: string;
+  indications: string;
+  tags: VisitTag[];
+  verified_by_vet: boolean;
+  vet_name: string | null;
+  vet_license: string | null;
+  created_at: string;
+}
+
+export interface VetAccessToken {
+  id: string;
+  pet_id: string;
+  token: string;
+  expires_at: string;
+  created_at: string;
+}

@@ -51,6 +51,8 @@ const migrations = [
   "018_scan_message_media.sql",
   "019_email_verification.sql",
   "020_profile_avatar.sql",
+  "021_pet_medical_records_and_vet_tokens.sql",
+  "022_pet_vet_visits.sql",
 ];
 
 for (const file of migrations) {

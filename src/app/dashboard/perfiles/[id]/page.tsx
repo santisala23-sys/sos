@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, ExternalLink, Pencil, QrCode } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
+import { ShareWithVetButton } from "@/components/dashboard/ShareWithVetButton";
+import { PetMedicalHistory } from "@/components/dashboard/PetMedicalHistory";
 import { PROFILE_TYPES } from "@/lib/profile-types";
 import { getPublicProfileUrl } from "@/lib/utils/slug";
 import { formatDateTime } from "@/lib/utils/format";
@@ -155,7 +157,7 @@ export default function ProfileDetailPage() {
             </p>
           )}
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <a
               href={publicUrl}
               target="_blank"
@@ -165,9 +167,19 @@ export default function ProfileDetailPage() {
               <ExternalLink className="h-4 w-4" aria-hidden />
               Ver perfil público
             </a>
+            {profile.profile_type === "pet" && (
+              <ShareWithVetButton
+                petId={profile.id}
+                petName={profile.beneficiary_name}
+              />
+            )}
           </div>
         </div>
       </section>
+
+      {profile.profile_type === "pet" && (
+        <PetMedicalHistory petId={profile.id} />
+      )}
 
       <section className="rounded-3xl border border-violet-100 bg-white p-6 shadow-lg shadow-violet-500/8 sm:p-8">
         <h2 className="flex items-center gap-2 text-lg font-bold text-neutral-900">
