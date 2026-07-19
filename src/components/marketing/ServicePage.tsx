@@ -17,14 +17,14 @@ export function ServicePage({ service }: ServicePageProps) {
 
   return (
     <MarketingBackground>
-      <MarketingNavbar variant="subpage" />
+      <MarketingNavbar variant="subpage" activeService={service.slug} />
 
       <main>
         {/* Hero full-bleed */}
         <section className="relative min-h-[78vh] overflow-hidden">
           <Image
-            src={service.image}
-            alt={service.imageAlt}
+            src={service.heroImage}
+            alt={service.heroImageAlt}
             fill
             priority
             className="object-cover"

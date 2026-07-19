@@ -8,6 +8,11 @@ import { BrandLogo } from "@/components/shared/BrandLogo";
 import { HamburgerButton } from "@/components/shared/HamburgerButton";
 import { MobileNavDrawer } from "@/components/shared/MobileNavDrawer";
 import { Button } from "@/components/ui/Button";
+import {
+  SERVICES,
+  SERVICE_LIST,
+  type ServiceSlug,
+} from "@/lib/marketing/services";
 import { cn } from "@/lib/utils/cn";
 
 const NAV_LINKS = [
@@ -20,6 +25,7 @@ const NAV_LINKS = [
 
 type MarketingNavbarProps = {
   variant?: "home" | "subpage";
+  activeService?: ServiceSlug;
 };
 
 function resolveHref(href: string, variant: "home" | "subpage") {
@@ -29,8 +35,65 @@ function resolveHref(href: string, variant: "home" | "subpage") {
   return href;
 }
 
-export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
+function CasosDeUsoNavItem({
+  variant,
+  activeService,
+  onNavigate,
+  className,
+  linkClassName,
+  subLinkClassName,
+}: {
+  variant: "home" | "subpage";
+  activeService?: ServiceSlug;
+  onNavigate?: () => void;
+  className?: string;
+  linkClassName?: string;
+  subLinkClassName?: string;
+}) {
+  const href = resolveHref("#casos", variant);
+  const current = activeService ? SERVICES[activeService] : null;
+  const others = activeService
+    ? SERVICE_LIST.filter((service) => service.slug !== activeService)
+    : [];
+
+  return (
+    <div className={cn("flex flex-col gap-1", className)}>
+      <Link href={href} className={linkClassName} onClick={onNavigate}>
+        {current ? `Casos de uso (${current.navLabel})` : "Casos de uso"}
+      </Link>
+      {current && others.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pl-1">
+          {others.map((service, index) => (
+            <span key={service.slug} className="inline-flex items-center gap-2">
+              {index > 0 && (
+                <span className={cn("text-neutral-300", subLinkClassName)} aria-hidden>
+                  ·
+                </span>
+              )}
+              <Link
+                href={service.href}
+                className={subLinkClassName}
+                onClick={onNavigate}
+              >
+                {service.navLabel}
+              </Link>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function MarketingNavbar({
+  variant = "home",
+  activeService,
+}: MarketingNavbarProps) {
   const pathname = usePathname();
+  const detectedService = pathname.match(/^\/servicios\/(personas|mascotas|objetos)/)?.[1] as
+    | ServiceSlug
+    | undefined;
+  const currentService = activeService ?? detectedService;
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -90,6 +153,24 @@ export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
           {NAV_LINKS.map(({ href, label }) => {
             const resolved = resolveHref(href, variant);
             const active = isActive(href);
+
+            if (href === "#casos") {
+              return (
+                <CasosDeUsoNavItem
+                  key={href}
+                  variant={variant}
+                  activeService={currentService}
+                  linkClassName={cn(
+                    "rounded-xl px-4 py-2.5 text-base font-medium transition-colors",
+                    active
+                      ? "bg-violet-100 text-violet-800"
+                      : "text-neutral-600 hover:bg-violet-50 hover:text-violet-800",
+                  )}
+                  subLinkClassName="text-xs font-semibold text-violet-700 transition-colors hover:text-violet-900"
+                />
+              );
+            }
+
             return (
               <Link
                 key={href}
@@ -141,6 +222,26 @@ export function MarketingNavbar({ variant = "home" }: MarketingNavbarProps) {
           {NAV_LINKS.map(({ href, label }) => {
             const resolved = resolveHref(href, variant);
             const active = isActive(href);
+
+            if (href === "#casos") {
+              return (
+                <CasosDeUsoNavItem
+                  key={href}
+                  variant={variant}
+                  activeService={currentService}
+                  onNavigate={() => setOpen(false)}
+                  className="rounded-2xl px-4 py-3.5"
+                  linkClassName={cn(
+                    "text-base font-semibold transition-colors",
+                    active
+                      ? "text-violet-700"
+                      : "text-neutral-800 hover:text-violet-800",
+                  )}
+                  subLinkClassName="text-sm font-semibold text-violet-600 transition-colors hover:text-violet-800"
+                />
+              );
+            }
+
             return (
               <Link
                 key={href}

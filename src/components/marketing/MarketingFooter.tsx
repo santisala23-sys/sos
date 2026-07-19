@@ -10,7 +10,9 @@ import {
 } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { Button } from "@/components/ui/Button";
+import { getSession } from "@/lib/auth/session";
 import { LEGAL_FOOTER_LINKS } from "@/lib/legal/constants";
+import { getActivateCodeHref } from "@/lib/marketing/activate-link";
 import {
   CONTACT_EMAIL,
   getContactMailtoUrl,
@@ -35,7 +37,6 @@ const PRODUCT_LINKS = [
 const ACCOUNT_LINKS = [
   { href: "/register", label: "Crear cuenta gratis" },
   { href: "/login", label: "Iniciar sesión" },
-  { href: "/activar", label: "Activar código" },
   { href: "/contacto", label: "Contacto" },
 ] as const;
 
@@ -55,7 +56,10 @@ type MarketingFooterProps = {
   className?: string;
 };
 
-export function MarketingFooter({ className = "" }: MarketingFooterProps) {
+export async function MarketingFooter({ className = "" }: MarketingFooterProps) {
+  const session = await getSession();
+  const activateHref = getActivateCodeHref(Boolean(session));
+
   return (
     <footer className={`border-t border-violet-100/80 bg-neutral-950 text-neutral-300 ${className}`}>
       <div className="mx-auto max-w-[88rem] px-4 py-16 sm:px-6 lg:px-8">
@@ -162,6 +166,14 @@ export function MarketingFooter({ className = "" }: MarketingFooterProps) {
                     </Link>
                   </li>
                 ))}
+                <li>
+                  <Link
+                    href={activateHref}
+                    className="text-sm text-neutral-400 transition-colors hover:text-violet-300"
+                  >
+                    Activar código
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -203,7 +215,7 @@ export function MarketingFooter({ className = "" }: MarketingFooterProps) {
                 Contacto
               </Button>
             </Link>
-            <Link href="/activar">
+            <Link href={activateHref}>
               <Button
                 variant="secondary"
                 size="sm"
