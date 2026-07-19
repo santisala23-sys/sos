@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight, Check, ChevronDown } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { HamburgerButton } from "@/components/shared/HamburgerButton";
 import { MobileNavDrawer } from "@/components/shared/MobileNavDrawer";
@@ -35,50 +35,147 @@ function resolveHref(href: string, variant: "home" | "subpage") {
   return href;
 }
 
-function CasosDeUsoNavItem({
+function UseCaseNavMenu({
   variant,
   activeService,
   onNavigate,
-  className,
-  linkClassName,
-  subLinkClassName,
+  layout,
 }: {
   variant: "home" | "subpage";
-  activeService?: ServiceSlug;
+  activeService: ServiceSlug;
   onNavigate?: () => void;
-  className?: string;
-  linkClassName?: string;
-  subLinkClassName?: string;
+  layout: "desktop" | "mobile";
 }) {
-  const href = resolveHref("#casos", variant);
-  const current = activeService ? SERVICES[activeService] : null;
-  const others = activeService
-    ? SERVICE_LIST.filter((service) => service.slug !== activeService)
-    : [];
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const homeHref = resolveHref("#casos", variant);
+  const current = SERVICES[activeService];
 
-  return (
-    <div className={cn("flex flex-col gap-1", className)}>
-      <Link href={href} className={linkClassName} onClick={onNavigate}>
-        {current ? `Casos de uso (${current.navLabel})` : "Casos de uso"}
-      </Link>
-      {current && others.length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pl-1">
-          {others.map((service, index) => (
-            <span key={service.slug} className="inline-flex items-center gap-2">
-              {index > 0 && (
-                <span className={cn("text-neutral-300", subLinkClassName)} aria-hidden>
-                  ·
-                </span>
-              )}
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const closeOnOutside = (event: MouseEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", closeOnOutside);
+    return () => document.removeEventListener("mousedown", closeOnOutside);
+  }, [menuOpen]);
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+    onNavigate?.();
+  };
+
+  if (layout === "mobile") {
+    return (
+      <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/80 to-white p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-violet-600">
+              Casos de uso
+            </p>
+            <p className="mt-1 text-sm font-semibold text-neutral-800">
+              Estás en{" "}
+              <span className="text-violet-700">{current.navLabel}</span>
+            </p>
+          </div>
+          <Link
+            href={homeHref}
+            onClick={closeMenu}
+            className="shrink-0 text-xs font-semibold text-violet-600 hover:text-violet-800"
+          >
+            Ver todos
+          </Link>
+        </div>
+
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          {SERVICE_LIST.map((service) => {
+            const isActive = service.slug === activeService;
+            return (
               <Link
+                key={service.slug}
                 href={service.href}
-                className={subLinkClassName}
-                onClick={onNavigate}
+                onClick={closeMenu}
+                className={cn(
+                  "rounded-xl px-2 py-2.5 text-center text-sm font-semibold transition-all",
+                  isActive
+                    ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
+                    : "bg-white text-neutral-700 ring-1 ring-violet-100 hover:bg-violet-50 hover:text-violet-800",
+                )}
               >
                 {service.navLabel}
               </Link>
-            </span>
-          ))}
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={menuRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setMenuOpen((value) => !value)}
+        aria-expanded={menuOpen}
+        aria-haspopup="menu"
+        className={cn(
+          "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-base font-medium transition-colors",
+          menuOpen
+            ? "bg-violet-100 text-violet-800"
+            : "text-neutral-600 hover:bg-violet-50 hover:text-violet-800",
+        )}
+      >
+        <span>Casos de uso</span>
+        <span className="rounded-full bg-violet-600 px-2.5 py-0.5 text-xs font-bold text-white">
+          {current.navLabel}
+        </span>
+        <ChevronDown
+          className={cn("h-4 w-4 transition-transform", menuOpen && "rotate-180")}
+          aria-hidden
+        />
+      </button>
+
+      {menuOpen && (
+        <div
+          role="menu"
+          className="absolute left-0 top-[calc(100%+0.45rem)] z-50 min-w-[14.5rem] overflow-hidden rounded-2xl border border-violet-100/90 bg-white p-2 shadow-xl shadow-violet-500/15"
+        >
+          <p className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-neutral-400">
+            Cambiar caso de uso
+          </p>
+          {SERVICE_LIST.map((service) => {
+            const isActive = service.slug === activeService;
+            return (
+              <Link
+                key={service.slug}
+                href={service.href}
+                role="menuitem"
+                onClick={closeMenu}
+                className={cn(
+                  "flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors",
+                  isActive
+                    ? "bg-violet-600 text-white"
+                    : "text-neutral-700 hover:bg-violet-50 hover:text-violet-800",
+                )}
+              >
+                {service.navLabel}
+                {isActive && <Check className="h-4 w-4 shrink-0" aria-hidden />}
+              </Link>
+            );
+          })}
+          <div className="my-1.5 border-t border-neutral-100" />
+          <Link
+            href={homeHref}
+            role="menuitem"
+            onClick={closeMenu}
+            className="block rounded-xl px-3 py-2 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-50 hover:text-violet-700"
+          >
+            Ver resumen en el inicio
+          </Link>
         </div>
       )}
     </div>
@@ -154,19 +251,13 @@ export function MarketingNavbar({
             const resolved = resolveHref(href, variant);
             const active = isActive(href);
 
-            if (href === "#casos") {
+            if (href === "#casos" && currentService) {
               return (
-                <CasosDeUsoNavItem
+                <UseCaseNavMenu
                   key={href}
                   variant={variant}
                   activeService={currentService}
-                  linkClassName={cn(
-                    "rounded-xl px-4 py-2.5 text-base font-medium transition-colors",
-                    active
-                      ? "bg-violet-100 text-violet-800"
-                      : "text-neutral-600 hover:bg-violet-50 hover:text-violet-800",
-                  )}
-                  subLinkClassName="text-xs font-semibold text-violet-700 transition-colors hover:text-violet-900"
+                  layout="desktop"
                 />
               );
             }
@@ -223,21 +314,14 @@ export function MarketingNavbar({
             const resolved = resolveHref(href, variant);
             const active = isActive(href);
 
-            if (href === "#casos") {
+            if (href === "#casos" && currentService) {
               return (
-                <CasosDeUsoNavItem
+                <UseCaseNavMenu
                   key={href}
                   variant={variant}
                   activeService={currentService}
                   onNavigate={() => setOpen(false)}
-                  className="rounded-2xl px-4 py-3.5"
-                  linkClassName={cn(
-                    "text-base font-semibold transition-colors",
-                    active
-                      ? "text-violet-700"
-                      : "text-neutral-800 hover:text-violet-800",
-                  )}
-                  subLinkClassName="text-sm font-semibold text-violet-600 transition-colors hover:text-violet-800"
+                  layout="mobile"
                 />
               );
             }
