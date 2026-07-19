@@ -62,7 +62,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   const [scanLogId, setScanLogId] = useState<string | null>(null);
   const [scanToken, setScanToken] = useState<string | null>(null);
   const [geoPhase, setGeoPhase] = useState<
-    "pending" | "loading" | "granted" | "skipped" | "denied"
+    "pending" | "loading" | "granted" | "skipped" | "denied" | "saving" | "saved"
   >("pending");
   const [sosLoading, setSosLoading] = useState(false);
   const [sosSent, setSosSent] = useState(false);
@@ -73,7 +73,11 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   const [sessionReady, setSessionReady] = useState(false);
   const [sessionRestored, setSessionRestored] = useState(false);
 
-  const locationResolved = geoPhase === "granted" || geoPhase === "skipped";
+  const locationResolved =
+    geoPhase === "granted" ||
+    geoPhase === "skipped" ||
+    geoPhase === "saved";
+  const isObjectProfile = profile.profile_type === "object";
   const typeConfig = getProfileTypeConfig(profile.profile_type);
   const hasClinicalPdf =
     typeConfig.showClinicalPdf && Boolean(profile.clinical_pdf_filename);
@@ -167,7 +171,8 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
     storeScanSession(profile.slug, {
       scanToken,
       scanLogId,
-      geoPhase: geoPhase === "granted" ? "granted" : "skipped",
+      geoPhase:
+        geoPhase === "granted" || geoPhase === "saved" ? "granted" : "skipped",
     });
   }, [scanLogId, scanToken, locationResolved, geoPhase, profile.slug]);
 
@@ -214,6 +219,36 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
     }
 
     setGeoPhase("granted");
+  }
+
+  async function handleSaveLocation() {
+    setGeoPhase("saving");
+    const location = await requestGeolocation();
+
+    if (!location) {
+      setGeoPhase("denied");
+      return;
+    }
+
+    setCoords(location);
+
+    try {
+      const res = await fetch(`/api/p/${profile.slug}/saved-location`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latitude: location.latitude,
+          longitude: location.longitude,
+        }),
+      });
+      if (!res.ok) {
+        setGeoPhase("denied");
+        return;
+      }
+      setGeoPhase("saved");
+    } catch {
+      setGeoPhase("denied");
+    }
   }
 
   function handleSkipLocation() {
@@ -337,20 +372,23 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
           status={
             geoPhase === "loading"
               ? "loading"
-              : geoPhase === "denied"
-                ? "denied"
-                : "idle"
+              : geoPhase === "saving"
+                ? "saving"
+                : geoPhase === "denied"
+                  ? "denied"
+                  : "idle"
           }
           onShare={handleShareLocation}
+          onSave={isObjectProfile ? handleSaveLocation : undefined}
           onSkip={handleSkipLocation}
+          isObjectProfile={isObjectProfile}
           isLight={isLight}
         />
       )}
 
       {geoPhase === "skipped" && (
         <p className={t.skippedBanner}>
-          Continuaste sin compartir ubicación. Los contactos de emergencia están
-          disponibles.
+          Continuaste sin compartir ubicación. Los contactos están disponibles.
         </p>
       )}
 
@@ -358,6 +396,13 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         <p className={t.grantedBanner}>
           <MapPin className="h-4 w-4 shrink-0" aria-hidden />
           Ubicación compartida con la familia
+        </p>
+      )}
+
+      {geoPhase === "saved" && (
+        <p className={t.grantedBanner}>
+          <MapPin className="h-4 w-4 shrink-0" aria-hidden />
+          Ubicación guardada. La ves en tu panel de SOSme.
         </p>
       )}
 

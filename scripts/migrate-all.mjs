@@ -54,6 +54,7 @@ const migrations = [
   "021_pet_medical_records_and_vet_tokens.sql",
   "022_pet_vet_visits.sql",
   "023_pet_preventive_and_attachments.sql",
+  "024_object_saved_location.sql",
 ];
 
 for (const file of migrations) {

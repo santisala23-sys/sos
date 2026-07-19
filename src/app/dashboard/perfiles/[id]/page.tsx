@@ -7,9 +7,13 @@ import { ArrowLeft, ExternalLink, Pencil } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { PetMedicalHistory } from "@/components/dashboard/PetMedicalHistory";
 import { PublicQrButton } from "@/components/dashboard/PublicQrButton";
+import { SavedLocationPanel } from "@/components/dashboard/SavedLocationPanel";
 import { PROFILE_TYPES } from "@/lib/profile-types";
 import { getPublicProfileUrl } from "@/lib/utils/slug";
 import { formatDateTime } from "@/lib/utils/format";
+import {
+  getGoogleMapsEmbedUrl,
+} from "@/lib/alerts/send-alert";
 
 export default function ProfileDetailPage() {
   const params = useParams<{ id: string }>();
@@ -121,6 +125,42 @@ export default function ProfileDetailPage() {
               </p>
             </div>
           )}
+
+          {profile.profile_type === "object" &&
+            profile.saved_latitude != null &&
+            profile.saved_longitude != null &&
+            profile.saved_location_at && (
+              <div className="space-y-3">
+                <SavedLocationPanel
+                  beneficiaryName={profile.beneficiary_name}
+                  latitude={Number(profile.saved_latitude)}
+                  longitude={Number(profile.saved_longitude)}
+                  savedAt={profile.saved_location_at}
+                />
+                <div className="overflow-hidden rounded-2xl border border-sky-100">
+                  <iframe
+                    title={`Mapa — ${profile.beneficiary_name}`}
+                    src={getGoogleMapsEmbedUrl(
+                      Number(profile.saved_latitude),
+                      Number(profile.saved_longitude),
+                    )}
+                    className="h-56 w-full border-0"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+              </div>
+            )}
+
+          {profile.profile_type === "object" &&
+            (profile.saved_latitude == null ||
+              profile.saved_longitude == null) && (
+              <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/40 px-4 py-5 text-sm text-sky-900/80">
+                Todavía no hay una ubicación guardada. Escaneá el QR del objeto y
+                tocá <strong>Guardar ubicación</strong> para marcar dónde lo
+                dejaste.
+              </div>
+            )}
 
           {(profile.allergies || profile.blood_type || profile.medical_notes) && (
             <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-4">

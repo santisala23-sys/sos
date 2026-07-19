@@ -1,13 +1,16 @@
 "use client";
 
-import { MapPin, Phone } from "lucide-react";
+import { Bookmark, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 type LocationPromptProps = {
   beneficiaryName: string;
-  status: "idle" | "loading" | "granted" | "denied";
+  status: "idle" | "loading" | "granted" | "denied" | "saving" | "saved";
   onShare: () => void;
   onSkip: () => void;
+  /** Solo perfiles objeto: guardar pin sin alerta de emergencia. */
+  onSave?: () => void;
+  isObjectProfile?: boolean;
   isLight?: boolean;
 };
 
@@ -16,9 +19,12 @@ export function LocationPrompt({
   status,
   onShare,
   onSkip,
+  onSave,
+  isObjectProfile = false,
   isLight = false,
 }: LocationPromptProps) {
   const denied = status === "denied";
+  const busy = status === "loading" || status === "saving";
 
   return (
     <section
@@ -46,7 +52,11 @@ export function LocationPrompt({
             isLight ? "text-amber-700" : "text-amber-300"
           }`}
         >
-          {denied ? "Ubicación no disponible" : "Gracias por ayudar"}
+          {denied
+            ? "Ubicación no disponible"
+            : isObjectProfile
+              ? "Objeto con QR"
+              : "Gracias por ayudar"}
         </p>
         <h2
           id="location-prompt-title"
@@ -54,7 +64,11 @@ export function LocationPrompt({
             isLight ? "text-amber-950" : "text-amber-50"
           }`}
         >
-          {denied ? "No pudimos obtener tu ubicación" : "Compartí la ubicación"}
+          {denied
+            ? "No pudimos obtener tu ubicación"
+            : isObjectProfile
+              ? "¿Dónde lo dejaste?"
+              : "Compartí la ubicación"}
         </h2>
         <p
           id="location-prompt-desc"
@@ -65,11 +79,20 @@ export function LocationPrompt({
           {denied ? (
             <>
               El GPS puede estar bloqueado en este dispositivo. Igual podés ver los
-              contactos de emergencia de{" "}
+              contactos de{" "}
+              <strong className={isLight ? "text-amber-950" : "text-white"}>
+                {beneficiaryName}
+              </strong>
+              .
+            </>
+          ) : isObjectProfile ? (
+            <>
+              Guardá la ubicación de{" "}
               <strong className={isLight ? "text-amber-950" : "text-white"}>
                 {beneficiaryName}
               </strong>{" "}
-              y pedir ayuda.
+              para encontrarlo después (auto, valija, etc.). Si lo encontraste
+              perdido, también podés avisar al dueño.
             </>
           ) : (
             <>
@@ -82,16 +105,37 @@ export function LocationPrompt({
           )}
         </p>
 
+        {!denied && isObjectProfile && onSave && (
+          <Button
+            type="button"
+            size="xl"
+            disabled={busy}
+            onClick={onSave}
+            className="mt-6 w-full gap-2 bg-sky-500 py-6 text-lg font-black text-white hover:bg-sky-400"
+          >
+            <Bookmark className="h-6 w-6" aria-hidden />
+            {status === "saving" ? "Guardando..." : "Guardar ubicación"}
+          </Button>
+        )}
+
         {!denied && (
           <Button
             type="button"
             size="xl"
-            disabled={status === "loading"}
+            disabled={busy}
             onClick={onShare}
-            className="mt-6 w-full gap-2 bg-amber-500 py-6 text-lg font-black text-black hover:bg-amber-400"
+            className={`w-full gap-2 py-6 text-lg font-black ${
+              isObjectProfile
+                ? "mt-3 bg-amber-500 text-black hover:bg-amber-400"
+                : "mt-6 bg-amber-500 text-black hover:bg-amber-400"
+            }`}
           >
             <MapPin className="h-6 w-6" aria-hidden />
-            {status === "loading" ? "Obteniendo GPS..." : "Compartir mi ubicación"}
+            {status === "loading"
+              ? "Obteniendo GPS..."
+              : isObjectProfile
+                ? "Avisar al dueño con mi ubicación"
+                : "Compartir mi ubicación"}
           </Button>
         )}
 
@@ -101,9 +145,21 @@ export function LocationPrompt({
               isLight ? "text-amber-800/90" : "text-amber-200/90"
             }`}
           >
-            Al compartir, enviamos tu ubicación GPS al tutor responsable para ayudar en la
-            asistencia. Podés continuar sin ubicación.{" "}
-            <a href="/privacidad" className="underline underline-offset-2 hover:text-white">
+            {isObjectProfile ? (
+              <>
+                Guardar ubicación solo actualiza el pin del objeto (sin alerta).
+                Avisar al dueño sí le manda una notificación.{" "}
+              </>
+            ) : (
+              <>
+                Al compartir, enviamos tu ubicación GPS al tutor responsable para
+                ayudar en la asistencia. Podés continuar sin ubicación.{" "}
+              </>
+            )}
+            <a
+              href="/privacidad"
+              className="underline underline-offset-2 hover:text-white"
+            >
               Privacidad
             </a>
           </p>
@@ -128,7 +184,7 @@ export function LocationPrompt({
             className="mt-4 w-full gap-2 bg-green-600 py-6 text-lg font-black text-white hover:bg-green-500"
           >
             <Phone className="h-6 w-6" aria-hidden />
-            Ver contactos de emergencia
+            Ver contactos
           </Button>
         )}
 
@@ -137,9 +193,13 @@ export function LocationPrompt({
             type="button"
             variant="ghost"
             onClick={onShare}
-            className={isLight ? "mt-3 text-amber-800 hover:bg-amber-100" : "mt-3 text-amber-200 hover:bg-amber-900/50"}
+            className={
+              isLight
+                ? "mt-3 text-amber-800 hover:bg-amber-100"
+                : "mt-3 text-amber-200 hover:bg-amber-900/50"
+            }
           >
-            Intentar compartir ubicación de nuevo
+            Intentar con GPS de nuevo
           </Button>
         )}
 
@@ -148,7 +208,11 @@ export function LocationPrompt({
             type="button"
             variant="ghost"
             onClick={onSkip}
-            className={isLight ? "mt-4 text-amber-800 hover:bg-amber-100" : "mt-4 text-amber-100 hover:bg-amber-900/50"}
+            className={
+              isLight
+                ? "mt-4 text-amber-800 hover:bg-amber-100"
+                : "mt-4 text-amber-100 hover:bg-amber-900/50"
+            }
           >
             Continuar sin ubicación
           </Button>

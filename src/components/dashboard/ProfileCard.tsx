@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Eye, Pencil, Trash2, QrCode, X } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
+import { SavedLocationPanel } from "@/components/dashboard/SavedLocationPanel";
 import { Button } from "@/components/ui/Button";
 import { PROFILE_TYPES } from "@/lib/profile-types";
 import { cn } from "@/lib/utils/cn";
@@ -93,6 +94,21 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
             </div>
           )}
         </dl>
+
+        {profile.profile_type === "object" &&
+          profile.saved_latitude != null &&
+          profile.saved_longitude != null &&
+          profile.saved_location_at && (
+            <div className="mt-4">
+              <SavedLocationPanel
+                compact
+                beneficiaryName={profile.beneficiary_name}
+                latitude={Number(profile.saved_latitude)}
+                longitude={Number(profile.saved_longitude)}
+                savedAt={profile.saved_location_at}
+              />
+            </div>
+          )}
 
         <div className="mt-5 space-y-2">
           <div className="grid grid-cols-2 gap-2">

@@ -319,6 +319,7 @@ export async function listQrProfilesByTutor(tutorId: string): Promise<QrProfile[
       secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
+      saved_latitude, saved_longitude, saved_location_at,
       sensitive_data_consent_at, sensitive_data_consent_version,
       is_active, created_at,
       CASE WHEN avatar_data IS NOT NULL THEN encode(avatar_data, 'base64') ELSE NULL END AS avatar_b64,
@@ -343,6 +344,7 @@ export async function findQrProfileBySlug(
           secondary_contact_name, secondary_contact_phone,
           instructions, medical_notes, allergies, blood_type,
           clinical_pdf_filename, clinical_pdf_uploaded_at,
+          saved_latitude, saved_longitude, saved_location_at,
           is_active, created_at,
           CASE WHEN avatar_data IS NOT NULL THEN encode(avatar_data, 'base64') ELSE NULL END AS avatar_b64,
           avatar_mime
@@ -357,6 +359,7 @@ export async function findQrProfileBySlug(
           secondary_contact_name, secondary_contact_phone,
           instructions, medical_notes, allergies, blood_type,
           clinical_pdf_filename, clinical_pdf_uploaded_at,
+          saved_latitude, saved_longitude, saved_location_at,
           is_active, created_at,
           CASE WHEN avatar_data IS NOT NULL THEN encode(avatar_data, 'base64') ELSE NULL END AS avatar_b64,
           avatar_mime
@@ -376,6 +379,7 @@ export async function findQrProfileById(id: string): Promise<QrProfile | null> {
       secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
+      saved_latitude, saved_longitude, saved_location_at,
       sensitive_data_consent_at, sensitive_data_consent_version,
       is_active, created_at,
       CASE WHEN avatar_data IS NOT NULL THEN encode(avatar_data, 'base64') ELSE NULL END AS avatar_b64,
@@ -457,6 +461,7 @@ export async function createQrProfile(
       secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
+      saved_latitude, saved_longitude, saved_location_at,
       sensitive_data_consent_at, sensitive_data_consent_version,
       is_active, created_at
   `;
@@ -570,6 +575,7 @@ export async function updateQrProfile(
       secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies, blood_type,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
+      saved_latitude, saved_longitude, saved_location_at,
       sensitive_data_consent_at, sensitive_data_consent_version,
       is_active, created_at
   `;
@@ -587,6 +593,32 @@ export async function deleteQrProfile(
     RETURNING id
   `;
   return rows.length > 0;
+}
+
+/**
+ * Guarda la última ubicación de un perfil objeto. No crea alerta ni notifica.
+ */
+export async function saveObjectProfileLocation(
+  slug: string,
+  latitude: number,
+  longitude: number,
+): Promise<{ id: string; beneficiary_name: string; saved_location_at: string } | null> {
+  const sql = getSql();
+  const rows = await sql`
+    UPDATE qr_profiles
+    SET
+      saved_latitude = ${latitude},
+      saved_longitude = ${longitude},
+      saved_location_at = NOW()
+    WHERE slug = ${slug}
+      AND is_active = TRUE
+      AND profile_type = 'object'
+    RETURNING id, beneficiary_name, saved_location_at
+  `;
+  const row = rows[0] as
+    | { id: string; beneficiary_name: string; saved_location_at: string }
+    | undefined;
+  return row ?? null;
 }
 
 export async function createScanLog(data: {

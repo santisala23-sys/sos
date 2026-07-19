@@ -11,8 +11,15 @@ export interface User {
   created_at: string;
 }
 
-/** Perfil público sin IDs internos expuestos al cliente */
-export type PublicQrProfile = Omit<QrProfile, "id" | "tutor_id">;
+/** Perfil público sin IDs internos ni ubicación guardada del dueño */
+export type PublicQrProfile = Omit<
+  QrProfile,
+  | "id"
+  | "tutor_id"
+  | "saved_latitude"
+  | "saved_longitude"
+  | "saved_location_at"
+>;
 
 export interface QrProfile {
   id: string;
@@ -30,6 +37,10 @@ export interface QrProfile {
   blood_type: string | null;
   clinical_pdf_filename: string | null;
   clinical_pdf_uploaded_at: string | null;
+  /** Última ubicación guardada (perfiles objeto: auto, valija, etc.). */
+  saved_latitude?: number | null;
+  saved_longitude?: number | null;
+  saved_location_at?: string | null;
   sensitive_data_consent_at?: string | null;
   sensitive_data_consent_version?: string | null;
   is_active: boolean;
