@@ -11,6 +11,7 @@ import {
   ArrowRight,
   Bell,
   ClipboardList,
+  Eye,
   MapPin,
   MessageCircle,
   Package,
@@ -227,8 +228,11 @@ export default function HomePage() {
                       <p className="text-sm font-medium text-neutral-600">
                         {detail}
                       </p>
-                      <span className="shrink-0 text-sm font-bold text-violet-700">
-                        Ver →
+                      <span
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700 transition-colors group-hover:bg-violet-600 group-hover:text-white"
+                        aria-hidden
+                      >
+                        <Eye className="h-4 w-4" />
                       </span>
                     </div>
                   </article>

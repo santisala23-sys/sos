@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { UserRound } from "lucide-react";
 import { buildWhatsAppUrl } from "@/lib/utils/contact";
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -15,17 +16,39 @@ export function FloatingWhatsAppButton() {
   const pathname = usePathname();
   if (pathname.startsWith("/p/")) return null;
 
-  const href = buildWhatsAppUrl("Hola SOSme");
+  const href = buildWhatsAppUrl("Hola SOSme, tengo una consulta.");
+
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-5 right-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl shadow-green-900/20 transition-transform hover:scale-[1.03] active:scale-[0.98]"
-      aria-label="Contactar por WhatsApp"
-      title="WhatsApp"
+      className="group fixed bottom-5 right-4 z-50 flex max-w-[calc(100vw-2rem)] items-end gap-3 sm:right-5"
+      aria-label="¿Tenés alguna consulta? Hablá con nosotros por WhatsApp"
     >
-      <WhatsAppIcon className="h-7 w-7" />
+      <div className="relative hidden min-w-[10.5rem] max-w-[13rem] rounded-2xl rounded-br-sm border border-violet-100 bg-white px-4 py-3 shadow-xl shadow-violet-500/15 transition-transform duration-300 group-hover:-translate-y-0.5 sm:block">
+        <p className="text-sm font-bold leading-snug text-neutral-900">
+          ¿Tenés alguna consulta?
+        </p>
+        <p className="mt-1 text-xs font-medium text-violet-700">
+          Hablá con nosotros →
+        </p>
+        <span
+          className="absolute -bottom-2 right-5 h-3 w-3 rotate-45 border-b border-r border-violet-100 bg-white"
+          aria-hidden
+        />
+      </div>
+
+      <div className="relative shrink-0 sos-contact-float">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-2xl shadow-violet-500/30 ring-4 ring-white transition-transform group-hover:scale-105 group-active:scale-95">
+          <UserRound className="h-8 w-8" strokeWidth={1.75} aria-hidden />
+        </div>
+        <span className="absolute -bottom-0.5 -right-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg ring-2 ring-white">
+          <WhatsAppIcon className="h-4 w-4" />
+        </span>
+      </div>
+
+      <span className="sr-only">Abrir WhatsApp</span>
     </a>
   );
 }
