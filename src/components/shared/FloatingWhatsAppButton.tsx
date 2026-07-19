@@ -1,7 +1,7 @@
 "use client";
 
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { UserRound } from "lucide-react";
 import { buildWhatsAppUrl } from "@/lib/utils/contact";
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -23,29 +23,36 @@ export function FloatingWhatsAppButton() {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group fixed bottom-5 right-4 z-50 flex max-w-[calc(100vw-2rem)] items-end gap-3 sm:right-5"
+      className="group fixed bottom-4 right-3 z-50 flex max-w-[calc(100vw-1.5rem)] items-end gap-2.5 sm:bottom-5 sm:right-5 sm:gap-3"
       aria-label="¿Tenés alguna consulta? Hablá con nosotros por WhatsApp"
     >
-      <div className="relative hidden min-w-[10.5rem] max-w-[13rem] rounded-2xl rounded-br-sm border border-violet-100 bg-white px-4 py-3 shadow-xl shadow-violet-500/15 transition-transform duration-300 group-hover:-translate-y-0.5 sm:block">
+      <div className="relative mb-2 hidden max-w-[13rem] rounded-2xl rounded-br-md border border-violet-100/90 bg-white px-4 py-3 shadow-xl shadow-violet-500/15 transition-transform duration-300 group-hover:-translate-y-0.5 sm:mb-3 sm:block">
         <p className="text-sm font-bold leading-snug text-neutral-900">
           ¿Tenés alguna consulta?
         </p>
-        <p className="mt-1 text-xs font-medium text-violet-700">
-          Hablá con nosotros →
+        <p className="mt-1 text-xs font-semibold text-violet-700">
+          Hablá con nosotros por WhatsApp
         </p>
         <span
-          className="absolute -bottom-2 right-5 h-3 w-3 rotate-45 border-b border-r border-violet-100 bg-white"
+          className="absolute -bottom-2 right-6 h-3 w-3 rotate-45 border-b border-r border-violet-100 bg-white"
           aria-hidden
         />
       </div>
 
       <div className="relative shrink-0 sos-contact-float">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-2xl shadow-violet-500/30 ring-4 ring-white transition-transform group-hover:scale-105 group-active:scale-95">
-          <UserRound className="h-8 w-8" strokeWidth={1.75} aria-hidden />
+        <div className="relative h-[5.25rem] w-[5.25rem] sm:h-[6.25rem] sm:w-[6.25rem]">
+          <Image
+            src="/images/contact/bitmoji-support.png"
+            alt=""
+            width={256}
+            height={256}
+            className="h-full w-full object-contain drop-shadow-[0_12px_24px_rgba(88,28,135,0.28)] transition-transform duration-300 group-hover:scale-105 group-active:scale-95"
+            sizes="100px"
+          />
+          <span className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg ring-[3px] ring-white">
+            <WhatsAppIcon className="h-[1.125rem] w-[1.125rem]" />
+          </span>
         </div>
-        <span className="absolute -bottom-0.5 -right-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg ring-2 ring-white">
-          <WhatsAppIcon className="h-4 w-4" />
-        </span>
       </div>
 
       <span className="sr-only">Abrir WhatsApp</span>
