@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { buildWhatsAppUrl } from "@/lib/utils/contact";
 
@@ -16,30 +15,17 @@ export function FloatingWhatsAppButton() {
   const pathname = usePathname();
   if (pathname.startsWith("/p/")) return null;
 
-  const href = buildWhatsAppUrl("Hola SOSme, tengo una consulta.");
-
+  const href = buildWhatsAppUrl("Hola SOSme");
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group fixed bottom-2 right-0 z-50 block translate-x-1 sm:bottom-4 sm:translate-x-2"
+      className="fixed bottom-5 right-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl shadow-green-900/20 transition-transform hover:scale-[1.03] active:scale-[0.98]"
       aria-label="Contactar por WhatsApp"
       title="WhatsApp"
     >
-      <div className="relative sos-contact-float h-[6.75rem] w-[6.75rem] sm:h-[8.75rem] sm:w-[8.75rem]">
-        <Image
-          src="/images/contact/bitmoji-support.png"
-          alt=""
-          width={350}
-          height={350}
-          className="h-full w-full object-contain object-bottom drop-shadow-[0_18px_28px_rgba(88,28,135,0.32)] transition-transform duration-300 group-hover:scale-[1.03] group-active:scale-[0.98]"
-          sizes="(max-width: 640px) 108px, 140px"
-        />
-        <span className="absolute bottom-0 right-0 flex h-10 w-10 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg ring-[3px] ring-white sm:h-11 sm:w-11">
-          <WhatsAppIcon className="h-5 w-5 sm:h-[1.35rem] sm:w-[1.35rem]" />
-        </span>
-      </div>
+      <WhatsAppIcon className="h-7 w-7" />
     </a>
   );
 }

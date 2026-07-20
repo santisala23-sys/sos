@@ -36,17 +36,3 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
-
-@keyframes sos-contact-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
-.sos-contact-float {
-  animation: sos-contact-float 3s ease-in-out infinite;
-}
