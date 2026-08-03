@@ -13,6 +13,7 @@ import {
 import type { ScanLogWithProfile } from "@/types/database";
 import { ScanLocationMap, getScanLocationMapsUrl } from "@/components/dashboard/ScanLocationMap";
 import { alertTypeLabel, formatDateTime } from "@/lib/utils/format";
+import { cn } from "@/lib/utils/cn";
 import { ScanMessageThread } from "@/components/shared/ScanMessageThread";
 import { Button } from "@/components/ui/Button";
 
@@ -81,6 +82,20 @@ export function LogDetailView({ log }: LogDetailViewProps) {
               <p className="mt-1 text-sm text-neutral-600">
                 {formatDateTime(log.scanned_at)}
               </p>
+              {hasLocation && (
+                <p
+                  className={cn(
+                    "mt-3 text-sm leading-relaxed",
+                    isApproximateLocation
+                      ? "text-violet-800"
+                      : "text-green-800",
+                  )}
+                >
+                  {isApproximateLocation
+                    ? "No compartieron ubicación exacta; podemos estimar una zona aproximada del escaneo."
+                    : "Compartieron ubicación exacta del escaneo."}
+                </p>
+              )}
             </div>
           </div>
         </div>

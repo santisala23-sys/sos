@@ -22,6 +22,21 @@ export function getGoogleMapsEmbedUrl(
   return `https://maps.google.com/maps?q=${latitude},${longitude}&z=${zoom}&output=embed`;
 }
 
+/** OSM embed centered on coords without a pin marker (approximate zone maps). */
+export function getOsmEmbedUrl(
+  latitude: number,
+  longitude: number,
+  radiusKm = 2.5,
+): string {
+  const latDelta = radiusKm / 111;
+  const lngDelta = radiusKm / (111 * Math.cos((latitude * Math.PI) / 180));
+  const minLat = latitude - latDelta;
+  const maxLat = latitude + latDelta;
+  const minLng = longitude - lngDelta;
+  const maxLng = longitude + lngDelta;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${minLng},${minLat},${maxLng},${maxLat}&layer=mapnik`;
+}
+
 export type AlertPayload = {
   type: "scan" | "sos" | "location" | "note" | "message";
   beneficiaryName: string;
