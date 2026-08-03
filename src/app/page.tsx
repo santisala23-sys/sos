@@ -361,10 +361,10 @@ export default async function HomePage() {
               <p className="mt-4 text-center text-sm text-neutral-500">
                 ¿Necesitás más de 1?{" "}
                 <Link
-                  href="/pricing"
+                  href="/contacto"
                   className="font-semibold text-violet-700 hover:underline"
                 >
-                  Ver planes
+                  Contactanos
                 </Link>
               </p>
             </article>

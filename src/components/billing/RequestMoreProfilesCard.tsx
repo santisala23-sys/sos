@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { MessageCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import {
@@ -64,11 +63,6 @@ export function RequestMoreProfilesCard({
                 Pedir más por WhatsApp
               </Button>
             </a>
-            <Link href="/pricing">
-              <Button type="button" variant="secondary" size="sm">
-                Ver planes
-              </Button>
-            </Link>
           </div>
         </div>
       </div>

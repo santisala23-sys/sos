@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/Button";
 const NAV_LINKS = [
   { href: "/", label: "Inicio" },
   { href: "/#catalogo", label: "Tienda" },
-  { href: "/pricing", label: "Planes" },
 ] as const;
 
 type AuthNavbarProps = {

@@ -31,7 +31,6 @@ const PRODUCT_LINKS = [
   { href: "/servicios/mascotas", label: "Mascotas" },
   { href: "/servicios/objetos", label: "Objetos y valijas" },
   { href: "/#catalogo", label: "Tienda" },
-  { href: "/pricing", label: "Planes" },
 ] as const;
 
 const ACCOUNT_LINKS = [

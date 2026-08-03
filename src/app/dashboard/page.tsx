@@ -107,7 +107,7 @@ export default function DashboardPage() {
 
   function handleCreateProfile() {
     if (atProfileLimit) {
-      router.push("/pricing");
+      router.push("/contacto");
       return;
     }
     router.push("/dashboard/perfiles/nuevo");
@@ -333,13 +333,6 @@ export default function DashboardPage() {
             <p className="mt-2 text-sm leading-relaxed text-neutral-600">
               Plan gratis: 1 perfil para persona, mascota u objeto. ¿Necesitás más?{" "}
               <Link
-                href="/pricing"
-                className="font-semibold text-violet-700 underline-offset-2 hover:underline"
-              >
-                Ver planes
-              </Link>{" "}
-              o{" "}
-              <Link
                 href="/contacto"
                 className="font-semibold text-violet-700 underline-offset-2 hover:underline"
               >
@@ -365,10 +358,10 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <Link
-                  href="/pricing"
+                  href="/contacto"
                   className="inline-flex shrink-0 items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-700"
                 >
-                  Ver planes
+                  Contactanos
                 </Link>
               </div>
             )}

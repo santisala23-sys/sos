@@ -63,8 +63,8 @@ export default function ContactoPage() {
           <Link href="/">
             <BrandLogo size="sm" />
           </Link>
-          <Link href="/pricing" className="text-sm font-medium text-violet-700 hover:underline">
-            Planes
+          <Link href="/register" className="text-sm font-medium text-violet-700 hover:underline">
+            Crear cuenta
           </Link>
         </div>
       </header>
