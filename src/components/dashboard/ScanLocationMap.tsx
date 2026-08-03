@@ -1,7 +1,6 @@
 import {
   getGoogleMapsEmbedUrl,
   getGoogleMapsUrl,
-  getOsmEmbedUrl,
 } from "@/lib/alerts/send-alert";
 
 type ScanLocationMapProps = {
@@ -21,10 +20,10 @@ export function ScanLocationMap({
 }: ScanLocationMapProps) {
   if (approximate) {
     return (
-      <div className={`relative overflow-hidden ${className}`}>
+      <div className={`relative overflow-hidden bg-neutral-200 ${className}`}>
         <iframe
           title={title}
-          src={getOsmEmbedUrl(latitude, longitude)}
+          src={getGoogleMapsEmbedUrl(latitude, longitude, true)}
           className="h-full w-full scale-[1.02] border-0"
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
@@ -32,6 +31,10 @@ export function ScanLocationMap({
         />
         <div
           className="absolute inset-0 z-10 cursor-default touch-none"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 z-[15] h-8 w-8 -translate-x-1/2 -translate-y-[calc(50%+2px)] rounded-full bg-neutral-200/95 shadow-sm ring-1 ring-neutral-300/80"
           aria-hidden
         />
         <div
