@@ -36,3 +36,14 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes cartPop {
+  0% {
+    transform: translateX(1.5rem) scale(0.92);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}

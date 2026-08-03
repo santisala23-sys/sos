@@ -42,6 +42,23 @@ export function buildPartnerInquiryMessage(params: {
   return lines.join("\n");
 }
 
+export function buildStoreCartWhatsAppMessage(params: {
+  items: { product_name: string; quantity: number; unit_price_label: string }[];
+}): string {
+  const itemLines = params.items.map(
+    (i) => `• ${i.quantity}x ${i.product_name} (${i.unit_price_label})`,
+  );
+  const lines = [
+    "Hola SOSme, quiero consultar por estos productos de la tienda:",
+    "",
+    ...itemLines,
+    "",
+    "¿Me pasás info de pago y envío? Gracias.",
+  ];
+
+  return lines.join("\n");
+}
+
 export function buildStoreOrderWhatsAppMessage(params: {
   orderId: string;
   customerName: string;
