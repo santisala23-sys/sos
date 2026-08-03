@@ -17,10 +17,25 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
 
 const NAV_LINKS = [
-  { href: "/dashboard", label: "Panel", icon: LayoutDashboard, hash: null },
-  { href: "/dashboard#perfiles", label: "Perfiles QR", icon: UserCircle2, hash: "perfiles" },
-  { href: "/dashboard#mascotas", label: "Mascotas", icon: PawPrint, hash: "mascotas" },
-  { href: "/dashboard#actividad", label: "Actividad", icon: Activity, hash: "actividad" },
+  { href: "/dashboard", label: "Panel", icon: LayoutDashboard, id: "panel" },
+  {
+    href: "/dashboard#perfiles",
+    label: "Perfiles QR",
+    icon: UserCircle2,
+    id: "perfiles",
+  },
+  {
+    href: "/dashboard#mascotas",
+    label: "Mascotas",
+    icon: PawPrint,
+    id: "mascotas",
+  },
+  {
+    href: "/dashboard/actividad",
+    label: "Actividad",
+    icon: Activity,
+    id: "actividad",
+  },
 ] as const;
 
 type PlanStatus = {
@@ -37,6 +52,7 @@ export function DashboardNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hash, setHash] = useState("");
   const [planStatus, setPlanStatus] = useState<PlanStatus | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -72,25 +88,64 @@ export function DashboardNavbar() {
       .catch(() => setPlanStatus(null));
   }, []);
 
-  const isLogDetail = pathname.startsWith("/dashboard/logs/");
+  useEffect(() => {
+    let cancelled = false;
 
-  function isActive(linkHash: (typeof NAV_LINKS)[number]["hash"]) {
-    if (linkHash === "actividad") {
-      return isLogDetail || (pathname === "/dashboard" && hash === "#actividad");
+    async function loadUnread() {
+      try {
+        const res = await fetch("/api/scan-logs");
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (!cancelled) setUnreadCount(data.unreadCount ?? 0);
+      } catch {
+        /* ignore */
+      }
     }
-    if (linkHash === "perfiles") {
+
+    loadUnread();
+    const interval = setInterval(loadUnread, 15000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [pathname]);
+
+  const isLogDetail = pathname.startsWith("/dashboard/logs/");
+  const isActividad =
+    pathname === "/dashboard/actividad" || isLogDetail;
+
+  function isActive(id: (typeof NAV_LINKS)[number]["id"]) {
+    if (id === "actividad") return isActividad;
+    if (id === "perfiles") {
       return pathname === "/dashboard" && hash === "#perfiles";
     }
-    if (linkHash === "mascotas") {
+    if (id === "mascotas") {
       return pathname === "/dashboard" && hash === "#mascotas";
     }
-    return pathname === "/dashboard" && !hash && !isLogDetail;
+    return pathname === "/dashboard" && !hash && !isActividad;
   }
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/");
     router.refresh();
+  }
+
+  function renderNavLabel(id: string, label: string) {
+    const showBadge = id === "actividad" && unreadCount > 0;
+    return (
+      <span className="inline-flex items-center gap-2">
+        {label}
+        {showBadge && (
+          <span
+            className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-black text-white shadow-sm"
+            aria-label={`${unreadCount} alertas sin leer`}
+          >
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
+      </span>
+    );
   }
 
   return (
@@ -125,21 +180,21 @@ export function DashboardNavbar() {
           className="hidden items-center gap-1 lg:flex"
           aria-label="Navegación del panel"
         >
-          {NAV_LINKS.map(({ href, label, icon: Icon, hash: linkHash }) => {
-            const active = isActive(linkHash);
+          {NAV_LINKS.map(({ href, label, icon: Icon, id }) => {
+            const active = isActive(id);
             return (
               <Link
                 key={href}
                 href={href}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-base font-medium transition-colors",
+                  "relative inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-base font-medium transition-colors",
                   active
                     ? "bg-violet-100 text-violet-800"
                     : "text-neutral-600 hover:bg-violet-50 hover:text-violet-800",
                 )}
               >
                 <Icon className="h-4 w-4" aria-hidden />
-                {label}
+                {renderNavLabel(id, label)}
               </Link>
             );
           })}
@@ -177,12 +232,13 @@ export function DashboardNavbar() {
           <p className="mb-4 rounded-2xl bg-violet-50 px-4 py-3 text-sm text-violet-800">
             <span className="font-semibold">{planStatus.planName}</span>
             {" · "}
-            {(planStatus.activeCount ?? planStatus.currentCount)}/{planStatus.currentCount} QR activos
+            {(planStatus.activeCount ?? planStatus.currentCount)}/
+            {planStatus.currentCount} QR activos
           </p>
         )}
         <nav className="flex flex-col gap-1.5" aria-label="Navegación móvil del panel">
-          {NAV_LINKS.map(({ href, label, icon: Icon, hash: linkHash }) => {
-            const active = isActive(linkHash);
+          {NAV_LINKS.map(({ href, label, icon: Icon, id }) => {
+            const active = isActive(id);
             return (
               <Link
                 key={href}
@@ -196,7 +252,7 @@ export function DashboardNavbar() {
                 onClick={() => setOpen(false)}
               >
                 <Icon className="h-5 w-5 shrink-0" aria-hidden />
-                {label}
+                {renderNavLabel(id, label)}
               </Link>
             );
           })}

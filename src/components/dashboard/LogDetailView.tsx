@@ -35,7 +35,7 @@ export function LogDetailView({ log }: LogDetailViewProps) {
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <button
         type="button"
-        onClick={() => router.push("/dashboard#actividad")}
+        onClick={() => router.push("/dashboard/actividad")}
         className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-white/80 hover:text-violet-800"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -140,9 +140,9 @@ export function LogDetailView({ log }: LogDetailViewProps) {
         </section>
       )}
 
-      <Link href="/dashboard#actividad">
+      <Link href="/dashboard/actividad">
         <Button type="button" variant="secondary" className="w-full sm:w-auto">
-          Volver al panel
+          Volver a actividad
         </Button>
       </Link>
     </main>

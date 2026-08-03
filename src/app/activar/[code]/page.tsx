@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Package } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { LegalFooter } from "@/components/legal/LegalFooter";
@@ -37,6 +37,12 @@ export default async function ActivarPage({ params }: ActivarPageProps) {
   const session = await getSession();
   const activation = toActivationPublicView(activationRow, session?.userId);
   const redirectPath = `/activar/${code}`;
+
+  // Product QR already claimed: send scanners (and owners) to the public profile,
+  // not the activation chrome with Tienda / Activar navbar.
+  if (activation.status === "claimed" && activation.publicSlug) {
+    redirect(`/p/${activation.publicSlug}`);
+  }
 
   return (
     <div className="flex min-h-dvh flex-col bg-[#faf9fc]">

@@ -13,7 +13,7 @@ export function AlertBanner({ unreadCount, latestLogId }: AlertBannerProps) {
 
   const href = latestLogId
     ? `/dashboard/logs/${latestLogId}`
-    : "/dashboard#actividad";
+    : "/dashboard/actividad";
 
   return (
     <Link

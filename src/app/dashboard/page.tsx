@@ -28,7 +28,6 @@ import {
   PushNotificationFooter,
   usePushNotifications,
 } from "@/components/dashboard/PushNotificationSetup";
-import { ScanLogsList } from "@/components/dashboard/ScanLogsList";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
 import { Button } from "@/components/ui/Button";
 
@@ -58,9 +57,10 @@ export default function DashboardPage() {
   const [accountMsg, setAccountMsg] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
-    const [profilesRes, logsRes] = await Promise.all([
+    const [profilesRes, logsRes, meRes] = await Promise.all([
       fetch("/api/qr-profiles"),
       fetch("/api/scan-logs"),
+      fetch("/api/auth/me"),
     ]);
 
     if (profilesRes.ok) {
@@ -74,21 +74,17 @@ export default function DashboardPage() {
       setUnreadCount(data.unreadCount ?? 0);
     }
 
+    if (meRes.ok) {
+      const data = await meRes.json();
+      if (data?.legal) setLegalStatus(data.legal);
+      if (data?.plan) setPlanStatus(data.plan);
+    }
+
     setLoading(false);
   }, []);
 
   useEffect(() => {
     loadData();
-    fetch("/api/auth/me")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (d?.legal) setLegalStatus(d.legal);
-        if (d?.plan) setPlanStatus(d.plan);
-      })
-      .catch(() => {
-        setLegalStatus(null);
-        setPlanStatus(null);
-      });
     const interval = setInterval(loadData, 15000);
     return () => clearInterval(interval);
   }, [loadData]);
@@ -445,26 +441,13 @@ export default function DashboardPage() {
         ) : (
           <div className="grid gap-5 lg:grid-cols-2">
             {petProfiles.map((profile) => (
-              <PetCard key={profile.id} profile={profile} />
+              <PetCard
+                key={profile.id}
+                profile={profile}
+                onRefresh={loadData}
+              />
             ))}
           </div>
-        )}
-      </DashboardSection>
-
-      <DashboardSection
-        id="actividad"
-        icon={Activity}
-        title="Actividad reciente"
-        description="Escaneos, alertas SOS y mensajes de quien leyó tu QR."
-        disabled={legalBlocked}
-      >
-        {loading ? (
-          <div className="space-y-3">
-            <div className="h-20 animate-pulse rounded-2xl bg-violet-50" />
-            <div className="h-20 animate-pulse rounded-2xl bg-violet-50" />
-          </div>
-        ) : (
-          <ScanLogsList logs={logs} />
         )}
       </DashboardSection>
 
