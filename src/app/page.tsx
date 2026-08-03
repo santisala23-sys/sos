@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { HeroImageCarousel } from "@/components/marketing/HeroImageCarousel";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { HowItWorksSection } from "@/components/marketing/HowItWorksSection";
 import { MarketingBackground } from "@/components/marketing/MarketingBackground";
@@ -90,16 +91,7 @@ export default async function HomePage() {
             <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
               <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-violet-400/20 via-indigo-300/15 to-rose-300/20 blur-2xl" />
               <div className="relative overflow-hidden rounded-[2rem] border border-white/90 bg-white/70 p-2 shadow-2xl shadow-violet-500/20 backdrop-blur-sm">
-                <div className="relative aspect-[5/4] max-h-[28rem] overflow-hidden rounded-[1.5rem] sm:max-h-[32rem] lg:max-h-[36rem]">
-                  <Image
-                    src="/images/landing/hero-golden-retriever.jpg"
-                    alt="Golden retriever con chapita SOSme en el collar en un jardín"
-                    fill
-                    priority
-                    className="object-cover object-[center_35%]"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                  />
-                </div>
+                <HeroImageCarousel />
               </div>
             </div>
           </div>
