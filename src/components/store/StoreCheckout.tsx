@@ -17,7 +17,8 @@ import {
   formatStorePrice,
   getStoreProductTypeLabel,
 } from "@/lib/store/product-types";
-import { getStoreProductImage } from "@/lib/store/product-images";
+import { getStoreProductImages } from "@/lib/store/product-images";
+import { ProductImageCarousel } from "@/components/store/ProductImageCarousel";
 import {
   buildStoreCartWhatsAppMessage,
   buildWhatsAppUrl,
@@ -54,17 +55,19 @@ function ProductCard({
   onSetQty,
   onOpenCart,
 }: ProductCardProps) {
-  const imageSrc = getStoreProductImage(product);
+  const images = getStoreProductImages(product);
 
   return (
     <article className="group relative flex h-full min-h-[26rem] flex-col overflow-hidden rounded-[1.75rem] border border-violet-200/70 bg-white shadow-lg shadow-violet-500/8 ring-1 ring-violet-100/80 transition-all duration-300 hover:border-violet-300/80 hover:shadow-2xl hover:shadow-violet-500/15">
       <div className="relative aspect-[5/4] overflow-hidden bg-gradient-to-br from-violet-100 via-indigo-50 to-white">
-        {imageSrc ? (
+        {images.length > 1 ? (
+          <ProductImageCarousel images={images} alt={product.name} />
+        ) : images.length === 1 ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={imageSrc}
+            src={images[0]}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <span

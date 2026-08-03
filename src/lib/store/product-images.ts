@@ -8,6 +8,14 @@ export const STORE_PRODUCT_IMAGES_BY_SLUG: Record<string, string> = {
   "sticker-qr": "/images/products/sticker-qr.jpg",
 };
 
+/** Slug → multiple images (carousel). Takes precedence over image_url. */
+export const STORE_PRODUCT_GALLERY_BY_SLUG: Record<string, readonly string[]> = {
+  "collar-qr": [
+    "/images/landing/hero-golden-retriever.jpg",
+    "/images/landing/hero-golden-retriever-2.jpg",
+  ],
+};
+
 export const STORE_PRODUCT_IMAGES_BY_TYPE: Record<
   Exclude<StoreProductType, "otro">,
   string
@@ -37,4 +45,18 @@ export function getStoreProductImage(product: {
   }
 
   return null;
+}
+
+export function getStoreProductImages(product: {
+  slug: string;
+  product_type: string;
+  image_url?: string | null;
+}): string[] {
+  const gallery = STORE_PRODUCT_GALLERY_BY_SLUG[product.slug];
+  if (gallery?.length) {
+    return [...gallery];
+  }
+
+  const single = getStoreProductImage(product);
+  return single ? [single] : [];
 }
