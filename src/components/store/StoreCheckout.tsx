@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
+  ChevronLeft,
+  ChevronRight,
   MessageCircle,
   Minus,
   Plus,
@@ -29,20 +31,142 @@ type StoreCheckoutProps = {
   products: StoreProductRow[];
 };
 
+const AUTO_ADVANCE_MS = 4500;
+const CARD_GAP_PX = 16;
+
 function productIcon(type: string): string {
   return STORE_PRODUCT_TYPES.find((t) => t.value === type)?.icon ?? "📦";
+}
+
+type ProductCardProps = {
+  product: StoreProductRow;
+  qty: number;
+  onAdd: () => void;
+  onSetQty: (qty: number) => void;
+  onOpenCart: () => void;
+};
+
+function ProductCard({
+  product,
+  qty,
+  onAdd,
+  onSetQty,
+  onOpenCart,
+}: ProductCardProps) {
+  const imageSrc = getStoreProductImage(product);
+
+  return (
+    <article className="group relative flex h-full min-h-[26rem] flex-col overflow-hidden rounded-[1.75rem] border border-violet-200/70 bg-white shadow-lg shadow-violet-500/8 ring-1 ring-violet-100/80 transition-all duration-300 hover:border-violet-300/80 hover:shadow-2xl hover:shadow-violet-500/15">
+      <div className="relative aspect-[5/4] overflow-hidden bg-gradient-to-br from-violet-100 via-indigo-50 to-white">
+        {imageSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageSrc}
+            alt={product.name}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <span
+            className="flex h-full w-full items-center justify-center text-6xl"
+            aria-hidden
+          >
+            {productIcon(product.product_type)}
+          </span>
+        )}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/90 to-transparent" />
+      </div>
+      <div className="flex flex-1 flex-col px-5 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5">
+        <span className="inline-flex w-fit rounded-full bg-violet-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-violet-700">
+          {getStoreProductTypeLabel(product.product_type)}
+        </span>
+        <h2 className="mt-3 text-lg font-black leading-tight text-neutral-900 sm:text-xl">
+          {product.name}
+        </h2>
+        <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-600">
+          {product.description}
+        </p>
+        <div className="mt-4 border-t border-violet-100/80 pt-4">
+          <p className="text-xl font-black tracking-tight text-neutral-900 sm:text-2xl">
+            {formatStorePrice(product.price_cents, product.price_label)}
+          </p>
+        </div>
+
+        {qty === 0 ? (
+          <Button
+            type="button"
+            className="mt-4 w-full gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 shadow-md shadow-violet-500/20 hover:from-violet-700 hover:to-indigo-700"
+            onClick={onAdd}
+          >
+            <ShoppingCart className="h-4 w-4" aria-hidden />
+            Agregar al carrito
+          </Button>
+        ) : (
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center rounded-xl border border-violet-200 bg-violet-50/50">
+                <button
+                  type="button"
+                  onClick={() => onSetQty(qty - 1)}
+                  className="rounded-l-xl px-3 py-2 text-neutral-600 hover:bg-white"
+                  aria-label="Quitar uno"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <span className="min-w-[2rem] text-center font-semibold tabular-nums">
+                  {qty}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onSetQty(qty + 1)}
+                  className="rounded-r-xl px-3 py-2 text-neutral-600 hover:bg-white"
+                  aria-label="Agregar uno"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenCart}
+                className="text-xs font-semibold text-violet-700 hover:underline"
+              >
+                Ver carrito
+              </button>
+            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full gap-2"
+              onClick={onAdd}
+            >
+              <Plus className="h-4 w-4" aria-hidden />
+              Agregar otro
+            </Button>
+          </div>
+        )}
+      </div>
+    </article>
+  );
 }
 
 export function StoreCheckout({ products }: StoreCheckoutProps) {
   const [cart, setCart] = useState<CartLine>({});
   const [cartOpen, setCartOpen] = useState(false);
-  const [cartAnimating, setCartAnimating] = useState(false);
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [cardsVisible, setCardsVisible] = useState(2);
+  const [cardWidth, setCardWidth] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const cartPanelRef = useRef<HTMLDivElement>(null);
 
   const cartItems = products
     .filter((p) => (cart[p.id] ?? 0) > 0)
     .map((p) => ({ product: p, quantity: cart[p.id] }));
 
   const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
+
+  const maxSlideIndex = Math.max(0, products.length - cardsVisible);
 
   const whatsappUrl =
     cartCount > 0
@@ -60,12 +184,45 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
         )
       : null;
 
+  const measureCarousel = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const width = viewport.offsetWidth;
+    const ratio = cardsVisible === 2 ? 0.44 : 0.78;
+    setViewportWidth(width);
+    setCardWidth(width * ratio);
+  }, [cardsVisible]);
+
   useEffect(() => {
-    if (!cartOpen) return;
-    setCartAnimating(true);
-    const timer = window.setTimeout(() => setCartAnimating(false), 320);
-    return () => window.clearTimeout(timer);
-  }, [cartOpen, cartCount]);
+    const mq = window.matchMedia("(min-width: 640px)");
+    const update = () => setCardsVisible(mq.matches ? 2 : 1);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    measureCarousel();
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const observer = new ResizeObserver(measureCarousel);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [measureCarousel]);
+
+  useEffect(() => {
+    setSlideIndex((index) => Math.min(index, maxSlideIndex));
+  }, [maxSlideIndex]);
+
+  useEffect(() => {
+    if (paused || products.length <= cardsVisible) return;
+
+    const id = window.setInterval(() => {
+      setSlideIndex((index) => (index >= maxSlideIndex ? 0 : index + 1));
+    }, AUTO_ADVANCE_MS);
+
+    return () => window.clearInterval(id);
+  }, [paused, maxSlideIndex, products.length, cardsVisible]);
 
   useEffect(() => {
     if (cartCount === 0) {
@@ -85,37 +242,133 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
   function addToCart(productId: string) {
     setQty(productId, (cart[productId] ?? 0) + 1);
     setCartOpen(true);
+    window.requestAnimationFrame(() => {
+      cartPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
   }
+
+  function goPrev() {
+    setSlideIndex((index) => (index <= 0 ? maxSlideIndex : index - 1));
+  }
+
+  function goNext() {
+    setSlideIndex((index) => (index >= maxSlideIndex ? 0 : index + 1));
+  }
+
+  const slideOffset = slideIndex * (cardWidth + CARD_GAP_PX);
+  const visibleWidth =
+    cardsVisible * cardWidth + (cardsVisible - 1) * CARD_GAP_PX;
+  const centerOffset = Math.max(0, (viewportWidth - visibleWidth) / 2);
+  const translateX = centerOffset - slideOffset;
+  const showArrows = products.length > cardsVisible;
 
   return (
     <>
-      {/* Botón compacto para reabrir el carrito */}
+      <div
+        className="relative mx-auto max-w-5xl"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocusCapture={() => setPaused(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setPaused(false);
+          }
+        }}
+      >
+        {showArrows && (
+          <>
+            <button
+              type="button"
+              onClick={goPrev}
+              className="absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-violet-200/80 bg-white/95 text-violet-700 shadow-lg shadow-violet-500/10 transition hover:bg-violet-50 sm:-left-2 sm:h-11 sm:w-11"
+              aria-label="Producto anterior"
+            >
+              <ChevronLeft className="h-5 w-5" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={goNext}
+              className="absolute right-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-violet-200/80 bg-white/95 text-violet-700 shadow-lg shadow-violet-500/10 transition hover:bg-violet-50 sm:-right-2 sm:h-11 sm:w-11"
+              aria-label="Producto siguiente"
+            >
+              <ChevronRight className="h-5 w-5" aria-hidden />
+            </button>
+          </>
+        )}
+
+        <div ref={viewportRef} className="overflow-hidden px-2 sm:px-8">
+          <div
+            className="flex gap-4 transition-transform duration-500 ease-out"
+            style={{
+              transform: cardWidth ? `translateX(${translateX}px)` : undefined,
+            }}
+          >
+            {products.map((product) => (
+              <div
+                key={product.id}
+                className="shrink-0"
+                style={{ width: cardWidth || undefined }}
+              >
+                <ProductCard
+                  product={product}
+                  qty={cart[product.id] ?? 0}
+                  onAdd={() => addToCart(product.id)}
+                  onSetQty={(qty) => setQty(product.id, qty)}
+                  onOpenCart={() => {
+                    setCartOpen(true);
+                    cartPanelRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "nearest",
+                    });
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {showArrows && (
+          <div className="mt-5 flex justify-center gap-2">
+            {Array.from({ length: maxSlideIndex + 1 }).map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => setSlideIndex(index)}
+                className={cn(
+                  "h-2 rounded-full transition-all",
+                  index === slideIndex
+                    ? "w-6 bg-violet-600"
+                    : "w-2 bg-violet-200 hover:bg-violet-300",
+                )}
+                aria-label={`Ir al slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
       {cartCount > 0 && !cartOpen && (
         <button
           type="button"
           onClick={() => setCartOpen(true)}
-          className="fixed top-24 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-violet-600 text-white shadow-xl shadow-violet-500/30 transition-transform hover:scale-105 active:scale-95 sm:top-28 sm:right-6"
-          aria-label={`Abrir carrito (${cartCount} productos)`}
+          className="mx-auto mt-8 flex items-center gap-2 rounded-full border border-violet-200 bg-white px-5 py-2.5 text-sm font-semibold text-violet-700 shadow-sm transition hover:bg-violet-50"
         >
-          <ShoppingCart className="h-5 w-5" aria-hidden />
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[11px] font-bold text-violet-700 ring-2 ring-violet-600">
-            {cartCount}
-          </span>
+          <ShoppingCart className="h-4 w-4" aria-hidden />
+          Ver carrito ({cartCount})
         </button>
       )}
 
-      {/* Carrito flotante arriba a la derecha */}
       <div
+        ref={cartPanelRef}
         className={cn(
-          "fixed top-24 right-4 z-50 w-[min(22rem,calc(100vw-2rem))] origin-top-right transition-all duration-300 ease-out sm:top-28 sm:right-6",
+          "mx-auto mt-8 max-w-md overflow-hidden transition-all duration-300 ease-out",
           cartOpen && cartCount > 0
-            ? "translate-x-0 scale-100 opacity-100"
-            : "pointer-events-none translate-x-6 scale-95 opacity-0",
-          cartAnimating && cartOpen && "animate-[cartPop_0.32s_ease-out]",
+            ? "max-h-[32rem] opacity-100"
+            : "pointer-events-none max-h-0 opacity-0",
         )}
         aria-hidden={!cartOpen || cartCount === 0}
       >
-        <div className="overflow-hidden rounded-2xl border border-violet-100 bg-white shadow-2xl shadow-violet-500/20">
+        <div className="overflow-hidden rounded-2xl border border-violet-100 bg-white shadow-xl shadow-violet-500/15">
           <div className="flex items-center justify-between gap-3 border-b border-violet-100 bg-gradient-to-r from-violet-50 to-indigo-50 px-4 py-3">
             <div className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md shadow-violet-500/25">
@@ -138,7 +391,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
             </button>
           </div>
 
-          <ul className="max-h-[min(18rem,45vh)] space-y-3 overflow-y-auto px-4 py-4">
+          <ul className="max-h-64 space-y-3 overflow-y-auto px-4 py-4">
             {cartItems.map(({ product, quantity }) => (
               <li
                 key={product.id}
@@ -191,104 +444,6 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
             </p>
           </div>
         </div>
-      </div>
-
-      <div className="mx-auto grid max-w-4xl gap-7 sm:grid-cols-2">
-        {products.map((product) => {
-          const qty = cart[product.id] ?? 0;
-          const imageSrc = getStoreProductImage(product);
-          return (
-            <article
-              key={product.id}
-              className="group relative flex min-h-[28rem] flex-col overflow-hidden rounded-[1.75rem] border border-violet-200/70 bg-white shadow-lg shadow-violet-500/8 ring-1 ring-violet-100/80 transition-all duration-300 hover:-translate-y-1 hover:border-violet-300/80 hover:shadow-2xl hover:shadow-violet-500/15"
-            >
-              <div className="relative aspect-[5/4] overflow-hidden bg-gradient-to-br from-violet-100 via-indigo-50 to-white">
-                {imageSrc ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={imageSrc}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center text-6xl" aria-hidden>
-                    {productIcon(product.product_type)}
-                  </span>
-                )}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/90 to-transparent" />
-              </div>
-              <div className="flex flex-1 flex-col px-6 pb-6 pt-5">
-                <span className="inline-flex w-fit rounded-full bg-violet-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-violet-700">
-                  {getStoreProductTypeLabel(product.product_type)}
-                </span>
-                <h2 className="mt-3 text-xl font-black leading-tight text-neutral-900">
-                  {product.name}
-                </h2>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-600">
-                  {product.description}
-                </p>
-                <div className="mt-5 flex items-end justify-between gap-3 border-t border-violet-100/80 pt-5">
-                  <p className="text-2xl font-black tracking-tight text-neutral-900">
-                    {formatStorePrice(product.price_cents, product.price_label)}
-                  </p>
-                </div>
-
-                {qty === 0 ? (
-                  <Button
-                    type="button"
-                    className="mt-4 w-full gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 shadow-md shadow-violet-500/20 hover:from-violet-700 hover:to-indigo-700"
-                    onClick={() => addToCart(product.id)}
-                  >
-                    <ShoppingCart className="h-4 w-4" aria-hidden />
-                    Agregar al carrito
-                  </Button>
-                ) : (
-                  <div className="mt-4 space-y-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center rounded-xl border border-violet-200 bg-violet-50/50">
-                        <button
-                          type="button"
-                          onClick={() => setQty(product.id, qty - 1)}
-                          className="rounded-l-xl px-3 py-2 text-neutral-600 hover:bg-white"
-                          aria-label="Quitar uno"
-                        >
-                          <Minus className="h-4 w-4" />
-                        </button>
-                        <span className="min-w-[2rem] text-center font-semibold tabular-nums">
-                          {qty}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setQty(product.id, qty + 1)}
-                          className="rounded-r-xl px-3 py-2 text-neutral-600 hover:bg-white"
-                          aria-label="Agregar uno"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setCartOpen(true)}
-                        className="text-xs font-semibold text-violet-700 hover:underline"
-                      >
-                        Ver carrito
-                      </button>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="w-full gap-2"
-                      onClick={() => addToCart(product.id)}
-                    >
-                      <Plus className="h-4 w-4" aria-hidden />
-                      Agregar otro
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </article>
-          );
-        })}
       </div>
 
       <p className="mt-10 text-center text-sm text-neutral-500">
