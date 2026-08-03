@@ -29,6 +29,7 @@ import {
   usePushNotifications,
 } from "@/components/dashboard/PushNotificationSetup";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
+import { ObjectSavedLocationsBanner } from "@/components/dashboard/ObjectSavedLocationsBanner";
 import { Button } from "@/components/ui/Button";
 
 export default function DashboardPage() {
@@ -311,6 +312,10 @@ export default function DashboardPage() {
 
       {scannerOpen && (
         <QrActivationScanner onClose={() => setScannerOpen(false)} />
+      )}
+
+      {!loading && !legalBlocked && (
+        <ObjectSavedLocationsBanner profiles={profiles} />
       )}
 
       <DashboardSection
