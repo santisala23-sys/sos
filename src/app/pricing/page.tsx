@@ -66,7 +66,7 @@ export default function PricingPage() {
               quieras (imprimir o digital), o comprá un
               producto en la{" "}
               <Link
-                href="/tienda"
+                href="/#catalogo"
                 className="font-semibold text-violet-700 hover:underline"
               >
                 tienda
@@ -199,10 +199,10 @@ export default function PricingPage() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-3 lg:shrink-0">
-                <Link href="/tienda">
+                <Link href="/#catalogo">
                   <Button size="lg" className="gap-2">
                     <Package className="h-5 w-5" aria-hidden />
-                    Ir a la tienda
+                    Ver catálogo
                   </Button>
                 </Link>
                 <Link href="/activar">

@@ -55,7 +55,7 @@ export function ServicePage({ service }: ServicePageProps) {
                   <ArrowRight className="h-5 w-5" aria-hidden />
                 </Button>
               </Link>
-              <Link href="/tienda">
+              <Link href="/#catalogo">
                 <Button
                   size="lg"
                   variant="secondary"

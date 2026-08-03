@@ -6,6 +6,7 @@ import { MarketingBackground } from "@/components/marketing/MarketingBackground"
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { PetHealthBookletSection } from "@/components/marketing/PetHealthBookletSection";
 import { SectionHeading } from "@/components/marketing/SectionHeading";
+import { StoreCatalogSection } from "@/components/store/StoreCatalogSection";
 import { USE_CASE_CARDS } from "@/lib/marketing/services";
 import {
   ArrowRight,
@@ -43,7 +44,7 @@ const INCLUDES = [
   { icon: Zap, text: "Sin cuotas mensuales" },
 ] as const;
 
-export default function HomePage() {
+export default async function HomePage() {
   return (
     <MarketingBackground>
       <MarketingNavbar />
@@ -83,12 +84,12 @@ export default function HomePage() {
                     <ArrowRight className="h-5 w-5" aria-hidden />
                   </Button>
                 </Link>
-                <Link href="/tienda">
+                <a href="#catalogo">
                   <Button variant="secondary" size="lg" className="gap-2 px-8">
                     <Package className="h-5 w-5" aria-hidden />
                     Ver productos
                   </Button>
-                </Link>
+                </a>
               </div>
             </div>
 
@@ -122,6 +123,10 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+
+        <HowItWorksSection />
+
+        <StoreCatalogSection />
 
         {/* Qué es */}
         <section
@@ -177,8 +182,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        <HowItWorksSection />
 
         {/* Casos de uso */}
         <section
@@ -321,12 +324,12 @@ export default function HomePage() {
                   </li>
                 ))}
               </ol>
-              <Link href="/tienda" className="mt-10 block">
+              <a href="#catalogo" className="mt-10 block">
                 <Button variant="secondary" size="lg" className="w-full gap-2">
-                  Ver tienda
+                  Ver catálogo
                   <ArrowRight className="h-5 w-5" aria-hidden />
                 </Button>
-              </Link>
+              </a>
               <p className="mt-4 text-center text-sm text-neutral-500">
                 ¿Ya lo tenés?{" "}
                 <Link
@@ -411,7 +414,7 @@ export default function HomePage() {
                   Empezar gratis
                 </Button>
               </Link>
-              <Link href="/tienda">
+              <a href="#catalogo">
                 <Button
                   size="lg"
                   variant="secondary"
@@ -419,7 +422,7 @@ export default function HomePage() {
                 >
                   Ver productos
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </section>

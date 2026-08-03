@@ -30,7 +30,7 @@ const PRODUCT_LINKS = [
   { href: "/servicios/personas", label: "Personas" },
   { href: "/servicios/mascotas", label: "Mascotas" },
   { href: "/servicios/objetos", label: "Objetos y valijas" },
-  { href: "/tienda", label: "Tienda" },
+  { href: "/#catalogo", label: "Tienda" },
   { href: "/pricing", label: "Planes" },
 ] as const;
 

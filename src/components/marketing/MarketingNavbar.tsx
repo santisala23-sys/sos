@@ -19,7 +19,7 @@ const NAV_LINKS = [
   { href: "#que-es", label: "Qué es" },
   { href: "#como-funciona", label: "Cómo funciona" },
   { href: "#casos", label: "Casos de uso" },
-  { href: "/tienda", label: "Tienda" },
+  { href: "/#catalogo", label: "Tienda" },
   { href: "/pricing", label: "Planes" },
 ] as const;
 
