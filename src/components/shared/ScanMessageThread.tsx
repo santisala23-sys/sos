@@ -533,7 +533,7 @@ export function ScanMessageThread({
             return (
               <div
                 key={msg.id}
-                className={`flex flex-col ${isOwnMessage ? "items-end" : "items-start"}`}
+                className={`flex w-full flex-col ${isOwnMessage ? "items-end" : "items-start"}`}
               >
                 <span
                   className={`mb-0.5 text-[10px] font-medium uppercase tracking-wide ${

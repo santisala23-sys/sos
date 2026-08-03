@@ -627,16 +627,20 @@ export async function createScanLog(data: {
   alert_type?: AlertType;
   latitude?: number | null;
   longitude?: number | null;
+  location_is_approximate?: boolean;
 }): Promise<Pick<ScanLog, "id" | "scanned_at">> {
   const sql = getSql();
   const rows = await sql`
-    INSERT INTO scan_logs (profile_id, user_agent, alert_type, latitude, longitude)
+    INSERT INTO scan_logs (
+      profile_id, user_agent, alert_type, latitude, longitude, location_is_approximate
+    )
     VALUES (
       ${data.profile_id},
       ${data.user_agent ?? null},
       ${data.alert_type ?? "scan"},
       ${data.latitude ?? null},
-      ${data.longitude ?? null}
+      ${data.longitude ?? null},
+      ${data.location_is_approximate ?? false}
     )
     RETURNING id, scanned_at
   `;
@@ -772,7 +776,11 @@ export async function updateScanLogLocation(
   const sql = getSql();
   const rows = await sql`
     UPDATE scan_logs
-    SET latitude = ${latitude}, longitude = ${longitude}, read_at = NULL
+    SET
+      latitude = ${latitude},
+      longitude = ${longitude},
+      location_is_approximate = FALSE,
+      read_at = NULL
     WHERE id = ${scanLogId}
     RETURNING id, scanned_at, profile_id
   `;

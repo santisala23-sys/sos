@@ -17,6 +17,8 @@ export type NotifyTutorParams = {
   scanLogId: string;
   latitude?: number | null;
   longitude?: number | null;
+  locationApproximate?: boolean;
+  locationArea?: string | null;
   scannerNote?: string | null;
 };
 
@@ -27,6 +29,8 @@ export async function notifyTutor(params: NotifyTutorParams): Promise<void> {
     scanLogId: params.scanLogId,
     latitude: params.latitude,
     longitude: params.longitude,
+    locationApproximate: params.locationApproximate,
+    locationArea: params.locationArea,
     scannerNote: params.scannerNote,
   });
 
@@ -50,6 +54,8 @@ export async function notifyTutor(params: NotifyTutorParams): Promise<void> {
     beneficiaryName: params.beneficiaryName,
     scannerNote: params.scannerNote,
     hasLocation: params.latitude != null && params.longitude != null,
+    locationApproximate: params.locationApproximate,
+    locationArea: params.locationArea,
   });
 
   const subscriptions = await listPushSubscriptionsByUser(params.tutorId);

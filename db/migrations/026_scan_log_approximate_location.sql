@@ -1,0 +1,2 @@
+ALTER TABLE scan_logs
+  ADD COLUMN IF NOT EXISTS location_is_approximate BOOLEAN NOT NULL DEFAULT FALSE;

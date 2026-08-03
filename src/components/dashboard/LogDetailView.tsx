@@ -23,6 +23,7 @@ type LogDetailViewProps = {
 export function LogDetailView({ log }: LogDetailViewProps) {
   const router = useRouter();
   const hasLocation = log.latitude != null && log.longitude != null;
+  const isApproximateLocation = Boolean(log.location_is_approximate);
   const lat = Number(log.latitude);
   const lng = Number(log.longitude);
   const isSos = log.alert_type === "sos";
@@ -94,7 +95,9 @@ export function LogDetailView({ log }: LogDetailViewProps) {
           <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4 sm:px-6">
             <span className="inline-flex items-center gap-2 font-bold text-neutral-900">
               <MapPin className="h-5 w-5 text-violet-600" aria-hidden />
-              Ubicación del escaneo
+              {isApproximateLocation
+                ? "Ubicación aproximada del escaneo"
+                : "Ubicación del escaneo"}
             </span>
             <a
               href={getGoogleMapsUrl(lat, lng)}
@@ -117,6 +120,7 @@ export function LogDetailView({ log }: LogDetailViewProps) {
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-neutral-100 px-5 py-3 sm:px-6">
             <p className="font-mono text-xs text-neutral-500">
               {lat.toFixed(5)}, {lng.toFixed(5)}
+              {isApproximateLocation ? " · aproximada por zona" : ""}
             </p>
             <a
               href={getGoogleMapsUrl(lat, lng)}

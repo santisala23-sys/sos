@@ -66,6 +66,7 @@ export const PATCH = withApi(
       scanLogId: access.scanLogId,
       latitude,
       longitude,
+      locationApproximate: false,
       scannerNote: fullLog?.scanner_note,
     });
 

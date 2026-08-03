@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { withApi } from "@/lib/api/with-api";
 import { notifyTutor } from "@/lib/alerts/notify-tutor";
 import { createScanLog, findQrProfileBySlug } from "@/lib/db/queries";
+import {
+  formatApproximateArea,
+  getApproximateGeoFromRequest,
+} from "@/lib/security/request-geo";
 import { createScanToken } from "@/lib/security/scan-token";
 
 export const POST = withApi(
@@ -25,10 +29,15 @@ export const POST = withApi(
       );
     }
 
+    const approxGeo = getApproximateGeoFromRequest(request);
+
     const scanLog = await createScanLog({
       profile_id: profile.id,
       user_agent: userAgent ?? null,
       alert_type: "scan",
+      latitude: approxGeo?.latitude ?? null,
+      longitude: approxGeo?.longitude ?? null,
+      location_is_approximate: approxGeo != null,
     });
 
     const scanToken = await createScanToken({
@@ -44,6 +53,10 @@ export const POST = withApi(
       emergencyContactPhone: profile.emergency_contact_phone,
       scannedAt: scanLog.scanned_at,
       scanLogId: scanLog.id,
+      latitude: approxGeo?.latitude ?? null,
+      longitude: approxGeo?.longitude ?? null,
+      locationApproximate: approxGeo != null,
+      locationArea: approxGeo ? formatApproximateArea(approxGeo) : null,
     });
 
     return NextResponse.json({ scanLogId: scanLog.id, scanToken });

@@ -56,6 +56,7 @@ export interface ScanLog {
   scanned_at: string;
   latitude: number | null;
   longitude: number | null;
+  location_is_approximate?: boolean;
   user_agent: string | null;
   alert_type: AlertType;
   scanner_note: string | null;

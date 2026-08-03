@@ -64,6 +64,8 @@ export function buildAlertMessage(params: {
   scanLogId: string;
   latitude?: number | null;
   longitude?: number | null;
+  locationApproximate?: boolean;
+  locationArea?: string | null;
   scannerNote?: string | null;
 }): { message: string; dashboardUrl: string; mapsUrl: string | null } {
   const dashboardUrl = getDashboardLogUrl(params.scanLogId);
@@ -72,9 +74,13 @@ export function buildAlertMessage(params: {
       ? getGoogleMapsUrl(Number(params.latitude), Number(params.longitude))
       : null;
 
-  const locationLine = mapsUrl
-    ? `Ubicación: ${mapsUrl}`
-    : "Ubicación: no compartida aún.";
+  let locationLine = "Ubicación: no compartida aún.";
+  if (mapsUrl && params.locationApproximate) {
+    const area = params.locationArea?.trim() || "zona del escaneo";
+    locationLine = `Ubicación aproximada (${area}): ${mapsUrl}`;
+  } else if (mapsUrl) {
+    locationLine = `Ubicación: ${mapsUrl}`;
+  }
 
   const noteLine = params.scannerNote?.trim()
     ? `Nota: "${params.scannerNote.trim()}"`
@@ -110,8 +116,11 @@ export function buildPushNotification(params: {
   beneficiaryName: string;
   scannerNote?: string | null;
   hasLocation?: boolean;
+  locationApproximate?: boolean;
+  locationArea?: string | null;
 }): { title: string; body: string } {
-  const { type, beneficiaryName, scannerNote, hasLocation } = params;
+  const { type, beneficiaryName, scannerNote, hasLocation, locationApproximate, locationArea } =
+    params;
   const note = scannerNote?.trim();
 
   switch (type) {
@@ -141,7 +150,12 @@ export function buildPushNotification(params: {
     default:
       return {
         title: `📱 QR escaneado — ${beneficiaryName}`,
-        body: "Alguien abrió el perfil. Tocá para ver la actividad.",
+        body:
+          hasLocation && locationApproximate
+            ? `Escaneo detectado cerca de ${locationArea?.trim() || "la zona del dispositivo"}.`
+            : hasLocation
+              ? "Alguien abrió el perfil con ubicación. Tocá para ver la actividad."
+              : "Alguien abrió el perfil. Tocá para ver la actividad.",
       };
   }
 }
