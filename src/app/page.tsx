@@ -53,12 +53,7 @@ export default async function HomePage() {
         <section className="mx-auto max-w-[88rem] px-4 pb-24 pt-8 sm:px-6 sm:pt-12 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
             <div className="text-center lg:text-left">
-              <p className="inline-flex items-center gap-2 rounded-full border border-violet-200/80 bg-white/90 px-4 py-2 text-sm font-semibold text-violet-800 shadow-sm backdrop-blur-sm">
-                <Sparkles className="h-4 w-4 text-violet-600" aria-hidden />
-                SOSme
-              </p>
-
-              <h1 className="mt-7 text-4xl font-black leading-[1.05] tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+              <h1 className="text-4xl font-black leading-[1.05] tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
                 Si alguien encuentra lo que importa,{" "}
                 <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-700 bg-clip-text text-transparent">
                   sabe cómo ayudarte
@@ -123,10 +118,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <HowItWorksSection />
-
-        <StoreCatalogSection />
-
         {/* Qué es */}
         <section
           id="que-es"
@@ -181,6 +172,10 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        <StoreCatalogSection />
+
+        <HowItWorksSection />
 
         {/* Casos de uso */}
         <section
