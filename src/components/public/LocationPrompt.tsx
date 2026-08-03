@@ -1,6 +1,7 @@
 "use client";
 
-import { Bookmark, MapPin, Phone } from "lucide-react";
+import { useState } from "react";
+import { Bookmark, MapPin, Phone, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 type LocationPromptProps = {
@@ -25,8 +26,15 @@ export function LocationPrompt({
 }: LocationPromptProps) {
   const denied = status === "denied";
   const busy = status === "loading" || status === "saving";
+  const [showSkipConfirm, setShowSkipConfirm] = useState(false);
+
+  function handleConfirmSkip() {
+    setShowSkipConfirm(false);
+    onSkip();
+  }
 
   return (
+    <>
     <section
       className={`mx-4 my-4 rounded-2xl border-4 px-5 py-8 shadow-2xl ${
         isLight
@@ -206,18 +214,73 @@ export function LocationPrompt({
         {!denied && (
           <Button
             type="button"
-            variant="ghost"
-            onClick={onSkip}
-            className={
+            variant="secondary"
+            size="lg"
+            onClick={() => setShowSkipConfirm(true)}
+            className={`mt-4 w-full border-2 py-4 text-base font-bold ${
               isLight
-                ? "mt-4 text-amber-800 hover:bg-amber-100"
-                : "mt-4 text-amber-100 hover:bg-amber-900/50"
-            }
+                ? "border-amber-400 bg-white text-amber-950 hover:bg-amber-100"
+                : "border-amber-300/90 bg-white/15 text-amber-50 hover:bg-white/25"
+            }`}
           >
             Continuar sin ubicación
           </Button>
         )}
       </div>
     </section>
+
+    {showSkipConfirm && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="skip-location-title"
+        aria-describedby="skip-location-desc"
+      >
+        <div className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl">
+          <div className="flex items-start justify-between gap-3">
+            <h3
+              id="skip-location-title"
+              className="text-xl font-black text-neutral-900"
+            >
+              ¿Estás seguro?
+            </h3>
+            <button
+              type="button"
+              onClick={() => setShowSkipConfirm(false)}
+              aria-label="Cerrar"
+              className="rounded-lg p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
+            >
+              <X className="h-5 w-5" aria-hidden />
+            </button>
+          </div>
+          <p
+            id="skip-location-desc"
+            className="mt-3 text-sm leading-relaxed text-neutral-600"
+          >
+            Vas a continuar sin compartir ubicación por ahora. Igual vas a poder
+            compartirla más adelante desde esta pantalla.
+          </p>
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full sm:w-auto"
+              onClick={() => setShowSkipConfirm(false)}
+            >
+              Volver
+            </Button>
+            <Button
+              type="button"
+              className="w-full sm:w-auto"
+              onClick={handleConfirmSkip}
+            >
+              Sí, continuar sin ubicación
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
