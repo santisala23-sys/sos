@@ -7,12 +7,12 @@ const HERO_IMAGES = [
   {
     src: "/images/landing/hero-golden-retriever.jpg",
     alt: "Golden retriever con chapita SOSme en el collar en un jardín",
-    objectPosition: "center 35%",
+    objectPosition: "50% 22%",
   },
   {
     src: "/images/landing/hero-golden-retriever-2.jpg",
     alt: "Golden retriever sonriente con chapita QR SOSme en el collar",
-    objectPosition: "center center",
+    objectPosition: "50% 18%",
   },
 ] as const;
 
@@ -35,7 +35,7 @@ export function HeroImageCarousel() {
   }, []);
 
   return (
-    <div className="relative aspect-[4/5] max-h-[32rem] overflow-hidden rounded-[1.5rem] sm:max-h-[38rem] lg:max-h-[44rem]">
+    <div className="relative h-[26rem] w-full overflow-hidden rounded-[1.5rem] sm:h-[30rem] lg:h-[34rem]">
       {HERO_IMAGES.map((image, index) => (
         <Image
           key={image.src}
@@ -44,7 +44,7 @@ export function HeroImageCarousel() {
           fill
           priority={index === 0}
           aria-hidden={index !== activeIndex}
-          className={`object-cover transition-opacity duration-700 ease-in-out ${
+          className={`object-cover object-center transition-opacity duration-700 ease-in-out ${
             index === activeIndex ? "opacity-100" : "opacity-0"
           }`}
           style={{ objectPosition: image.objectPosition }}
