@@ -193,16 +193,16 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
         </div>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mx-auto grid max-w-4xl gap-7 sm:grid-cols-2">
         {products.map((product) => {
           const qty = cart[product.id] ?? 0;
           const imageSrc = getStoreProductImage(product);
           return (
             <article
               key={product.id}
-              className="group flex flex-col overflow-hidden rounded-3xl border border-violet-100/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/10"
+              className="group relative flex min-h-[28rem] flex-col overflow-hidden rounded-[1.75rem] border border-violet-200/70 bg-white shadow-lg shadow-violet-500/8 ring-1 ring-violet-100/80 transition-all duration-300 hover:-translate-y-1 hover:border-violet-300/80 hover:shadow-2xl hover:shadow-violet-500/15"
             >
-              <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br from-violet-50 to-indigo-50">
+              <div className="relative aspect-[5/4] overflow-hidden bg-gradient-to-br from-violet-100 via-indigo-50 to-white">
                 {imageSrc ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -211,27 +211,32 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
-                  <span className="text-6xl" aria-hidden>
+                  <span className="flex h-full w-full items-center justify-center text-6xl" aria-hidden>
                     {productIcon(product.product_type)}
                   </span>
                 )}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/90 to-transparent" />
               </div>
-              <div className="flex flex-1 flex-col p-6">
-                <p className="text-xs font-bold uppercase tracking-wider text-violet-600">
+              <div className="flex flex-1 flex-col px-6 pb-6 pt-5">
+                <span className="inline-flex w-fit rounded-full bg-violet-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-violet-700">
                   {getStoreProductTypeLabel(product.product_type)}
-                </p>
-                <h2 className="mt-1 text-lg font-bold text-neutral-900">{product.name}</h2>
+                </span>
+                <h2 className="mt-3 text-xl font-black leading-tight text-neutral-900">
+                  {product.name}
+                </h2>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-600">
                   {product.description}
                 </p>
-                <p className="mt-4 text-lg font-black text-neutral-900">
-                  {formatStorePrice(product.price_cents, product.price_label)}
-                </p>
+                <div className="mt-5 flex items-end justify-between gap-3 border-t border-violet-100/80 pt-5">
+                  <p className="text-2xl font-black tracking-tight text-neutral-900">
+                    {formatStorePrice(product.price_cents, product.price_label)}
+                  </p>
+                </div>
 
                 {qty === 0 ? (
                   <Button
                     type="button"
-                    className="mt-4 w-full gap-2"
+                    className="mt-4 w-full gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 shadow-md shadow-violet-500/20 hover:from-violet-700 hover:to-indigo-700"
                     onClick={() => addToCart(product.id)}
                   >
                     <ShoppingCart className="h-4 w-4" aria-hidden />
@@ -240,11 +245,11 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
                 ) : (
                   <div className="mt-4 space-y-3">
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center rounded-xl border border-neutral-200">
+                      <div className="flex items-center rounded-xl border border-violet-200 bg-violet-50/50">
                         <button
                           type="button"
                           onClick={() => setQty(product.id, qty - 1)}
-                          className="rounded-l-xl px-3 py-2 text-neutral-600 hover:bg-neutral-50"
+                          className="rounded-l-xl px-3 py-2 text-neutral-600 hover:bg-white"
                           aria-label="Quitar uno"
                         >
                           <Minus className="h-4 w-4" />
@@ -255,7 +260,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
                         <button
                           type="button"
                           onClick={() => setQty(product.id, qty + 1)}
-                          className="rounded-r-xl px-3 py-2 text-neutral-600 hover:bg-neutral-50"
+                          className="rounded-r-xl px-3 py-2 text-neutral-600 hover:bg-white"
                           aria-label="Agregar uno"
                         >
                           <Plus className="h-4 w-4" />

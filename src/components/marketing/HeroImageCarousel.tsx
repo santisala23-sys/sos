@@ -35,7 +35,7 @@ export function HeroImageCarousel() {
   }, []);
 
   return (
-    <div className="relative h-[26rem] w-full overflow-hidden rounded-[1.5rem] sm:h-[30rem] lg:h-[34rem]">
+    <div className="relative h-[28rem] w-full overflow-hidden rounded-[1.5rem] sm:h-[32rem] lg:h-[36rem]">
       {HERO_IMAGES.map((image, index) => (
         <Image
           key={image.src}

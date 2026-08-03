@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Package } from "lucide-react";
-import { SectionHeading } from "@/components/marketing/SectionHeading";
 import { StoreCheckout } from "@/components/store/StoreCheckout";
 import { Button } from "@/components/ui/Button";
 import { listActiveStoreProducts } from "@/lib/db/queries-store";
@@ -18,17 +17,20 @@ export async function StoreCatalogSection() {
       id="catalogo"
       className="scroll-mt-32 border-y border-violet-100/80 bg-white/60 px-4 py-24 backdrop-blur-sm sm:px-6 lg:px-8"
     >
-      <div className="mx-auto max-w-6xl">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <SectionHeading
-            align="left"
-            eyebrow="Catálogo"
-            title="Elegí tu producto con QR"
-            description="Sumá al carrito y contactanos por WhatsApp para coordinar pago y envío."
-          />
+      <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl lg:text-[2.75rem] lg:leading-[1.1]">
+            Catálogo
+          </h2>
+          <p className="mt-3 text-xl font-bold text-neutral-800 sm:text-2xl">
+            Elegí tu producto con QR
+          </p>
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-neutral-600">
+            Sumá al carrito y contactanos por WhatsApp para coordinar pago y envío.
+          </p>
           <Link
             href="/register"
-            className="shrink-0 text-sm font-semibold text-violet-700 hover:underline"
+            className="mt-4 inline-block text-sm font-semibold text-violet-700 hover:underline"
           >
             ¿Preferís imprimir el QR gratis? →
           </Link>
