@@ -84,9 +84,18 @@ export function ScanLogsList({ logs }: ScanLogsListProps) {
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {log.latitude != null && log.longitude != null && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-600">
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium",
+                        log.location_is_approximate
+                          ? "bg-violet-100 text-violet-800"
+                          : "bg-green-100 text-green-800",
+                      )}
+                    >
                       <MapPin className="h-3 w-3" aria-hidden />
-                      Con ubicación
+                      {log.location_is_approximate
+                        ? "Zona aproximada (sin GPS exacto)"
+                        : "Ubicación exacta"}
                     </span>
                   )}
                   {hasNote && (

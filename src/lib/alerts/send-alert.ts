@@ -16,8 +16,10 @@ export function getGoogleMapsUrl(
 export function getGoogleMapsEmbedUrl(
   latitude: number,
   longitude: number,
+  approximate = false,
 ): string {
-  return `https://maps.google.com/maps?q=${latitude},${longitude}&z=16&output=embed`;
+  const zoom = approximate ? 13 : 16;
+  return `https://maps.google.com/maps?q=${latitude},${longitude}&z=${zoom}&output=embed`;
 }
 
 export type AlertPayload = {

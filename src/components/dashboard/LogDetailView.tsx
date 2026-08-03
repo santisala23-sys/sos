@@ -11,7 +11,7 @@ import {
   Clock,
 } from "lucide-react";
 import type { ScanLogWithProfile } from "@/types/database";
-import { getGoogleMapsEmbedUrl, getGoogleMapsUrl } from "@/lib/alerts/send-alert";
+import { ScanLocationMap, getScanLocationMapsUrl } from "@/components/dashboard/ScanLocationMap";
 import { alertTypeLabel, formatDateTime } from "@/lib/utils/format";
 import { ScanMessageThread } from "@/components/shared/ScanMessageThread";
 import { Button } from "@/components/ui/Button";
@@ -100,7 +100,7 @@ export function LogDetailView({ log }: LogDetailViewProps) {
                 : "Ubicación del escaneo"}
             </span>
             <a
-              href={getGoogleMapsUrl(lat, lng)}
+              href={getScanLocationMapsUrl(lat, lng)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-violet-700 underline-offset-2 hover:underline"
@@ -109,21 +109,35 @@ export function LogDetailView({ log }: LogDetailViewProps) {
               <ExternalLink className="h-3.5 w-3.5" aria-hidden />
             </a>
           </div>
-          <iframe
-            title="Mapa de ubicación del escaneo"
-            src={getGoogleMapsEmbedUrl(lat, lng)}
-            className="h-72 w-full border-0 sm:h-80"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            allowFullScreen
+          {isApproximateLocation && (
+            <div className="border-b border-violet-100 bg-violet-50 px-5 py-3 text-sm leading-relaxed text-violet-900 sm:px-6">
+              <strong className="font-semibold">Ubicación aproximada.</strong>{" "}
+              La persona no compartió su ubicación exacta por GPS. El círculo
+              violeta marca la zona estimada según la conexión del dispositivo.
+            </div>
+          )}
+          <ScanLocationMap
+            latitude={lat}
+            longitude={lng}
+            approximate={isApproximateLocation}
           />
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-neutral-100 px-5 py-3 sm:px-6">
-            <p className="font-mono text-xs text-neutral-500">
-              {lat.toFixed(5)}, {lng.toFixed(5)}
-              {isApproximateLocation ? " · aproximada por zona" : ""}
+            <p className="text-xs text-neutral-500">
+              {isApproximateLocation ? (
+                <>
+                  Zona estimada ·{" "}
+                  <span className="font-mono">
+                    {lat.toFixed(5)}, {lng.toFixed(5)}
+                  </span>
+                </>
+              ) : (
+                <span className="font-mono">
+                  {lat.toFixed(5)}, {lng.toFixed(5)}
+                </span>
+              )}
             </p>
             <a
-              href={getGoogleMapsUrl(lat, lng)}
+              href={getScanLocationMapsUrl(lat, lng)}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs font-semibold text-violet-700 underline-offset-2 hover:underline"
