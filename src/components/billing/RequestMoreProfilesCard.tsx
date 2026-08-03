@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { MessageCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import {
