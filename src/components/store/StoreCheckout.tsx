@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -33,6 +33,7 @@ type StoreCheckoutProps = {
 
 const AUTO_ADVANCE_MS = 4500;
 const CARD_GAP_PX = 16;
+const LOOP_COPIES = 3;
 
 function productIcon(type: string): string {
   return STORE_PRODUCT_TYPES.find((t) => t.value === type)?.icon ?? "📦";
@@ -151,14 +152,24 @@ function ProductCard({
 export function StoreCheckout({ products }: StoreCheckoutProps) {
   const [cart, setCart] = useState<CartLine>({});
   const [cartOpen, setCartOpen] = useState(false);
-  const [slideIndex, setSlideIndex] = useState(0);
+  const [slideIndex, setSlideIndex] = useState(products.length);
   const [cardsVisible, setCardsVisible] = useState(2);
   const [cardWidth, setCardWidth] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [animateSlide, setAnimateSlide] = useState(true);
 
   const viewportRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const cartPanelRef = useRef<HTMLDivElement>(null);
+
+  const loopProducts = useMemo(
+    () =>
+      products.length > 0
+        ? Array.from({ length: LOOP_COPIES }, () => products).flat()
+        : [],
+    [products],
+  );
 
   const cartItems = products
     .filter((p) => (cart[p.id] ?? 0) > 0)
@@ -166,7 +177,12 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
 
   const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
 
-  const maxSlideIndex = Math.max(0, products.length - cardsVisible);
+  const canLoop = products.length > 1;
+  const activeDot =
+    products.length > 0
+      ? ((slideIndex - products.length) % products.length + products.length) %
+        products.length
+      : 0;
 
   const whatsappUrl =
     cartCount > 0
@@ -188,7 +204,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
     const viewport = viewportRef.current;
     if (!viewport) return;
     const width = viewport.offsetWidth;
-    const ratio = cardsVisible === 2 ? 0.44 : 0.78;
+    const ratio = cardsVisible === 2 ? 0.42 : 0.76;
     setViewportWidth(width);
     setCardWidth(width * ratio);
   }, [cardsVisible]);
@@ -211,18 +227,49 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
   }, [measureCarousel]);
 
   useEffect(() => {
-    setSlideIndex((index) => Math.min(index, maxSlideIndex));
-  }, [maxSlideIndex]);
+    setSlideIndex(products.length);
+  }, [products.length]);
 
   useEffect(() => {
-    if (paused || products.length <= cardsVisible) return;
+    if (paused || !canLoop) return;
 
     const id = window.setInterval(() => {
-      setSlideIndex((index) => (index >= maxSlideIndex ? 0 : index + 1));
+      setAnimateSlide(true);
+      setSlideIndex((index) => index + 1);
     }, AUTO_ADVANCE_MS);
 
     return () => window.clearInterval(id);
-  }, [paused, maxSlideIndex, products.length, cardsVisible]);
+  }, [paused, canLoop]);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || products.length === 0) return;
+
+    function handleTransitionEnd(event: TransitionEvent) {
+      if (event.propertyName !== "transform") return;
+
+      setSlideIndex((index) => {
+        if (index >= products.length * 2) {
+          setAnimateSlide(false);
+          return index - products.length;
+        }
+        if (index < products.length) {
+          setAnimateSlide(false);
+          return index + products.length;
+        }
+        return index;
+      });
+    }
+
+    track.addEventListener("transitionend", handleTransitionEnd);
+    return () => track.removeEventListener("transitionend", handleTransitionEnd);
+  }, [products.length]);
+
+  useEffect(() => {
+    if (animateSlide) return;
+    const id = window.requestAnimationFrame(() => setAnimateSlide(true));
+    return () => window.cancelAnimationFrame(id);
+  }, [animateSlide]);
 
   useEffect(() => {
     if (cartCount === 0) {
@@ -248,11 +295,18 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
   }
 
   function goPrev() {
-    setSlideIndex((index) => (index <= 0 ? maxSlideIndex : index - 1));
+    setAnimateSlide(true);
+    setSlideIndex((index) => index - 1);
   }
 
   function goNext() {
-    setSlideIndex((index) => (index >= maxSlideIndex ? 0 : index + 1));
+    setAnimateSlide(true);
+    setSlideIndex((index) => index + 1);
+  }
+
+  function goToDot(dotIndex: number) {
+    setAnimateSlide(true);
+    setSlideIndex(products.length + dotIndex);
   }
 
   const slideOffset = slideIndex * (cardWidth + CARD_GAP_PX);
@@ -260,7 +314,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
     cardsVisible * cardWidth + (cardsVisible - 1) * CARD_GAP_PX;
   const centerOffset = Math.max(0, (viewportWidth - visibleWidth) / 2);
   const translateX = centerOffset - slideOffset;
-  const showArrows = products.length > cardsVisible;
+  const showArrows = products.length > 1;
 
   return (
     <>
@@ -298,14 +352,18 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
 
         <div ref={viewportRef} className="overflow-hidden px-2 sm:px-8">
           <div
-            className="flex gap-4 transition-transform duration-500 ease-out"
+            ref={trackRef}
+            className={cn(
+              "flex gap-4",
+              animateSlide && "transition-transform duration-500 ease-out",
+            )}
             style={{
               transform: cardWidth ? `translateX(${translateX}px)` : undefined,
             }}
           >
-            {products.map((product) => (
+            {loopProducts.map((product, index) => (
               <div
-                key={product.id}
+                key={`${product.id}-${index}`}
                 className="shrink-0"
                 style={{ width: cardWidth || undefined }}
               >
@@ -329,18 +387,18 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
 
         {showArrows && (
           <div className="mt-5 flex justify-center gap-2">
-            {Array.from({ length: maxSlideIndex + 1 }).map((_, index) => (
+            {products.map((_, index) => (
               <button
                 key={index}
                 type="button"
-                onClick={() => setSlideIndex(index)}
+                onClick={() => goToDot(index)}
                 className={cn(
                   "h-2 rounded-full transition-all",
-                  index === slideIndex
+                  index === activeDot
                     ? "w-6 bg-violet-600"
                     : "w-2 bg-violet-200 hover:bg-violet-300",
                 )}
-                aria-label={`Ir al slide ${index + 1}`}
+                aria-label={`Ir al producto ${index + 1}`}
               />
             ))}
           </div>

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ChevronRight } from "lucide-react";
 
 const STEPS = [
   {
@@ -62,7 +63,7 @@ type Step = (typeof STEPS)[number];
 
 function StepCard({ step, title, text, image, imageAlt }: Step) {
   return (
-    <li className="flex w-full flex-col items-center text-center">
+    <div className="flex w-full max-w-[16rem] flex-col items-center text-center sm:max-w-none">
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-base font-black text-white shadow-md shadow-violet-500/20 ring-2 ring-white">
         {step}
       </div>
@@ -76,7 +77,7 @@ function StepCard({ step, title, text, image, imageAlt }: Step) {
         className="mt-5 h-auto w-full max-w-[14rem] rounded-2xl"
         sizes="(max-width: 640px) 224px, 224px"
       />
-    </li>
+    </div>
   );
 }
 
@@ -90,17 +91,33 @@ function StepRow({
   steps: readonly Step[];
 }) {
   return (
-    <div className="rounded-[1.75rem] border border-violet-100/80 bg-gradient-to-b from-violet-50/40 to-white px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+    <div className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <div className="mx-auto mb-8 max-w-2xl text-center">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-600">{label}</p>
         <p className="mt-2 text-base leading-relaxed text-neutral-600">{description}</p>
       </div>
 
-      <ol className="grid gap-8 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-10">
+      <div className="grid gap-8 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:hidden">
         {steps.map((step) => (
           <StepCard key={step.step} {...step} />
         ))}
-      </ol>
+      </div>
+
+      <div className="hidden lg:flex lg:items-start lg:justify-center lg:gap-1">
+        {steps.map((step, index) => (
+          <div key={step.step} className="flex items-start">
+            <StepCard {...step} />
+            {index < steps.length - 1 && (
+              <div
+                className="flex w-12 shrink-0 items-center justify-center self-center pt-36"
+                aria-hidden
+              >
+                <ChevronRight className="h-7 w-7 text-violet-400" strokeWidth={2.5} />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
