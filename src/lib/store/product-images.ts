@@ -4,7 +4,7 @@ export const STORE_PRODUCT_IMAGES_BY_SLUG: Record<string, string> = {
   "collar-qr": "/images/products/collar-qr.png",
   "colgante-qr": "/images/products/colgante-qr-lanyard.jpg",
   "iman-qr": "/images/products/iman-qr.png",
-  "credencial-plastificada": "/images/products/credencial-plastificada.png",
+  "credencial-plastificada": "/images/products/colgante-qr-lanyard.jpg",
   "sticker-qr": "/images/products/sticker-qr.jpg",
 };
 
@@ -23,7 +23,7 @@ export const STORE_PRODUCT_IMAGES_BY_TYPE: Record<
   collar: "/images/products/collar-qr.png",
   colgante: "/images/products/colgante-qr-lanyard.jpg",
   iman: "/images/products/iman-qr.png",
-  credencial: "/images/products/credencial-plastificada.png",
+  credencial: "/images/products/colgante-qr-lanyard.jpg",
   sticker: "/images/products/sticker-qr.jpg",
 };
 
