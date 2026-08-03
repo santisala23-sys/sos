@@ -387,9 +387,24 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
       )}
 
       {geoPhase === "skipped" && (
-        <p className={t.skippedBanner}>
-          Continuaste sin compartir ubicación. Los contactos están disponibles.
-        </p>
+        <div
+          className={`${t.skippedBanner} flex flex-col items-center gap-3 px-4 py-4 sm:flex-row sm:justify-center sm:gap-4`}
+        >
+          <p className="text-center sm:text-left">
+            <span className="font-semibold">Todavía no compartiste ubicación.</span>{" "}
+            Podés intentarlo de nuevo cuando quieras. Los contactos ya están
+            disponibles abajo.
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleShareLocation}
+            className="shrink-0 gap-2 bg-amber-500 font-bold text-black hover:bg-amber-400"
+          >
+            <MapPin className="h-4 w-4" aria-hidden />
+            Compartir ubicación
+          </Button>
+        </div>
       )}
 
       {geoPhase === "granted" && (
