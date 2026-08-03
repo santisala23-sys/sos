@@ -528,23 +528,24 @@ export function ScanMessageThread({
         ) : (
           messages.map((msg) => {
             const isTutor = msg.sender === "tutor";
+            const isOwnMessage = mode === "public" ? !isTutor : isTutor;
             const src = mediaSrc(msg);
             return (
               <div
                 key={msg.id}
-                className={`flex flex-col ${isTutor ? "items-end" : "items-start"}`}
+                className={`flex flex-col ${isOwnMessage ? "items-end" : "items-start"}`}
               >
                 <span
                   className={`mb-0.5 text-[10px] font-medium uppercase tracking-wide ${
                     dark ? "text-neutral-500" : "text-neutral-400"
                   }`}
                 >
-                  {isTutor ? "Familia" : "En el lugar"}
+                  {isTutor ? "Familia" : mode === "public" ? "Vos" : "En el lugar"}
                 </span>
                 <div
                   className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                     isTutor ? bubbleTutor : bubblePublic
-                  } ${isTutor ? "rounded-br-md" : "rounded-bl-md"}`}
+                  } ${isOwnMessage ? "rounded-br-md" : "rounded-bl-md"}`}
                 >
                   {msg.media_type === "image" && src && (
                     <button

@@ -41,12 +41,6 @@ async function resolveAccess(
   slug: string | null,
   ipHash: string | null,
 ): Promise<"public" | "tutor" | null> {
-  const session = await getSession();
-  if (session) {
-    const log = await findScanLogForTutor(scanLogId, session.userId);
-    if (log) return "tutor";
-  }
-
   const token = getScanTokenFromRequest(request);
   if (token) {
     const scanner = await authorizeScannerFromToken(token, ipHash);
@@ -56,6 +50,15 @@ async function resolveAccess(
   if (slug) {
     const scanner = await authorizeScannerAccess(request, scanLogId, slug);
     if (scanner) return "public";
+  }
+
+  const session = await getSession();
+  if (session) {
+    const log = await findScanLogForTutor(scanLogId, session.userId);
+    if (log) return "tutor";
+  }
+
+  if (slug) {
     await denyScanner(ipHash, "messages_slug_fallback_denied");
   }
 
