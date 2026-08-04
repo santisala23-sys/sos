@@ -1,9 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Bell, BellOff, CheckCircle2, Smartphone, Trash2 } from "lucide-react";
+import { Bell, BellOff, CheckCircle2, Download, Smartphone, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { IosInstallModal } from "@/components/dashboard/IosInstallModal";
+import { usePwaInstall } from "@/components/dashboard/usePwaInstall";
 import type { PushDeviceSummary } from "@/lib/push/device-label";
+import { isIosDevice, isStandaloneDisplay } from "@/lib/pwa/device";
 import { formatDateTime } from "@/lib/utils/format";
 
 export type PushEnvironment = "ready" | "ios_install" | "unsupported";
@@ -13,21 +16,6 @@ function urlBase64ToUint8Array(base64String: string) {
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const rawData = window.atob(base64);
   return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
-}
-
-function isIosDevice(): boolean {
-  if (typeof navigator === "undefined") return false;
-  return /iPad|iPhone|iPod/.test(navigator.userAgent);
-}
-
-function isStandaloneDisplay(): boolean {
-  if (typeof window === "undefined") return false;
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    Boolean(
-      (navigator as Navigator & { standalone?: boolean }).standalone,
-    )
-  );
 }
 
 export function detectPushEnvironment(): PushEnvironment {
@@ -163,7 +151,7 @@ export function usePushNotifications(): PushNotificationsState {
     if (environment !== "ready") {
       setMessage(
         environment === "ios_install"
-          ? "En iPhone, agregá SOSme a la pantalla de inicio y abrilo desde ahí para activar alertas."
+          ? "En iPhone, usá “Cómo agregar al inicio” y abrí SOSme desde el ícono para activar alertas."
           : "Este navegador no permite alertas push. Probá con Chrome o agregá la app a inicio.",
       );
       return;
@@ -289,17 +277,25 @@ export function usePushNotifications(): PushNotificationsState {
 
 type PushProps = { push: PushNotificationsState };
 
-function PushEnvironmentNotice({ push }: PushProps) {
-  if (push.environment === "ready") return null;
+type PwaInstallState = ReturnType<typeof usePwaInstall>;
+
+function PushEnvironmentNotice({
+  push,
+  pwa,
+}: PushProps & { pwa: PwaInstallState }) {
+  if (push.environment === "ready" && !pwa.canInstall) return null;
 
   return (
     <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950">
       {push.environment === "ios_install" ? (
         <>
-          <strong className="font-semibold">En iPhone/iPad:</strong> tocá{" "}
-          <strong>Compartir → Agregar a inicio</strong>, abrí SOSme desde el ícono
-          en la pantalla de inicio y activá las alertas ahí. Safari solo en pestaña
+          <strong className="font-semibold">En iPhone/iPad</strong> hace falta tener
+          SOSme en la pantalla de inicio para activar alertas push. Safari en pestaña
           no las permite.
+        </>
+      ) : pwa.canInstall ? (
+        <>
+          Para mejores alertas en el celular, agregá SOSme al inicio como app.
         </>
       ) : (
         <>
@@ -307,11 +303,29 @@ function PushEnvironmentNotice({ push }: PushProps) {
           <strong>Chrome en Android</strong> o agregá SOSme a la pantalla de inicio.
         </>
       )}
+
+      {pwa.canInstall && (
+        <Button
+          type="button"
+          size="sm"
+          disabled={pwa.installing}
+          onClick={() => void pwa.install()}
+          className="mt-3 gap-1.5 bg-amber-700 hover:bg-amber-800"
+        >
+          <Download className="h-4 w-4" aria-hidden />
+          {pwa.installing
+            ? "Instalando..."
+            : pwa.isIos
+              ? "Cómo agregar al inicio"
+              : "Agregar al inicio"}
+        </Button>
+      )}
     </div>
   );
 }
 
 export function PushNotificationPanel({ push }: PushProps) {
+  const pwa = usePwaInstall();
   if (push.checking) {
     return (
       <section className="rounded-2xl border border-violet-200/80 bg-white px-5 py-4 shadow-lg shadow-violet-500/10">
@@ -389,7 +403,12 @@ export function PushNotificationPanel({ push }: PushProps) {
           )}
         </div>
 
-        <PushEnvironmentNotice push={push} />
+        <PushEnvironmentNotice push={push} pwa={pwa} />
+
+        <IosInstallModal
+          open={pwa.iosGuideOpen}
+          onClose={() => pwa.setIosGuideOpen(false)}
+        />
 
         {push.message && (
           <p
