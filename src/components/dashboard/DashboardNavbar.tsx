@@ -182,6 +182,7 @@ export function DashboardNavbar() {
         >
           {NAV_LINKS.map(({ href, label, icon: Icon, id }) => {
             const active = isActive(id);
+            const alertHighlight = id === "actividad" && unreadCount > 0 && !active;
             return (
               <Link
                 key={href}
@@ -190,7 +191,9 @@ export function DashboardNavbar() {
                   "relative inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-base font-medium transition-colors",
                   active
                     ? "bg-violet-100 text-violet-800"
-                    : "text-neutral-600 hover:bg-violet-50 hover:text-violet-800",
+                    : alertHighlight
+                      ? "bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
+                      : "text-neutral-600 hover:bg-violet-50 hover:text-violet-800",
                 )}
               >
                 <Icon className="h-4 w-4" aria-hidden />
@@ -239,6 +242,7 @@ export function DashboardNavbar() {
         <nav className="flex flex-col gap-1.5" aria-label="Navegación móvil del panel">
           {NAV_LINKS.map(({ href, label, icon: Icon, id }) => {
             const active = isActive(id);
+            const alertHighlight = id === "actividad" && unreadCount > 0 && !active;
             return (
               <Link
                 key={href}
@@ -247,7 +251,9 @@ export function DashboardNavbar() {
                   "inline-flex items-center gap-3 rounded-2xl px-4 py-3.5 text-base font-semibold transition-colors",
                   active
                     ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
-                    : "text-neutral-800 hover:bg-violet-50 hover:text-violet-800",
+                    : alertHighlight
+                      ? "bg-red-50 text-red-700 hover:bg-red-100"
+                      : "text-neutral-800 hover:bg-violet-50 hover:text-violet-800",
                 )}
                 onClick={() => setOpen(false)}
               >

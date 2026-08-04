@@ -67,9 +67,10 @@ export const POST = withApi(
         userId: user.id,
         details: { reason: "bad_password" },
       });
-      const hint = user.google_id
-        ? "Esta cuenta usa Google. Iniciá sesión con el botón de Google."
-        : "Credenciales incorrectas";
+      const hint =
+        user.google_id && !user.password_hash
+          ? "Esta cuenta usa Google. Iniciá sesión con el botón de Google."
+          : "Credenciales incorrectas";
       return NextResponse.json({ error: hint }, { status: 401 });
     }
 

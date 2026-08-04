@@ -12,7 +12,6 @@ import {
   PawPrint,
   Plus,
   QrCode,
-  Sparkles,
   UserX,
   UserCircle2,
 } from "lucide-react";
@@ -179,11 +178,7 @@ export default function DashboardPage() {
           }}
         />
         <div className="relative">
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-sm font-semibold backdrop-blur-sm">
-            <Sparkles className="h-4 w-4" aria-hidden />
-            Tu espacio SOSme
-          </p>
-          <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
+          <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
             Hola, este es tu panel
           </h1>
           <p className="mt-2 max-w-xl text-base text-violet-100 sm:text-lg">
@@ -208,16 +203,38 @@ export default function DashboardPage() {
                 )}
               </p>
             </div>
-            <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-4 backdrop-blur-sm">
-              <div className="flex items-center gap-2 text-violet-200">
+            <div
+              className={`rounded-2xl border px-4 py-4 backdrop-blur-sm ${
+                !loading && unreadCount > 0
+                  ? "border-red-300/70 bg-red-500/15"
+                  : "border-white/20 bg-white/10"
+              }`}
+            >
+              <div
+                className={`flex items-center gap-2 ${
+                  !loading && unreadCount > 0 ? "text-red-100" : "text-violet-200"
+                }`}
+              >
                 <Bell className="h-4 w-4" aria-hidden />
                 <span className="text-xs font-semibold uppercase tracking-wide">
                   Alertas nuevas
                 </span>
               </div>
-              <p className="mt-2 text-2xl font-black">
+              <p
+                className={`mt-2 text-2xl font-black ${
+                  !loading && unreadCount > 0 ? "text-white" : ""
+                }`}
+              >
                 {loading ? "—" : unreadCount}
               </p>
+              {!loading && unreadCount > 0 && (
+                <Link
+                  href="/dashboard/actividad"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm font-bold text-red-700 shadow-sm transition hover:bg-red-50"
+                >
+                  Ver alerta
+                </Link>
+              )}
             </div>
             <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-4 backdrop-blur-sm">
               <div className="flex items-center gap-2 text-violet-200">
