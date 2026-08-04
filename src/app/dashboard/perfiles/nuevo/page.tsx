@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -21,7 +22,7 @@ function parseProfileType(value: string | null): ProfileType {
   return "person";
 }
 
-export default function NewProfilePage() {
+function NewProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const profileType = parseProfileType(searchParams.get("tipo"));
@@ -53,5 +54,19 @@ export default function NewProfilePage() {
         />
       </section>
     </main>
+  );
+}
+
+export default function NewProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-[50vh] items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
+        </main>
+      }
+    >
+      <NewProfileContent />
+    </Suspense>
   );
 }

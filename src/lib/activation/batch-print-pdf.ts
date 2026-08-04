@@ -58,7 +58,7 @@ async function readAssetBuffer(assetUrl: string): Promise<Buffer | null> {
   const relativePath = assetUrl.startsWith("/")
     ? assetUrl.slice(1)
     : assetUrl;
-  const absolutePath = path.join(process.cwd(), relativePath);
+  const absolutePath = path.join(process.cwd(), "public", relativePath);
 
   try {
     return await fs.readFile(absolutePath);
