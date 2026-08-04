@@ -2,9 +2,19 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ClipboardList, PawPrint, Pencil, Trash2, X } from "lucide-react";
+import {
+  ClipboardList,
+  ExternalLink,
+  PawPrint,
+  Pencil,
+  QrCode,
+  Trash2,
+  X,
+} from "lucide-react";
 import type { QrProfile } from "@/types/database";
+import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
+import { getTutorPublicPreviewUrl } from "@/lib/utils/slug";
 import { cn } from "@/lib/utils/cn";
 
 type PetCardProps = {
@@ -18,6 +28,8 @@ const actionClass =
 export function PetCard({ profile, onRefresh }: PetCardProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showQr, setShowQr] = useState(false);
+  const previewUrl = getTutorPublicPreviewUrl(profile.id);
 
   async function handleDelete() {
     setDeleting(true);
@@ -74,26 +86,57 @@ export function PetCard({ profile, onRefresh }: PetCardProps) {
           </div>
         </div>
 
-        <div className="mt-5 grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="mt-5 space-y-2">
           <Link
-            href={`/dashboard/perfiles/${profile.id}`}
+            href={`/dashboard/perfiles/${profile.id}/libreta`}
             className={cn(
               actionClass,
-              "border-teal-200 bg-teal-50 text-teal-900 hover:bg-teal-100 sm:col-span-2",
+              "w-full border-teal-200 bg-teal-50 text-teal-900 hover:bg-teal-100",
             )}
           >
             <ClipboardList className="h-4 w-4" aria-hidden />
             Abrir libreta sanitaria
           </Link>
-          <Link
-            href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent("/dashboard#mascotas")}`}
-            className={cn(actionClass, "sm:col-span-2")}
+          <div className="grid grid-cols-2 gap-2">
+            <a
+              href={previewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                actionClass,
+                "border-violet-100 bg-violet-50/60 text-violet-800 hover:bg-violet-100",
+              )}
+            >
+              <ExternalLink className="h-4 w-4" aria-hidden />
+              Ver perfil público
+            </a>
+            <Link
+              href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent("/dashboard#mascotas")}`}
+              className={actionClass}
+            >
+              <Pencil className="h-4 w-4" aria-hidden />
+              Editar datos
+            </Link>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowQr(!showQr)}
+            className={cn(actionClass, "w-full")}
           >
-            <Pencil className="h-4 w-4" aria-hidden />
-            Editar datos
-          </Link>
+            <QrCode className="h-4 w-4" aria-hidden />
+            {showQr ? "Ocultar QR" : "Ver QR"}
+          </button>
         </div>
       </div>
+
+      {showQr && (
+        <div className="mt-auto border-t border-teal-100 bg-teal-50/30 px-5 py-5 sm:px-6">
+          <QrCodeDisplay
+            slug={profile.slug}
+            beneficiaryName={profile.beneficiary_name}
+          />
+        </div>
+      )}
 
       {confirmDelete && (
         <div

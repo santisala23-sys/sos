@@ -5,11 +5,10 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, ExternalLink, Pencil } from "lucide-react";
 import type { QrProfile } from "@/types/database";
-import { PetMedicalHistory } from "@/components/dashboard/PetMedicalHistory";
 import { PublicQrButton } from "@/components/dashboard/PublicQrButton";
 import { SavedLocationPanel } from "@/components/dashboard/SavedLocationPanel";
 import { PROFILE_TYPES } from "@/lib/profile-types";
-import { getPublicProfileUrl } from "@/lib/utils/slug";
+import { getTutorPublicPreviewUrl } from "@/lib/utils/slug";
 import { formatDateTime } from "@/lib/utils/format";
 import {
   getGoogleMapsEmbedUrl,
@@ -29,7 +28,12 @@ export default function ProfileDetailPage() {
         return;
       }
       const data = await res.json();
-      setProfile(data.profile ?? null);
+      const loaded = data.profile as QrProfile | null;
+      if (loaded?.profile_type === "pet") {
+        router.replace(`/dashboard/perfiles/${params.id}/libreta`);
+        return;
+      }
+      setProfile(loaded ?? null);
       setLoading(false);
     }
     void load();
@@ -51,7 +55,7 @@ export default function ProfileDetailPage() {
   const typeLabel =
     PROFILE_TYPES.find((t) => t.value === profile.profile_type)?.label ??
     "Persona";
-  const publicUrl = getPublicProfileUrl(profile.slug);
+  const previewUrl = getTutorPublicPreviewUrl(profile.id);
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
@@ -204,7 +208,7 @@ export default function ProfileDetailPage() {
 
           <div className="flex flex-col gap-3">
             <a
-              href={publicUrl}
+              href={previewUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-neutral-100 px-4 py-2 text-base font-semibold text-neutral-900 transition-colors hover:bg-neutral-200"
@@ -220,13 +224,6 @@ export default function ProfileDetailPage() {
           </div>
         </div>
       </section>
-
-      {profile.profile_type === "pet" && (
-        <PetMedicalHistory
-          petId={profile.id}
-          petName={profile.beneficiary_name}
-        />
-      )}
     </main>
   );
 }

@@ -19,3 +19,12 @@ export function generateSlug(beneficiaryName: string): string {
 export function getPublicProfileUrl(slug: string): string {
   return `${getAppUrl()}/p/${slug}`;
 }
+
+/** Vista del tutor: mismo contenido público sin registrar escaneo. */
+export function getTutorPublicPreviewUrl(profileId: string): string {
+  return `${getAppUrl()}/dashboard/perfiles/${profileId}/vista-publica`;
+}
+
+export function getPetHealthBookUrl(profileId: string): string {
+  return `${getAppUrl()}/dashboard/perfiles/${profileId}/libreta`;
+}

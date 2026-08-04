@@ -30,6 +30,8 @@ import {
 
 type EmergencyProfileViewProps = {
   profile: PublicQrProfile;
+  /** Vista del tutor: no registra escaneo ni abre chat/SOS reales. */
+  previewMode?: boolean;
 };
 
 async function requestGeolocation(): Promise<{
@@ -51,7 +53,10 @@ async function requestGeolocation(): Promise<{
   });
 }
 
-export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
+export function EmergencyProfileView({
+  profile,
+  previewMode = false,
+}: EmergencyProfileViewProps) {
   const { isLight, toggle, mounted } = usePublicTheme();
   const t = publicThemeStyles(isLight);
 
@@ -110,6 +115,11 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
 
   useEffect(() => {
     async function initSession() {
+      if (previewMode) {
+        setSessionReady(true);
+        return;
+      }
+
       const stored = getStoredScanSession(profile.slug);
       if (stored?.scanToken) {
         try {
@@ -159,10 +169,10 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
     }
 
     initSession();
-  }, [profile.slug, triggerScanAlert]);
+  }, [profile.slug, triggerScanAlert, previewMode]);
 
   useEffect(() => {
-    if (!scanLogId || !scanToken) return;
+    if (previewMode || !scanLogId || !scanToken) return;
     storeScanSession(profile.slug, {
       scanToken,
       scanLogId,
@@ -344,11 +354,20 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
       </header>
 
       <aside className={t.strip}>
-        Al abrir este QR se notifica al tutor. En emergencia grave llamá al{" "}
-        <strong className={t.stripStrong}>911</strong>.{" "}
-        <Link href="/aviso-escaneadores-publicos" className={t.stripLink}>
-          Qué datos se registran
-        </Link>
+        {previewMode ? (
+          <>
+            <strong className={t.stripStrong}>Vista previa del tutor</strong> — así
+            ven quienes escanean el QR. No se registra escaneo ni alertas.
+          </>
+        ) : (
+          <>
+            Al abrir este QR se notifica al tutor. En emergencia grave llamá al{" "}
+            <strong className={t.stripStrong}>911</strong>.{" "}
+            <Link href="/aviso-escaneadores-publicos" className={t.stripLink}>
+              Qué datos se registran
+            </Link>
+          </>
+        )}
       </aside>
 
       {sessionRestored && sessionReady && (
@@ -357,7 +376,13 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         </p>
       )}
 
-      <main className="relative space-y-5 px-4 py-5 pb-[calc(10.5rem+env(safe-area-inset-bottom))]">
+      <main
+        className={`relative space-y-5 px-4 py-5 ${
+          previewMode
+            ? "pb-8"
+            : "pb-[calc(10.5rem+env(safe-area-inset-bottom))]"
+        }`}
+      >
         {!sessionReady && <p className={t.loading}>Cargando...</p>}
 
         {sessionReady && (
@@ -378,6 +403,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
                   </div>
                 </div>
               </div>
+              {!previewMode && (
               <div className={`border-b px-4 py-4 ${isLight ? "border-neutral-100 bg-neutral-50/80" : "border-white/10 bg-white/5"}`}>
                 {locationShared ? (
                   <p className={`flex items-center gap-2 text-sm font-semibold ${isLight ? "text-green-800" : "text-green-300"}`}>
@@ -425,6 +451,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
                   </div>
                 )}
               </div>
+              )}
               <div className="p-4">
                 <ContactActions
                   profile={profile}
@@ -438,7 +465,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
               </div>
             </section>
 
-            {scanLogId && scanToken && (
+            {scanLogId && scanToken && !previewMode && (
               <section aria-labelledby="chat-heading" className={t.card}>
                 <div className={t.cardHeader}>
                   <div className="flex items-center gap-2">
@@ -541,6 +568,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         <p className={t.footerBrand}>{typeConfig.publicHeader} · SOSme</p>
       </main>
 
+      {!previewMode && (
       <footer className={t.footer}>
         <p className={t.footerNote}>
           En emergencia grave, llamá al{" "}
@@ -563,6 +591,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
               : "NECESITO AYUDA / SOS"}
         </Button>
       </footer>
+      )}
     </div>
   );
 }

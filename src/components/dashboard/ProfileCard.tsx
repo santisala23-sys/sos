@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, Pencil, Trash2, QrCode, X } from "lucide-react";
+import { Eye, ExternalLink, Pencil, Trash2, QrCode, X } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
 import { PROFILE_TYPES } from "@/lib/profile-types";
+import { getTutorPublicPreviewUrl } from "@/lib/utils/slug";
 import { cn } from "@/lib/utils/cn";
 
 type ProfileCardProps = {
@@ -25,6 +26,7 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
   const typeLabel =
     PROFILE_TYPES.find((t) => t.value === profile.profile_type)?.label ??
     "Persona";
+  const previewUrl = getTutorPublicPreviewUrl(profile.id);
 
   async function handleDelete() {
     setDeleting(true);
@@ -114,6 +116,15 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
               Editar perfil
             </Link>
           </div>
+          <a
+            href={previewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(actionClass, "w-full")}
+          >
+            <ExternalLink className="h-4 w-4" aria-hidden />
+            Ver perfil público
+          </a>
           <button
             type="button"
             onClick={() => setShowQr(!showQr)}

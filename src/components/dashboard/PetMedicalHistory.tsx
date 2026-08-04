@@ -12,9 +12,14 @@ import { Button } from "@/components/ui/Button";
 type PetMedicalHistoryProps = {
   petId: string;
   petName: string;
+  embedded?: boolean;
 };
 
-export function PetMedicalHistory({ petId, petName }: PetMedicalHistoryProps) {
+export function PetMedicalHistory({
+  petId,
+  petName,
+  embedded = false,
+}: PetMedicalHistoryProps) {
   const [visits, setVisits] = useState<PetVetVisit[]>([]);
   const [preventive, setPreventive] = useState<PetPreventiveItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,14 +56,24 @@ export function PetMedicalHistory({ petId, petName }: PetMedicalHistoryProps) {
   }, [petId]);
 
   return (
-    <section className="rounded-3xl border border-violet-100 bg-white p-6 shadow-lg shadow-violet-500/8 sm:p-8">
-      <h2 className="flex items-center gap-2 text-lg font-bold text-neutral-900">
-        <ClipboardList className="h-5 w-5 text-violet-600" aria-hidden />
-        Libreta sanitaria
-      </h2>
-      <p className="mt-1 text-sm text-neutral-500">
-        Vacunas, desparasitaciones, visitas e indicaciones del veterinario.
-      </p>
+    <section
+      className={
+        embedded
+          ? undefined
+          : "rounded-3xl border border-violet-100 bg-white p-6 shadow-lg shadow-violet-500/8 sm:p-8"
+      }
+    >
+      {!embedded && (
+        <>
+          <h2 className="flex items-center gap-2 text-lg font-bold text-neutral-900">
+            <ClipboardList className="h-5 w-5 text-violet-600" aria-hidden />
+            Libreta sanitaria
+          </h2>
+          <p className="mt-1 text-sm text-neutral-500">
+            Vacunas, desparasitaciones, visitas e indicaciones del veterinario.
+          </p>
+        </>
+      )}
 
       {loading && (
         <p className="mt-4 text-sm text-neutral-500">Cargando libreta...</p>
