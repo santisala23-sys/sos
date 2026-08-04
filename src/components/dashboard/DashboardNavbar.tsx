@@ -7,9 +7,6 @@ import {
   Activity,
   LayoutDashboard,
   LogOut,
-  Package,
-  PawPrint,
-  UserCircle2,
 } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { HamburgerButton } from "@/components/shared/HamburgerButton";
@@ -19,24 +16,6 @@ import { cn } from "@/lib/utils/cn";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Panel", icon: LayoutDashboard, id: "panel" },
-  {
-    href: "/dashboard#personas",
-    label: "Personas",
-    icon: UserCircle2,
-    id: "personas",
-  },
-  {
-    href: "/dashboard#objetos",
-    label: "Objetos",
-    icon: Package,
-    id: "objetos",
-  },
-  {
-    href: "/dashboard#mascotas",
-    label: "Mascotas",
-    icon: PawPrint,
-    id: "mascotas",
-  },
   {
     href: "/dashboard/actividad",
     label: "Actividad",
@@ -56,7 +35,6 @@ export function DashboardNavbar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [hash, setHash] = useState("");
   const [profileLimit, setProfileLimit] = useState<ProfileLimitStatus | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -65,13 +43,6 @@ export function DashboardNavbar() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    const updateHash = () => setHash(window.location.hash);
-    updateHash();
-    window.addEventListener("hashchange", updateHash);
-    return () => window.removeEventListener("hashchange", updateHash);
   }, []);
 
   useEffect(() => {
@@ -122,23 +93,7 @@ export function DashboardNavbar() {
 
   function isActive(id: (typeof NAV_LINKS)[number]["id"]) {
     if (id === "actividad") return isActividad;
-    if (id === "personas") {
-      return (
-        pathname === "/dashboard" &&
-        (hash === "#personas" || hash === "#perfiles")
-      );
-    }
-    if (id === "objetos") {
-      return pathname === "/dashboard" && hash === "#objetos";
-    }
-    if (id === "mascotas") {
-      return pathname === "/dashboard" && hash === "#mascotas";
-    }
-    return (
-      pathname === "/dashboard" &&
-      !hash &&
-      !isActividad
-    );
+    return pathname === "/dashboard" && !isActividad;
   }
 
   async function handleLogout() {
@@ -222,10 +177,10 @@ export function DashboardNavbar() {
         <div className="hidden items-center gap-2 lg:flex">
           <Button
             type="button"
-            variant="ghost"
+            variant="danger"
             size="md"
             onClick={handleLogout}
-            className="gap-2 px-4 text-base text-neutral-600"
+            className="gap-2 px-4 text-base"
           >
             <LogOut className="h-4 w-4" aria-hidden />
             Salir
@@ -280,7 +235,7 @@ export function DashboardNavbar() {
         <div className="mt-6 flex flex-col gap-2.5 border-t border-neutral-100 pt-6">
           <Button
             type="button"
-            variant="secondary"
+            variant="danger"
             size="lg"
             className="w-full gap-2"
             onClick={() => {

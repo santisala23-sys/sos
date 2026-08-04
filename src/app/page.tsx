@@ -64,7 +64,7 @@ export default async function HomePage() {
 
               <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-neutral-600 sm:text-xl lg:mx-0">
                 SOSme vincula un código QR a tu perfil de emergencia. Una
-                persona, mascota u objeto — quien lo escanea te contacta al
+                persona, mascota u objeto: quien lo escanea te contacta al
                 instante y vos recibís la alerta. En mascotas, sumás la libreta
                 sanitaria: vacunas, visitas e indicaciones del vet.
               </p>
