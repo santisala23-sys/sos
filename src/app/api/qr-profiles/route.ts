@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "Tu plan incluye 1 perfil QR. Para agregar más, contactanos y te ampliamos la cuenta.",
+            "Llegaste al límite de perfiles. Contactanos para ampliar tu cuenta.",
           code: "PROFILE_LIMIT",
           plan: limit,
         },

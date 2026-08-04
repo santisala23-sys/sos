@@ -508,7 +508,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
       </div>
 
       <p className="mt-10 text-center text-sm text-neutral-500">
-        ¿Preferís probar gratis?{" "}
+        ¿Preferís probar primero?{" "}
         <Link href="/register" className="font-semibold text-violet-700 hover:underline">
           Creá tu perfil e imprimí el QR
         </Link>

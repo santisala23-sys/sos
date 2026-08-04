@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Activity,
-  AlertTriangle,
   Bell,
   CheckCircle2,
   FileDown,
@@ -29,6 +28,8 @@ import {
 } from "@/components/dashboard/PushNotificationSetup";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
 import { ObjectSavedLocationsBanner } from "@/components/dashboard/ObjectSavedLocationsBanner";
+import { ProfileLimitModal } from "@/components/dashboard/ProfileLimitModal";
+import { SectionAddButton } from "@/components/dashboard/SectionAddButton";
 import type { ProfileType } from "@/lib/profile-types";
 import {
   sortProfileSections,
@@ -59,6 +60,7 @@ export default function DashboardPage() {
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [accountMsg, setAccountMsg] = useState<string | null>(null);
+  const [limitModalOpen, setLimitModalOpen] = useState(false);
 
   const loadData = useCallback(async () => {
     const [profilesRes, logsRes, meRes] = await Promise.all([
@@ -176,12 +178,23 @@ export default function DashboardPage() {
     },
   };
 
-  function handleCreateProfile() {
+  const addProfileLabels: Record<ProfileType, string> = {
+    person: "Agregar persona",
+    object: "Agregar objeto",
+    pet: "Agregar mascota",
+  };
+
+  function handleAddProfile(type: ProfileType) {
+    if (legalBlocked) return;
     if (atProfileLimit) {
-      router.push("/contacto");
+      setLimitModalOpen(true);
       return;
     }
-    router.push("/dashboard/perfiles/nuevo");
+    router.push(`/dashboard/perfiles/nuevo?tipo=${type}`);
+  }
+
+  function handleCreateProfile() {
+    handleAddProfile("person");
   }
 
   async function handleExport() {
@@ -310,13 +323,18 @@ export default function DashboardPage() {
             </div>
             <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-4 backdrop-blur-sm">
               <div className="flex items-center gap-2 text-violet-200">
-                <Activity className="h-4 w-4" aria-hidden />
+                <UserCircle2 className="h-4 w-4" aria-hidden />
                 <span className="text-xs font-semibold uppercase tracking-wide">
-                  Plan
+                  Perfiles
                 </span>
               </div>
-              <p className="mt-2 text-lg font-bold leading-tight">
-                {planStatus?.planName ?? "—"}
+              <p className="mt-2 text-2xl font-black">
+                {loading ? "—" : profiles.length}
+                {planStatus && (
+                  <span className="text-lg font-semibold text-violet-200">
+                    /{planStatus.maxProfiles}
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -412,52 +430,18 @@ export default function DashboardPage() {
             Creá tu primer perfil QR
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-            Plan gratis: 1 perfil para persona, mascota u objeto. ¿Necesitás más?{" "}
+            Creá un perfil para persona, mascota u objeto. ¿Necesitás más?{" "}
             <Link
               href="/contacto"
               className="font-semibold text-violet-700 underline-offset-2 hover:underline"
             >
-              contactanos
+              Contactanos
             </Link>
             .
           </p>
           <div className="mt-6 rounded-2xl border border-white/80 bg-white p-5 shadow-sm">
             <QrProfileForm onSuccess={loadData} />
           </div>
-        </div>
-      )}
-
-      {hasAnyProfiles && atProfileLimit && !legalBlocked && (
-        <div className="flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-600">
-              <AlertTriangle className="h-5 w-5" aria-hidden />
-            </span>
-            <p className="text-sm font-semibold text-red-800">
-              Llegaste al límite de perfiles de tu plan. Mejorá tu plan para
-              crear más perfiles.
-            </p>
-          </div>
-          <Link
-            href="/contacto"
-            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-700"
-          >
-            Contactanos
-          </Link>
-        </div>
-      )}
-
-      {hasAnyProfiles && !atProfileLimit && !legalBlocked && (
-        <div>
-          <Button
-            type="button"
-            onClick={handleCreateProfile}
-            className="w-full gap-2 sm:w-auto"
-            size="lg"
-          >
-            <Plus className="h-5 w-5" aria-hidden />
-            Crear perfil QR nuevo
-          </Button>
         </div>
       )}
 
@@ -474,6 +458,15 @@ export default function DashboardPage() {
             title={meta.title}
             description={meta.description}
             disabled={legalBlocked}
+            headerAction={
+              !legalBlocked ? (
+                <SectionAddButton
+                  atLimit={atProfileLimit}
+                  label={addProfileLabels[sectionType]}
+                  onClick={() => handleAddProfile(sectionType)}
+                />
+              ) : undefined
+            }
           >
             {loading ? (
               <div className="space-y-3">
@@ -511,6 +504,11 @@ export default function DashboardPage() {
           </DashboardSection>
         );
       })}
+
+      <ProfileLimitModal
+        open={limitModalOpen}
+        onClose={() => setLimitModalOpen(false)}
+      />
 
       <section className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-black text-neutral-900">Cuenta</h2>

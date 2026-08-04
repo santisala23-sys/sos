@@ -10,7 +10,7 @@ export type PlanDefinition = {
 export const PLANS: Record<PlanTier, PlanDefinition> = {
   free: {
     id: "free",
-    name: "Gratis",
+    name: "Inicial",
     maxProfiles: 1,
     description: "Un perfil QR con alertas, ubicación y chat.",
   },

@@ -50,7 +50,7 @@ export function AuthNavbar({ mode }: AuthNavbarProps) {
                 size="md"
                 className="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 text-base shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
               >
-                Empezar gratis
+                Empezar
               </Button>
             </Link>
           )}
@@ -97,7 +97,7 @@ export function AuthNavbar({ mode }: AuthNavbarProps) {
                 size="lg"
                 className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
               >
-                Empezar gratis
+                Empezar
               </Button>
             </Link>
           )}

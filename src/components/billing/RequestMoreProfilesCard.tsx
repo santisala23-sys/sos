@@ -53,7 +53,7 @@ export function RequestMoreProfilesCard({
         <div className="min-w-0 flex-1">
           <h3 className="font-bold text-neutral-900">¿Querés más perfiles QR?</h3>
           <p className="mt-1 text-sm leading-relaxed text-neutral-600">
-            El plan gratis incluye <strong>1 perfil</strong> (persona, mascota u objeto).
+            Incluye <strong>1 perfil</strong> (persona, mascota u objeto).
             Si necesitás más para tu familia o tu negocio, contactanos y te ampliamos la
             cuenta manualmente — sin pagos automáticos por ahora.
           </p>

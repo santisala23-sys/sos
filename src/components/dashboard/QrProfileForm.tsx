@@ -26,6 +26,7 @@ import { profileHasSensitiveData } from "@/lib/legal/sensitive-data";
 
 type QrProfileFormProps = {
   profile?: QrProfile;
+  defaultProfileType?: ProfileType;
   onSuccess: (profile?: QrProfile) => void;
   onCancel?: () => void;
   /** Endpoint usado al crear (no editar). Permite reutilizar el form en la
@@ -63,6 +64,7 @@ function dataUrlToAvatarPayload(dataUrl: string): { mime: string; data: string }
 
 export function QrProfileForm({
   profile,
+  defaultProfileType,
   onSuccess,
   onCancel,
   createEndpoint = "/api/qr-profiles",
@@ -88,7 +90,7 @@ export function QrProfileForm({
   const [cropFile, setCropFile] = useState<File | null>(null);
 
   const [profileType, setProfileType] = useState<ProfileType>(
-    profile?.profile_type ?? "person",
+    profile?.profile_type ?? defaultProfileType ?? "person",
   );
   const [beneficiaryName, setBeneficiaryName] = useState(
     profile?.beneficiary_name ?? "",

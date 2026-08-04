@@ -34,7 +34,7 @@ const PRODUCT_LINKS = [
 ] as const;
 
 const ACCOUNT_LINKS = [
-  { href: "/register", label: "Crear cuenta gratis" },
+  { href: "/register", label: "Crear cuenta" },
   { href: "/login", label: "Iniciar sesión" },
   { href: "/contacto", label: "Contacto" },
 ] as const;
@@ -125,7 +125,7 @@ export async function MarketingFooter({ className = "" }: MarketingFooterProps) 
                 size="lg"
                 className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/30 hover:from-violet-700 hover:to-indigo-700"
               >
-                Crear perfil gratis
+                Crear perfil
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
             </Link>

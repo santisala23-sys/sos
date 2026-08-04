@@ -1,18 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
+import type { ProfileType } from "@/lib/profile-types";
+
+const VALID_TYPES = new Set<ProfileType>(["person", "object", "pet"]);
+
+const SECTION_HASH: Record<ProfileType, string> = {
+  person: "personas",
+  object: "objetos",
+  pet: "mascotas",
+};
+
+function parseProfileType(value: string | null): ProfileType {
+  if (value && VALID_TYPES.has(value as ProfileType)) {
+    return value as ProfileType;
+  }
+  return "person";
+}
 
 export default function NewProfilePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const profileType = parseProfileType(searchParams.get("tipo"));
+  const backHash = SECTION_HASH[profileType];
 
   return (
     <main className="mx-auto max-w-2xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
       <div>
         <Link
-          href="/dashboard#personas"
+          href={`/dashboard#${backHash}`}
           className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 hover:underline"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -28,8 +47,9 @@ export default function NewProfilePage() {
 
       <section className="rounded-3xl border border-violet-100 bg-white p-5 shadow-xl shadow-violet-500/10 sm:p-8">
         <QrProfileForm
-          onSuccess={() => router.push("/dashboard#personas")}
-          onCancel={() => router.push("/dashboard#personas")}
+          defaultProfileType={profileType}
+          onSuccess={() => router.push(`/dashboard#${backHash}`)}
+          onCancel={() => router.push(`/dashboard#${backHash}`)}
         />
       </section>
     </main>

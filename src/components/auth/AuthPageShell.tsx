@@ -61,7 +61,7 @@ export function AuthPageShell({ mode, error, redirectTo }: AuthPageShellProps) {
               <>
                 <p className="inline-flex items-center gap-2 rounded-full border border-violet-200/80 bg-white/90 px-4 py-1.5 text-sm font-semibold text-violet-800 shadow-sm">
                   <Sparkles className="h-4 w-4 text-violet-600" aria-hidden />
-                  Empezá gratis
+                  Empezá ahora
                 </p>
                 <h1 className="mt-5 text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl">
                   Creá tu cuenta{" "}

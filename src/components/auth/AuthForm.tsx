@@ -212,7 +212,7 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <p className="rounded-lg border border-violet-100 bg-violet-50/80 px-3 py-2 text-xs text-violet-900">
-            <strong>Plan gratis:</strong> 1 perfil QR.{" "}
+            Incluye <strong>1 perfil QR</strong>.{" "}
             <Link href="/contacto" className="font-semibold underline-offset-2 hover:underline">
               Más perfiles
             </Link>

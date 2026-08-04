@@ -6,11 +6,46 @@ import { Button } from "@/components/ui/Button";
 import type { PushDeviceSummary } from "@/lib/push/device-label";
 import { formatDateTime } from "@/lib/utils/format";
 
+export type PushEnvironment = "ready" | "ios_install" | "unsupported";
+
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const rawData = window.atob(base64);
   return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+}
+
+function isIosDevice(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+}
+
+function isStandaloneDisplay(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    Boolean(
+      (navigator as Navigator & { standalone?: boolean }).standalone,
+    )
+  );
+}
+
+export function detectPushEnvironment(): PushEnvironment {
+  if (typeof window === "undefined") return "unsupported";
+
+  const hasNotification = "Notification" in window;
+  const hasServiceWorker = "serviceWorker" in navigator;
+  const hasPushManager = "PushManager" in window;
+
+  if (!hasNotification || !hasServiceWorker) return "unsupported";
+
+  if (isIosDevice() && (!hasPushManager || !isStandaloneDisplay())) {
+    return "ios_install";
+  }
+
+  if (!hasPushManager) return "unsupported";
+
+  return "ready";
 }
 
 async function getVapidPublicKey(): Promise<string | null> {
@@ -28,11 +63,33 @@ async function registerServiceWorker() {
   return reg;
 }
 
+async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration | null> {
+  if (!("serviceWorker" in navigator)) return null;
+
+  try {
+    let reg = await navigator.serviceWorker.getRegistration();
+    if (!reg) {
+      reg = await registerServiceWorker();
+    }
+    await navigator.serviceWorker.ready;
+    return reg;
+  } catch {
+    return null;
+  }
+}
+
 async function getCurrentPushEndpoint(): Promise<string | null> {
-  if (Notification.permission !== "granted") return null;
-  const reg = await navigator.serviceWorker.getRegistration();
-  const sub = await reg?.pushManager.getSubscription();
-  return sub?.endpoint ?? null;
+  if (!("Notification" in window) || Notification.permission !== "granted") {
+    return null;
+  }
+
+  try {
+    const reg = await getServiceWorkerRegistration();
+    const sub = await reg?.pushManager.getSubscription();
+    return sub?.endpoint ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function detectPushSubscription(): Promise<boolean> {
@@ -40,7 +97,7 @@ async function detectPushSubscription(): Promise<boolean> {
 }
 
 export type PushNotificationsState = {
-  supported: boolean;
+  environment: PushEnvironment;
   checking: boolean;
   subscribed: boolean;
   loading: boolean;
@@ -54,7 +111,7 @@ export type PushNotificationsState = {
 };
 
 export function usePushNotifications(): PushNotificationsState {
-  const [supported, setSupported] = useState(false);
+  const [environment, setEnvironment] = useState<PushEnvironment>("unsupported");
   const [checking, setChecking] = useState(true);
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -80,28 +137,38 @@ export function usePushNotifications(): PushNotificationsState {
   }, []);
 
   const refreshStatus = useCallback(async () => {
-    const active = await detectPushSubscription();
+    const env = detectPushEnvironment();
+    setEnvironment(env);
+
+    const active = env === "ready" ? await detectPushSubscription() : false;
     setSubscribed(active);
     await refreshDevices();
     return active;
   }, [refreshDevices]);
 
   useEffect(() => {
-    const ok =
-      "serviceWorker" in navigator &&
-      "PushManager" in window &&
-      "Notification" in window;
-    setSupported(ok);
-
-    if (!ok) {
-      setChecking(false);
-      return;
-    }
-
     refreshStatus().finally(() => setChecking(false));
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        void refreshStatus();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [refreshStatus]);
 
   async function subscribe() {
+    if (environment !== "ready") {
+      setMessage(
+        environment === "ios_install"
+          ? "En iPhone, agregá SOSme a la pantalla de inicio y abrilo desde ahí para activar alertas."
+          : "Este navegador no permite alertas push. Probá con Chrome o agregá la app a inicio.",
+      );
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
 
@@ -112,9 +179,13 @@ export function usePushNotifications(): PushNotificationsState {
         return;
       }
 
-      const reg = await registerServiceWorker();
-      const publicKey = await getVapidPublicKey();
+      const reg = await getServiceWorkerRegistration();
+      if (!reg) {
+        setMessage("No se pudo preparar las notificaciones en este dispositivo.");
+        return;
+      }
 
+      const publicKey = await getVapidPublicKey();
       if (!publicKey) {
         setMessage("Push no configurado en el servidor (VAPID).");
         return;
@@ -155,7 +226,7 @@ export function usePushNotifications(): PushNotificationsState {
   async function unsubscribe() {
     setLoading(true);
     try {
-      const reg = await navigator.serviceWorker.getRegistration();
+      const reg = await getServiceWorkerRegistration();
       const sub = await reg?.pushManager.getSubscription();
       if (sub) {
         await fetch("/api/push/subscribe", {
@@ -188,7 +259,7 @@ export function usePushNotifications(): PushNotificationsState {
       }
 
       if (device.isCurrent) {
-        const reg = await navigator.serviceWorker.getRegistration();
+        const reg = await getServiceWorkerRegistration();
         const sub = await reg?.pushManager.getSubscription();
         await sub?.unsubscribe();
         setSubscribed(false);
@@ -202,7 +273,7 @@ export function usePushNotifications(): PushNotificationsState {
   }
 
   return {
-    supported,
+    environment,
     checking,
     subscribed,
     loading,
@@ -218,11 +289,40 @@ export function usePushNotifications(): PushNotificationsState {
 
 type PushProps = { push: PushNotificationsState };
 
+function PushEnvironmentNotice({ push }: PushProps) {
+  if (push.environment === "ready") return null;
+
+  return (
+    <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950">
+      {push.environment === "ios_install" ? (
+        <>
+          <strong className="font-semibold">En iPhone/iPad:</strong> tocá{" "}
+          <strong>Compartir → Agregar a inicio</strong>, abrí SOSme desde el ícono
+          en la pantalla de inicio y activá las alertas ahí. Safari solo en pestaña
+          no las permite.
+        </>
+      ) : (
+        <>
+          Este navegador no soporta alertas push. Probá con{" "}
+          <strong>Chrome en Android</strong> o agregá SOSme a la pantalla de inicio.
+        </>
+      )}
+    </div>
+  );
+}
+
 export function PushNotificationPanel({ push }: PushProps) {
-  if (!push.supported || push.checking) return null;
+  if (push.checking) {
+    return (
+      <section className="rounded-2xl border border-violet-200/80 bg-white px-5 py-4 shadow-lg shadow-violet-500/10">
+        <p className="text-sm text-neutral-500">Comprobando alertas push...</p>
+      </section>
+    );
+  }
 
   const otherDevices = push.devices.filter((device) => !device.isCurrent);
   const hasAccountDevices = push.devices.length > 0;
+  const canSubscribe = push.environment === "ready";
 
   return (
     <section className="overflow-hidden rounded-2xl border border-violet-200/80 bg-white shadow-lg shadow-violet-500/10">
@@ -268,7 +368,7 @@ export function PushNotificationPanel({ push }: PushProps) {
               type="button"
               variant="ghost"
               size="sm"
-              disabled={push.loading}
+              disabled={push.loading || !canSubscribe}
               onClick={push.unsubscribe}
               className="gap-1 text-green-800 hover:bg-green-100"
             >
@@ -288,6 +388,8 @@ export function PushNotificationPanel({ push }: PushProps) {
             </Button>
           )}
         </div>
+
+        <PushEnvironmentNotice push={push} />
 
         {push.message && (
           <p

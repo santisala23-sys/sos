@@ -28,7 +28,7 @@ const TRUST_PILLS = [
   { icon: Smartphone, label: "Sin instalar apps" },
   { icon: Bell, label: "Alerta al instante" },
   { icon: ClipboardList, label: "Libreta sanitaria" },
-  { icon: Shield, label: "Gratis para empezar" },
+  { icon: Shield, label: "Empezá hoy" },
 ] as const;
 
 const INCLUDES = [
@@ -75,7 +75,7 @@ export default async function HomePage() {
                     size="lg"
                     className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 px-8 shadow-xl shadow-violet-500/30 hover:from-violet-700 hover:to-indigo-700"
                   >
-                    Crear perfil gratis
+                    Crear perfil
                     <ArrowRight className="h-5 w-5" aria-hidden />
                   </Button>
                 </Link>
@@ -134,7 +134,7 @@ export default async function HomePage() {
                 {
                   step: "02",
                   title: "Pegás o llevás el QR",
-                  text: "En una chapita, collar, tarjeta o sticker. También podés imprimirlo vos gratis.",
+                  text: "En una chapita, collar, tarjeta o sticker. También podés imprimirlo vos mismo.",
                   icon: Package,
                 },
                 {
@@ -282,7 +282,7 @@ export default async function HomePage() {
           <SectionHeading
             eyebrow="Empezá hoy"
             title="Elegí cómo empezar"
-            description="Comprás un producto listo para usar, o creás tu perfil digital gratis e imprimís el QR vos mismo."
+            description="Comprás un producto listo para usar, o creás tu perfil digital e imprimís el QR vos mismo."
           />
 
           <div className="mt-14 grid gap-8 lg:grid-cols-2">
@@ -331,7 +331,7 @@ export default async function HomePage() {
             <article className="flex flex-col rounded-[2rem] border border-neutral-200 bg-white p-9 shadow-lg">
               <p className="inline-flex w-fit items-center gap-2 rounded-full bg-neutral-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-neutral-700">
                 <QrCode className="h-3.5 w-3.5" aria-hidden />
-                Digital gratis
+                Perfil digital
               </p>
               <h3 className="mt-5 text-2xl font-black text-neutral-900 sm:text-3xl">
                 Creás la cuenta e imprimís
@@ -341,7 +341,7 @@ export default async function HomePage() {
               </p>
               <ol className="mt-8 flex-1 space-y-5 text-neutral-700">
                 {[
-                  "Te registrás gratis (1 perfil incluido)",
+                  "Te registrás (1 perfil incluido)",
                   "Completás los datos de contacto",
                   "Descargás PNG o imprimís PDF",
                 ].map((item, i) => (
@@ -355,7 +355,7 @@ export default async function HomePage() {
               </ol>
               <Link href="/register" className="mt-10 block">
                 <Button variant="secondary" size="lg" className="w-full">
-                  Crear perfil gratis
+                  Crear perfil
                 </Button>
               </Link>
               <p className="mt-4 text-center text-sm text-neutral-500">
@@ -389,7 +389,7 @@ export default async function HomePage() {
               Protegé lo que más importa hoy
             </h2>
             <p className="relative mx-auto mt-5 max-w-2xl text-lg text-violet-100 sm:text-xl">
-              Creá tu perfil gratis en minutos o elegí un producto físico listo
+              Creá tu perfil en minutos o elegí un producto físico listo
               para activar.
             </p>
             <div className="relative mt-10 flex flex-wrap justify-center gap-4">
@@ -398,7 +398,7 @@ export default async function HomePage() {
                   size="lg"
                   className="bg-white px-8 text-violet-700 shadow-xl hover:bg-violet-50"
                 >
-                  Empezar gratis
+                  Empezar
                 </Button>
               </Link>
               <a href="#catalogo">

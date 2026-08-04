@@ -51,7 +51,7 @@ export function ServicePage({ service }: ServicePageProps) {
                   size="lg"
                   className="gap-2 bg-white px-8 text-neutral-900 shadow-xl hover:bg-white/95"
                 >
-                  Empezar gratis
+                  Empezar
                   <ArrowRight className="h-5 w-5" aria-hidden />
                 </Button>
               </Link>
@@ -166,7 +166,7 @@ export function ServicePage({ service }: ServicePageProps) {
                   size="lg"
                   className="bg-white px-8 text-neutral-900 hover:bg-white/95"
                 >
-                  Crear perfil gratis
+                  Crear perfil
                 </Button>
               </Link>
               <Link href="/#casos">

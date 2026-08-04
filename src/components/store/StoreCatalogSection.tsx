@@ -32,7 +32,7 @@ export async function StoreCatalogSection() {
             href="/register"
             className="mt-4 inline-block text-sm font-semibold text-violet-700 hover:underline"
           >
-            ¿Preferís imprimir el QR gratis? →
+            ¿Preferís imprimir el QR vos mismo? →
           </Link>
         </div>
 
@@ -44,14 +44,14 @@ export async function StoreCatalogSection() {
                 El catálogo se está preparando
               </p>
               <p className="mt-2 text-neutral-600">
-                Mientras tanto podés crear tu perfil digital gratis.
+                Mientras tanto podés crear tu perfil digital.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <Link href="/contacto">
                   <Button variant="secondary">Escribinos</Button>
                 </Link>
                 <Link href="/register">
-                  <Button>Crear perfil gratis</Button>
+                  <Button>Crear perfil</Button>
                 </Link>
               </div>
             </div>

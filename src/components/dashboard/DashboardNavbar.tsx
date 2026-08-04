@@ -45,8 +45,7 @@ const NAV_LINKS = [
   },
 ] as const;
 
-type PlanStatus = {
-  planName: string;
+type ProfileLimitStatus = {
   maxProfiles: number;
   currentCount: number;
   activeCount?: number;
@@ -58,7 +57,7 @@ export function DashboardNavbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hash, setHash] = useState("");
-  const [planStatus, setPlanStatus] = useState<PlanStatus | null>(null);
+  const [profileLimit, setProfileLimit] = useState<ProfileLimitStatus | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
@@ -90,9 +89,9 @@ export function DashboardNavbar() {
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (d?.plan) setPlanStatus(d.plan);
+        if (d?.plan) setProfileLimit(d.plan);
       })
-      .catch(() => setPlanStatus(null));
+      .catch(() => setProfileLimit(null));
   }, []);
 
   useEffect(() => {
@@ -186,8 +185,8 @@ export function DashboardNavbar() {
             Panel del tutor
             <br />
             <span className="font-semibold text-violet-700">
-              {planStatus
-                ? `${planStatus.planName} · ${(planStatus.activeCount ?? planStatus.currentCount)}/${planStatus.currentCount} QR activos`
+              {profileLimit
+                ? `${profileLimit.activeCount ?? profileLimit.currentCount}/${profileLimit.maxProfiles} QR activos`
                 : "Gestioná tus perfiles y alertas"}
             </span>
           </span>
@@ -248,12 +247,10 @@ export function DashboardNavbar() {
         title="Panel"
         hiddenFrom="lg"
       >
-        {planStatus && (
+        {profileLimit && (
           <p className="mb-4 rounded-2xl bg-violet-50 px-4 py-3 text-sm text-violet-800">
-            <span className="font-semibold">{planStatus.planName}</span>
-            {" · "}
-            {(planStatus.activeCount ?? planStatus.currentCount)}/
-            {planStatus.currentCount} QR activos
+            {(profileLimit.activeCount ?? profileLimit.currentCount)}/
+            {profileLimit.maxProfiles} QR activos
           </p>
         )}
         <nav className="flex flex-col gap-1.5" aria-label="Navegación móvil del panel">
