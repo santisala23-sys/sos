@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { isIosDevice, isStandaloneDisplay } from "@/lib/pwa/device";
+import { isIosDevice, isMobileDevice, isStandaloneDisplay } from "@/lib/pwa/device";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -11,6 +11,7 @@ type BeforeInstallPromptEvent = Event & {
 export function usePwaInstall() {
   const [isStandalone, setIsStandalone] = useState(false);
   const [isIos, setIsIos] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [canNativeInstall, setCanNativeInstall] = useState(false);
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
@@ -19,6 +20,7 @@ export function usePwaInstall() {
 
   useEffect(() => {
     setIsIos(isIosDevice());
+    setIsMobile(isMobileDevice());
     setIsStandalone(isStandaloneDisplay());
 
     const onInstallPrompt = (event: Event) => {
@@ -42,7 +44,8 @@ export function usePwaInstall() {
     };
   }, []);
 
-  const canInstall = !isStandalone && (canNativeInstall || isIos);
+  const canInstall =
+    isMobile && !isStandalone && (canNativeInstall || isIos);
 
   const install = useCallback(async () => {
     if (isStandalone) return;
@@ -69,6 +72,7 @@ export function usePwaInstall() {
     canInstall,
     canNativeInstall,
     isIos,
+    isMobile,
     isStandalone,
     iosGuideOpen,
     setIosGuideOpen,
