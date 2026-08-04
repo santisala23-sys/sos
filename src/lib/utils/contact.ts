@@ -12,6 +12,24 @@ export function buildWhatsAppUrl(message: string): string {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
+export function buildContactInquiryMessage(params: {
+  motivoLabel: string;
+  nombre?: string;
+  detalle?: string;
+}): string {
+  const lines = [
+    "Hola SOSme, te escribo desde la web de contacto.",
+    "",
+    `Motivo: ${params.motivoLabel}`,
+    params.nombre?.trim() ? `Nombre / cuenta: ${params.nombre.trim()}` : null,
+    params.detalle?.trim() ? `Mensaje:\n${params.detalle.trim()}` : null,
+    "",
+    "Gracias.",
+  ].filter(Boolean);
+
+  return lines.join("\n");
+}
+
 export function buildRequestMoreProfilesMessage(params: {
   email?: string;
   profileCount?: number;
