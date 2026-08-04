@@ -813,7 +813,11 @@ export async function updateScanLogLocation(
 
 export async function savePushSubscription(
   userId: string,
-  subscription: { endpoint: string; keys: { p256dh: string; auth: string } },
+  subscription: {
+    endpoint: string;
+    keys: { p256dh: string; auth: string };
+    userAgent?: string | null;
+  },
 ): Promise<"ok" | "conflict"> {
   const sql = getSql();
   const existing = await sql`
@@ -825,16 +829,20 @@ export async function savePushSubscription(
   }
 
   await sql`
-    INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth)
+    INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth, user_agent, updated_at)
     VALUES (
       ${userId},
       ${subscription.endpoint},
       ${subscription.keys.p256dh},
-      ${subscription.keys.auth}
+      ${subscription.keys.auth},
+      ${subscription.userAgent ?? null},
+      NOW()
     )
     ON CONFLICT (endpoint) DO UPDATE
       SET p256dh = EXCLUDED.p256dh,
-          auth = EXCLUDED.auth
+          auth = EXCLUDED.auth,
+          user_agent = COALESCE(EXCLUDED.user_agent, push_subscriptions.user_agent),
+          updated_at = NOW()
       WHERE push_subscriptions.user_id = ${userId}
   `;
   return "ok";
@@ -849,6 +857,36 @@ export async function deletePushSubscription(
     DELETE FROM push_subscriptions
     WHERE user_id = ${userId} AND endpoint = ${endpoint}
   `;
+}
+
+export async function deletePushSubscriptionById(
+  userId: string,
+  subscriptionId: string,
+): Promise<boolean> {
+  const sql = getSql();
+  const rows = await sql`
+    DELETE FROM push_subscriptions
+    WHERE user_id = ${userId} AND id = ${subscriptionId}
+    RETURNING id
+  `;
+  return rows.length > 0;
+}
+
+export async function listPushSubscriptionDevices(userId: string) {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, endpoint, user_agent, created_at, updated_at
+    FROM push_subscriptions
+    WHERE user_id = ${userId}
+    ORDER BY updated_at DESC
+  `;
+  return rows as {
+    id: string;
+    endpoint: string;
+    user_agent: string | null;
+    created_at: string;
+    updated_at: string;
+  }[];
 }
 
 export async function listPushSubscriptionsByUser(userId: string) {

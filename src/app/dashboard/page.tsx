@@ -24,8 +24,7 @@ import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBan
 import { PetCard } from "@/components/dashboard/PetCard";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import {
-  PushNotificationAlert,
-  PushNotificationFooter,
+  PushNotificationPanel,
   usePushNotifications,
 } from "@/components/dashboard/PushNotificationSetup";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
@@ -286,11 +285,11 @@ export default function DashboardPage() {
         />
       )}
 
+      {!legalBlocked && <PushNotificationPanel push={push} />}
+
       {!loading && unreadCount > 0 && !legalBlocked && (
         <AlertBanner unreadCount={unreadCount} latestLogId={latestUnread?.id} />
       )}
-
-      <PushNotificationAlert push={push} />
 
       {!loading && activatedProfile && !legalBlocked && (
         <div className="flex items-start gap-4 rounded-2xl border border-green-200/80 bg-gradient-to-r from-green-50 to-emerald-50 p-5 shadow-lg shadow-green-500/10">
@@ -448,8 +447,6 @@ export default function DashboardPage() {
           </div>
         )}
       </DashboardSection>
-
-      <PushNotificationFooter push={push} />
 
       <section className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-black text-neutral-900">Cuenta</h2>

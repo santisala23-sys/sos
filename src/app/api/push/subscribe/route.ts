@@ -3,9 +3,27 @@ import { withApi } from "@/lib/api/with-api";
 import { getSession } from "@/lib/auth/session";
 import {
   deletePushSubscription,
+  deletePushSubscriptionById,
+  listPushSubscriptionDevices,
   savePushSubscription,
 } from "@/lib/db/queries";
+import { toPushDeviceSummary } from "@/lib/push/device-label";
 import { logSecurityAudit } from "@/lib/security/audit";
+
+export const GET = withApi({ rateLimit: "api" }, async (request) => {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  const currentEndpoint =
+    new URL(request.url).searchParams.get("currentEndpoint")?.trim() || null;
+  const rows = await listPushSubscriptionDevices(session.userId);
+
+  return NextResponse.json({
+    devices: rows.map((row) => toPushDeviceSummary(row, currentEndpoint)),
+  });
+});
 
 export const POST = withApi(
   { rateLimit: "api" },
@@ -16,9 +34,10 @@ export const POST = withApi(
     }
 
     const body = await request.json();
-    const { endpoint, keys } = body as {
+    const { endpoint, keys, userAgent } = body as {
       endpoint?: string;
       keys?: { p256dh?: string; auth?: string };
+      userAgent?: string;
     };
 
     if (!endpoint || !keys?.p256dh || !keys?.auth) {
@@ -28,6 +47,7 @@ export const POST = withApi(
     const result = await savePushSubscription(session.userId, {
       endpoint,
       keys: { p256dh: keys.p256dh, auth: keys.auth },
+      userAgent: userAgent ?? null,
     });
 
     if (result === "conflict") {
@@ -47,21 +67,30 @@ export const POST = withApi(
   },
 );
 
-export const DELETE = withApi(
-  { rateLimit: "api" },
-  async (request) => {
-    const session = await getSession();
-    if (!session) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
+export const DELETE = withApi({ rateLimit: "api" }, async (request) => {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
 
-    const body = await request.json();
-    const { endpoint } = body as { endpoint?: string };
-    if (!endpoint) {
-      return NextResponse.json({ error: "endpoint requerido" }, { status: 400 });
-    }
+  const body = await request.json();
+  const { endpoint, id } = body as { endpoint?: string; id?: string };
 
-    await deletePushSubscription(session.userId, endpoint);
+  if (id) {
+    const removed = await deletePushSubscriptionById(session.userId, id);
+    if (!removed) {
+      return NextResponse.json({ error: "Dispositivo no encontrado" }, { status: 404 });
+    }
     return NextResponse.json({ ok: true });
-  },
-);
+  }
+
+  if (!endpoint) {
+    return NextResponse.json(
+      { error: "endpoint o id requerido" },
+      { status: 400 },
+    );
+  }
+
+  await deletePushSubscription(session.userId, endpoint);
+  return NextResponse.json({ ok: true });
+});
