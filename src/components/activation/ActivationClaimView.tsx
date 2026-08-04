@@ -106,7 +106,7 @@ export function ActivationClaimView({
     if (profile?.slug) {
       router.push(`/dashboard?activado=${profile.slug}`);
     } else {
-      router.push("/dashboard#perfiles");
+      router.push("/dashboard#personas");
     }
     router.refresh();
   }

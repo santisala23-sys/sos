@@ -7,6 +7,7 @@ import { ArrowLeft, ExternalLink, Pencil } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { PublicQrButton } from "@/components/dashboard/PublicQrButton";
 import { SavedLocationPanel } from "@/components/dashboard/SavedLocationPanel";
+import { dashboardHashForProfileType } from "@/lib/dashboard/profile-section-order";
 import { PROFILE_TYPES } from "@/lib/profile-types";
 import { getTutorPublicPreviewUrl } from "@/lib/utils/slug";
 import { formatDateTime } from "@/lib/utils/format";
@@ -24,7 +25,7 @@ export default function ProfileDetailPage() {
     async function load() {
       const res = await fetch(`/api/qr-profiles/${params.id}`);
       if (!res.ok) {
-        router.push("/dashboard#perfiles");
+        router.push("/dashboard#personas");
         return;
       }
       const data = await res.json();
@@ -64,14 +65,16 @@ export default function ProfileDetailPage() {
           href={
             profile.profile_type === "pet"
               ? "/dashboard#mascotas"
-              : "/dashboard#perfiles"
+              : `/dashboard${dashboardHashForProfileType(profile.profile_type)}`
           }
           className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 hover:underline"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           {profile.profile_type === "pet"
             ? "Volver a mascotas"
-            : "Volver a perfiles QR"}
+            : profile.profile_type === "object"
+              ? "Volver a objetos"
+              : "Volver a personas"}
         </Link>
         <Link
           href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent(`/dashboard/perfiles/${profile.id}`)}`}

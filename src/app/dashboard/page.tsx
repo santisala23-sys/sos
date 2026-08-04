@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -11,6 +11,7 @@ import {
   FileDown,
   PawPrint,
   Plus,
+  Package,
   QrCode,
   UserX,
   UserCircle2,
@@ -28,6 +29,10 @@ import {
 } from "@/components/dashboard/PushNotificationSetup";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
 import { ObjectSavedLocationsBanner } from "@/components/dashboard/ObjectSavedLocationsBanner";
+import type { ProfileType } from "@/lib/profile-types";
+import {
+  sortProfileSections,
+} from "@/lib/dashboard/profile-section-order";
 import { Button } from "@/components/ui/Button";
 
 export default function DashboardPage() {
@@ -94,15 +99,82 @@ export default function DashboardPage() {
     if (activatedSlug) setHighlightedSlug(activatedSlug);
   }, []);
 
+  useEffect(() => {
+    if (window.location.hash === "#perfiles") {
+      window.history.replaceState(null, "", "/dashboard#personas");
+    }
+  }, []);
+
   const latestUnread = logs.find((l) => !l.read_at);
   const legalBlocked = legalStatus?.needsAcceptance ?? false;
   const atProfileLimit = planStatus != null && !planStatus.canCreateMore;
   const activeProfilesCount = loading
     ? null
     : profiles.reduce((acc, p) => (p.is_active ? acc + 1 : acc), 0);
-  const emergencyProfiles = profiles.filter((p) => p.profile_type !== "pet");
+  const personProfiles = profiles.filter((p) => p.profile_type === "person");
+  const objectProfiles = profiles.filter((p) => p.profile_type === "object");
   const petProfiles = profiles.filter((p) => p.profile_type === "pet");
   const hasAnyProfiles = profiles.length > 0;
+
+  const profileCounts: Record<ProfileType, number> = {
+    person: personProfiles.length,
+    object: objectProfiles.length,
+    pet: petProfiles.length,
+  };
+  const orderedSections = sortProfileSections(profileCounts);
+
+  const profilesByType: Record<ProfileType, QrProfile[]> = {
+    person: personProfiles,
+    object: objectProfiles,
+    pet: petProfiles,
+  };
+
+  const sectionMeta: Record<
+    ProfileType,
+    {
+      id: string;
+      title: string;
+      description: string;
+      icon: typeof UserCircle2;
+      emptyTitle: string;
+      emptyBody: ReactNode;
+    }
+  > = {
+    person: {
+      id: "personas",
+      title: "Personas",
+      description:
+        "Perfiles QR de emergencia con contactos, alertas SOS y datos médicos.",
+      icon: UserCircle2,
+      emptyTitle: "Todavía no tenés perfiles de persona",
+      emptyBody:
+        "Creá un perfil para vos o un familiar con contactos de emergencia y alertas.",
+    },
+    object: {
+      id: "objetos",
+      title: "Objetos",
+      description:
+        "Autos, valijas y equipos con QR. Guardá ubicación y contacto del dueño.",
+      icon: Package,
+      emptyTitle: "Todavía no tenés objetos",
+      emptyBody:
+        "Marcá valijas, autos u otros objetos con QR para recuperarlos si se pierden.",
+    },
+    pet: {
+      id: "mascotas",
+      title: "Mascotas",
+      description:
+        "Libreta sanitaria, vacunas, visitas veterinarias y QR de emergencia.",
+      icon: PawPrint,
+      emptyTitle: "Todavía no tenés mascotas",
+      emptyBody: (
+        <>
+          Creá un perfil con tipo <strong>Mascota</strong> o activá el QR de un
+          collar/chapita.
+        </>
+      ),
+    },
+  };
 
   function handleCreateProfile() {
     if (atProfileLimit) {
@@ -334,79 +406,99 @@ export default function DashboardPage() {
         <ObjectSavedLocationsBanner profiles={profiles} />
       )}
 
-      <DashboardSection
-        id="perfiles"
-        icon={UserCircle2}
-        title="Perfiles QR de emergencia"
-        description="Personas y objetos con QR, contactos de emergencia y alertas SOS."
-        disabled={legalBlocked}
-      >
-        {loading ? (
-          <div className="space-y-3">
-            <div className="h-32 animate-pulse rounded-2xl bg-violet-50" />
-            <div className="h-32 animate-pulse rounded-2xl bg-violet-50" />
+      {!loading && !hasAnyProfiles && !legalBlocked && (
+        <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/50 p-6 sm:p-8">
+          <h3 className="text-lg font-bold text-neutral-900">
+            Creá tu primer perfil QR
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+            Plan gratis: 1 perfil para persona, mascota u objeto. ¿Necesitás más?{" "}
+            <Link
+              href="/contacto"
+              className="font-semibold text-violet-700 underline-offset-2 hover:underline"
+            >
+              contactanos
+            </Link>
+            .
+          </p>
+          <div className="mt-6 rounded-2xl border border-white/80 bg-white p-5 shadow-sm">
+            <QrProfileForm onSuccess={loadData} />
           </div>
-        ) : !hasAnyProfiles ? (
-          <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/50 p-6 sm:p-8">
-            <h3 className="text-lg font-bold text-neutral-900">
-              Creá tu primer perfil QR
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-              Plan gratis: 1 perfil para persona, mascota u objeto. ¿Necesitás más?{" "}
-              <Link
-                href="/contacto"
-                className="font-semibold text-violet-700 underline-offset-2 hover:underline"
-              >
-                contactanos
-              </Link>
-              .
+        </div>
+      )}
+
+      {hasAnyProfiles && atProfileLimit && !legalBlocked && (
+        <div className="flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-600">
+              <AlertTriangle className="h-5 w-5" aria-hidden />
+            </span>
+            <p className="text-sm font-semibold text-red-800">
+              Llegaste al límite de perfiles de tu plan. Mejorá tu plan para
+              crear más perfiles.
             </p>
-            <div className="mt-6 rounded-2xl border border-white/80 bg-white p-5 shadow-sm">
-              <QrProfileForm onSuccess={loadData} />
-            </div>
           </div>
-        ) : (
-          <>
-            {atProfileLimit && (
-              <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-start gap-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-600">
-                    <AlertTriangle className="h-5 w-5" aria-hidden />
-                  </span>
-                  <p className="text-sm font-semibold text-red-800">
-                    Llegaste al límite de perfiles de tu plan. Mejorá tu plan para
-                    crear más perfiles.
-                  </p>
-                </div>
-                <Link
-                  href="/contacto"
-                  className="inline-flex shrink-0 items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-700"
-                >
-                  Contactanos
-                </Link>
+          <Link
+            href="/contacto"
+            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-700"
+          >
+            Contactanos
+          </Link>
+        </div>
+      )}
+
+      {hasAnyProfiles && !atProfileLimit && !legalBlocked && (
+        <div>
+          <Button
+            type="button"
+            onClick={handleCreateProfile}
+            className="w-full gap-2 sm:w-auto"
+            size="lg"
+          >
+            <Plus className="h-5 w-5" aria-hidden />
+            Crear perfil QR nuevo
+          </Button>
+        </div>
+      )}
+
+      {hasAnyProfiles &&
+        orderedSections.map((sectionType) => {
+        const meta = sectionMeta[sectionType];
+        const sectionProfiles = profilesByType[sectionType];
+
+        return (
+          <DashboardSection
+            key={sectionType}
+            id={meta.id}
+            icon={meta.icon}
+            title={meta.title}
+            description={meta.description}
+            disabled={legalBlocked}
+          >
+            {loading ? (
+              <div className="space-y-3">
+                <div className="h-32 animate-pulse rounded-2xl bg-violet-50" />
               </div>
-            )}
-            {!atProfileLimit && (
-              <div className="mb-5">
-                <Button
-                  type="button"
-                  onClick={handleCreateProfile}
-                  className="w-full gap-2 sm:w-auto"
-                  size="lg"
-                >
-                  <Plus className="h-5 w-5" aria-hidden />
-                  Crear perfil QR nuevo
-                </Button>
+            ) : sectionProfiles.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-6 sm:p-6">
+                <h3 className="font-bold text-neutral-900">{meta.emptyTitle}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                  {meta.emptyBody}
+                </p>
               </div>
-            )}
-            {emergencyProfiles.length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-6 text-sm text-neutral-500">
-                Todavía no tenés perfiles de persona u objeto. Las mascotas
-                aparecen en la sección Mascotas.
-              </p>
+            ) : sectionType === "pet" ? (
+              <div className="grid gap-5 lg:grid-cols-2">
+                {sectionProfiles.map((profile) => (
+                  <PetCard
+                    key={profile.id}
+                    profile={profile}
+                    onRefresh={loadData}
+                  />
+                ))}
+              </div>
             ) : (
               <div className="grid gap-5 lg:grid-cols-2">
-                {emergencyProfiles.map((profile) => (
+                {sectionProfiles.map((profile) => (
                   <ProfileCard
                     key={profile.id}
                     profile={profile}
@@ -416,54 +508,9 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
-          </>
-        )}
-      </DashboardSection>
-
-      <DashboardSection
-        id="mascotas"
-        icon={PawPrint}
-        title="Mascotas"
-        description="Seleccioná una mascota para su libreta sanitaria, vacunas, visitas y QR para el veterinario."
-        disabled={legalBlocked}
-      >
-        {loading ? (
-          <div className="space-y-3">
-            <div className="h-32 animate-pulse rounded-2xl bg-teal-50" />
-          </div>
-        ) : petProfiles.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-teal-200 bg-teal-50/40 p-6 sm:p-8">
-            <h3 className="text-lg font-bold text-neutral-900">
-              Todavía no tenés mascotas
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-              Creá un perfil con tipo <strong>Mascota</strong> o activá el QR de
-              un collar/chapita. Después vas a poder cargar la libreta sanitaria
-              acá.
-            </p>
-            {!atProfileLimit && hasAnyProfiles && (
-              <Button
-                type="button"
-                onClick={handleCreateProfile}
-                className="mt-4 gap-2"
-              >
-                <Plus className="h-4 w-4" aria-hidden />
-                Crear perfil de mascota
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="grid gap-5 lg:grid-cols-2">
-            {petProfiles.map((profile) => (
-              <PetCard
-                key={profile.id}
-                profile={profile}
-                onRefresh={loadData}
-              />
-            ))}
-          </div>
-        )}
-      </DashboardSection>
+          </DashboardSection>
+        );
+      })}
 
       <section className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-black text-neutral-900">Cuenta</h2>

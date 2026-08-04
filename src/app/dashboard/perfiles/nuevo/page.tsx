@@ -12,7 +12,7 @@ export default function NewProfilePage() {
     <main className="mx-auto max-w-2xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
       <div>
         <Link
-          href="/dashboard#perfiles"
+          href="/dashboard#personas"
           className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 hover:underline"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -28,8 +28,8 @@ export default function NewProfilePage() {
 
       <section className="rounded-3xl border border-violet-100 bg-white p-5 shadow-xl shadow-violet-500/10 sm:p-8">
         <QrProfileForm
-          onSuccess={() => router.push("/dashboard#perfiles")}
-          onCancel={() => router.push("/dashboard#perfiles")}
+          onSuccess={() => router.push("/dashboard#personas")}
+          onCancel={() => router.push("/dashboard#personas")}
         />
       </section>
     </main>

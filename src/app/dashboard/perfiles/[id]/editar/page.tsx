@@ -35,7 +35,7 @@ function EditProfileContent() {
     async function load() {
       const res = await fetch(`/api/qr-profiles/${params.id}`);
       if (!res.ok) {
-        router.push("/dashboard#perfiles");
+        router.push("/dashboard#personas");
         return;
       }
       const data = await res.json();

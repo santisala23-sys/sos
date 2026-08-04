@@ -7,6 +7,7 @@ import {
   Activity,
   LayoutDashboard,
   LogOut,
+  Package,
   PawPrint,
   UserCircle2,
 } from "lucide-react";
@@ -19,10 +20,16 @@ import { cn } from "@/lib/utils/cn";
 const NAV_LINKS = [
   { href: "/dashboard", label: "Panel", icon: LayoutDashboard, id: "panel" },
   {
-    href: "/dashboard#perfiles",
-    label: "Perfiles QR",
+    href: "/dashboard#personas",
+    label: "Personas",
     icon: UserCircle2,
-    id: "perfiles",
+    id: "personas",
+  },
+  {
+    href: "/dashboard#objetos",
+    label: "Objetos",
+    icon: Package,
+    id: "objetos",
   },
   {
     href: "/dashboard#mascotas",
@@ -116,13 +123,23 @@ export function DashboardNavbar() {
 
   function isActive(id: (typeof NAV_LINKS)[number]["id"]) {
     if (id === "actividad") return isActividad;
-    if (id === "perfiles") {
-      return pathname === "/dashboard" && hash === "#perfiles";
+    if (id === "personas") {
+      return (
+        pathname === "/dashboard" &&
+        (hash === "#personas" || hash === "#perfiles")
+      );
+    }
+    if (id === "objetos") {
+      return pathname === "/dashboard" && hash === "#objetos";
     }
     if (id === "mascotas") {
       return pathname === "/dashboard" && hash === "#mascotas";
     }
-    return pathname === "/dashboard" && !hash && !isActividad;
+    return (
+      pathname === "/dashboard" &&
+      !hash &&
+      !isActividad
+    );
   }
 
   async function handleLogout() {
