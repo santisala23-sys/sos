@@ -94,8 +94,10 @@ export type PushNotificationsState = {
   devicesLoading: boolean;
   subscribe: () => Promise<void>;
   unsubscribe: () => Promise<void>;
+  testPush: () => Promise<void>;
   removeDevice: (device: PushDeviceSummary) => Promise<void>;
   refreshDevices: () => Promise<void>;
+  messageTone: "success" | "error" | "info";
 };
 
 export function usePushNotifications(): PushNotificationsState {
@@ -104,6 +106,9 @@ export function usePushNotifications(): PushNotificationsState {
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [messageTone, setMessageTone] = useState<"success" | "error" | "info">(
+    "info",
+  );
   const [devices, setDevices] = useState<PushDeviceSummary[]>([]);
   const [devicesLoading, setDevicesLoading] = useState(false);
 
@@ -147,6 +152,51 @@ export function usePushNotifications(): PushNotificationsState {
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [refreshStatus]);
 
+  async function runTestPush(showSuccess = true) {
+    const res = await fetch("/api/push/test", { method: "POST" });
+    const data = (await res.json().catch(() => ({}))) as {
+      ok?: boolean;
+      sent?: number;
+      failed?: number;
+      expired?: number;
+      error?: string;
+    };
+
+    if (res.ok && data.ok && (data.sent ?? 0) > 0) {
+      if (showSuccess) {
+        setMessageTone("success");
+        setMessage(
+          "Te enviamos una alerta de prueba. Si no la ves, bloqueá la pantalla un momento o revisá Ajustes → Notificaciones → SOSme.",
+        );
+      }
+      return true;
+    }
+
+    setMessageTone("error");
+    if (data.expired && (data.expired ?? 0) > 0) {
+      setMessage(
+        "La suscripción de este dispositivo venció. Desactivá alertas, volvé a activarlas y probá otra vez.",
+      );
+    } else if ((data.sent ?? 0) === 0) {
+      setMessage(
+        "No pudimos entregar la prueba a este dispositivo. Desactivá alertas, volvé a activarlas desde el ícono de inicio y probá de nuevo.",
+      );
+    } else {
+      setMessage(data.error ?? "No se pudo enviar la alerta de prueba.");
+    }
+    return false;
+  }
+
+  async function testPush() {
+    setLoading(true);
+    setMessage(null);
+    try {
+      await runTestPush(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function subscribe() {
     if (environment !== "ready") {
       setMessage(
@@ -159,6 +209,7 @@ export function usePushNotifications(): PushNotificationsState {
 
     setLoading(true);
     setMessage(null);
+    setMessageTone("info");
 
     try {
       const permission = await Notification.requestPermission();
@@ -180,12 +231,14 @@ export function usePushNotifications(): PushNotificationsState {
       }
 
       let sub = await reg.pushManager.getSubscription();
-      if (!sub) {
-        sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicKey),
-        });
+      if (sub) {
+        await sub.unsubscribe();
       }
+
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      });
 
       const res = await fetch("/api/push/subscribe", {
         method: "POST",
@@ -202,12 +255,8 @@ export function usePushNotifications(): PushNotificationsState {
       }
 
       setSubscribed(true);
-      setMessage(null);
       await refreshDevices();
-
-      void fetch("/api/push/test", { method: "POST" }).catch(() => {
-        /* best effort */
-      });
+      await runTestPush(true);
     } catch {
       setMessage("Error al activar notificaciones.");
     } finally {
@@ -229,6 +278,7 @@ export function usePushNotifications(): PushNotificationsState {
         await sub.unsubscribe();
       }
       setSubscribed(false);
+      setMessageTone("info");
       setMessage("Notificaciones desactivadas en este dispositivo.");
       await refreshDevices();
     } finally {
@@ -270,10 +320,12 @@ export function usePushNotifications(): PushNotificationsState {
     subscribed,
     loading,
     message,
+    messageTone,
     devices,
     devicesLoading,
     subscribe,
     unsubscribe,
+    testPush,
     removeDevice,
     refreshDevices,
   };
@@ -382,17 +434,30 @@ export function PushNotificationPanel({ push }: PushProps) {
           </div>
 
           {push.subscribed ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={push.loading || !canSubscribe}
-              onClick={push.unsubscribe}
-              className="gap-1 text-green-800 hover:bg-green-100"
-            >
-              <BellOff className="h-4 w-4" aria-hidden />
-              Desactivar
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={push.loading || !canSubscribe}
+                onClick={push.testPush}
+                className="gap-1"
+              >
+                <Bell className="h-4 w-4" aria-hidden />
+                {push.loading ? "Enviando..." : "Probar alerta"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={push.loading || !canSubscribe}
+                onClick={push.unsubscribe}
+                className="gap-1 text-green-800 hover:bg-green-100"
+              >
+                <BellOff className="h-4 w-4" aria-hidden />
+                Desactivar
+              </Button>
+            </div>
           ) : (
             <Button
               type="button"
@@ -416,7 +481,15 @@ export function PushNotificationPanel({ push }: PushProps) {
 
         {push.message && (
           <p
-            className={`mt-3 text-sm ${push.subscribed ? "text-green-800" : "text-red-700"}`}
+            className={`mt-3 text-sm ${
+              push.messageTone === "success"
+                ? "text-green-800"
+                : push.messageTone === "error"
+                  ? "text-red-700"
+                  : push.subscribed
+                    ? "text-green-800"
+                    : "text-red-700"
+            }`}
             role="alert"
           >
             {push.message}
