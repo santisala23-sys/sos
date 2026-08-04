@@ -1,5 +1,5 @@
-import { listPushSubscriptionsByUser } from "@/lib/db/queries";
-import { sendWebPush } from "@/lib/push/send-web-push";
+import { deletePushSubscription, listPushSubscriptionsByUser } from "@/lib/db/queries";
+import { sendWebPushToUser } from "@/lib/push/send-web-push";
 import { getAppUrl } from "@/lib/utils/app-url";
 
 export type NotifyTutorPetVisitParams = {
@@ -55,9 +55,9 @@ export async function notifyTutorPetVisit(
     : `${vetLabel} cargó una visita. Tocá para ver la libreta.`;
 
   const subscriptions = await listPushSubscriptionsByUser(params.tutorId);
-  await Promise.all(
-    subscriptions.map((sub) =>
-      sendWebPush(sub, { title, body, url: profileUrl }),
-    ),
+  await sendWebPushToUser(
+    subscriptions,
+    { title, body, url: profileUrl },
+    (endpoint) => deletePushSubscription(params.tutorId, endpoint),
   );
 }

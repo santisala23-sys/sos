@@ -35,7 +35,7 @@ export function ScanLogsList({ logs }: ScanLogsListProps) {
   }
 
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="flex flex-col gap-4">
       {logs.map((log, index) => {
         const isUnread = !log.read_at;
         const hasNote = Boolean(log.scanner_note?.trim());
@@ -48,11 +48,11 @@ export function ScanLogsList({ logs }: ScanLogsListProps) {
             <Link
               href={`/dashboard/logs/${log.id}`}
               className={cn(
-                "group flex items-start gap-4 rounded-2xl border p-4 transition-all duration-200 sm:p-5",
+                "group flex items-start gap-4 rounded-[1.25rem] border p-4 transition-all duration-200 sm:p-5",
                 isLatestUnread
-                  ? "border-violet-400 bg-gradient-to-r from-violet-50 to-indigo-50 shadow-lg shadow-violet-500/15 ring-2 ring-violet-300/50"
+                  ? "border-red-300 bg-gradient-to-r from-red-50 via-rose-50 to-red-50 shadow-lg shadow-red-500/15 ring-2 ring-red-200/80"
                   : isUnread
-                    ? "border-red-200 bg-red-50/60 hover:border-red-300 hover:shadow-md"
+                    ? "border-red-200/90 bg-red-50/70 hover:border-red-300 hover:shadow-md hover:shadow-red-500/10"
                     : "border-neutral-200/80 bg-white hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-lg hover:shadow-violet-500/10",
               )}
             >

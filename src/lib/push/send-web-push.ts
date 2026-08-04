@@ -19,11 +19,18 @@ export type PushPayload = {
   url?: string;
 };
 
+export type PushSendResult =
+  | { ok: true }
+  | { ok: false; expired: boolean; statusCode?: number; message?: string };
+
 export async function sendWebPush(
   subscription: { endpoint: string; p256dh: string; auth: string },
   payload: PushPayload,
-): Promise<boolean> {
-  if (!configureVapid()) return false;
+): Promise<PushSendResult> {
+  if (!configureVapid()) {
+    console.error("[web-push] VAPID keys not configured");
+    return { ok: false, expired: false, message: "vapid_not_configured" };
+  }
 
   try {
     await webpush.sendNotification(
@@ -32,10 +39,52 @@ export async function sendWebPush(
         keys: { p256dh: subscription.p256dh, auth: subscription.auth },
       },
       JSON.stringify(payload),
+      {
+        TTL: 60 * 60,
+        urgency: "high",
+      },
     );
-    return true;
+    return { ok: true };
   } catch (error) {
-    console.error("[web-push] Error:", error);
-    return false;
+    const statusCode =
+      error instanceof webpush.WebPushError ? error.statusCode : undefined;
+    const expired = statusCode === 410 || statusCode === 404;
+    console.error("[web-push] Error:", statusCode ?? error);
+    return {
+      ok: false,
+      expired,
+      statusCode,
+      message: error instanceof Error ? error.message : "unknown_error",
+    };
   }
+}
+
+export async function sendWebPushToUser(
+  subscriptions: { endpoint: string; p256dh: string; auth: string }[],
+  payload: PushPayload,
+  onExpired?: (endpoint: string) => Promise<void>,
+): Promise<{ sent: number; failed: number; expired: number }> {
+  let sent = 0;
+  let failed = 0;
+  let expired = 0;
+
+  await Promise.all(
+    subscriptions.map(async (subscription) => {
+      const result = await sendWebPush(subscription, payload);
+      if (result.ok) {
+        sent += 1;
+        return;
+      }
+
+      if (result.expired) {
+        expired += 1;
+        await onExpired?.(subscription.endpoint);
+        return;
+      }
+
+      failed += 1;
+    }),
+  );
+
+  return { sent, failed, expired };
 }

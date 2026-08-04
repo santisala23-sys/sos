@@ -252,6 +252,10 @@ export default function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      {!loading && unreadCount > 0 && !legalBlocked && (
+        <AlertBanner unreadCount={unreadCount} latestLogId={latestUnread?.id} />
+      )}
+
       <section className="relative overflow-hidden rounded-[1.75rem] border border-white/90 bg-gradient-to-br from-violet-600 via-violet-700 to-indigo-800 p-6 text-white shadow-2xl shadow-violet-600/30 sm:p-8">
         <div
           className="pointer-events-none absolute inset-0 opacity-20"
@@ -393,10 +397,6 @@ export default function DashboardPage() {
       )}
 
       {!legalBlocked && <PushNotificationPanel push={push} />}
-
-      {!loading && unreadCount > 0 && !legalBlocked && (
-        <AlertBanner unreadCount={unreadCount} latestLogId={latestUnread?.id} />
-      )}
 
       {!loading && activatedProfile && !legalBlocked && (
         <div className="flex items-start gap-4 rounded-2xl border border-green-200/80 bg-gradient-to-r from-green-50 to-emerald-50 p-5 shadow-lg shadow-green-500/10">

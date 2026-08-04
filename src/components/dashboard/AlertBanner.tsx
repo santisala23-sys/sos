@@ -33,7 +33,7 @@ export function AlertBanner({ unreadCount, latestLogId }: AlertBannerProps) {
             : `Tenés ${unreadCount} alertas nuevas`}
         </p>
         <p className="mt-0.5 text-sm text-red-800/90">
-          Escaneo, SOS o nota pendiente de revisar — tocá para ver el detalle
+          Escaneo, SOS o nota pendiente de revisar. Tocá para ver el detalle.
         </p>
       </div>
       <ChevronRight

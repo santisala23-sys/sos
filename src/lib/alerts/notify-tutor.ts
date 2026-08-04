@@ -4,8 +4,11 @@ import {
   sendFamilyAlert,
   type AlertPayload,
 } from "@/lib/alerts/send-alert";
-import { listPushSubscriptionsByUser } from "@/lib/db/queries";
-import { sendWebPush } from "@/lib/push/send-web-push";
+import {
+  deletePushSubscription,
+  listPushSubscriptionsByUser,
+} from "@/lib/db/queries";
+import { sendWebPushToUser } from "@/lib/push/send-web-push";
 
 export type NotifyTutorParams = {
   tutorId: string;
@@ -59,13 +62,26 @@ export async function notifyTutor(params: NotifyTutorParams): Promise<void> {
   });
 
   const subscriptions = await listPushSubscriptionsByUser(params.tutorId);
-  await Promise.all(
-    subscriptions.map((sub) =>
-      sendWebPush(sub, {
-        title: push.title,
-        body: push.body,
-        url: dashboardUrl,
-      }),
-    ),
+  if (subscriptions.length === 0) {
+    console.warn("[notify-tutor] No push subscriptions for tutor", params.tutorId);
+    return;
+  }
+
+  const pushResult = await sendWebPushToUser(
+    subscriptions,
+    {
+      title: push.title,
+      body: push.body,
+      url: dashboardUrl,
+    },
+    (endpoint) => deletePushSubscription(params.tutorId, endpoint),
   );
+
+  if (pushResult.sent === 0) {
+    console.error("[notify-tutor] Push delivery failed", {
+      tutorId: params.tutorId,
+      scanLogId: params.scanLogId,
+      ...pushResult,
+    });
+  }
 }

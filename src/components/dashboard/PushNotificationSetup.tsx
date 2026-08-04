@@ -204,6 +204,10 @@ export function usePushNotifications(): PushNotificationsState {
       setSubscribed(true);
       setMessage(null);
       await refreshDevices();
+
+      void fetch("/api/push/test", { method: "POST" }).catch(() => {
+        /* best effort */
+      });
     } catch {
       setMessage("Error al activar notificaciones.");
     } finally {
