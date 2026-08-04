@@ -14,7 +14,6 @@ import {
 import type { PublicQrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
-import { LocationPrompt } from "@/components/public/LocationPrompt";
 import { PublicThemeToggle } from "@/components/public/PublicThemeToggle";
 import { publicThemeStyles } from "@/components/public/publicThemeStyles";
 import { ScannerPushPrompt } from "@/components/public/ScannerPushPrompt";
@@ -62,8 +61,8 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   const [scanLogId, setScanLogId] = useState<string | null>(null);
   const [scanToken, setScanToken] = useState<string | null>(null);
   const [geoPhase, setGeoPhase] = useState<
-    "pending" | "loading" | "granted" | "skipped" | "denied" | "saving" | "saved"
-  >("pending");
+    "skipped" | "loading" | "granted" | "denied" | "saving" | "saved"
+  >("skipped");
   const [sosLoading, setSosLoading] = useState(false);
   const [sosSent, setSosSent] = useState(false);
   const [coords, setCoords] = useState<{
@@ -73,10 +72,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
   const [sessionReady, setSessionReady] = useState(false);
   const [sessionRestored, setSessionRestored] = useState(false);
 
-  const locationResolved =
-    geoPhase === "granted" ||
-    geoPhase === "skipped" ||
-    geoPhase === "saved";
+  const locationShared = geoPhase === "granted" || geoPhase === "saved";
   const isObjectProfile = profile.profile_type === "object";
   const typeConfig = getProfileTypeConfig(profile.profile_type);
   const hasClinicalPdf =
@@ -104,7 +100,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         storeScanSession(profile.slug, {
           scanToken: data.scanToken,
           scanLogId: data.scanLogId,
-          geoPhase: "pending",
+          geoPhase: "skipped",
         });
       }
     } catch {
@@ -143,7 +139,7 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
               ) {
                 setGeoPhase(stored.geoPhase);
               } else {
-                setGeoPhase("pending");
+                setGeoPhase("skipped");
               }
 
               setSessionRestored(true);
@@ -167,14 +163,13 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
 
   useEffect(() => {
     if (!scanLogId || !scanToken) return;
-    if (!locationResolved) return;
     storeScanSession(profile.slug, {
       scanToken,
       scanLogId,
       geoPhase:
         geoPhase === "granted" || geoPhase === "saved" ? "granted" : "skipped",
     });
-  }, [scanLogId, scanToken, locationResolved, geoPhase, profile.slug]);
+  }, [scanLogId, scanToken, geoPhase, profile.slug]);
 
   useEffect(() => {
     if (scanLogId && sessionRestored) {
@@ -249,10 +244,6 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
     } catch {
       setGeoPhase("denied");
     }
-  }
-
-  function handleSkipLocation() {
-    setGeoPhase("skipped");
   }
 
   async function handleSos() {
@@ -360,71 +351,16 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
         </Link>
       </aside>
 
-      {sessionRestored && locationResolved && (
+      {sessionRestored && sessionReady && (
         <p className={t.statusViolet}>
           Retomaste la conversación anterior en este dispositivo.
-        </p>
-      )}
-
-      {!locationResolved && sessionReady && (
-        <LocationPrompt
-          beneficiaryName={profile.beneficiary_name}
-          status={
-            geoPhase === "loading"
-              ? "loading"
-              : geoPhase === "saving"
-                ? "saving"
-                : geoPhase === "denied"
-                  ? "denied"
-                  : "idle"
-          }
-          onShare={handleShareLocation}
-          onSave={isObjectProfile ? handleSaveLocation : undefined}
-          onSkip={handleSkipLocation}
-          isObjectProfile={isObjectProfile}
-          isLight={isLight}
-        />
-      )}
-
-      {geoPhase === "skipped" && (
-        <div
-          className={`${t.skippedBanner} flex flex-col items-center gap-3 px-4 py-4 sm:flex-row sm:justify-center sm:gap-4`}
-        >
-          <p className="text-center sm:text-left">
-            <span className="font-semibold">Todavía no compartiste ubicación.</span>{" "}
-            Podés intentarlo de nuevo cuando quieras. Los contactos ya están
-            disponibles abajo.
-          </p>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleShareLocation}
-            className="shrink-0 gap-2 bg-amber-500 font-bold text-black hover:bg-amber-400"
-          >
-            <MapPin className="h-4 w-4" aria-hidden />
-            Compartir ubicación
-          </Button>
-        </div>
-      )}
-
-      {geoPhase === "granted" && (
-        <p className={t.grantedBanner}>
-          <MapPin className="h-4 w-4 shrink-0" aria-hidden />
-          Ubicación compartida con la familia
-        </p>
-      )}
-
-      {geoPhase === "saved" && (
-        <p className={t.grantedBanner}>
-          <MapPin className="h-4 w-4 shrink-0" aria-hidden />
-          Ubicación guardada. La ves en tu panel de SOSme.
         </p>
       )}
 
       <main className="relative space-y-5 px-4 py-5 pb-[calc(10.5rem+env(safe-area-inset-bottom))]">
         {!sessionReady && <p className={t.loading}>Cargando...</p>}
 
-        {sessionReady && locationResolved && (
+        {sessionReady && (
           <>
             <section aria-labelledby="contacts-heading" className={t.card}>
               <div className={t.cardHeader}>
@@ -441,6 +377,53 @@ export function EmergencyProfileView({ profile }: EmergencyProfileViewProps) {
                     </p>
                   </div>
                 </div>
+              </div>
+              <div className={`border-b px-4 py-4 ${isLight ? "border-neutral-100 bg-neutral-50/80" : "border-white/10 bg-white/5"}`}>
+                {locationShared ? (
+                  <p className={`flex items-center gap-2 text-sm font-semibold ${isLight ? "text-green-800" : "text-green-300"}`}>
+                    <MapPin className="h-4 w-4 shrink-0" aria-hidden />
+                    {geoPhase === "saved"
+                      ? "Ubicación guardada. La ves en tu panel de SOSme."
+                      : "Ubicación compartida con la familia"}
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {geoPhase === "denied" && (
+                      <p className={`text-sm ${isLight ? "text-amber-900" : "text-amber-200"}`}>
+                        No pudimos obtener tu ubicación. Podés intentarlo de nuevo cuando quieras.
+                      </p>
+                    )}
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button
+                        type="button"
+                        size="lg"
+                        disabled={geoPhase === "loading" || geoPhase === "saving"}
+                        onClick={handleShareLocation}
+                        className="w-full gap-2 bg-amber-500 font-bold text-black hover:bg-amber-400 sm:w-auto"
+                      >
+                        <MapPin className="h-5 w-5" aria-hidden />
+                        {geoPhase === "loading"
+                          ? "Obteniendo GPS..."
+                          : "Compartir mi ubicación"}
+                      </Button>
+                      {isObjectProfile && (
+                        <Button
+                          type="button"
+                          size="lg"
+                          variant="secondary"
+                          disabled={geoPhase === "loading" || geoPhase === "saving"}
+                          onClick={handleSaveLocation}
+                          className="w-full gap-2 sm:w-auto"
+                        >
+                          <MapPin className="h-5 w-5" aria-hidden />
+                          {geoPhase === "saving"
+                            ? "Guardando..."
+                            : "Guardar ubicación del objeto"}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="p-4">
                 <ContactActions
