@@ -167,6 +167,7 @@ export function usePushNotifications(): PushNotificationsState {
       expired?: number;
       lastStatusCode?: number;
       vapidConfigured?: boolean;
+      vapidHealthy?: boolean;
       error?: string;
     };
 
@@ -186,6 +187,7 @@ export function usePushNotifications(): PushNotificationsState {
         statusCode: data.lastStatusCode,
         expired: (data.expired ?? 0) > 0,
         vapidConfigured: data.vapidConfigured,
+        vapidHealthy: data.vapidHealthy,
       }),
     );
     return false;
@@ -279,6 +281,7 @@ export function usePushNotifications(): PushNotificationsState {
             statusCode: data.testStatusCode,
             expired: data.testExpired,
             vapidConfigured: true,
+            vapidHealthy: true,
           }),
         );
       }

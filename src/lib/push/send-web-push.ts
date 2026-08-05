@@ -1,17 +1,22 @@
 import webpush from "web-push";
-import { getServerVapidPublicKey } from "@/lib/push/vapid";
+import { getServerVapidPrivateKey, getServerVapidPublicKey, getVapidSubject } from "@/lib/push/vapid";
 
 function configureVapid() {
   const publicKey = getServerVapidPublicKey();
-  const privateKey = process.env.VAPID_PRIVATE_KEY;
-  const subject = process.env.VAPID_SUBJECT ?? "mailto:somososme@gmail.com";
+  const privateKey = getServerVapidPrivateKey();
+  const subject = getVapidSubject();
 
   if (!publicKey || !privateKey) {
     return false;
   }
 
-  webpush.setVapidDetails(subject, publicKey, privateKey);
-  return true;
+  try {
+    webpush.setVapidDetails(subject, publicKey, privateKey);
+    return true;
+  } catch (error) {
+    console.error("[web-push] Invalid VAPID configuration:", error);
+    return false;
+  }
 }
 
 export type PushPayload = {
@@ -74,6 +79,7 @@ export type PushDeliverySummary = {
   expired: number;
   lastStatusCode?: number;
   vapidConfigured: boolean;
+  vapidHealthy: boolean;
 };
 
 export async function sendWebPushToUser(
@@ -113,6 +119,7 @@ export async function sendWebPushToUser(
     failed,
     expired,
     lastStatusCode,
-    vapidConfigured: configureVapid(),
+    vapidConfigured: Boolean(getServerVapidPublicKey() && getServerVapidPrivateKey()),
+    vapidHealthy: configureVapid(),
   };
 }
