@@ -8,6 +8,7 @@ import {
   savePushSubscription,
 } from "@/lib/db/queries";
 import { toPushDeviceSummary } from "@/lib/push/device-label";
+import { sendWebPush } from "@/lib/push/send-web-push";
 import { logSecurityAudit } from "@/lib/security/audit";
 
 export const GET = withApi({ rateLimit: "api" }, async (request) => {
@@ -63,7 +64,25 @@ export const POST = withApi(
       );
     }
 
-    return NextResponse.json({ ok: true });
+    const testResult = await sendWebPush(
+      {
+        endpoint,
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+      },
+      {
+        title: "SOSme — Alertas activas",
+        body: "Listo. Vas a recibir avisos cuando escaneen tu QR o haya SOS.",
+        url: "/dashboard/actividad",
+      },
+    );
+
+    return NextResponse.json({
+      ok: true,
+      testDelivered: testResult.ok,
+      testStatusCode: testResult.ok ? undefined : testResult.statusCode,
+      testExpired: testResult.ok ? false : testResult.expired,
+    });
   },
 );
 

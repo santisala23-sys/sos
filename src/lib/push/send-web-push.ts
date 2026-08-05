@@ -1,9 +1,10 @@
 import webpush from "web-push";
+import { getServerVapidPublicKey } from "@/lib/push/vapid";
 
 function configureVapid() {
-  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const publicKey = getServerVapidPublicKey();
   const privateKey = process.env.VAPID_PRIVATE_KEY;
-  const subject = process.env.VAPID_SUBJECT ?? "mailto:sos@app.local";
+  const subject = process.env.VAPID_SUBJECT ?? "mailto:somososme@gmail.com";
 
   if (!publicKey || !privateKey) {
     return false;
@@ -49,7 +50,15 @@ export async function sendWebPush(
     const statusCode =
       error instanceof webpush.WebPushError ? error.statusCode : undefined;
     const expired = statusCode === 410 || statusCode === 404;
-    console.error("[web-push] Error:", statusCode ?? error);
+    const body =
+      error instanceof webpush.WebPushError
+        ? error.body?.slice(0, 200)
+        : undefined;
+    console.error("[web-push] Error:", {
+      statusCode,
+      endpoint: subscription.endpoint.slice(0, 80),
+      body,
+    });
     return {
       ok: false,
       expired,
@@ -59,14 +68,23 @@ export async function sendWebPush(
   }
 }
 
+export type PushDeliverySummary = {
+  sent: number;
+  failed: number;
+  expired: number;
+  lastStatusCode?: number;
+  vapidConfigured: boolean;
+};
+
 export async function sendWebPushToUser(
   subscriptions: { endpoint: string; p256dh: string; auth: string }[],
   payload: PushPayload,
   onExpired?: (endpoint: string) => Promise<void>,
-): Promise<{ sent: number; failed: number; expired: number }> {
+): Promise<PushDeliverySummary> {
   let sent = 0;
   let failed = 0;
   let expired = 0;
+  let lastStatusCode: number | undefined;
 
   await Promise.all(
     subscriptions.map(async (subscription) => {
@@ -74,6 +92,10 @@ export async function sendWebPushToUser(
       if (result.ok) {
         sent += 1;
         return;
+      }
+
+      if (result.statusCode) {
+        lastStatusCode = result.statusCode;
       }
 
       if (result.expired) {
@@ -86,5 +108,11 @@ export async function sendWebPushToUser(
     }),
   );
 
-  return { sent, failed, expired };
+  return {
+    sent,
+    failed,
+    expired,
+    lastStatusCode,
+    vapidConfigured: configureVapid(),
+  };
 }

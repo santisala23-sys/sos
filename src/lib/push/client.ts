@@ -1,3 +1,5 @@
+import { getClientVapidPublicKey } from "@/lib/push/vapid";
+
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
@@ -6,13 +8,7 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export async function getVapidPublicKey(): Promise<string | null> {
-  if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
-    return process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  }
-  const keyRes = await fetch("/api/push/vapid-public-key");
-  if (!keyRes.ok) return null;
-  const { publicKey } = await keyRes.json();
-  return publicKey ?? null;
+  return getClientVapidPublicKey();
 }
 
 export async function registerServiceWorker() {
@@ -35,7 +31,7 @@ export async function subscribeBrowserPush(): Promise<PushSubscription | null> {
   if (permission !== "granted") return null;
 
   const reg = await registerServiceWorker();
-  const publicKey = await getVapidPublicKey();
+  const publicKey = await getClientVapidPublicKey();
   if (!publicKey) return null;
 
   let sub = await reg.pushManager.getSubscription();

@@ -6,6 +6,10 @@ import { Button } from "@/components/ui/Button";
 import { IosInstallModal } from "@/components/dashboard/IosInstallModal";
 import { usePwaInstall } from "@/components/dashboard/usePwaInstall";
 import type { PushDeviceSummary } from "@/lib/push/device-label";
+import {
+  describePushFailure,
+  getClientVapidPublicKey,
+} from "@/lib/push/vapid";
 import { isIosDevice, isStandaloneDisplay } from "@/lib/pwa/device";
 import { formatDateTime } from "@/lib/utils/format";
 
@@ -37,12 +41,7 @@ export function detectPushEnvironment(): PushEnvironment {
 }
 
 async function getVapidPublicKey(): Promise<string | null> {
-  if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
-    return process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  }
-  const keyRes = await fetch("/api/push/vapid-public-key");
-  const { publicKey } = await keyRes.json();
-  return publicKey ?? null;
+  return getClientVapidPublicKey();
 }
 
 async function registerServiceWorker() {
@@ -153,12 +152,21 @@ export function usePushNotifications(): PushNotificationsState {
   }, [refreshStatus]);
 
   async function runTestPush(showSuccess = true) {
-    const res = await fetch("/api/push/test", { method: "POST" });
+    const currentEndpoint = await getCurrentPushEndpoint();
+    const res = await fetch("/api/push/test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(
+        currentEndpoint ? { endpoint: currentEndpoint } : {},
+      ),
+    });
     const data = (await res.json().catch(() => ({}))) as {
       ok?: boolean;
       sent?: number;
       failed?: number;
       expired?: number;
+      lastStatusCode?: number;
+      vapidConfigured?: boolean;
       error?: string;
     };
 
@@ -173,17 +181,13 @@ export function usePushNotifications(): PushNotificationsState {
     }
 
     setMessageTone("error");
-    if (data.expired && (data.expired ?? 0) > 0) {
-      setMessage(
-        "La suscripción de este dispositivo venció. Desactivá alertas, volvé a activarlas y probá otra vez.",
-      );
-    } else if ((data.sent ?? 0) === 0) {
-      setMessage(
-        "No pudimos entregar la prueba a este dispositivo. Desactivá alertas, volvé a activarlas desde el ícono de inicio y probá de nuevo.",
-      );
-    } else {
-      setMessage(data.error ?? "No se pudo enviar la alerta de prueba.");
-    }
+    setMessage(
+      describePushFailure({
+        statusCode: data.lastStatusCode,
+        expired: (data.expired ?? 0) > 0,
+        vapidConfigured: data.vapidConfigured,
+      }),
+    );
     return false;
   }
 
@@ -254,9 +258,30 @@ export function usePushNotifications(): PushNotificationsState {
         return;
       }
 
+      const data = (await res.json()) as {
+        testDelivered?: boolean;
+        testStatusCode?: number;
+        testExpired?: boolean;
+      };
+
       setSubscribed(true);
       await refreshDevices();
-      await runTestPush(true);
+
+      if (data.testDelivered) {
+        setMessageTone("success");
+        setMessage(
+          "Te enviamos una alerta de prueba. Si no la ves, bloqueá la pantalla un momento o revisá Ajustes → Notificaciones → SOSme.",
+        );
+      } else {
+        setMessageTone("error");
+        setMessage(
+          describePushFailure({
+            statusCode: data.testStatusCode,
+            expired: data.testExpired,
+            vapidConfigured: true,
+          }),
+        );
+      }
     } catch {
       setMessage("Error al activar notificaciones.");
     } finally {

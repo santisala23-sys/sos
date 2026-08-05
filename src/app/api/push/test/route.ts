@@ -7,16 +7,29 @@ import {
 } from "@/lib/db/queries";
 import { sendWebPushToUser } from "@/lib/push/send-web-push";
 
-export const POST = withApi({ rateLimit: "api" }, async () => {
+export const POST = withApi({ rateLimit: "api" }, async (request) => {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const subscriptions = await listPushSubscriptionsByUser(session.userId);
+  const body = (await request.json().catch(() => ({}))) as {
+    endpoint?: string;
+  };
+
+  let subscriptions = await listPushSubscriptionsByUser(session.userId);
+  if (body.endpoint?.trim()) {
+    subscriptions = subscriptions.filter(
+      (subscription) => subscription.endpoint === body.endpoint,
+    );
+  }
+
   if (subscriptions.length === 0) {
     return NextResponse.json(
-      { error: "No hay dispositivos con alertas activas" },
+      {
+        error:
+          "No encontramos alertas activas para este dispositivo. Volvé a activarlas.",
+      },
       { status: 404 },
     );
   }
