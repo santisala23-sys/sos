@@ -70,7 +70,11 @@ const CHANNELS = [
   },
 ] as const;
 
-export function ContactoPageContent() {
+type ContactoPageContentProps = {
+  loggedIn?: boolean;
+};
+
+export function ContactoPageContent({ loggedIn = false }: ContactoPageContentProps) {
   const [motivo, setMotivo] = useState<MotiveId>("mas-perfiles");
   const [nombre, setNombre] = useState("");
   const [detalle, setDetalle] = useState("");
@@ -96,7 +100,7 @@ export function ContactoPageContent() {
 
   return (
     <>
-      <MarketingNavbar variant="subpage" />
+      {!loggedIn && <MarketingNavbar variant="subpage" />}
 
       <main>
         <section className="relative overflow-hidden px-4 pb-10 pt-8 sm:px-6 sm:pb-14 sm:pt-12 lg:px-8">
@@ -325,25 +329,40 @@ export function ContactoPageContent() {
                 </ul>
               </div>
 
-              <div className="rounded-[1.75rem] border border-violet-200/80 bg-gradient-to-br from-violet-50 to-indigo-50 p-6 shadow-lg shadow-violet-500/10 sm:p-8">
-                <h3 className="text-lg font-black text-neutral-900">
-                  ¿Ya tenés cuenta?
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-                  Si querés más perfiles QR, podés pedirlos desde acá o entrar al
-                  panel y seguir usando SOSme mientras te respondemos.
-                </p>
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                  <Link href="/register" className="flex-1">
-                    <Button variant="secondary" className="w-full">
-                      Crear cuenta
-                    </Button>
-                  </Link>
-                  <Link href="/login" className="flex-1">
-                    <Button className="w-full">Ingresar</Button>
+              {loggedIn ? (
+                <div className="rounded-[1.75rem] border border-violet-200/80 bg-gradient-to-br from-violet-50 to-indigo-50 p-6 shadow-lg shadow-violet-500/10 sm:p-8">
+                  <h3 className="text-lg font-black text-neutral-900">
+                    Volvé al panel
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                    Tu sesión sigue activa. Cuando envíes la consulta por
+                    WhatsApp, podés volver a gestionar tus perfiles y alertas.
+                  </p>
+                  <Link href="/dashboard" className="mt-5 block">
+                    <Button className="w-full">Ir al panel</Button>
                   </Link>
                 </div>
-              </div>
+              ) : (
+                <div className="rounded-[1.75rem] border border-violet-200/80 bg-gradient-to-br from-violet-50 to-indigo-50 p-6 shadow-lg shadow-violet-500/10 sm:p-8">
+                  <h3 className="text-lg font-black text-neutral-900">
+                    ¿Ya tenés cuenta?
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                    Si querés más perfiles QR, podés pedirlos desde acá o entrar al
+                    panel y seguir usando SOSme mientras te respondemos.
+                  </p>
+                  <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                    <Link href="/register" className="flex-1">
+                      <Button variant="secondary" className="w-full">
+                        Crear cuenta
+                      </Button>
+                    </Link>
+                    <Link href="/login" className="flex-1">
+                      <Button className="w-full">Ingresar</Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
             </aside>
           </div>
         </section>
