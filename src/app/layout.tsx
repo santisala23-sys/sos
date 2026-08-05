@@ -4,6 +4,7 @@ import { GoogleTagManager } from "@/components/analytics/GoogleTagManager";
 import { getAppUrl } from "@/lib/utils/app-url";
 import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { FloatingWhatsAppButton } from "@/components/shared/FloatingWhatsAppButton";
+import { MobileNavigationLoading } from "@/components/shared/MobileNavigationLoading";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getAppUrl()),
@@ -63,6 +64,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col antialiased">
         <GoogleTagManager />
         {children}
+        <MobileNavigationLoading />
         <FloatingWhatsAppButton />
         <CookieConsentBanner />
       </body>
