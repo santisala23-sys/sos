@@ -158,7 +158,6 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
   const [slideIndex, setSlideIndex] = useState(products.length);
   const [cardsVisible, setCardsVisible] = useState(2);
   const [cardWidth, setCardWidth] = useState(0);
-  const [viewportWidth, setViewportWidth] = useState(0);
   const [paused, setPaused] = useState(false);
   const [animateSlide, setAnimateSlide] = useState(true);
 
@@ -207,9 +206,12 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
     const viewport = viewportRef.current;
     if (!viewport) return;
     const width = viewport.offsetWidth;
-    const ratio = cardsVisible === 2 ? 0.42 : 0.76;
-    setViewportWidth(width);
-    setCardWidth(width * ratio);
+    if (cardsVisible === 2) {
+      // ~2 cards visibles + asoma la siguiente (menos espacio blanco en notebook)
+      setCardWidth((width - CARD_GAP_PX) / 2.15);
+    } else {
+      setCardWidth(width * 0.82);
+    }
   }, [cardsVisible]);
 
   useEffect(() => {
@@ -313,16 +315,13 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
   }
 
   const slideOffset = slideIndex * (cardWidth + CARD_GAP_PX);
-  const visibleWidth =
-    cardsVisible * cardWidth + (cardsVisible - 1) * CARD_GAP_PX;
-  const centerOffset = Math.max(0, (viewportWidth - visibleWidth) / 2);
-  const translateX = centerOffset - slideOffset;
+  const translateX = -slideOffset;
   const showArrows = products.length > 1;
 
   return (
     <>
       <div
-        className="relative mx-auto max-w-5xl"
+        className="relative mx-auto max-w-7xl"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onFocusCapture={() => setPaused(true)}
@@ -353,7 +352,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
           </>
         )}
 
-        <div ref={viewportRef} className="overflow-hidden px-2 sm:px-8">
+        <div ref={viewportRef} className="overflow-hidden px-1 sm:px-2">
           <div
             ref={trackRef}
             className={cn(

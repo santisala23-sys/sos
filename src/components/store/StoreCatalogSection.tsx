@@ -17,7 +17,7 @@ export async function StoreCatalogSection() {
       id="catalogo"
       className="scroll-mt-32 border-y border-violet-100/80 bg-white/60 px-4 py-24 backdrop-blur-sm sm:px-6 lg:px-8"
     >
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl lg:text-[2.75rem] lg:leading-[1.1]">
             Catálogo

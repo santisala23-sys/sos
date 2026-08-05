@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Activity } from "lucide-react";
+import Link from "next/link";
+import { Activity, ChevronLeft, LayoutDashboard } from "lucide-react";
 import type { ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { ScanLogsList } from "@/components/dashboard/ScanLogsList";
@@ -31,6 +32,15 @@ export default function ActividadPage() {
 
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center gap-2 rounded-xl border border-violet-200 bg-white px-4 py-2.5 text-sm font-semibold text-violet-800 shadow-sm transition hover:bg-violet-50 lg:hidden"
+      >
+        <ChevronLeft className="h-4 w-4" aria-hidden />
+        <LayoutDashboard className="h-4 w-4" aria-hidden />
+        Ir a panel
+      </Link>
+
       {!loading && unreadCount > 0 && (
         <AlertBanner
           unreadCount={unreadCount}

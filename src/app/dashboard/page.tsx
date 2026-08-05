@@ -252,6 +252,19 @@ export default function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <Link
+        href="/dashboard/actividad"
+        className="inline-flex items-center gap-2 rounded-xl border border-violet-200 bg-white px-4 py-2.5 text-sm font-semibold text-violet-800 shadow-sm transition hover:bg-violet-50 lg:hidden"
+      >
+        <Activity className="h-4 w-4" aria-hidden />
+        Ir a actividad
+        {!loading && unreadCount > 0 && (
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-black text-white">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
+      </Link>
+
       {!loading && unreadCount > 0 && !legalBlocked && (
         <AlertBanner unreadCount={unreadCount} latestLogId={latestUnread?.id} />
       )}
