@@ -67,14 +67,30 @@ async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration
   }
 }
 
+/** Busca la suscripción push local en todos los service workers registrados. */
 async function getCurrentPushEndpoint(): Promise<string | null> {
   if (!("Notification" in window) || Notification.permission !== "granted") {
     return null;
   }
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+    return null;
+  }
 
   try {
-    const reg = await getServiceWorkerRegistration();
-    const sub = await reg?.pushManager.getSubscription();
+    await getServiceWorkerRegistration();
+
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for (const reg of regs) {
+      try {
+        const sub = await reg.pushManager.getSubscription();
+        if (sub?.endpoint) return sub.endpoint;
+      } catch {
+        /* probar el siguiente */
+      }
+    }
+
+    const ready = await navigator.serviceWorker.ready;
+    const sub = await ready.pushManager.getSubscription();
     return sub?.endpoint ?? null;
   } catch {
     return null;
@@ -83,6 +99,44 @@ async function getCurrentPushEndpoint(): Promise<string | null> {
 
 async function detectPushSubscription(): Promise<boolean> {
   return Boolean(await getCurrentPushEndpoint());
+}
+
+/**
+ * Si el permiso ya está concedido pero se perdió la suscripción local,
+ * la vuelve a crear y la guarda en el servidor (sin pedir permiso de nuevo).
+ */
+async function repairLocalPushSubscription(): Promise<boolean> {
+  if (detectPushEnvironment() !== "ready") return false;
+  if (!("Notification" in window) || Notification.permission !== "granted") {
+    return false;
+  }
+  if (await getCurrentPushEndpoint()) return true;
+
+  try {
+    const reg = await getServiceWorkerRegistration();
+    if (!reg) return false;
+
+    const publicKey = await getVapidPublicKey();
+    if (!publicKey) return false;
+
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey),
+    });
+
+    const res = await fetch("/api/push/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...sub.toJSON(),
+        userAgent: navigator.userAgent,
+      }),
+    });
+
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 export type PushNotificationsState = {
@@ -113,7 +167,7 @@ export function usePushNotifications(): PushNotificationsState {
   const [devices, setDevices] = useState<PushDeviceSummary[]>([]);
   const [devicesLoading, setDevicesLoading] = useState(false);
 
-  const refreshDevices = useCallback(async () => {
+  const refreshDevices = useCallback(async (): Promise<PushDeviceSummary[]> => {
     setDevicesLoading(true);
     try {
       const currentEndpoint = await getCurrentPushEndpoint();
@@ -123,8 +177,11 @@ export function usePushNotifications(): PushNotificationsState {
       const res = await fetch(`/api/push/subscribe${params}`);
       if (res.ok) {
         const data = await res.json();
-        setDevices(data.devices ?? []);
+        const next = (data.devices ?? []) as PushDeviceSummary[];
+        setDevices(next);
+        return next;
       }
+      return [];
     } finally {
       setDevicesLoading(false);
     }
@@ -134,9 +191,31 @@ export function usePushNotifications(): PushNotificationsState {
     const env = detectPushEnvironment();
     setEnvironment(env);
 
-    const active = env === "ready" ? await detectPushSubscription() : false;
+    // Detectar suscripción local aunque el entorno no esté marcado "ready"
+    // (evita forzar subscribed=false por un falso ios_install/unsupported).
+    let active = await detectPushSubscription();
+
+    // Permiso OK pero se perdió la suscripción del navegador → reparar.
+    if (
+      !active &&
+      env === "ready" &&
+      "Notification" in window &&
+      Notification.permission === "granted"
+    ) {
+      active = await repairLocalPushSubscription();
+    }
+
+    let deviceList = await refreshDevices();
+    if (!active && deviceList.some((device) => device.isCurrent)) {
+      active = true;
+    }
+
+    // Tras reparar, volver a marcar el dispositivo actual en la lista.
+    if (active && !deviceList.some((device) => device.isCurrent)) {
+      deviceList = await refreshDevices();
+    }
+
     setSubscribed(active);
-    await refreshDevices();
     return active;
   }, [refreshDevices]);
 
@@ -418,7 +497,10 @@ export function PushNotificationPanel({ push }: PushProps) {
     );
   }
 
-  if (push.subscribed) return null;
+  // Ocultar si este dispositivo ya está suscripto (local o marcado en la lista).
+  if (push.subscribed || push.devices.some((device) => device.isCurrent)) {
+    return null;
+  }
 
   const hasAccountDevices = push.devices.length > 0;
   const canActivateHere = push.environment === "ready";
