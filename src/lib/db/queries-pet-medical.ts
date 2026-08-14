@@ -614,3 +614,124 @@ export async function getVisitAttachmentByVetToken(
       | undefined) ?? null
   );
 }
+
+export type PreventiveReminderKind = "upcoming" | "due";
+
+export type PreventiveReminderCandidate = {
+  itemId: string;
+  petId: string;
+  tutorId: string;
+  petName: string;
+  kind: PreventiveKind;
+  name: string;
+  nextDueAt: string;
+  reminderKind: PreventiveReminderKind;
+  daysUntilDue: number;
+};
+
+let preventiveReminderColumnsReady = false;
+
+/** Aplica la migración de columnas de recordatorio si aún no está en la DB. */
+export async function ensurePreventiveReminderColumns(): Promise<void> {
+  if (preventiveReminderColumnsReady) return;
+  const sql = getSql();
+  await sql`
+    ALTER TABLE pet_preventive_items
+      ADD COLUMN IF NOT EXISTS reminder_3d_sent_for DATE,
+      ADD COLUMN IF NOT EXISTS reminder_due_sent_for DATE
+  `;
+  preventiveReminderColumnsReady = true;
+}
+
+/**
+ * Vacunas/desparasitaciones que necesitan aviso push:
+ * - upcoming: vence en 1–3 días (una sola vez por next_due_at)
+ * - due: vence hoy o venció ayer (ventana por si el cron falla un día)
+ */
+export async function listPreventiveRemindersDue(): Promise<
+  PreventiveReminderCandidate[]
+> {
+  await ensurePreventiveReminderColumns();
+  const sql = getSql();
+  const rows = await sql`
+    WITH today AS (
+      SELECT (CURRENT_TIMESTAMP AT TIME ZONE 'America/Argentina/Buenos_Aires')::date AS d
+    )
+    SELECT
+      i.id AS item_id,
+      i.pet_id,
+      p.tutor_id,
+      p.beneficiary_name AS pet_name,
+      i.kind,
+      i.name,
+      i.next_due_at::text AS next_due_at,
+      CASE
+        WHEN i.next_due_at <= (SELECT d FROM today)
+          AND i.next_due_at >= (SELECT d FROM today) - 1
+          AND i.reminder_due_sent_for IS DISTINCT FROM i.next_due_at
+        THEN 'due'
+        WHEN i.next_due_at > (SELECT d FROM today)
+          AND i.next_due_at <= (SELECT d FROM today) + 3
+          AND i.reminder_3d_sent_for IS DISTINCT FROM i.next_due_at
+        THEN 'upcoming'
+        ELSE NULL
+      END AS reminder_kind,
+      (i.next_due_at - (SELECT d FROM today))::int AS days_until_due
+    FROM pet_preventive_items i
+    INNER JOIN qr_profiles p ON p.id = i.pet_id
+    WHERE i.next_due_at IS NOT NULL
+      AND p.profile_type = 'pet'
+      AND p.is_active = TRUE
+      AND (
+        (
+          i.next_due_at <= (SELECT d FROM today)
+          AND i.next_due_at >= (SELECT d FROM today) - 1
+          AND i.reminder_due_sent_for IS DISTINCT FROM i.next_due_at
+        )
+        OR (
+          i.next_due_at > (SELECT d FROM today)
+          AND i.next_due_at <= (SELECT d FROM today) + 3
+          AND i.reminder_3d_sent_for IS DISTINCT FROM i.next_due_at
+        )
+      )
+    ORDER BY i.next_due_at ASC, i.name ASC
+  `;
+
+  return (rows as Record<string, unknown>[])
+    .filter((row) => row.reminder_kind === "upcoming" || row.reminder_kind === "due")
+    .map((row) => ({
+      itemId: String(row.item_id),
+      petId: String(row.pet_id),
+      tutorId: String(row.tutor_id),
+      petName: String(row.pet_name),
+      kind: row.kind as PreventiveKind,
+      name: String(row.name),
+      nextDueAt: String(row.next_due_at),
+      reminderKind: row.reminder_kind as PreventiveReminderKind,
+      daysUntilDue: Number(row.days_until_due),
+    }));
+}
+
+export async function markPreventiveReminderSent(
+  itemId: string,
+  reminderKind: PreventiveReminderKind,
+  nextDueAt: string,
+): Promise<void> {
+  await ensurePreventiveReminderColumns();
+  const sql = getSql();
+  if (reminderKind === "due") {
+    await sql`
+      UPDATE pet_preventive_items
+      SET reminder_due_sent_for = ${nextDueAt}::date
+      WHERE id = ${itemId}::uuid
+        AND next_due_at = ${nextDueAt}::date
+    `;
+    return;
+  }
+  await sql`
+    UPDATE pet_preventive_items
+    SET reminder_3d_sent_for = ${nextDueAt}::date
+    WHERE id = ${itemId}::uuid
+      AND next_due_at = ${nextDueAt}::date
+  `;
+}
