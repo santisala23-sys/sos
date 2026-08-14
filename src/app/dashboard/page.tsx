@@ -141,6 +141,7 @@ export default function DashboardPage() {
       icon: typeof UserCircle2;
       emptyTitle: string;
       emptyBody: ReactNode;
+      accent: "rose" | "teal" | "sky";
     }
   > = {
     person: {
@@ -152,6 +153,7 @@ export default function DashboardPage() {
       emptyTitle: "Todavía no tenés perfiles de persona",
       emptyBody:
         "Creá un perfil para vos o un familiar con contactos de emergencia y alertas.",
+      accent: "rose",
     },
     object: {
       id: "objetos",
@@ -162,6 +164,7 @@ export default function DashboardPage() {
       emptyTitle: "Todavía no tenés objetos",
       emptyBody:
         "Marcá valijas, autos u otros objetos con QR para recuperarlos si se pierden.",
+      accent: "sky",
     },
     pet: {
       id: "mascotas",
@@ -176,6 +179,7 @@ export default function DashboardPage() {
           collar/chapita.
         </>
       ),
+      accent: "teal",
     },
   };
 
@@ -391,6 +395,7 @@ export default function DashboardPage() {
               icon={meta.icon}
               title={meta.title}
               description={meta.description}
+              accent={meta.accent}
               disabled={legalBlocked}
               collapsible
               defaultOpen={false}
