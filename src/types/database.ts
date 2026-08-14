@@ -127,7 +127,7 @@ export interface PushSubscriptionRow {
 
 export type VisitTag = "vaccine" | "deworming" | "treatment" | "checkup";
 
-export type PreventiveKind = "vaccine" | "deworming";
+export type PreventiveKind = "vaccine" | "deworming" | "checkup";
 
 export interface PetPreventiveItem {
   id: string;

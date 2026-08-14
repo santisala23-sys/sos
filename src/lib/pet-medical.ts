@@ -10,7 +10,21 @@ export const VISIT_TAGS: { value: VisitTag; label: string }[] = [
 export const PREVENTIVE_KIND_LABELS: Record<PreventiveKind, string> = {
   vaccine: "Vacuna",
   deworming: "Desparasitación",
+  checkup: "Cita / control",
 };
+
+export const PREVENTIVE_KINDS: {
+  value: PreventiveKind;
+  label: string;
+}[] = [
+  { value: "vaccine", label: "Vacuna" },
+  { value: "deworming", label: "Desparasitación" },
+  { value: "checkup", label: "Cita / control" },
+];
+
+export function isPreventiveKind(value: unknown): value is PreventiveKind {
+  return value === "vaccine" || value === "deworming" || value === "checkup";
+}
 
 export function isVisitTag(value: unknown): value is VisitTag {
   return (

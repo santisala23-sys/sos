@@ -21,13 +21,14 @@ export function buildPreventiveReminderCopy(
 ): { title: string; body: string } {
   const kindLabel = PREVENTIVE_KIND_LABELS[candidate.kind].toLowerCase();
   const libretaUrlHint = "Tocá para ver la libreta.";
+  const emoji = candidate.kind === "checkup" ? "📅" : "💉";
 
   if (candidate.reminderKind === "due") {
     const overdue = candidate.daysUntilDue < 0;
     return {
       title: overdue
         ? `⚠️ ${kindLabel} vencida — ${candidate.petName}`
-        : `📅 ${kindLabel} vence hoy — ${candidate.petName}`,
+        : `${emoji} ${kindLabel} vence hoy — ${candidate.petName}`,
       body: overdue
         ? `${candidate.name} de ${candidate.petName} ya venció. ${libretaUrlHint}`
         : `${candidate.name} de ${candidate.petName} vence hoy. ${libretaUrlHint}`,
@@ -35,7 +36,7 @@ export function buildPreventiveReminderCopy(
   }
 
   return {
-    title: `💉 Próxima ${kindLabel} — ${candidate.petName}`,
+    title: `${emoji} Próxima ${kindLabel} — ${candidate.petName}`,
     body: `${candidate.name} de ${candidate.petName} vence ${daysLabel(candidate.daysUntilDue)}. ${libretaUrlHint}`,
   };
 }

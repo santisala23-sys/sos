@@ -7,6 +7,7 @@ import { VetVisitsList } from "@/components/vet/VetVisitsList";
 import { TutorVisitForm } from "@/components/dashboard/TutorVisitForm";
 import { ShareWithVetButton } from "@/components/dashboard/ShareWithVetButton";
 import { PreventiveCareSection } from "@/components/dashboard/PreventiveCareSection";
+import { ScheduledPreventiveBanner } from "@/components/dashboard/ScheduledPreventiveBanner";
 import { Button } from "@/components/ui/Button";
 
 type PetMedicalHistoryProps = {
@@ -98,6 +99,8 @@ export function PetMedicalHistory({
               Generá un acceso temporal para que el veterinario cargue la visita.
             </p>
           </div>
+
+          <ScheduledPreventiveBanner items={preventive} />
 
           <PreventiveCareSection
             petId={petId}

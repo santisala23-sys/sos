@@ -32,6 +32,7 @@ export function PreventiveCareSection({
   const [formOpen, setFormOpen] = useState(false);
   const [vaccinesOpen, setVaccinesOpen] = useState(false);
   const [dewormingsOpen, setDewormingsOpen] = useState(false);
+  const [checkupsOpen, setCheckupsOpen] = useState(false);
   const [name, setName] = useState("");
   const [lastApplied, setLastApplied] = useState("");
   const [nextDue, setNextDue] = useState("");
@@ -41,6 +42,7 @@ export function PreventiveCareSection({
 
   const vaccines = items.filter((i) => i.kind === "vaccine");
   const dewormings = items.filter((i) => i.kind === "deworming");
+  const checkups = items.filter((i) => i.kind === "checkup");
   const postUrl = createUrl ?? `/api/qr-profiles/${petId}/preventive`;
 
   async function onSubmit(e: React.FormEvent) {
@@ -72,7 +74,8 @@ export function PreventiveCareSection({
       setNextDue("");
       setFormOpen(false);
       if (kind === "vaccine") setVaccinesOpen(true);
-      else setDewormingsOpen(true);
+      else if (kind === "deworming") setDewormingsOpen(true);
+      else setCheckupsOpen(true);
     } catch {
       setError("Error de conexión");
     } finally {
@@ -138,7 +141,8 @@ export function PreventiveCareSection({
                 setKind(k);
                 setFormOpen(true);
                 if (k === "vaccine") setVaccinesOpen(true);
-                else setDewormingsOpen(true);
+                else if (k === "deworming") setDewormingsOpen(true);
+                else setCheckupsOpen(true);
               }}
               className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-bold text-violet-700 hover:bg-violet-50"
             >
@@ -231,6 +235,13 @@ export function PreventiveCareSection({
         dewormingsOpen,
         () => setDewormingsOpen((v) => !v),
       )}
+      {renderGroup(
+        "Citas / controles",
+        checkups,
+        "checkup",
+        checkupsOpen,
+        () => setCheckupsOpen((v) => !v),
+      )}
 
       {!readOnly && formOpen && (
         <form
@@ -256,7 +267,11 @@ export function PreventiveCareSection({
               onChange={(e) => setName(e.target.value)}
               className={inputClass}
               placeholder={
-                kind === "vaccine" ? "Ej. Antirrábica, Séxtuple..." : "Ej. Drontal..."
+                kind === "vaccine"
+                  ? "Ej. Antirrábica, Séxtuple..."
+                  : kind === "deworming"
+                    ? "Ej. Drontal, desparasitación garrapatas..."
+                    : "Ej. Control general, curación..."
               }
               required
               maxLength={200}
@@ -265,7 +280,7 @@ export function PreventiveCareSection({
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className="text-sm font-semibold text-neutral-700">
-                Fecha aplicada
+                {kind === "checkup" ? "Fecha de la cita" : "Fecha aplicada"}
               </label>
               <input
                 type="date"
@@ -276,7 +291,7 @@ export function PreventiveCareSection({
             </div>
             <div>
               <label className="text-sm font-semibold text-neutral-700">
-                Próxima aplicación
+                {kind === "checkup" ? "Próxima cita" : "Próxima aplicación"}
               </label>
               <input
                 type="date"

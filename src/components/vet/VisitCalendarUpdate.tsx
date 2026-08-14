@@ -3,6 +3,7 @@
 import type { PetPreventiveItem, PreventiveKind } from "@/types/database";
 import {
   formatVisitDate,
+  PREVENTIVE_KINDS,
   PREVENTIVE_KIND_LABELS,
 } from "@/lib/pet-medical";
 
@@ -33,6 +34,12 @@ function itemOptionLabel(item: PetPreventiveItem): string {
   return `${item.name} (${kindLabel}) · ${next}`;
 }
 
+function namePlaceholder(kind: PreventiveKind): string {
+  if (kind === "vaccine") return "Ej. Antirrábica";
+  if (kind === "deworming") return "Ej. Desparasitación garrapatas";
+  return "Ej. Control general, curación...";
+}
+
 export function VisitCalendarUpdate({
   enabled,
   onEnabledChange,
@@ -60,6 +67,8 @@ export function VisitCalendarUpdate({
   const scheduledItems = existingItems.filter((item) => item.next_due_at);
   const editingExisting = Boolean(selectedItemId);
   const showPicker = scheduledItems.length > 0 && onSelectedItemIdChange;
+  const nextLabel =
+    kind === "checkup" ? "Fecha de la próxima cita" : "Próxima aplicación";
 
   function handleSelectChange(value: string) {
     if (!onSelectedItemIdChange) return;
@@ -86,7 +95,9 @@ export function VisitCalendarUpdate({
           onChange={(e) => onEnabledChange(e.target.checked)}
           className="mt-0.5"
         />
-        <span>Actualizar calendario de vacunas / desparasitaciones</span>
+        <span>
+          Actualizar calendario (vacuna, desparasitación o próxima cita)
+        </span>
       </label>
       {enabled && (
         <div className="mt-3 space-y-3">
@@ -118,12 +129,7 @@ export function VisitCalendarUpdate({
 
           {!editingExisting && (
             <div className="flex flex-wrap gap-2">
-              {(
-                [
-                  ["vaccine", "Vacuna"],
-                  ["deworming", "Desparasitación"],
-                ] as const
-              ).map(([value, label]) => (
+              {PREVENTIVE_KINDS.map(({ value, label }) => (
                 <button
                   key={value}
                   type="button"
@@ -148,7 +154,7 @@ export function VisitCalendarUpdate({
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
               className={inputClass}
-              placeholder="Ej. Antirrábica"
+              placeholder={namePlaceholder(kind)}
               maxLength={200}
               required={enabled}
               readOnly={editingExisting}
@@ -156,14 +162,17 @@ export function VisitCalendarUpdate({
           </div>
           <div>
             <label className="text-sm font-semibold text-neutral-700">
-              Próxima aplicación{" "}
-              <span className="font-normal text-neutral-400">(opcional)</span>
+              {nextLabel}{" "}
+              <span className="font-normal text-neutral-400">
+                {kind === "checkup" ? "(recomendado)" : "(opcional)"}
+              </span>
             </label>
             <input
               type="date"
               value={nextDue}
               onChange={(e) => onNextDueChange(e.target.value)}
               className={inputClass}
+              required={enabled && kind === "checkup" && !editingExisting}
             />
           </div>
         </div>

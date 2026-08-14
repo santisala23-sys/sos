@@ -1,4 +1,4 @@
-import { Syringe } from "lucide-react";
+import { CalendarClock, Syringe } from "lucide-react";
 import type { PetPreventiveItem } from "@/types/database";
 import { formatVisitDate } from "@/lib/pet-medical";
 
@@ -14,21 +14,27 @@ function isOverdue(nextDue: string | null): boolean {
 export function VetPreventiveReadOnly({ items }: VetPreventiveReadOnlyProps) {
   const vaccines = items.filter((i) => i.kind === "vaccine");
   const dewormings = items.filter((i) => i.kind === "deworming");
+  const checkups = items.filter((i) => i.kind === "checkup");
 
   if (items.length === 0) {
     return (
       <p className="text-sm text-neutral-500">
-        Sin vacunas ni desparasitaciones cargadas.
+        Sin vacunas, desparasitaciones ni citas cargadas.
       </p>
     );
   }
 
-  function group(title: string, list: PetPreventiveItem[]) {
+  function group(
+    title: string,
+    list: PetPreventiveItem[],
+    icon: "syringe" | "calendar" = "syringe",
+  ) {
     if (list.length === 0) return null;
+    const Icon = icon === "calendar" ? CalendarClock : Syringe;
     return (
       <div>
         <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-teal-700">
-          <Syringe className="h-3.5 w-3.5" aria-hidden />
+          <Icon className="h-3.5 w-3.5" aria-hidden />
           {title}
         </p>
         <ul className="mt-2 space-y-2">
@@ -70,6 +76,7 @@ export function VetPreventiveReadOnly({ items }: VetPreventiveReadOnlyProps) {
     <div className="space-y-4">
       {group("Vacunas", vaccines)}
       {group("Desparasitaciones", dewormings)}
+      {group("Citas / controles", checkups, "calendar")}
     </div>
   );
 }

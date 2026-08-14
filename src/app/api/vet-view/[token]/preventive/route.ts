@@ -62,7 +62,7 @@ export const POST = withApi(
 
     if (!parsed.data.kind) {
       return NextResponse.json(
-        { error: "Tipo inválido (vacuna o desparasitación)" },
+          { error: "Tipo inválido (vacuna, desparasitación o cita)" },
         { status: 400 },
       );
     }

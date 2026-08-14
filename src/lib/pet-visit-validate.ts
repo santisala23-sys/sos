@@ -1,5 +1,5 @@
-import { isUuid, normalizeVisitTags } from "@/lib/pet-medical";
-import type { VisitTag } from "@/types/database";
+import { isUuid, isPreventiveKind, normalizeVisitTags } from "@/lib/pet-medical";
+import type { PreventiveKind, VisitTag } from "@/types/database";
 import type { VisitAttachmentInput } from "@/lib/db/queries-pet-medical";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -127,7 +127,7 @@ export function parsePreventiveBody(
       ok: true;
       data: {
         id?: string;
-        kind?: "vaccine" | "deworming";
+        kind?: PreventiveKind;
         name: string;
         last_applied_at: string | null;
         next_due_at: string | null;
@@ -141,10 +141,13 @@ export function parsePreventiveBody(
   const raw = body as Record<string, unknown>;
   const kind = raw.kind;
   if (options.requireKind) {
-    if (kind !== "vaccine" && kind !== "deworming") {
-      return { ok: false, error: "Tipo inválido (vacuna o desparasitación)" };
+    if (!isPreventiveKind(kind)) {
+      return {
+        ok: false,
+        error: "Tipo inválido (vacuna, desparasitación o cita)",
+      };
     }
-  } else if (kind !== undefined && kind !== "vaccine" && kind !== "deworming") {
+  } else if (kind !== undefined && !isPreventiveKind(kind)) {
     return { ok: false, error: "Tipo inválido" };
   }
 
@@ -175,7 +178,7 @@ export function parsePreventiveBody(
     ok: true,
     data: {
       ...(id ? { id } : {}),
-      ...(kind === "vaccine" || kind === "deworming" ? { kind } : {}),
+      ...(isPreventiveKind(kind) ? { kind } : {}),
       name,
       last_applied_at: lastRaw || null,
       next_due_at: nextRaw || null,

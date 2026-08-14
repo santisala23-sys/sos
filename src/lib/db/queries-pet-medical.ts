@@ -399,6 +399,7 @@ export async function insertPreventiveItemForTutor(
     notes?: string;
   },
 ): Promise<PetPreventiveItem | null> {
+  await ensurePreventiveCheckupKind();
   const sql = getSql();
   const rows = await sql`
     INSERT INTO pet_preventive_items (
@@ -489,6 +490,7 @@ export async function insertPreventiveItemByVet(
     notes?: string;
   },
 ): Promise<PetPreventiveItem | null> {
+  await ensurePreventiveCheckupKind();
   const sql = getSql();
   const rows = await sql`
     INSERT INTO pet_preventive_items (
@@ -630,6 +632,7 @@ export type PreventiveReminderCandidate = {
 };
 
 let preventiveReminderColumnsReady = false;
+let preventiveCheckupKindReady = false;
 
 /** Aplica la migración de columnas de recordatorio si aún no está en la DB. */
 export async function ensurePreventiveReminderColumns(): Promise<void> {
@@ -643,6 +646,22 @@ export async function ensurePreventiveReminderColumns(): Promise<void> {
   preventiveReminderColumnsReady = true;
 }
 
+/** Permite kind = checkup (cita/control) si la migración aún no corrió. */
+export async function ensurePreventiveCheckupKind(): Promise<void> {
+  if (preventiveCheckupKindReady) return;
+  const sql = getSql();
+  await sql`
+    ALTER TABLE pet_preventive_items
+      DROP CONSTRAINT IF EXISTS pet_preventive_items_kind_check
+  `;
+  await sql`
+    ALTER TABLE pet_preventive_items
+      ADD CONSTRAINT pet_preventive_items_kind_check
+      CHECK (kind IN ('vaccine', 'deworming', 'checkup'))
+  `;
+  preventiveCheckupKindReady = true;
+}
+
 /**
  * Vacunas/desparasitaciones que necesitan aviso push:
  * - upcoming: vence en 1–3 días (una sola vez por next_due_at)
@@ -652,6 +671,7 @@ export async function listPreventiveRemindersDue(): Promise<
   PreventiveReminderCandidate[]
 > {
   await ensurePreventiveReminderColumns();
+  await ensurePreventiveCheckupKind();
   const sql = getSql();
   const rows = await sql`
     WITH today AS (

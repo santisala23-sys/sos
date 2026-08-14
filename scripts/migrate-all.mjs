@@ -60,6 +60,7 @@ const migrations = [
   "027_push_subscription_device.sql",
   "028_batch_profile_type.sql",
   "029_preventive_reminders.sql",
+  "030_preventive_checkup_kind.sql",
 ];
 
 for (const file of migrations) {

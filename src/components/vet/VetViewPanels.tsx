@@ -27,7 +27,7 @@ export function VetViewPanels({
     <>
       <div className="border-b border-neutral-100 px-6 py-5">
         <h2 className="text-sm font-bold uppercase tracking-wide text-neutral-400">
-          Vacunas y desparasitaciones
+          Vacunas, desparasitaciones y citas
         </h2>
         <div className="mt-3">
           <VetPreventiveReadOnly items={preventive} />
