@@ -361,6 +361,22 @@ export default function DashboardPage() {
               title={meta.title}
               description={meta.description}
               disabled={legalBlocked}
+              collapsible
+              defaultOpen={false}
+              badge={
+                loading
+                  ? undefined
+                  : sectionProfiles.length > 0
+                    ? sectionProfiles.length
+                    : undefined
+              }
+              closedHint={
+                !loading && sectionProfiles.length > 0
+                  ? `Tocá para ver ${sectionProfiles.length} perfil${sectionProfiles.length === 1 ? "" : "es"}.`
+                  : !loading && sectionProfiles.length === 0
+                    ? "Tocá para ver u agregar perfiles."
+                    : undefined
+              }
               headerAction={
                 !legalBlocked ? (
                   <SectionAddButton
