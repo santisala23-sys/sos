@@ -7,6 +7,7 @@ import {
   Activity,
   LayoutDashboard,
   LogOut,
+  UserCircle2,
 } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { HamburgerButton } from "@/components/shared/HamburgerButton";
@@ -21,6 +22,12 @@ const NAV_LINKS = [
     label: "Actividad",
     icon: Activity,
     id: "actividad",
+  },
+  {
+    href: "/dashboard/perfil",
+    label: "Perfil",
+    icon: UserCircle2,
+    id: "perfil",
   },
 ] as const;
 
@@ -90,10 +97,12 @@ export function DashboardNavbar() {
   const isLogDetail = pathname.startsWith("/dashboard/logs/");
   const isActividad =
     pathname === "/dashboard/actividad" || isLogDetail;
+  const isPerfil = pathname === "/dashboard/perfil";
 
   function isActive(id: (typeof NAV_LINKS)[number]["id"]) {
     if (id === "actividad") return isActividad;
-    return pathname === "/dashboard" && !isActividad;
+    if (id === "perfil") return isPerfil;
+    return pathname === "/dashboard" && !isActividad && !isPerfil;
   }
 
   async function handleLogout() {

@@ -7,12 +7,9 @@ import {
   Activity,
   Bell,
   CheckCircle2,
-  FileDown,
   PawPrint,
-  Plus,
   Package,
   QrCode,
-  UserX,
   UserCircle2,
 } from "lucide-react";
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
@@ -23,18 +20,15 @@ import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBan
 import { PetCard } from "@/components/dashboard/PetCard";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import {
+  PushDevicesSection,
   PushNotificationPanel,
   usePushNotifications,
 } from "@/components/dashboard/PushNotificationSetup";
-import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
 import { ObjectSavedLocationsBanner } from "@/components/dashboard/ObjectSavedLocationsBanner";
 import { ProfileLimitModal } from "@/components/dashboard/ProfileLimitModal";
 import { SectionAddButton } from "@/components/dashboard/SectionAddButton";
 import type { ProfileType } from "@/lib/profile-types";
-import {
-  sortProfileSections,
-} from "@/lib/dashboard/profile-section-order";
-import { Button } from "@/components/ui/Button";
+import { sortProfileSections } from "@/lib/dashboard/profile-section-order";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -57,9 +51,6 @@ export default function DashboardPage() {
     canCreateMore: boolean;
   } | null>(null);
   const push = usePushNotifications();
-  const [exporting, setExporting] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [accountMsg, setAccountMsg] = useState<string | null>(null);
   const [limitModalOpen, setLimitModalOpen] = useState(false);
 
   const loadData = useCallback(async () => {
@@ -116,14 +107,16 @@ export default function DashboardPage() {
   const personProfiles = profiles.filter((p) => p.profile_type === "person");
   const objectProfiles = profiles.filter((p) => p.profile_type === "object");
   const petProfiles = profiles.filter((p) => p.profile_type === "pet");
-  const hasAnyProfiles = profiles.length > 0;
 
   const profileCounts: Record<ProfileType, number> = {
     person: personProfiles.length,
     object: objectProfiles.length,
     pet: petProfiles.length,
   };
-  const orderedSections = sortProfileSections(profileCounts);
+  // Personas/Objetos: ocultar si vacíos. Mascotas siempre visible.
+  const orderedSections = sortProfileSections(profileCounts).filter(
+    (type) => type === "pet" || profileCounts[type] > 0,
+  );
 
   const profilesByType: Record<ProfileType, QrProfile[]> = {
     person: personProfiles,
@@ -193,59 +186,6 @@ export default function DashboardPage() {
     router.push(`/dashboard/perfiles/nuevo?tipo=${type}`);
   }
 
-  function handleCreateProfile() {
-    handleAddProfile("person");
-  }
-
-  async function handleExport() {
-    setExporting(true);
-    setAccountMsg(null);
-    try {
-      const res = await fetch("/api/account/export");
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setAccountMsg(data.error ?? "No se pudo exportar");
-        return;
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `sosme-export-${new Date().toISOString().slice(0, 10)}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      setAccountMsg("Exportación generada.");
-    } catch {
-      setAccountMsg("Error de conexión");
-    } finally {
-      setExporting(false);
-    }
-  }
-
-  async function handleDeleteRequest() {
-    const ok = window.confirm(
-      "¿Querés solicitar la baja de tu cuenta? Se programará la eliminación/anonimización según la política de retención.",
-    );
-    if (!ok) return;
-    setDeleting(true);
-    setAccountMsg(null);
-    try {
-      const res = await fetch("/api/account/delete-request", { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setAccountMsg(data.error ?? "No se pudo solicitar la baja");
-        return;
-      }
-      router.push("/");
-      router.refresh();
-    } catch {
-      setAccountMsg("Error de conexión");
-    } finally {
-      setDeleting(false);
-    }
-  }
   const activatedProfile = highlightedSlug
     ? profiles.find((p) => p.slug === highlightedSlug)
     : null;
@@ -264,6 +204,22 @@ export default function DashboardPage() {
           </span>
         )}
       </Link>
+
+      {legalStatus?.needsAcceptance && (
+        <LegalAcceptanceBanner
+          currentVersion={legalStatus.currentVersion}
+          userVersion={legalStatus.userVersion}
+          onAccepted={() =>
+            setLegalStatus({
+              ...legalStatus,
+              needsAcceptance: false,
+              userVersion: legalStatus.currentVersion,
+            })
+          }
+        />
+      )}
+
+      {!legalBlocked && <PushNotificationPanel push={push} />}
 
       {!loading && unreadCount > 0 && !legalBlocked && (
         <AlertBanner unreadCount={unreadCount} latestLogId={latestUnread?.id} />
@@ -288,16 +244,18 @@ export default function DashboardPage() {
             las alertas de escaneo.
           </p>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-4 backdrop-blur-sm">
               <div className="flex items-center gap-2 text-violet-200">
                 <QrCode className="h-4 w-4" aria-hidden />
                 <span className="text-xs font-semibold uppercase tracking-wide">
-                  Activos
+                  QRs activos
                 </span>
               </div>
               <p className="mt-2 text-2xl font-black">
-                {loading ? "—" : (planStatus?.activeCount ?? activeProfilesCount ?? 0)}
+                {loading
+                  ? "—"
+                  : (planStatus?.activeCount ?? activeProfilesCount ?? 0)}
                 {planStatus && (
                   <span className="text-lg font-semibold text-violet-200">
                     /{planStatus.currentCount}
@@ -319,7 +277,7 @@ export default function DashboardPage() {
               >
                 <Bell className="h-4 w-4" aria-hidden />
                 <span className="text-xs font-semibold uppercase tracking-wide">
-                  Alertas nuevas
+                  Alertas
                 </span>
               </div>
               <p
@@ -338,45 +296,14 @@ export default function DashboardPage() {
                 </Link>
               )}
             </div>
-            <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-4 backdrop-blur-sm">
-              <div className="flex items-center gap-2 text-violet-200">
-                <UserCircle2 className="h-4 w-4" aria-hidden />
-                <span className="text-xs font-semibold uppercase tracking-wide">
-                  Perfiles
-                </span>
-              </div>
-              <p className="mt-2 text-2xl font-black">
-                {loading ? "—" : profiles.length}
-                {planStatus && (
-                  <span className="text-lg font-semibold text-violet-200">
-                    /{planStatus.maxProfiles}
-                  </span>
-                )}
-              </p>
-            </div>
           </div>
 
           {!legalBlocked && (
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={handleCreateProfile}
-                className="flex items-center gap-3 rounded-2xl border border-white/30 bg-white px-5 py-4 text-left text-violet-900 shadow-lg transition hover:bg-violet-50"
-              >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white">
-                  <Plus className="h-5 w-5" aria-hidden />
-                </span>
-                <span>
-                  <span className="block text-base font-black">Crear perfil QR nuevo</span>
-                  <span className="mt-0.5 block text-sm text-violet-700/80">
-                    Persona, mascota u objeto
-                  </span>
-                </span>
-              </button>
+            <div className="mt-6" id="activar-producto">
               <button
                 type="button"
                 onClick={() => setScannerOpen(true)}
-                className="flex items-center gap-3 rounded-2xl border border-white/30 bg-white/15 px-5 py-4 text-left text-white backdrop-blur-sm transition hover:bg-white/25"
+                className="flex w-full items-center gap-3 rounded-2xl border border-white/30 bg-white/15 px-5 py-4 text-left text-white backdrop-blur-sm transition hover:bg-white/25 sm:max-w-md"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-amber-950">
                   <QrCode className="h-5 w-5" aria-hidden />
@@ -394,22 +321,6 @@ export default function DashboardPage() {
           )}
         </div>
       </section>
-
-      {legalStatus?.needsAcceptance && (
-        <LegalAcceptanceBanner
-          currentVersion={legalStatus.currentVersion}
-          userVersion={legalStatus.userVersion}
-          onAccepted={() =>
-            setLegalStatus({
-              ...legalStatus,
-              needsAcceptance: false,
-              userVersion: legalStatus.currentVersion,
-            })
-          }
-        />
-      )}
-
-      {!legalBlocked && <PushNotificationPanel push={push} />}
 
       {!loading && activatedProfile && !legalBlocked && (
         <div className="flex items-start gap-4 rounded-2xl border border-green-200/80 bg-gradient-to-r from-green-50 to-emerald-50 p-5 shadow-lg shadow-green-500/10">
@@ -437,125 +348,72 @@ export default function DashboardPage() {
         <ObjectSavedLocationsBanner profiles={profiles} />
       )}
 
-      {!loading && !hasAnyProfiles && !legalBlocked && (
-        <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/50 p-6 sm:p-8">
-          <h3 className="text-lg font-bold text-neutral-900">
-            Creá tu primer perfil QR
-          </h3>
-          <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-            Creá un perfil para persona, mascota u objeto. ¿Necesitás más?{" "}
-            <Link
-              href="/contacto"
-              className="font-semibold text-violet-700 underline-offset-2 hover:underline"
-            >
-              Contactanos
-            </Link>
-            .
-          </p>
-          <div className="mt-6 rounded-2xl border border-white/80 bg-white p-5 shadow-sm">
-            <QrProfileForm onSuccess={loadData} />
-          </div>
-        </div>
-      )}
-
-      {hasAnyProfiles &&
+      {!legalBlocked &&
         orderedSections.map((sectionType) => {
-        const meta = sectionMeta[sectionType];
-        const sectionProfiles = profilesByType[sectionType];
+          const meta = sectionMeta[sectionType];
+          const sectionProfiles = profilesByType[sectionType];
 
-        return (
-          <DashboardSection
-            key={sectionType}
-            id={meta.id}
-            icon={meta.icon}
-            title={meta.title}
-            description={meta.description}
-            disabled={legalBlocked}
-            headerAction={
-              !legalBlocked ? (
-                <SectionAddButton
-                  atLimit={atProfileLimit}
-                  label={addProfileLabels[sectionType]}
-                  onClick={() => handleAddProfile(sectionType)}
-                />
-              ) : undefined
-            }
-          >
-            {loading ? (
-              <div className="space-y-3">
-                <div className="h-32 animate-pulse rounded-2xl bg-violet-50" />
-              </div>
-            ) : sectionProfiles.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-6 sm:p-6">
-                <h3 className="font-bold text-neutral-900">{meta.emptyTitle}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-                  {meta.emptyBody}
-                </p>
-              </div>
-            ) : sectionType === "pet" ? (
-              <div className="grid gap-5 lg:grid-cols-2">
-                {sectionProfiles.map((profile) => (
-                  <PetCard
-                    key={profile.id}
-                    profile={profile}
-                    onRefresh={loadData}
+          return (
+            <DashboardSection
+              key={sectionType}
+              id={meta.id}
+              icon={meta.icon}
+              title={meta.title}
+              description={meta.description}
+              disabled={legalBlocked}
+              headerAction={
+                !legalBlocked ? (
+                  <SectionAddButton
+                    atLimit={atProfileLimit}
+                    label={addProfileLabels[sectionType]}
+                    onClick={() => handleAddProfile(sectionType)}
                   />
-                ))}
-              </div>
-            ) : (
-              <div className="grid gap-5 lg:grid-cols-2">
-                {sectionProfiles.map((profile) => (
-                  <ProfileCard
-                    key={profile.id}
-                    profile={profile}
-                    onRefresh={loadData}
-                    defaultShowQr={profile.slug === highlightedSlug}
-                  />
-                ))}
-              </div>
-            )}
-          </DashboardSection>
-        );
-      })}
+                ) : undefined
+              }
+            >
+              {loading ? (
+                <div className="space-y-3">
+                  <div className="h-32 animate-pulse rounded-2xl bg-violet-50" />
+                </div>
+              ) : sectionProfiles.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-6 sm:p-6">
+                  <h3 className="font-bold text-neutral-900">{meta.emptyTitle}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                    {meta.emptyBody}
+                  </p>
+                </div>
+              ) : sectionType === "pet" ? (
+                <div className="grid gap-5 lg:grid-cols-2">
+                  {sectionProfiles.map((profile) => (
+                    <PetCard
+                      key={profile.id}
+                      profile={profile}
+                      onRefresh={loadData}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid gap-5 lg:grid-cols-2">
+                  {sectionProfiles.map((profile) => (
+                    <ProfileCard
+                      key={profile.id}
+                      profile={profile}
+                      onRefresh={loadData}
+                      defaultShowQr={profile.slug === highlightedSlug}
+                    />
+                  ))}
+                </div>
+              )}
+            </DashboardSection>
+          );
+        })}
 
       <ProfileLimitModal
         open={limitModalOpen}
         onClose={() => setLimitModalOpen(false)}
       />
 
-      <section className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-black text-neutral-900">Cuenta</h2>
-        <p className="mt-1 text-sm text-neutral-600">
-          Podés descargar una copia de tus datos o solicitar la baja de tu cuenta.
-        </p>
-        {accountMsg && (
-          <p className="mt-3 text-sm text-neutral-700" role="status">
-            {accountMsg}
-          </p>
-        )}
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={exporting}
-            onClick={handleExport}
-            className="gap-2"
-          >
-            <FileDown className="h-4 w-4" aria-hidden />
-            {exporting ? "Generando..." : "Descargar mis datos"}
-          </Button>
-          <Button
-            type="button"
-            variant="danger"
-            disabled={deleting}
-            onClick={handleDeleteRequest}
-            className="gap-2"
-          >
-            <UserX className="h-4 w-4" aria-hidden />
-            {deleting ? "Procesando..." : "Solicitar baja de cuenta"}
-          </Button>
-        </div>
-      </section>
+      {!legalBlocked && <PushDevicesSection push={push} />}
     </main>
   );
 }
