@@ -10,7 +10,7 @@ import {
   describePushFailure,
   getClientVapidPublicKey,
 } from "@/lib/push/vapid";
-import { isIosDevice, isStandaloneDisplay } from "@/lib/pwa/device";
+import { isIosSafari, isStandaloneDisplay } from "@/lib/pwa/device";
 import { formatDateTime } from "@/lib/utils/format";
 
 export type PushEnvironment = "ready" | "ios_install" | "unsupported";
@@ -31,7 +31,9 @@ export function detectPushEnvironment(): PushEnvironment {
 
   if (!hasNotification || !hasServiceWorker) return "unsupported";
 
-  if (isIosDevice() && (!hasPushManager || !isStandaloneDisplay())) {
+  // Solo Safari real en iPhone/iPad exige app en inicio.
+  // Chrome en Mac (aunque el UA diga iPhone) tiene PushManager y debe poder activar.
+  if (isIosSafari() && (!hasPushManager || !isStandaloneDisplay())) {
     return "ios_install";
   }
 
@@ -205,10 +207,11 @@ export function usePushNotifications(): PushNotificationsState {
 
   async function subscribe() {
     if (environment !== "ready") {
+      setMessageTone("info");
       setMessage(
         environment === "ios_install"
-          ? "En iPhone, usá “Cómo agregar al inicio” y abrí SOSme desde el ícono para activar alertas."
-          : "Este navegador no permite alertas push. Probá con Chrome o agregá la app a inicio.",
+          ? "En este iPhone/iPad tenés que agregar SOSme a la pantalla de inicio y abrirlo desde ahí para activar alertas."
+          : "Este navegador no permite alertas push. Probá con Chrome en Android o en la computadora.",
       );
       return;
     }
@@ -368,23 +371,19 @@ function PushEnvironmentNotice({
   pwa,
 }: PushProps & { pwa: PwaInstallState }) {
   if (push.environment === "ready" && !pwa.canInstall) return null;
+  // En iOS el CTA principal ya es “Cómo agregar al inicio”.
+  if (push.environment === "ios_install") return null;
 
   return (
     <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950">
-      {push.environment === "ios_install" ? (
-        <>
-          <strong className="font-semibold">En iPhone/iPad</strong> hace falta tener
-          SOSme en la pantalla de inicio para activar alertas push. Safari en pestaña
-          no las permite.
-        </>
-      ) : pwa.canInstall ? (
+      {pwa.canInstall ? (
         <>
           Para mejores alertas en el celular, agregá SOSme al inicio como app.
         </>
       ) : (
         <>
           Este navegador no soporta alertas push. Probá con{" "}
-          <strong>Chrome en Android</strong> o agregá SOSme a la pantalla de inicio.
+          <strong>Chrome en Android</strong> o en la computadora.
         </>
       )}
 
@@ -422,6 +421,8 @@ export function PushNotificationPanel({ push }: PushProps) {
   if (push.subscribed) return null;
 
   const hasAccountDevices = push.devices.length > 0;
+  const canActivateHere = push.environment === "ready";
+  const needsIosInstall = push.environment === "ios_install";
 
   return (
     <section className="overflow-hidden rounded-2xl border border-violet-200/80 bg-white shadow-lg shadow-violet-500/10">
@@ -433,28 +434,45 @@ export function PushNotificationPanel({ push }: PushProps) {
             </span>
             <div>
               <p className="font-bold text-violet-950">
-                {hasAccountDevices
-                  ? "Activá alertas también en este dispositivo"
-                  : "Activá las alertas push"}
+                {needsIosInstall
+                  ? "Agregá SOSme al inicio para activar alertas"
+                  : hasAccountDevices
+                    ? "Activá alertas también en este dispositivo"
+                    : "Activá las alertas push"}
               </p>
               <p className="mt-1 text-sm leading-relaxed text-violet-800/90">
-                {hasAccountDevices
-                  ? "Tu cuenta ya recibe alertas en otros dispositivos. Podés sumar este también."
-                  : "Recibí avisos al instante cuando escaneen el QR, haya SOS o un mensaje nuevo."}
+                {needsIosInstall
+                  ? "En iPhone/iPad Safari no permite push desde una pestaña. Instalá la app en inicio y abrila desde el ícono."
+                  : hasAccountDevices
+                    ? "Tu cuenta ya recibe alertas en otros dispositivos. Podés sumar este también."
+                    : "Recibí avisos al instante cuando escaneen el QR, haya SOS o un mensaje nuevo."}
               </p>
             </div>
           </div>
 
-          <Button
-            type="button"
-            size="sm"
-            disabled={push.loading}
-            onClick={push.subscribe}
-            className="gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 shadow-md hover:from-violet-700 hover:to-indigo-700"
-          >
-            <Bell className="h-4 w-4" aria-hidden />
-            {push.loading ? "Activando..." : "Activar alertas push"}
-          </Button>
+          {canActivateHere ? (
+            <Button
+              type="button"
+              size="sm"
+              disabled={push.loading}
+              onClick={push.subscribe}
+              className="gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 shadow-md hover:from-violet-700 hover:to-indigo-700"
+            >
+              <Bell className="h-4 w-4" aria-hidden />
+              {push.loading ? "Activando..." : "Activar alertas push"}
+            </Button>
+          ) : needsIosInstall ? (
+            <Button
+              type="button"
+              size="sm"
+              disabled={pwa.installing}
+              onClick={() => void pwa.install()}
+              className="gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 shadow-md hover:from-violet-700 hover:to-indigo-700"
+            >
+              <Download className="h-4 w-4" aria-hidden />
+              Cómo agregar al inicio
+            </Button>
+          ) : null}
         </div>
 
         <PushEnvironmentNotice push={push} pwa={pwa} />
@@ -471,7 +489,7 @@ export function PushNotificationPanel({ push }: PushProps) {
                 ? "text-green-800"
                 : push.messageTone === "error"
                   ? "text-red-700"
-                  : "text-red-700"
+                  : "text-violet-800"
             }`}
             role="alert"
           >

@@ -1,6 +1,22 @@
 export function isIosDevice(): boolean {
   if (typeof navigator === "undefined") return false;
-  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const ua = navigator.userAgent;
+  if (/iPad|iPhone|iPod/.test(ua)) return true;
+  // iPadOS reciente puede reportarse como Macintosh con touch.
+  return /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
+}
+
+/**
+ * Safari/WebKit real en iPhone/iPad.
+ * `navigator.standalone` solo existe ahí; Chrome/Firefox de escritorio
+ * (aunque emulen UA de iPhone) no lo definen.
+ */
+export function isIosSafari(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return (
+    typeof (navigator as Navigator & { standalone?: boolean }).standalone ===
+    "boolean"
+  );
 }
 
 export function isMobileDevice(): boolean {

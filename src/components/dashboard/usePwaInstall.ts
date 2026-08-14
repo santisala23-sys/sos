@@ -1,7 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { isIosDevice, isMobileDevice, isStandaloneDisplay } from "@/lib/pwa/device";
+import {
+  isIosSafari,
+  isMobileDevice,
+  isStandaloneDisplay,
+} from "@/lib/pwa/device";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -19,7 +23,8 @@ export function usePwaInstall() {
   const [installing, setInstalling] = useState(false);
 
   useEffect(() => {
-    setIsIos(isIosDevice());
+    // Guía de instalación iOS solo en Safari real (no Chrome de escritorio).
+    setIsIos(isIosSafari());
     setIsMobile(isMobileDevice());
     setIsStandalone(isStandaloneDisplay());
 
