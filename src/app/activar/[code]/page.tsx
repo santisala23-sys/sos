@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { Package } from "lucide-react";
+import { Package, PawPrint, User } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { LegalFooter } from "@/components/legal/LegalFooter";
 import { ActivationClaimView } from "@/components/activation/ActivationClaimView";
@@ -11,6 +11,7 @@ import {
   toActivationPublicView,
 } from "@/lib/db/queries-activation";
 import { normalizeActivationCode } from "@/lib/activation/codes";
+import { getActivationTypeCopy } from "@/lib/profile-types";
 
 type ActivarPageProps = {
   params: Promise<{ code: string }>;
@@ -37,6 +38,13 @@ export default async function ActivarPage({ params }: ActivarPageProps) {
   const session = await getSession();
   const activation = toActivationPublicView(activationRow, session?.userId);
   const redirectPath = `/activar/${code}`;
+  const copy = getActivationTypeCopy(activation.profileType);
+  const HeaderIcon =
+    activation.profileType === "pet"
+      ? PawPrint
+      : activation.profileType === "object"
+        ? Package
+        : User;
 
   // Product QR already claimed: send scanners (and owners) to the public profile,
   // not the activation chrome with Tienda / Activar navbar.
@@ -60,10 +68,10 @@ export default async function ActivarPage({ params }: ActivarPageProps) {
       <main className="mx-auto w-full max-w-lg flex-1 px-4 py-10 sm:px-6">
         <div className="text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
-            <Package className="h-6 w-6" aria-hidden />
+            <HeaderIcon className="h-6 w-6" aria-hidden />
           </div>
           <h1 className="mt-4 text-2xl font-black text-neutral-900 sm:text-3xl">
-            Activar producto SOSme
+            {copy.title}
           </h1>
           {(activation.partnerName || activation.productLabel) && (
             <p className="mt-2 text-neutral-600">
@@ -71,6 +79,7 @@ export default async function ActivarPage({ params }: ActivarPageProps) {
               {activation.productLabel ? ` · ${activation.productLabel}` : ""}
             </p>
           )}
+          <p className="mt-1 text-sm text-neutral-500">{copy.subtitle}</p>
           <p className="mt-1 font-mono text-sm text-neutral-500">Código {code}</p>
         </div>
 

@@ -34,39 +34,76 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function parseObjects(pdf: string): PdfObject[] {
+/**
+ * Binary-safe object parse: stream payloads are sliced by /Length, not by
+ * searching for "endstream" inside compressed image bytes (that caused zlib EOF).
+ */
+function parseObjects(pdfBuffer: Buffer): PdfObject[] {
+  const pdf = pdfBuffer.toString("latin1");
   const objects: PdfObject[] = [];
-  const regex = /(\d+) 0 obj\r?\n([\s\S]*?)\r?\nendobj/g;
-  let match: RegExpExecArray | null;
+  const objHeaderRegex = /(\d+) 0 obj\r?\n/g;
+  let headerMatch: RegExpExecArray | null;
 
-  while ((match = regex.exec(pdf)) !== null) {
-    const id = Number(match[1]);
-    const rawBody = match[2];
-    const streamIndex = rawBody.indexOf("stream");
+  while ((headerMatch = objHeaderRegex.exec(pdf)) !== null) {
+    const id = Number(headerMatch[1]);
+    const bodyStart = headerMatch.index + headerMatch[0].length;
 
-    if (streamIndex === -1) {
-      objects.push({ id, header: `${id} 0 obj`, body: rawBody, isStream: false });
+    const dictEndRel = pdf.slice(bodyStart).search(/>>\s*(stream[\r\n]|endobj)/);
+    if (dictEndRel === -1) {
       continue;
     }
 
-    const header = rawBody.slice(0, streamIndex).trimEnd();
-    const afterStream = rawBody.slice(streamIndex + "stream".length);
-    const streamBody = afterStream.replace(/^\r?\n/, "").replace(/\r?\nendstream$/, "");
+    const afterDict = pdf.slice(bodyStart + dictEndRel);
+    const streamToken = afterDict.match(/^>>\s*stream(\r\n|\n|\r)/);
+
+    if (!streamToken) {
+      const endobjRel = pdf.slice(bodyStart).indexOf("endobj");
+      if (endobjRel === -1) continue;
+      const rawBody = pdf.slice(bodyStart, bodyStart + endobjRel).replace(/\r?\n$/, "");
+      objects.push({
+        id,
+        header: `${id} 0 obj`,
+        body: rawBody,
+        isStream: false,
+      });
+      objHeaderRegex.lastIndex = bodyStart + endobjRel + "endobj".length;
+      continue;
+    }
+
+    const dictText = pdf.slice(bodyStart, bodyStart + dictEndRel + 2).trimEnd();
+    const lengthMatch = dictText.match(/\/Length\s+(\d+)(?!\s+\d+\s+R)/);
+    if (!lengthMatch) {
+      // Indirect /Length N 0 R — skip; not needed for OCG markers.
+      continue;
+    }
+
+    const streamLength = Number(lengthMatch[1]);
+    const streamDataStart = bodyStart + dictEndRel + streamToken[0].length;
+    const streamDataEnd = streamDataStart + streamLength;
+    const stream = Buffer.from(pdf.slice(streamDataStart, streamDataEnd), "latin1");
+
     objects.push({
       id,
       header: `${id} 0 obj`,
-      body: header,
-      stream: Buffer.from(streamBody, "latin1"),
+      body: dictText,
+      stream,
       isStream: true,
     });
+
+    objHeaderRegex.lastIndex = streamDataEnd;
   }
 
   return objects;
 }
 
-function inflateStream(object: PdfObject): string {
+function inflateStream(object: PdfObject): string | null {
   if (!object.isStream || !object.stream) {
-    return "";
+    return null;
+  }
+
+  // Never touch embedded images — binary Flate streams are not page content.
+  if (/\/Subtype\s*\/Image/.test(object.body)) {
+    return null;
   }
 
   const isFlate = /\/Filter\s*\/FlateDecode/.test(object.body);
@@ -74,7 +111,11 @@ function inflateStream(object: PdfObject): string {
     return object.stream.toString("latin1");
   }
 
-  return zlib.inflateSync(object.stream).toString("latin1");
+  try {
+    return zlib.inflateSync(object.stream).toString("latin1");
+  } catch {
+    return null;
+  }
 }
 
 function deflateStream(content: string): Buffer {
@@ -91,10 +132,7 @@ function wrapLayerContent(content: string): string {
       `${escapeRegExp(layer.begin)}\\s*([\\s\\S]*?)\\s*${escapeRegExp(layer.end)}`,
       "g",
     );
-    body = body.replace(
-      pattern,
-      `/OC /${layer.propertyKey} BDC\n$1\nEMC`,
-    );
+    body = body.replace(pattern, `/OC /${layer.propertyKey} BDC\n$1\nEMC`);
   }
 
   return `${transform}${body}`.trimEnd() + "\n";
@@ -110,7 +148,7 @@ function serializeObject(object: PdfObject): string {
 }
 
 function rebuildPdf(objects: PdfObject[]): Buffer {
-  let body = "%PDF-1.3\n%ÿÿÿÿ\n";
+  let body = "%PDF-1.3\n%\xff\xff\xff\xff\n";
   const offsets: number[] = [];
   const maxId = objects.reduce((max, obj) => Math.max(max, obj.id), 0);
 
@@ -175,8 +213,7 @@ function addPropertiesToResources(resourcesBody: string, layerRefs: string): str
  * the layer dictionary on the catalog.
  */
 export function injectPdfOptionalContentGroups(pdfBuffer: Buffer): Buffer {
-  const pdf = pdfBuffer.toString("latin1");
-  const objects = parseObjects(pdf);
+  const objects = parseObjects(pdfBuffer);
 
   const pageObjects = objects.filter((object) =>
     /\/Type\s*\/Page/.test(object.body),
@@ -214,13 +251,11 @@ export function injectPdfOptionalContentGroups(pdfBuffer: Buffer): Buffer {
     `/${LAYERS[1].propertyKey} ${cutOcgId} 0 R`,
   ].join("\n");
 
-  const contentStreams = objects.filter(
-    (object) => object.isStream && /\/Length/.test(object.body),
-  );
+  for (const streamObject of objects) {
+    if (!streamObject.isStream) continue;
 
-  for (const streamObject of contentStreams) {
     const inflated = inflateStream(streamObject);
-    if (!inflated.includes("%__LAYER_")) {
+    if (!inflated || !inflated.includes("%__LAYER_")) {
       continue;
     }
 

@@ -11,7 +11,9 @@ import { getActivationUrl } from "@/lib/activation/codes";
 import {
   getProductBatchById,
   listActivationsByBatch,
+  updateProductBatchProfileType,
 } from "@/lib/db/queries-activation";
+import { isProfileType } from "@/lib/profile-types";
 import {
   getDefaultPrintTemplate,
   getPrintTemplateById,
@@ -41,7 +43,7 @@ export const GET = withApi(
 
     if (format === "csv") {
       const header =
-        "activation_code,activation_url,public_slug,profile_url,status,claimed_at\n";
+                    "activation_code,activation_url,public_slug,profile_url,status,claimed_at,profile_type\n";
       const rows = activations
         .map((a) => {
           const slug = a.public_slug ?? "";
@@ -52,6 +54,7 @@ export const GET = withApi(
             slug ? getPublicProfileUrl(slug) : "",
             a.status,
             a.claimed_at ?? "",
+            a.profile_type,
           ];
           return fields
             .map((value) => `"${String(value).replace(/"/g, '""')}"`)
@@ -154,5 +157,39 @@ export const GET = withApi(
     }
 
     return NextResponse.json({ activations, batch });
+  },
+);
+
+export const PATCH = withApi(
+  { requireAdmin: true, rateLimit: "admin" },
+  async (request, context) => {
+    const params = await context.params;
+    const batchId = params?.id;
+    if (!batchId) {
+      return NextResponse.json({ error: "ID requerido" }, { status: 400 });
+    }
+
+    let body: { profile_type?: string };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+    }
+
+    const profileType = body.profile_type?.trim();
+    if (!profileType || !isProfileType(profileType)) {
+      return NextResponse.json(
+        { error: "Categoría inválida. Usá person, pet u object." },
+        { status: 400 },
+      );
+    }
+
+    const updated = await updateProductBatchProfileType(batchId, profileType);
+    if (!updated) {
+      return NextResponse.json({ error: "Lote no encontrado" }, { status: 404 });
+    }
+
+    const batch = await getProductBatchById(batchId);
+    return NextResponse.json({ batch });
   },
 );

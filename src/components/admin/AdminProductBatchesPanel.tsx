@@ -6,11 +6,13 @@ import {
   ChevronRight,
   Download,
   Package,
+  PawPrint,
   Plus,
   RefreshCw,
   Ban,
   CheckCircle2,
   Clock3,
+  User,
 } from "lucide-react";
 import type {
   ActivationStats,
@@ -18,6 +20,7 @@ import type {
   QrProductBatchRow,
 } from "@/lib/db/queries-activation";
 import type { PrintTemplateRow } from "@/lib/activation/print-template-types";
+import { PROFILE_TYPES, type ProfileType } from "@/lib/profile-types";
 import { formatDateTime } from "@/lib/utils/format";
 import { AdminStatCard } from "@/components/admin/AdminUiParts";
 import { adminUi } from "@/components/admin/adminUi";
@@ -44,6 +47,26 @@ function ActivationProgress({
         />
       </div>
     </div>
+  );
+}
+
+function BatchCategoryBadge({ type }: { type: ProfileType }) {
+  const option = PROFILE_TYPES.find((item) => item.value === type);
+  const Icon =
+    type === "pet" ? PawPrint : type === "object" ? Package : User;
+  const styles = {
+    person: "bg-violet-100 text-violet-800 border-violet-200",
+    pet: "bg-amber-100 text-amber-900 border-amber-200",
+    object: "bg-sky-100 text-sky-800 border-sky-200",
+  };
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${styles[type]}`}
+    >
+      <Icon className="h-3 w-3" aria-hidden />
+      {option?.label ?? type}
+    </span>
   );
 }
 
@@ -78,6 +101,7 @@ export function AdminProductBatchesPanel() {
   const [productLabel, setProductLabel] = useState("");
   const [quantity, setQuantity] = useState(10);
   const [notes, setNotes] = useState("");
+  const [profileType, setProfileType] = useState<ProfileType>("person");
   const [templateId, setTemplateId] = useState("");
   const [templates, setTemplates] = useState<PrintTemplateRow[]>([]);
   const [expandedBatchId, setExpandedBatchId] = useState<string | null>(null);
@@ -142,6 +166,32 @@ export function AdminProductBatchesPanel() {
     }
   }
 
+  async function handleUpdateProfileType(
+    batchId: string,
+    nextType: ProfileType,
+  ) {
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/product-batches/${batchId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile_type: nextType }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error ?? "No se pudo cambiar la categoría");
+        return;
+      }
+      setBatches((prev) =>
+        prev.map((batch) =>
+          batch.id === batchId ? { ...batch, profile_type: nextType } : batch,
+        ),
+      );
+    } catch {
+      setError("Error de conexión al cambiar la categoría");
+    }
+  }
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -156,6 +206,7 @@ export function AdminProductBatchesPanel() {
           quantity,
           notes: notes || undefined,
           template_id: templateId || null,
+          profile_type: profileType,
         }),
       });
       const data = await res.json();
@@ -167,6 +218,7 @@ export function AdminProductBatchesPanel() {
       setProductLabel("");
       setQuantity(10);
       setNotes("");
+      setProfileType("person");
       setExpandedBatchId(null);
       setBatchActivations({});
       await load();
@@ -224,10 +276,56 @@ export function AdminProductBatchesPanel() {
           <h2 className="text-lg font-bold">Nuevo lote de activación</h2>
         </div>
         <p className="mt-1 text-sm text-neutral-400">
-          Genera códigos únicos y URLs para imprenta. Descargá{" "}
-          <strong className="font-medium text-neutral-300">Imprenta (ZIP)</strong> con PNG,
-          SVG y manifest listos para la gráfica.
+          Genera códigos únicos y URLs para imprenta. La categoría define el
+          formulario que ve quien activa el QR (persona, mascota u objeto).
         </p>
+
+        <fieldset className="mt-6">
+          <legend className="text-sm font-medium text-neutral-300">
+            Categoría del QR *
+          </legend>
+          <div className="mt-2 grid gap-2 sm:grid-cols-3">
+            {PROFILE_TYPES.map((option) => {
+              const Icon =
+                option.value === "pet"
+                  ? PawPrint
+                  : option.value === "object"
+                    ? Package
+                    : User;
+              const selected = profileType === option.value;
+              return (
+                <label
+                  key={option.value}
+                  className={`flex cursor-pointer flex-col gap-1 rounded-xl border px-3 py-3 transition-colors ${
+                    selected
+                      ? "border-violet-500 bg-violet-950/40 text-white"
+                      : "border-neutral-700 bg-neutral-900/40 text-neutral-300 hover:border-violet-700"
+                  }`}
+                >
+                  <span className="flex items-center gap-2 text-sm font-semibold">
+                    <Icon className="h-4 w-4" aria-hidden />
+                    {option.label}
+                  </span>
+                  <span className="text-xs leading-snug text-neutral-400">
+                    {option.value === "pet"
+                      ? "Chapita, collar o libreta de mascota"
+                      : option.value === "object"
+                        ? "Valija, notebook u otro objeto"
+                        : "Perfil de emergencia personal"}
+                  </span>
+                  <input
+                    type="radio"
+                    name="batch_profile_type"
+                    value={option.value}
+                    checked={selected}
+                    onChange={() => setProfileType(option.value)}
+                    className="sr-only"
+                  />
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <label className="block text-sm text-neutral-300">
@@ -327,12 +425,13 @@ export function AdminProductBatchesPanel() {
           <p className="text-neutral-500">Todavía no hay lotes creados.</p>
         ) : (
           <div className={adminUi.tableWrap}>
-            <table className="w-full min-w-[900px] text-left text-sm">
+            <table className="w-full min-w-[980px] text-left text-sm">
               <thead className={adminUi.tableHead}>
                 <tr>
                   <th className="w-8 px-2 py-3" aria-hidden />
                   <th className="px-4 py-3">Partner</th>
                   <th className="px-4 py-3">Producto</th>
+                  <th className="px-4 py-3">Categoría</th>
                   <th className="px-4 py-3">Plantilla</th>
                   <th className="px-4 py-3">Generados</th>
                   <th className="px-4 py-3">Progreso</th>
@@ -363,6 +462,9 @@ export function AdminProductBatchesPanel() {
                         <td className="px-4 py-3 font-medium">{batch.partner_name}</td>
                         <td className="px-4 py-3 text-neutral-400">
                           {batch.product_label ?? "—"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <BatchCategoryBadge type={batch.profile_type} />
                         </td>
                         <td className="px-4 py-3 text-neutral-400">
                           {batch.template_name ?? "Default"}
@@ -427,6 +529,28 @@ export function AdminProductBatchesPanel() {
                             ) : (
                               <>
                                 <div className="mb-3 flex flex-wrap items-center gap-2">
+                                  <label className="inline-flex items-center gap-2 text-xs text-neutral-600">
+                                    Categoría
+                                    <select
+                                      value={batch.profile_type}
+                                      onChange={(e) =>
+                                        handleUpdateProfileType(
+                                          batch.id,
+                                          e.target.value as ProfileType,
+                                        )
+                                      }
+                                      className="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-xs font-medium text-neutral-800"
+                                    >
+                                      {PROFILE_TYPES.map((option) => (
+                                        <option
+                                          key={option.value}
+                                          value={option.value}
+                                        >
+                                          {option.label}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
                                   <a
                                     href={`/api/admin/product-batches/${batch.id}?format=pdf`}
                                     className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-violet-500"

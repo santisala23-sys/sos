@@ -5,6 +5,7 @@ import {
   getActivationStats,
   listProductBatches,
 } from "@/lib/db/queries-activation";
+import { isProfileType } from "@/lib/profile-types";
 
 export const GET = withApi(
   { requireAdmin: true, rateLimit: "admin" },
@@ -26,6 +27,7 @@ export const POST = withApi(
       notes?: string;
       quantity?: number;
       template_id?: string | null;
+      profile_type?: string;
     };
 
     try {
@@ -50,6 +52,14 @@ export const POST = withApi(
       );
     }
 
+    const profile_type = body.profile_type?.trim();
+    if (!profile_type || !isProfileType(profile_type)) {
+      return NextResponse.json(
+        { error: "Elegí si el lote es para persona, mascota u objeto" },
+        { status: 400 },
+      );
+    }
+
     try {
       const result = await createProductBatch({
         partner_name,
@@ -57,6 +67,7 @@ export const POST = withApi(
         notes: body.notes?.trim() || null,
         quantity,
         template_id: body.template_id ?? null,
+        profile_type,
       });
       return NextResponse.json(result, { status: 201 });
     } catch (error) {

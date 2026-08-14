@@ -6,7 +6,6 @@ import {
   findActivationByCode,
   toActivationPublicView,
 } from "@/lib/db/queries-activation";
-import { isProfileType, type ProfileType } from "@/lib/profile-types";
 import { normalizeBloodType } from "@/lib/blood-types";
 import {
   sensitiveConsentFields,
@@ -72,7 +71,6 @@ export const POST = withApi(
       medical_notes,
       allergies,
       blood_type,
-      profile_type,
       sensitiveDataConsent,
       avatar,
     } = body;
@@ -89,8 +87,12 @@ export const POST = withApi(
       );
     }
 
-    const resolvedProfileType: ProfileType =
-      profile_type && isProfileType(profile_type) ? profile_type : "person";
+    const activation = await findActivationByCode(code);
+    if (!activation) {
+      return NextResponse.json({ error: "Código no encontrado" }, { status: 404 });
+    }
+
+    const resolvedProfileType = activation.profile_type;
 
     const resolvedBloodType =
       resolvedProfileType === "person" ? normalizeBloodType(blood_type) : null;

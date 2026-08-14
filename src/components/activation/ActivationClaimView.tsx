@@ -7,6 +7,8 @@ import type { ActivationPublicView } from "@/lib/db/queries-activation";
 import type { QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
+import { getActivationTypeCopy } from "@/lib/profile-types";
+import { dashboardHashForProfileType } from "@/lib/dashboard/profile-section-order";
 
 type ActivationClaimViewProps = {
   code: string;
@@ -22,6 +24,7 @@ export function ActivationClaimView({
   redirectPath,
 }: ActivationClaimViewProps) {
   const router = useRouter();
+  const copy = getActivationTypeCopy(activation.profileType);
 
   const loginHref = `/login?redirect=${encodeURIComponent(redirectPath)}`;
   const registerHref = `/register?redirect=${encodeURIComponent(redirectPath)}`;
@@ -83,11 +86,8 @@ export function ActivationClaimView({
         <div className="flex items-start gap-3">
           <QrCode className="mt-0.5 h-8 w-8 shrink-0 text-violet-600" aria-hidden />
           <div>
-            <p className="font-semibold text-neutral-900">Activá tu producto una sola vez</p>
-            <p className="mt-2 text-sm text-neutral-600">
-              Creá una cuenta o ingresá para vincular este QR a tu perfil. Después, quien
-              escanee ve tus datos de contacto — sin instalar apps.
-            </p>
+            <p className="font-semibold text-neutral-900">{copy.loginTitle}</p>
+            <p className="mt-2 text-sm text-neutral-600">{copy.loginBody}</p>
           </div>
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
@@ -103,24 +103,26 @@ export function ActivationClaimView({
   }
 
   function handleSuccess(profile?: QrProfile) {
+    const type = profile?.profile_type ?? activation.profileType;
+    const hash = dashboardHashForProfileType(type);
     if (profile?.slug) {
-      router.push(`/dashboard?activado=${profile.slug}`);
+      router.push(`/dashboard?activado=${profile.slug}${hash}`);
     } else {
-      router.push("/dashboard#personas");
+      router.push(`/dashboard${hash}`);
     }
     router.refresh();
   }
 
   return (
     <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8">
-      <h2 className="text-lg font-bold text-neutral-900">Configurá tu perfil</h2>
-      <p className="mt-1 text-sm text-neutral-600">
-        Completá los datos que verán quienes escaneen el QR en tu producto.
-      </p>
+      <h2 className="text-lg font-bold text-neutral-900">{copy.formTitle}</h2>
+      <p className="mt-1 text-sm text-neutral-600">{copy.formHint}</p>
 
       <div className="mt-6">
         <QrProfileForm
           createEndpoint={`/api/activar/${encodeURIComponent(code)}`}
+          defaultProfileType={activation.profileType}
+          lockProfileType
           onSuccess={handleSuccess}
         />
       </div>

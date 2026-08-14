@@ -107,3 +107,56 @@ export function getProfileTypeConfig(type: ProfileType | string | null | undefin
 export function isProfileType(value: string): value is ProfileType {
   return value === "person" || value === "pet" || value === "object";
 }
+
+export function resolveProfileType(
+  value: string | null | undefined,
+): ProfileType {
+  if (value && isProfileType(value)) return value;
+  return "person";
+}
+
+export type ActivationTypeCopy = {
+  title: string;
+  subtitle: string;
+  formTitle: string;
+  formHint: string;
+  loginTitle: string;
+  loginBody: string;
+};
+
+export function getActivationTypeCopy(
+  type: ProfileType | string | null | undefined,
+): ActivationTypeCopy {
+  const resolved = resolveProfileType(type);
+  if (resolved === "pet") {
+    return {
+      title: "Activar QR de mascota",
+      subtitle: "Este código es para una chapita o collar.",
+      formTitle: "Datos de tu mascota",
+      formHint: "Completá cómo contactarte si la encuentran.",
+      loginTitle: "Activá la chapita de tu mascota",
+      loginBody:
+        "Creá una cuenta o ingresá para vincular este QR a tu mascota. Después, quien la encuentre ve cómo avisarte.",
+    };
+  }
+  if (resolved === "object") {
+    return {
+      title: "Activar QR de objeto",
+      subtitle: "Este código es para un objeto, valija o equipo.",
+      formTitle: "Datos del objeto",
+      formHint: "Completá cómo contactarte si lo encuentran.",
+      loginTitle: "Activá el QR de tu objeto",
+      loginBody:
+        "Creá una cuenta o ingresá para vincular este QR a tu objeto. Quien lo encuentre va a poder avisarte.",
+    };
+  }
+  return {
+    title: "Activar QR de persona",
+    subtitle: "Este código es para un perfil de emergencia personal.",
+    formTitle: "Datos de emergencia",
+    formHint: "Completá los datos que verán quienes escaneen el QR.",
+    loginTitle: "Activá tu producto una sola vez",
+    loginBody:
+      "Creá una cuenta o ingresá para vincular este QR a tu perfil. Después, quien escanee ve tus datos de contacto — sin instalar apps.",
+  };
+}

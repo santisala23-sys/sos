@@ -27,6 +27,8 @@ import { profileHasSensitiveData } from "@/lib/legal/sensitive-data";
 type QrProfileFormProps = {
   profile?: QrProfile;
   defaultProfileType?: ProfileType;
+  /** Si es true, no se puede cambiar el tipo (p. ej. lote de chapitas de mascota). */
+  lockProfileType?: boolean;
   onSuccess: (profile?: QrProfile) => void;
   onCancel?: () => void;
   /** Endpoint usado al crear (no editar). Permite reutilizar el form en la
@@ -65,6 +67,7 @@ function dataUrlToAvatarPayload(dataUrl: string): { mime: string; data: string }
 export function QrProfileForm({
   profile,
   defaultProfileType,
+  lockProfileType = false,
   onSuccess,
   onCancel,
   createEndpoint = "/api/qr-profiles",
@@ -365,6 +368,24 @@ export function QrProfileForm({
         />
       </div>
 
+      {lockProfileType ? (
+        <div className={`${sectionClass} flex items-start gap-3`}>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white">
+            <AvatarIcon className="h-5 w-5" aria-hidden />
+          </span>
+          <div>
+            <p className="text-sm font-bold text-neutral-900">
+              {PROFILE_TYPES.find((option) => option.value === profileType)?.label}
+            </p>
+            <p className="mt-0.5 text-xs leading-snug text-neutral-500">
+              {
+                PROFILE_TYPES.find((option) => option.value === profileType)
+                  ?.description
+              }
+            </p>
+          </div>
+        </div>
+      ) : (
       <fieldset className={sectionClass}>
         <legend className={legendClass}>Tipo de perfil *</legend>
         <div className="mt-1 grid gap-2 sm:grid-cols-3">
@@ -410,6 +431,7 @@ export function QrProfileForm({
           })}
         </div>
       </fieldset>
+      )}
 
       <fieldset className={sectionClass}>
         <legend className={legendClass}>

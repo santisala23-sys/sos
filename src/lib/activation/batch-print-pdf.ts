@@ -105,7 +105,15 @@ async function drawDesignFromTemplate(
       const qrX = mmToPt(element.xMm);
       const qrY = yMmToPt(element.yMm);
       const qrPng = await generateQrPng(item.activationUrl, qrPx);
-      doc.image(qrPng, qrX, qrY, { width: qrPt, height: qrPt });
+      try {
+        doc.image(qrPng, qrX, qrY, { width: qrPt, height: qrPt });
+      } catch (error) {
+        throw new Error(
+          `No se pudo incrustar el QR en el PDF (${item.label ?? item.activationUrl}): ${
+            error instanceof Error ? error.message : "error de imagen"
+          }`,
+        );
+      }
       continue;
     }
 
@@ -121,7 +129,15 @@ async function drawDesignFromTemplate(
       const heightPt = mmToPt(element.heightMm);
       const x = mmToPt(element.xMm);
       const y = yMmToPt(element.yMm);
-      doc.image(buffer, x, y, { width: widthPt, height: heightPt });
+      try {
+        doc.image(buffer, x, y, { width: widthPt, height: heightPt });
+      } catch (error) {
+        console.error(
+          "[batch-print-pdf] skipping broken template image",
+          element.assetUrl,
+          error,
+        );
+      }
       continue;
     }
 
@@ -259,7 +275,12 @@ export async function buildBatchPrintPdf(
   }
 
   const rawPdf = await renderTemplatePdf(options, template);
-  return injectPdfOptionalContentGroups(rawPdf);
+  try {
+    return injectPdfOptionalContentGroups(rawPdf);
+  } catch (error) {
+    console.error("[batch-print-pdf] OCG layer inject failed, returning raw PDF", error);
+    return rawPdf;
+  }
 }
 
 export const printPdfMeta = {

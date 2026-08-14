@@ -5,7 +5,10 @@ import {
   normalizeActivationCode,
 } from "@/lib/activation/codes";
 import type { QrProfile } from "@/types/database";
-import type { ProfileType } from "@/lib/profile-types";
+import {
+  resolveProfileType,
+  type ProfileType,
+} from "@/lib/profile-types";
 import { createQrProfile } from "@/lib/db/queries";
 
 export type QrProductBatchRow = {
@@ -16,6 +19,7 @@ export type QrProductBatchRow = {
   quantity: number;
   template_id: string | null;
   template_name: string | null;
+  profile_type: ProfileType;
   created_at: string;
   unclaimed_count: number;
   claimed_count: number;
@@ -34,6 +38,7 @@ export type QrActivationRow = {
   created_at: string;
   partner_name: string | null;
   product_label: string | null;
+  profile_type: ProfileType;
 };
 
 export type ActivationPublicView = {
@@ -41,6 +46,7 @@ export type ActivationPublicView = {
   status: QrActivationRow["status"];
   partnerName: string | null;
   productLabel: string | null;
+  profileType: ProfileType;
   publicSlug: string | null;
   profileId: string | null;
   claimedByCurrentUser: boolean;
@@ -67,13 +73,15 @@ export async function findActivationByCode(
     SELECT
       a.id, a.batch_id, a.profile_id, a.activation_code, a.public_slug,
       a.status, a.claimed_at, a.claimed_by_user_id, a.created_at,
-      b.partner_name, b.product_label
+      b.partner_name, b.product_label, b.profile_type
     FROM qr_activations a
     LEFT JOIN qr_product_batches b ON b.id = a.batch_id
     WHERE a.activation_code = ${code}
     LIMIT 1
   `;
-  return (rows[0] as QrActivationRow | undefined) ?? null;
+  const row = rows[0] as QrActivationRow | undefined;
+  if (!row) return null;
+  return { ...row, profile_type: resolveProfileType(row.profile_type) };
 }
 
 export function toActivationPublicView(
@@ -85,6 +93,7 @@ export function toActivationPublicView(
     status: row.status,
     partnerName: row.partner_name,
     productLabel: row.product_label,
+    profileType: resolveProfileType(row.profile_type),
     publicSlug: row.public_slug,
     profileId: row.profile_id,
     claimedByCurrentUser: Boolean(
@@ -153,7 +162,9 @@ export async function claimActivationForUser(
   const profile = await createQrProfile({
     tutor_id: userId,
     slug,
-    profile_type: profileData.profile_type ?? "person",
+    profile_type: resolveProfileType(
+      activation.profile_type ?? profileData.profile_type,
+    ),
     beneficiary_name: profileData.beneficiary_name,
     emergency_contact_name: profileData.emergency_contact_name,
     emergency_contact_phone: profileData.emergency_contact_phone,
@@ -242,16 +253,18 @@ export async function getProductBatchById(
   const rows = await sql`
     SELECT
       b.id, b.partner_name, b.product_label, b.notes, b.quantity, b.created_at,
-      b.template_id, t.name AS template_name
+      b.template_id, b.profile_type, t.name AS template_name
     FROM qr_product_batches b
     LEFT JOIN print_templates t ON t.id = b.template_id
     WHERE b.id = ${batchId}
     LIMIT 1
   `;
-  return (rows[0] as Omit<
+  const row = rows[0] as Omit<
     QrProductBatchRow,
     "unclaimed_count" | "claimed_count" | "disabled_count"
-  > | undefined) ?? null;
+  > | undefined;
+  if (!row) return null;
+  return { ...row, profile_type: resolveProfileType(row.profile_type) };
 }
 
 export async function listProductBatches(): Promise<QrProductBatchRow[]> {
@@ -259,7 +272,7 @@ export async function listProductBatches(): Promise<QrProductBatchRow[]> {
   const rows = await sql`
     SELECT
       b.id, b.partner_name, b.product_label, b.notes, b.quantity, b.created_at,
-      b.template_id, t.name AS template_name,
+      b.template_id, b.profile_type, t.name AS template_name,
       COUNT(*) FILTER (WHERE a.status = 'unclaimed')::int AS unclaimed_count,
       COUNT(*) FILTER (WHERE a.status = 'claimed')::int AS claimed_count,
       COUNT(*) FILTER (WHERE a.status = 'disabled')::int AS disabled_count
@@ -269,7 +282,10 @@ export async function listProductBatches(): Promise<QrProductBatchRow[]> {
     GROUP BY b.id, t.name
     ORDER BY b.created_at DESC
   `;
-  return rows as QrProductBatchRow[];
+  return (rows as QrProductBatchRow[]).map((row) => ({
+    ...row,
+    profile_type: resolveProfileType(row.profile_type),
+  }));
 }
 
 export async function listActivationsByBatch(
@@ -280,13 +296,16 @@ export async function listActivationsByBatch(
     SELECT
       a.id, a.batch_id, a.profile_id, a.activation_code, a.public_slug,
       a.status, a.claimed_at, a.claimed_by_user_id, a.created_at,
-      b.partner_name, b.product_label
+      b.partner_name, b.product_label, b.profile_type
     FROM qr_activations a
     LEFT JOIN qr_product_batches b ON b.id = a.batch_id
     WHERE a.batch_id = ${batchId}
     ORDER BY a.created_at ASC
   `;
-  return rows as QrActivationRow[];
+  return (rows as QrActivationRow[]).map((row) => ({
+    ...row,
+    profile_type: resolveProfileType(row.profile_type),
+  }));
 }
 
 export async function createProductBatch(input: {
@@ -295,20 +314,23 @@ export async function createProductBatch(input: {
   notes?: string | null;
   quantity: number;
   template_id?: string | null;
+  profile_type?: ProfileType;
 }): Promise<{ batch: QrProductBatchRow; activations: QrActivationRow[] }> {
   const quantity = Math.min(Math.max(input.quantity, 1), 500);
+  const profileType = resolveProfileType(input.profile_type);
   const sql = getSql();
 
   const batchRows = await sql`
-    INSERT INTO qr_product_batches (partner_name, product_label, notes, quantity, template_id)
+    INSERT INTO qr_product_batches (partner_name, product_label, notes, quantity, template_id, profile_type)
     VALUES (
       ${input.partner_name.trim()},
       ${input.product_label?.trim() || null},
       ${input.notes?.trim() || null},
       ${quantity},
-      ${input.template_id ?? null}
+      ${input.template_id ?? null},
+      ${profileType}
     )
-    RETURNING id, partner_name, product_label, notes, quantity, template_id, created_at
+    RETURNING id, partner_name, product_label, notes, quantity, template_id, profile_type, created_at
   `;
   const batch = batchRows[0] as {
     id: string;
@@ -317,6 +339,7 @@ export async function createProductBatch(input: {
     notes: string | null;
     quantity: number;
     template_id: string | null;
+    profile_type: ProfileType;
     created_at: string;
   };
 
@@ -356,11 +379,13 @@ export async function createProductBatch(input: {
       ...row,
       partner_name: batch.partner_name,
       product_label: batch.product_label,
+      profile_type: profileType,
     });
   }
 
   const batchRow: QrProductBatchRow = {
     ...batch,
+    profile_type: profileType,
     template_name: templateName,
     unclaimed_count: quantity,
     claimed_count: 0,
@@ -368,4 +393,18 @@ export async function createProductBatch(input: {
   };
 
   return { batch: batchRow, activations };
+}
+
+export async function updateProductBatchProfileType(
+  batchId: string,
+  profileType: ProfileType,
+): Promise<boolean> {
+  const sql = getSql();
+  const rows = await sql`
+    UPDATE qr_product_batches
+    SET profile_type = ${profileType}
+    WHERE id = ${batchId}
+    RETURNING id
+  `;
+  return rows.length > 0;
 }
