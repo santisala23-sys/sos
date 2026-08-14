@@ -6,9 +6,7 @@ import {
   listPreventiveItems,
 } from "@/lib/db/queries-pet-medical";
 import { isUuid } from "@/lib/pet-medical";
-import { VetVisitsList } from "@/components/vet/VetVisitsList";
-import { VetVisitForm } from "@/components/vet/VetVisitForm";
-import { VetPreventiveReadOnly } from "@/components/vet/VetPreventiveReadOnly";
+import { VetViewPanels } from "@/components/vet/VetViewPanels";
 
 type PageProps = {
   params: Promise<{ token: string }>;
@@ -109,36 +107,11 @@ export default async function VetViewPage({ params }: PageProps) {
             </div>
           )}
 
-          <div className="border-b border-neutral-100 px-6 py-5">
-            <h2 className="text-sm font-bold uppercase tracking-wide text-neutral-400">
-              Vacunas y desparasitaciones
-            </h2>
-            <div className="mt-3">
-              <VetPreventiveReadOnly items={preventive} />
-            </div>
-          </div>
-
-          <div className="px-6 py-5">
-            <h2 className="text-sm font-bold uppercase tracking-wide text-neutral-400">
-              Historial de visitas
-            </h2>
-            <div className="mt-3">
-              <VetVisitsList visits={visits} vetToken={token} />
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-6 rounded-3xl border border-teal-100 bg-white p-6 shadow-lg shadow-teal-900/5">
-          <h2 className="text-lg font-bold text-neutral-900">
-            Registrar visita
-          </h2>
-          <p className="mt-1 text-sm text-neutral-500">
-            Cargá qué se hizo, indicaciones, archivos y, si corresponde, la
-            próxima vacuna o desparasitación.
-          </p>
-          <div className="mt-5">
-            <VetVisitForm token={token} />
-          </div>
+          <VetViewPanels
+            token={token}
+            visits={visits}
+            preventive={preventive}
+          />
         </section>
 
         <p className="mt-6 text-center text-xs text-neutral-400">

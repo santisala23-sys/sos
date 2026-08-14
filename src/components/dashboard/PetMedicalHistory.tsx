@@ -123,9 +123,18 @@ export function PetMedicalHistory({
               petId={petId}
               open={visitFormOpen}
               onOpenChange={setVisitFormOpen}
+              preventiveItems={preventive}
               onCreated={(visit) => setVisits((prev) => [visit, ...prev])}
               onPreventiveAdded={(item) =>
-                setPreventive((prev) => [...prev, item])
+                setPreventive((prev) => {
+                  const idx = prev.findIndex((row) => row.id === item.id);
+                  if (idx >= 0) {
+                    const next = [...prev];
+                    next[idx] = item;
+                    return next;
+                  }
+                  return [...prev, item];
+                })
               }
             />
 

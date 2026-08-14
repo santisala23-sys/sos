@@ -22,6 +22,7 @@ type TutorVisitFormProps = {
   onOpenChange: (open: boolean) => void;
   onCreated: (visit: PetVetVisit) => void;
   onPreventiveAdded?: (item: PetPreventiveItem) => void;
+  preventiveItems?: PetPreventiveItem[];
 };
 
 export function TutorVisitForm({
@@ -30,6 +31,7 @@ export function TutorVisitForm({
   onOpenChange,
   onCreated,
   onPreventiveAdded,
+  preventiveItems = [],
 }: TutorVisitFormProps) {
   const [visitDate, setVisitDate] = useState(
     () => new Date().toISOString().slice(0, 10),
@@ -44,9 +46,14 @@ export function TutorVisitForm({
   const [preventiveKind, setPreventiveKind] = useState<PreventiveKind>("vaccine");
   const [preventiveName, setPreventiveName] = useState("");
   const [preventiveNextDue, setPreventiveNextDue] = useState("");
+  const [selectedPreventiveId, setSelectedPreventiveId] = useState<string | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const scheduledItems = preventiveItems.filter((item) => item.next_due_at);
 
   function toggleTag(tag: VisitTag) {
     setTags((prev) =>
@@ -64,7 +71,29 @@ export function TutorVisitForm({
     setUpdateCalendar(false);
     setPreventiveName("");
     setPreventiveNextDue("");
+    setSelectedPreventiveId(null);
+    setPreventiveKind("vaccine");
     setError(null);
+  }
+
+  function handleCalendarEnabled(enabled: boolean) {
+    setUpdateCalendar(enabled);
+    if (!enabled) {
+      setSelectedPreventiveId(null);
+      setPreventiveName("");
+      setPreventiveNextDue("");
+      setPreventiveKind("vaccine");
+      return;
+    }
+    if (scheduledItems.length > 0) {
+      const first = scheduledItems[0]!;
+      setSelectedPreventiveId(first.id);
+      setPreventiveKind(first.kind);
+      setPreventiveName(first.name);
+      setPreventiveNextDue("");
+    } else {
+      setSelectedPreventiveId(null);
+    }
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -98,16 +127,29 @@ export function TutorVisitForm({
       }
 
       if (updateCalendar && preventiveName.trim()) {
-        const prevRes = await fetch(`/api/qr-profiles/${petId}/preventive`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            kind: preventiveKind,
-            name: preventiveName.trim(),
-            last_applied_at: visitDate,
-            next_due_at: preventiveNextDue || null,
-          }),
-        });
+        const prevRes = selectedPreventiveId
+          ? await fetch(
+              `/api/qr-profiles/${petId}/preventive/${selectedPreventiveId}`,
+              {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  name: preventiveName.trim(),
+                  last_applied_at: visitDate,
+                  next_due_at: preventiveNextDue || null,
+                }),
+              },
+            )
+          : await fetch(`/api/qr-profiles/${petId}/preventive`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                kind: preventiveKind,
+                name: preventiveName.trim(),
+                last_applied_at: visitDate,
+                next_due_at: preventiveNextDue || null,
+              }),
+            });
         const prevData = (await prevRes.json()) as {
           item?: PetPreventiveItem;
         };
@@ -237,13 +279,16 @@ export function TutorVisitForm({
 
       <VisitCalendarUpdate
         enabled={updateCalendar}
-        onEnabledChange={setUpdateCalendar}
+        onEnabledChange={handleCalendarEnabled}
         kind={preventiveKind}
         onKindChange={setPreventiveKind}
         name={preventiveName}
         onNameChange={setPreventiveName}
         nextDue={preventiveNextDue}
         onNextDueChange={setPreventiveNextDue}
+        existingItems={preventiveItems}
+        selectedItemId={selectedPreventiveId}
+        onSelectedItemIdChange={setSelectedPreventiveId}
         accent="violet"
         inputClass={inputClass}
       />

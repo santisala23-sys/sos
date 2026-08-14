@@ -1,4 +1,4 @@
-import { normalizeVisitTags } from "@/lib/pet-medical";
+import { isUuid, normalizeVisitTags } from "@/lib/pet-medical";
 import type { VisitTag } from "@/types/database";
 import type { VisitAttachmentInput } from "@/lib/db/queries-pet-medical";
 
@@ -126,6 +126,7 @@ export function parsePreventiveBody(
   | {
       ok: true;
       data: {
+        id?: string;
         kind?: "vaccine" | "deworming";
         name: string;
         last_applied_at: string | null;
@@ -167,9 +168,13 @@ export function parsePreventiveBody(
   const notes =
     typeof raw.notes === "string" ? raw.notes.trim().slice(0, 1000) : "";
 
+  const idRaw = typeof raw.id === "string" ? raw.id.trim() : "";
+  const id = idRaw && isUuid(idRaw) ? idRaw : undefined;
+
   return {
     ok: true,
     data: {
+      ...(id ? { id } : {}),
       ...(kind === "vaccine" || kind === "deworming" ? { kind } : {}),
       name,
       last_applied_at: lastRaw || null,

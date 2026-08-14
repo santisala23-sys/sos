@@ -517,6 +517,41 @@ export async function insertPreventiveItemByVet(
   return row ? mapPreventive(row) : null;
 }
 
+/** Actualiza un ítem del calendario (p. ej. aplicar la dosis programada). */
+export async function updatePreventiveItemByVet(
+  token: string,
+  itemId: string,
+  data: {
+    name: string;
+    last_applied_at?: string | null;
+    next_due_at?: string | null;
+  },
+): Promise<PetPreventiveItem | null> {
+  const sql = getSql();
+  const rows = await sql`
+    UPDATE pet_preventive_items i
+    SET
+      name = ${data.name.trim()},
+      last_applied_at = ${data.last_applied_at || null}::date,
+      next_due_at = ${data.next_due_at || null}::date
+    FROM vet_access_tokens t
+    INNER JOIN qr_profiles p ON p.id = t.pet_id
+    WHERE i.id = ${itemId}::uuid
+      AND i.pet_id = t.pet_id
+      AND t.token = ${token}::uuid
+      AND t.expires_at > NOW()
+      AND p.profile_type = 'pet'
+      AND p.is_active = TRUE
+    RETURNING
+      i.id, i.pet_id, i.kind, i.name,
+      i.last_applied_at::text AS last_applied_at,
+      i.next_due_at::text AS next_due_at,
+      i.notes, i.created_at, i.updated_at
+  `;
+  const row = rows[0] as Record<string, unknown> | undefined;
+  return row ? mapPreventive(row) : null;
+}
+
 export async function getVisitAttachmentForTutor(
   petId: string,
   tutorId: string,

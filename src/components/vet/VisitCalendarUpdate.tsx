@@ -1,6 +1,12 @@
 "use client";
 
-import type { PreventiveKind } from "@/types/database";
+import type { PetPreventiveItem, PreventiveKind } from "@/types/database";
+import {
+  formatVisitDate,
+  PREVENTIVE_KIND_LABELS,
+} from "@/lib/pet-medical";
+
+const NEW_ITEM = "__new__";
 
 type VisitCalendarUpdateProps = {
   enabled: boolean;
@@ -11,9 +17,21 @@ type VisitCalendarUpdateProps = {
   onNameChange: (name: string) => void;
   nextDue: string;
   onNextDueChange: (nextDue: string) => void;
+  /** Si hay ítems con próxima, se pueden elegir para actualizar esa fila. */
+  existingItems?: PetPreventiveItem[];
+  selectedItemId?: string | null;
+  onSelectedItemIdChange?: (id: string | null) => void;
   accent?: "violet" | "teal";
   inputClass: string;
 };
+
+function itemOptionLabel(item: PetPreventiveItem): string {
+  const kindLabel = PREVENTIVE_KIND_LABELS[item.kind];
+  const next = item.next_due_at
+    ? `Próxima: ${formatVisitDate(item.next_due_at)}`
+    : "Sin próxima";
+  return `${item.name} (${kindLabel}) · ${next}`;
+}
 
 export function VisitCalendarUpdate({
   enabled,
@@ -24,6 +42,9 @@ export function VisitCalendarUpdate({
   onNameChange,
   nextDue,
   onNextDueChange,
+  existingItems = [],
+  selectedItemId = null,
+  onSelectedItemIdChange,
   accent = "violet",
   inputClass,
 }: VisitCalendarUpdateProps) {
@@ -35,6 +56,26 @@ export function VisitCalendarUpdate({
     accent === "teal"
       ? "bg-teal-700 text-white"
       : "bg-violet-700 text-white";
+
+  const scheduledItems = existingItems.filter((item) => item.next_due_at);
+  const editingExisting = Boolean(selectedItemId);
+  const showPicker = scheduledItems.length > 0 && onSelectedItemIdChange;
+
+  function handleSelectChange(value: string) {
+    if (!onSelectedItemIdChange) return;
+    if (value === NEW_ITEM) {
+      onSelectedItemIdChange(null);
+      onNameChange("");
+      onNextDueChange("");
+      return;
+    }
+    const item = scheduledItems.find((row) => row.id === value);
+    if (!item) return;
+    onSelectedItemIdChange(item.id);
+    onKindChange(item.kind);
+    onNameChange(item.name);
+    onNextDueChange("");
+  }
 
   return (
     <div className={boxClass}>
@@ -49,27 +90,56 @@ export function VisitCalendarUpdate({
       </label>
       {enabled && (
         <div className="mt-3 space-y-3">
-          <div className="flex flex-wrap gap-2">
-            {(
-              [
-                ["vaccine", "Vacuna"],
-                ["deworming", "Desparasitación"],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => onKindChange(value)}
-                className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-                  kind === value
-                    ? activeChip
-                    : "border border-neutral-300 bg-white text-neutral-700"
-                }`}
+          {showPicker && (
+            <div>
+              <label className="text-sm font-semibold text-neutral-700">
+                ¿Cuál actualizás?
+              </label>
+              <select
+                value={selectedItemId ?? NEW_ITEM}
+                onChange={(e) => handleSelectChange(e.target.value)}
+                className={inputClass}
               >
-                {label}
-              </button>
-            ))}
-          </div>
+                {scheduledItems.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {itemOptionLabel(item)}
+                  </option>
+                ))}
+                <option value={NEW_ITEM}>Agregar otra…</option>
+              </select>
+              {editingExisting && (
+                <p className="mt-1.5 text-xs text-neutral-500">
+                  Se marca como aplicada en la fecha de la visita y podés cargar
+                  la próxima programada.
+                </p>
+              )}
+            </div>
+          )}
+
+          {!editingExisting && (
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  ["vaccine", "Vacuna"],
+                  ["deworming", "Desparasitación"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => onKindChange(value)}
+                  className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
+                    kind === value
+                      ? activeChip
+                      : "border border-neutral-300 bg-white text-neutral-700"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div>
             <label className="text-sm font-semibold text-neutral-700">
               Nombre
@@ -81,6 +151,7 @@ export function VisitCalendarUpdate({
               placeholder="Ej. Antirrábica"
               maxLength={200}
               required={enabled}
+              readOnly={editingExisting}
             />
           </div>
           <div>

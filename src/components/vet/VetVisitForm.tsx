@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import {
   VisitFilePicker,
@@ -10,14 +10,26 @@ import {
 } from "@/components/vet/VisitFilePicker";
 import { VisitCalendarUpdate } from "@/components/vet/VisitCalendarUpdate";
 import { VISIT_TAGS } from "@/lib/pet-medical";
-import type { PreventiveKind, VisitTag } from "@/types/database";
+import type {
+  PetPreventiveItem,
+  PreventiveKind,
+  VisitTag,
+} from "@/types/database";
 
 type VetVisitFormProps = {
   token: string;
+  preventiveItems?: PetPreventiveItem[];
   onPreventiveAdded?: () => void;
+  /** Si false, el título lo pone el contenedor (p. ej. sección desplegable). */
+  showHeading?: boolean;
 };
 
-export function VetVisitForm({ token, onPreventiveAdded }: VetVisitFormProps) {
+export function VetVisitForm({
+  token,
+  preventiveItems = [],
+  onPreventiveAdded,
+  showHeading = true,
+}: VetVisitFormProps) {
   const router = useRouter();
   const [visitDate, setVisitDate] = useState(
     () => new Date().toISOString().slice(0, 10),
@@ -32,14 +44,39 @@ export function VetVisitForm({ token, onPreventiveAdded }: VetVisitFormProps) {
   const [preventiveKind, setPreventiveKind] = useState<PreventiveKind>("vaccine");
   const [preventiveName, setPreventiveName] = useState("");
   const [preventiveNextDue, setPreventiveNextDue] = useState("");
+  const [selectedPreventiveId, setSelectedPreventiveId] = useState<string | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const scheduledItems = preventiveItems.filter((item) => item.next_due_at);
 
   function toggleTag(tag: VisitTag) {
     setTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
+  }
+
+  function handleCalendarEnabled(enabled: boolean) {
+    setUpdateCalendar(enabled);
+    if (!enabled) {
+      setSelectedPreventiveId(null);
+      setPreventiveName("");
+      setPreventiveNextDue("");
+      setPreventiveKind("vaccine");
+      return;
+    }
+    if (scheduledItems.length > 0) {
+      const first = scheduledItems[0]!;
+      setSelectedPreventiveId(first.id);
+      setPreventiveKind(first.kind);
+      setPreventiveName(first.name);
+      setPreventiveNextDue("");
+    } else {
+      setSelectedPreventiveId(null);
+    }
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -74,6 +111,7 @@ export function VetVisitForm({ token, onPreventiveAdded }: VetVisitFormProps) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            ...(selectedPreventiveId ? { id: selectedPreventiveId } : {}),
             kind: preventiveKind,
             name: preventiveName.trim(),
             last_applied_at: visitDate,
@@ -91,6 +129,7 @@ export function VetVisitForm({ token, onPreventiveAdded }: VetVisitFormProps) {
       setUpdateCalendar(false);
       setPreventiveName("");
       setPreventiveNextDue("");
+      setSelectedPreventiveId(null);
       router.refresh();
       window.setTimeout(() => setSuccess(false), 4000);
     } catch {
@@ -105,6 +144,16 @@ export function VetVisitForm({ token, onPreventiveAdded }: VetVisitFormProps) {
 
   return (
     <form onSubmit={(e) => void onSubmit(e)} className="space-y-4">
+      {showHeading && (
+        <div>
+          <h2 className="text-lg font-bold text-neutral-900">Registrar visita</h2>
+          <p className="mt-1 text-sm text-neutral-500">
+            Cargá qué se hizo, indicaciones, archivos y, si corresponde, la
+            próxima vacuna o desparasitación.
+          </p>
+        </div>
+      )}
+
       <div>
         <label htmlFor="visit_date" className="text-sm font-semibold text-neutral-700">
           Fecha de la visita
@@ -179,13 +228,16 @@ export function VetVisitForm({ token, onPreventiveAdded }: VetVisitFormProps) {
 
       <VisitCalendarUpdate
         enabled={updateCalendar}
-        onEnabledChange={setUpdateCalendar}
+        onEnabledChange={handleCalendarEnabled}
         kind={preventiveKind}
         onKindChange={setPreventiveKind}
         name={preventiveName}
         onNameChange={setPreventiveName}
         nextDue={preventiveNextDue}
         onNextDueChange={setPreventiveNextDue}
+        existingItems={preventiveItems}
+        selectedItemId={selectedPreventiveId}
+        onSelectedItemIdChange={setSelectedPreventiveId}
         accent="teal"
         inputClass={inputClass}
       />
@@ -252,5 +304,50 @@ export function VetVisitForm({ token, onPreventiveAdded }: VetVisitFormProps) {
         Guardar visita
       </Button>
     </form>
+  );
+}
+
+/** Encabezado clicable para secciones desplegables de la vista vet. */
+export function VetCollapsibleHeader({
+  title,
+  subtitle,
+  open,
+  onToggle,
+  badge,
+}: {
+  title: string;
+  subtitle?: string;
+  open: boolean;
+  onToggle: () => void;
+  badge?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={open}
+      className="flex w-full items-start justify-between gap-3 text-left"
+    >
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
+          {badge ? (
+            <span className="rounded-full bg-teal-100 px-2.5 py-0.5 text-xs font-bold text-teal-800">
+              {badge}
+            </span>
+          ) : null}
+        </div>
+        {subtitle ? (
+          <p className="mt-1 text-sm text-neutral-500">{subtitle}</p>
+        ) : null}
+      </div>
+      <span
+        className={`mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-600 transition-transform ${
+          open ? "rotate-180" : ""
+        }`}
+      >
+        <ChevronDown className="h-5 w-5" aria-hidden />
+      </span>
+    </button>
   );
 }
