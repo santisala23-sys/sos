@@ -78,11 +78,10 @@ export const POST = withApi(
     if (
       !beneficiary_name?.trim() ||
       !emergency_contact_name?.trim() ||
-      !emergency_contact_phone?.trim() ||
-      !instructions?.trim()
+      !emergency_contact_phone?.trim()
     ) {
       return NextResponse.json(
-        { error: "Completá nombre, contacto de emergencia e instrucciones" },
+        { error: "Completá nombre y contacto de emergencia" },
         { status: 400 },
       );
     }
@@ -93,14 +92,22 @@ export const POST = withApi(
     }
 
     const resolvedProfileType = activation.profile_type;
+    const isPet = resolvedProfileType === "pet";
+
+    if (!isPet && !instructions?.trim()) {
+      return NextResponse.json(
+        { error: "Completá las instrucciones" },
+        { status: 400 },
+      );
+    }
 
     const resolvedBloodType =
       resolvedProfileType === "person" ? normalizeBloodType(blood_type) : null;
 
     const consentError = validateSensitiveDataConsent({
       profileType: resolvedProfileType,
-      allergies,
-      medicalNotes: medical_notes,
+      allergies: isPet ? "" : allergies,
+      medicalNotes: isPet ? "" : medical_notes,
       bloodType: resolvedBloodType,
       sensitiveDataConsent,
     });
@@ -117,9 +124,9 @@ export const POST = withApi(
         emergency_contact_phone: emergency_contact_phone.trim(),
         secondary_contact_name: secondary_contact_name?.trim() || null,
         secondary_contact_phone: secondary_contact_phone?.trim() || null,
-        instructions: instructions.trim(),
-        medical_notes: medical_notes ?? "",
-        allergies: allergies ?? "",
+        instructions: instructions?.trim() || "",
+        medical_notes: isPet ? "" : medical_notes ?? "",
+        allergies: isPet ? "" : allergies ?? "",
         blood_type: resolvedBloodType,
         profile_type: resolvedProfileType,
         ...sensitiveConsentFields(Boolean(sensitiveDataConsent)),

@@ -511,6 +511,7 @@ export function EmergencyProfileView({
               </section>
             )}
 
+            {profile.instructions?.trim() && (
             <section aria-labelledby="instructions-heading" className={t.card}>
               <div className="p-5">
                 <h2 id="instructions-heading" className={t.sectionHeadingYellow}>
@@ -519,6 +520,7 @@ export function EmergencyProfileView({
                 <div className={t.infoInstructions}>{profile.instructions}</div>
               </div>
             </section>
+            )}
 
             {typeConfig.showMedicalNotes && profile.medical_notes?.trim() && (
               <section aria-labelledby="medical-heading" className={t.card}>

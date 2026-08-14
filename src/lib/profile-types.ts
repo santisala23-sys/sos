@@ -29,6 +29,7 @@ export type ProfileTypeConfig = {
   contactPlaceholder: string;
   instructionsLabel: string;
   instructionsPlaceholder: string;
+  instructionsRequired: boolean;
   publicHeader: string;
   /** Etiqueta corta para la vista pública: "Persona", "Mascota", "Objeto". */
   publicTypeLabel: string;
@@ -50,6 +51,7 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     instructionsLabel: "Instrucciones de manejo / comportamiento",
     instructionsPlaceholder:
       "Ej: No tolera contacto físico. Hablarle pausado. Sensible a sirenas.",
+    instructionsRequired: true,
     publicHeader: "Perfil de asistencia",
     publicTypeLabel: "Persona",
     showAllergies: true,
@@ -69,10 +71,11 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     instructionsLabel: "Instrucciones si la encuentran",
     instructionsPlaceholder:
       "Ej: Es tranquilo pero asusta con ruidos fuertes. Llamar al dueño antes de acercarse.",
+    instructionsRequired: false,
     publicHeader: "Mascota — contacto del dueño",
     publicTypeLabel: "Mascota",
-    showAllergies: true,
-    showMedicalNotes: true,
+    showAllergies: false,
+    showMedicalNotes: false,
     showBloodType: false,
     showClinicalPdf: false,
     allergiesLabel: "Alergias o restricciones",
@@ -87,6 +90,7 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     instructionsLabel: "Qué hacer si lo encontrás",
     instructionsPlaceholder:
       "Ej: Contiene documentación importante. Hay recompensa. Llamar o escribir al contacto.",
+    instructionsRequired: true,
     publicHeader: "Objeto perdido — contacto",
     publicTypeLabel: "Objeto",
     showAllergies: false,
@@ -133,7 +137,7 @@ export function getActivationTypeCopy(
       title: "Activar QR de mascota",
       subtitle: "Este código es para una chapita o collar.",
       formTitle: "Datos de tu mascota",
-      formHint: "Completá cómo contactarte si la encuentran.",
+      formHint: "Foto, contactos y, si querés, cómo acercarse a tu mascota.",
       loginTitle: "Activá la chapita de tu mascota",
       loginBody:
         "Creá una cuenta o ingresá para vincular este QR a tu mascota. Después, quien la encuentre ve cómo avisarte.",

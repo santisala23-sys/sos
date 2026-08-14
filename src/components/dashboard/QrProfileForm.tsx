@@ -147,10 +147,22 @@ export function QrProfileForm({
       emergency_contact_phone: emergencyContactPhone,
       secondary_contact_name: secondaryContactName.trim() || null,
       secondary_contact_phone: secondaryContactPhone.trim() || null,
-      instructions,
-      allergies: typeConfig.showAllergies ? allergies.trim() || null : null,
-      blood_type: typeConfig.showBloodType ? bloodType || null : null,
-      medical_notes: typeConfig.showMedicalNotes ? medicalNotes || null : null,
+      instructions: instructions.trim(),
+      ...(typeConfig.showAllergies
+        ? { allergies: allergies.trim() || null }
+        : isEditing
+          ? {}
+          : { allergies: null }),
+      ...(typeConfig.showBloodType
+        ? { blood_type: bloodType || null }
+        : isEditing
+          ? {}
+          : { blood_type: null }),
+      ...(typeConfig.showMedicalNotes
+        ? { medical_notes: medicalNotes || null }
+        : isEditing
+          ? {}
+          : { medical_notes: null }),
       ...(needsSensitiveConsent ? { sensitiveDataConsent } : {}),
       ...(isEditing ? { is_active: isActive } : {}),
       ...(avatarChange !== undefined
@@ -509,10 +521,11 @@ export function QrProfileForm({
 
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">
-          {typeConfig.instructionsLabel} *
+          {typeConfig.instructionsLabel}
+          {typeConfig.instructionsRequired ? " *" : " (opcional)"}
         </span>
         <textarea
-          required
+          required={typeConfig.instructionsRequired}
           rows={4}
           value={instructions}
           onChange={(e) => setInstructions(e.target.value)}

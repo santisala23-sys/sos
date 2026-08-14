@@ -56,20 +56,21 @@ export async function POST(request: Request) {
       avatar?: { mime?: string; data?: string } | null;
     };
 
+    const resolvedProfileType: ProfileType =
+      profile_type && isProfileType(profile_type) ? profile_type : "person";
+    const isPet = resolvedProfileType === "pet";
+
     if (
       !beneficiary_name ||
       !emergency_contact_name ||
       !emergency_contact_phone ||
-      !instructions
+      (!isPet && !instructions)
     ) {
       return NextResponse.json(
         { error: "Faltan campos obligatorios" },
         { status: 400 },
       );
     }
-
-    const resolvedProfileType: ProfileType =
-      profile_type && isProfileType(profile_type) ? profile_type : "person";
 
     const resolvedBloodType =
       resolvedProfileType === "person"
@@ -78,8 +79,8 @@ export async function POST(request: Request) {
 
     const consentError = validateSensitiveDataConsent({
       profileType: resolvedProfileType,
-      allergies,
-      medicalNotes: medical_notes,
+      allergies: isPet ? "" : allergies,
+      medicalNotes: isPet ? "" : medical_notes,
       bloodType: resolvedBloodType,
       sensitiveDataConsent,
     });
@@ -116,9 +117,9 @@ export async function POST(request: Request) {
       emergency_contact_phone,
       secondary_contact_name: secondary_contact_name?.trim() || null,
       secondary_contact_phone: secondary_contact_phone?.trim() || null,
-      instructions,
-      medical_notes: medical_notes ?? "",
-      allergies: allergies ?? "",
+      instructions: instructions?.trim() || "",
+      medical_notes: isPet ? "" : medical_notes ?? "",
+      allergies: isPet ? "" : allergies ?? "",
       blood_type: resolvedBloodType,
       profile_type: resolvedProfileType,
       ...sensitiveConsentFields(Boolean(sensitiveDataConsent)),
