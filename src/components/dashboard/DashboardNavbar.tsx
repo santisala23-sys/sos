@@ -5,10 +5,16 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   Activity,
+  ClipboardList,
   LayoutDashboard,
   LogOut,
+  Package,
+  PawPrint,
+  QrCode,
+  ShoppingBag,
   UserCircle2,
 } from "lucide-react";
+import type { QrProfile } from "@/types/database";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { HamburgerButton } from "@/components/shared/HamburgerButton";
 import { MobileNavDrawer } from "@/components/shared/MobileNavDrawer";
@@ -37,6 +43,32 @@ type ProfileLimitStatus = {
   activeCount?: number;
 };
 
+function NavSectionLabel({ children }: { children: string }) {
+  return (
+    <p className="mb-1.5 mt-4 px-2 text-[11px] font-bold uppercase tracking-[0.16em] text-violet-600 first:mt-0">
+      {children}
+    </p>
+  );
+}
+
+function drawerLinkClass(active: boolean) {
+  return cn(
+    "inline-flex items-center gap-3 rounded-2xl px-4 py-3.5 text-base font-semibold transition-colors",
+    active
+      ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
+      : "text-neutral-800 hover:bg-violet-50 hover:text-violet-800",
+  );
+}
+
+function drawerSubLinkClass(active: boolean) {
+  return cn(
+    "inline-flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors",
+    active
+      ? "bg-violet-100 text-violet-900"
+      : "text-neutral-700 hover:bg-violet-50 hover:text-violet-800",
+  );
+}
+
 export function DashboardNavbar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -44,6 +76,7 @@ export function DashboardNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [profileLimit, setProfileLimit] = useState<ProfileLimitStatus | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [profiles, setProfiles] = useState<QrProfile[]>([]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -75,6 +108,28 @@ export function DashboardNavbar() {
   useEffect(() => {
     let cancelled = false;
 
+    async function loadProfiles() {
+      try {
+        const res = await fetch("/api/qr-profiles");
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (!cancelled) setProfiles(data.profiles ?? []);
+      } catch {
+        /* ignore */
+      }
+    }
+
+    loadProfiles();
+    const interval = setInterval(loadProfiles, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [pathname, open]);
+
+  useEffect(() => {
+    let cancelled = false;
+
     async function loadUnread() {
       try {
         const res = await fetch("/api/scan-logs");
@@ -99,10 +154,18 @@ export function DashboardNavbar() {
     pathname === "/dashboard/actividad" || isLogDetail;
   const isPerfil = pathname === "/dashboard/perfil";
 
+  const petProfiles = profiles.filter((p) => p.profile_type === "pet");
+  const personProfiles = profiles.filter((p) => p.profile_type === "person");
+  const objectProfiles = profiles.filter((p) => p.profile_type === "object");
+
   function isActive(id: (typeof NAV_LINKS)[number]["id"]) {
     if (id === "actividad") return isActividad;
     if (id === "perfil") return isPerfil;
     return pathname === "/dashboard" && !isActividad && !isPerfil;
+  }
+
+  function isProfilePath(id: string, suffix = "") {
+    return pathname === `/dashboard/perfiles/${id}${suffix}`;
   }
 
   async function handleLogout() {
@@ -181,6 +244,13 @@ export function DashboardNavbar() {
               </Link>
             );
           })}
+          <Link
+            href="/#catalogo"
+            className="relative inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-base font-medium text-neutral-600 transition-colors hover:bg-violet-50 hover:text-violet-800"
+          >
+            <ShoppingBag className="h-4 w-4" aria-hidden />
+            Tienda
+          </Link>
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
@@ -217,30 +287,161 @@ export function DashboardNavbar() {
             {profileLimit.maxProfiles} QR activos
           </p>
         )}
+
         <nav className="flex flex-col gap-1.5" aria-label="Navegación móvil del panel">
-          {NAV_LINKS.map(({ href, label, icon: Icon, id }) => {
-            const active = isActive(id);
-            const alertHighlight = id === "actividad" && unreadCount > 0 && !active;
-            return (
+          {NAV_LINKS.filter((l) => l.id !== "perfil").map(
+            ({ href, label, icon: Icon, id }) => {
+              const active = isActive(id);
+              const alertHighlight =
+                id === "actividad" && unreadCount > 0 && !active;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    drawerLinkClass(active),
+                    !active &&
+                      alertHighlight &&
+                      "bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800",
+                  )}
+                  onClick={() => setOpen(false)}
+                >
+                  <Icon className="h-5 w-5 shrink-0" aria-hidden />
+                  {renderNavLabel(id, label)}
+                </Link>
+              );
+            },
+          )}
+
+          {petProfiles.length > 0 && (
+            <div className="mt-2">
+              <NavSectionLabel>Mascotas</NavSectionLabel>
+              <div className="space-y-3">
+                {petProfiles.map((pet) => {
+                  const editHref = `/dashboard/perfiles/${pet.id}/editar?from=${encodeURIComponent("/dashboard#mascotas")}`;
+                  const libretaHref = `/dashboard/perfiles/${pet.id}/libreta`;
+                  const editActive =
+                    pathname.startsWith(`/dashboard/perfiles/${pet.id}/editar`);
+                  const libretaActive = isProfilePath(pet.id, "/libreta");
+
+                  return (
+                    <div
+                      key={pet.id}
+                      className="rounded-2xl border border-teal-100 bg-teal-50/40 p-2.5"
+                    >
+                      <div className="mb-1.5 flex items-center gap-2 px-1.5">
+                        <PawPrint
+                          className="h-4 w-4 shrink-0 text-teal-700"
+                          aria-hidden
+                        />
+                        <p className="truncate text-sm font-black text-teal-950">
+                          {pet.beneficiary_name}
+                        </p>
+                        <span className="shrink-0 rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-teal-800">
+                          Mascota
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Link
+                          href={editHref}
+                          className={drawerSubLinkClass(editActive)}
+                          onClick={() => setOpen(false)}
+                        >
+                          <QrCode className="h-4 w-4 shrink-0" aria-hidden />
+                          Perfil QR
+                        </Link>
+                        <Link
+                          href={libretaHref}
+                          className={drawerSubLinkClass(libretaActive)}
+                          onClick={() => setOpen(false)}
+                        >
+                          <ClipboardList
+                            className="h-4 w-4 shrink-0"
+                            aria-hidden
+                          />
+                          Libreta sanitaria
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {personProfiles.length > 0 && (
+            <div className="mt-2">
+              <NavSectionLabel>Personas</NavSectionLabel>
+              <div className="flex flex-col gap-1">
+                {personProfiles.map((person) => {
+                  const href = `/dashboard/perfiles/${person.id}`;
+                  const active =
+                    isProfilePath(person.id) ||
+                    pathname.startsWith(`/dashboard/perfiles/${person.id}/`);
+                  return (
+                    <Link
+                      key={person.id}
+                      href={href}
+                      className={drawerLinkClass(active)}
+                      onClick={() => setOpen(false)}
+                    >
+                      <UserCircle2 className="h-5 w-5 shrink-0" aria-hidden />
+                      <span className="truncate">{person.beneficiary_name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {objectProfiles.length > 0 && (
+            <div className="mt-2">
+              <NavSectionLabel>Objetos</NavSectionLabel>
+              <div className="flex flex-col gap-1">
+                {objectProfiles.map((object) => {
+                  const href = `/dashboard/perfiles/${object.id}`;
+                  const active =
+                    isProfilePath(object.id) ||
+                    pathname.startsWith(`/dashboard/perfiles/${object.id}/`);
+                  return (
+                    <Link
+                      key={object.id}
+                      href={href}
+                      className={drawerLinkClass(active)}
+                      onClick={() => setOpen(false)}
+                    >
+                      <Package className="h-5 w-5 shrink-0" aria-hidden />
+                      <span className="truncate">{object.beneficiary_name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-2">
+            <NavSectionLabel>Más</NavSectionLabel>
+            <div className="flex flex-col gap-1.5">
               <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "inline-flex items-center gap-3 rounded-2xl px-4 py-3.5 text-base font-semibold transition-colors",
-                  active
-                    ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
-                    : alertHighlight
-                      ? "bg-red-50 text-red-700 hover:bg-red-100"
-                      : "text-neutral-800 hover:bg-violet-50 hover:text-violet-800",
-                )}
+                href="/#catalogo"
+                className={drawerLinkClass(false)}
                 onClick={() => setOpen(false)}
               >
-                <Icon className="h-5 w-5 shrink-0" aria-hidden />
-                {renderNavLabel(id, label)}
+                <ShoppingBag className="h-5 w-5 shrink-0" aria-hidden />
+                Tienda
               </Link>
-            );
-          })}
+              <Link
+                href="/dashboard/perfil"
+                className={drawerLinkClass(isPerfil)}
+                onClick={() => setOpen(false)}
+              >
+                <UserCircle2 className="h-5 w-5 shrink-0" aria-hidden />
+                Perfil
+              </Link>
+            </div>
+          </div>
         </nav>
+
         <div className="mt-6 flex flex-col gap-2.5 border-t border-neutral-100 pt-6">
           <Button
             type="button"
