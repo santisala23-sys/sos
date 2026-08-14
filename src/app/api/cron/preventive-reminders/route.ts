@@ -1,16 +1,10 @@
 import { NextResponse } from "next/server";
 import { withApi } from "@/lib/api/with-api";
+import { assertCronSecret } from "@/lib/cron/auth";
 import { notifyTutorPreventiveReminder } from "@/lib/alerts/notify-tutor-preventive-reminder";
 import { listPreventiveRemindersDue } from "@/lib/db/queries-pet-medical";
 
-function assertCronSecret(request: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  const header = request.headers.get("x-cron-secret");
-  return header === secret;
-}
-
-/** Cron diario: avisos push de vacunas/desparasitaciones (3 días antes y el día). */
+/** Cron dedicado a recordatorios de vacunas/desparasitaciones. */
 export const POST = withApi(
   { rateLimit: "admin", skipLogging: false },
   async (request) => {
@@ -47,3 +41,5 @@ export const POST = withApi(
     });
   },
 );
+
+export const GET = POST;

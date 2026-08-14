@@ -59,6 +59,7 @@ const migrations = [
   "026_scan_log_approximate_location.sql",
   "027_push_subscription_device.sql",
   "028_batch_profile_type.sql",
+  "029_preventive_reminders.sql",
 ];
 
 for (const file of migrations) {

@@ -72,6 +72,10 @@ for (const key of vapidKeys) {
   }
 }
 
+if (local.CRON_SECRET) {
+  vercelEnvAdd("CRON_SECRET", local.CRON_SECRET, ["production", "preview"]);
+}
+
 // Email transaccional (verificación de cuenta) vía SMTP
 const emailKeys = [
   "SMTP_HOST",
