@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Bell, BellOff, Download, Smartphone, Trash2 } from "lucide-react";
+import { Bell, BellOff, ChevronDown, Download, Smartphone, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { IosInstallModal } from "@/components/dashboard/IosInstallModal";
 import { usePwaInstall } from "@/components/dashboard/usePwaInstall";
@@ -585,6 +585,8 @@ export function PushNotificationPanel({ push }: PushProps) {
 
 /** Lista de dispositivos con alertas; va al final del panel. */
 export function PushDevicesSection({ push }: PushProps) {
+  const [open, setOpen] = useState(false);
+
   if (push.checking) return null;
 
   const hasAccountDevices = push.devices.length > 0;
@@ -592,18 +594,43 @@ export function PushDevicesSection({ push }: PushProps) {
 
   const otherDevices = push.devices.filter((device) => !device.isCurrent);
   const canSubscribe = push.environment === "ready";
+  const deviceCount = push.devices.length;
 
   return (
     <section className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
-      <div className="border-b border-neutral-100 px-5 py-4">
+      <div className="px-5 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-black text-neutral-900">Dispositivos</h2>
-            <p className="mt-1 text-sm text-neutral-600">
-              Cada navegador o celular donde activaste notificaciones para esta cuenta.
-            </p>
-          </div>
-          {push.subscribed && (
+          <button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            aria-expanded={open}
+            className="flex min-w-0 flex-1 items-start justify-between gap-3 text-left"
+          >
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-lg font-black text-neutral-900">Dispositivos</h2>
+                {deviceCount > 0 && (
+                  <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-bold text-violet-800">
+                    {deviceCount}
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-sm text-neutral-600">
+                {open
+                  ? "Cada navegador o celular donde activaste notificaciones para esta cuenta."
+                  : "Tocá para ver los dispositivos con alertas activas."}
+              </p>
+            </div>
+            <span
+              className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-600 transition-transform ${
+                open ? "rotate-180" : ""
+              }`}
+            >
+              <ChevronDown className="h-5 w-5" aria-hidden />
+            </span>
+          </button>
+
+          {open && push.subscribed && (
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
@@ -631,7 +658,7 @@ export function PushDevicesSection({ push }: PushProps) {
           )}
         </div>
 
-        {push.message && push.subscribed && (
+        {open && push.message && push.subscribed && (
           <p
             className={`mt-3 text-sm ${
               push.messageTone === "success"
@@ -647,62 +674,64 @@ export function PushDevicesSection({ push }: PushProps) {
         )}
       </div>
 
-      <div className="px-5 py-4">
-        {push.devicesLoading ? (
-          <p className="text-sm text-neutral-500">Cargando dispositivos...</p>
-        ) : hasAccountDevices ? (
-          <ul className="space-y-2">
-            {push.devices.map((device) => (
-              <li
-                key={device.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-neutral-100 bg-neutral-50/80 px-3 py-3"
-              >
-                <div className="flex min-w-0 items-start gap-3">
-                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-violet-700 shadow-sm">
-                    <Smartphone className="h-4 w-4" aria-hidden />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-neutral-900">
-                      {device.label}
-                      {device.isCurrent && (
-                        <span className="ml-2 inline-flex rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-800">
-                          Este dispositivo
-                        </span>
-                      )}
-                    </p>
-                    <p className="mt-0.5 text-xs text-neutral-500">
-                      Activo desde {formatDateTime(device.createdAt)}
-                    </p>
+      {open && (
+        <div className="border-t border-neutral-100 px-5 py-4">
+          {push.devicesLoading ? (
+            <p className="text-sm text-neutral-500">Cargando dispositivos...</p>
+          ) : hasAccountDevices ? (
+            <ul className="space-y-2">
+              {push.devices.map((device) => (
+                <li
+                  key={device.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-neutral-100 bg-neutral-50/80 px-3 py-3"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-violet-700 shadow-sm">
+                      <Smartphone className="h-4 w-4" aria-hidden />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-neutral-900">
+                        {device.label}
+                        {device.isCurrent && (
+                          <span className="ml-2 inline-flex rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-800">
+                            Este dispositivo
+                          </span>
+                        )}
+                      </p>
+                      <p className="mt-0.5 text-xs text-neutral-500">
+                        Activo desde {formatDateTime(device.createdAt)}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                {!device.isCurrent && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    disabled={push.loading}
-                    onClick={() => push.removeDevice(device)}
-                    className="shrink-0 gap-1 text-neutral-600 hover:bg-red-50 hover:text-red-700"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                    Quitar
-                  </Button>
-                )}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-neutral-500">
-            Todavía no hay dispositivos con alertas registradas.
-          </p>
-        )}
+                  {!device.isCurrent && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={push.loading}
+                      onClick={() => push.removeDevice(device)}
+                      className="shrink-0 gap-1 text-neutral-600 hover:bg-red-50 hover:text-red-700"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                      Quitar
+                    </Button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-neutral-500">
+              Todavía no hay dispositivos con alertas registradas.
+            </p>
+          )}
 
-        {otherDevices.length === 0 && push.subscribed && hasAccountDevices && (
-          <p className="mt-3 text-xs text-neutral-500">
-            Solo este dispositivo tiene alertas activas por ahora.
-          </p>
-        )}
-      </div>
+          {otherDevices.length === 0 && push.subscribed && hasAccountDevices && (
+            <p className="mt-3 text-xs text-neutral-500">
+              Solo este dispositivo tiene alertas activas por ahora.
+            </p>
+          )}
+        </div>
+      )}
     </section>
   );
 }

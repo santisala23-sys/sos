@@ -7,6 +7,7 @@ import {
   Activity,
   Bell,
   CheckCircle2,
+  ChevronDown,
   PawPrint,
   Package,
   QrCode,
@@ -37,6 +38,7 @@ export default function DashboardPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
   const [highlightedSlug, setHighlightedSlug] = useState<string | null>(null);
   const [legalStatus, setLegalStatus] = useState<{
     needsAcceptance: boolean;
@@ -90,6 +92,12 @@ export default function DashboardPage() {
     const params = new URLSearchParams(window.location.search);
     const activatedSlug = params.get("activado");
     if (activatedSlug) setHighlightedSlug(activatedSlug);
+  }, []);
+
+  useEffect(() => {
+    if (window.location.hash === "#activar-producto") {
+      setPanelOpen(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -236,88 +244,111 @@ export default function DashboardPage() {
           }}
         />
         <div className="relative">
-          <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
-            Hola, este es tu panel
-          </h1>
-          <p className="mt-2 max-w-xl text-base text-violet-100 sm:text-lg">
-            Gestioná perfiles QR de emergencia, la libreta de tus mascotas y
-            las alertas de escaneo.
-          </p>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-4 backdrop-blur-sm">
-              <div className="flex items-center gap-2 text-violet-200">
-                <QrCode className="h-4 w-4" aria-hidden />
-                <span className="text-xs font-semibold uppercase tracking-wide">
-                  QRs activos
-                </span>
-              </div>
-              <p className="mt-2 text-2xl font-black">
-                {loading
-                  ? "—"
-                  : (planStatus?.activeCount ?? activeProfilesCount ?? 0)}
-                {planStatus && (
-                  <span className="text-lg font-semibold text-violet-200">
-                    /{planStatus.currentCount}
-                  </span>
-                )}
+          <button
+            type="button"
+            onClick={() => setPanelOpen((value) => !value)}
+            aria-expanded={panelOpen}
+            className="flex w-full items-start justify-between gap-3 text-left"
+          >
+            <div className="min-w-0">
+              <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+                Hola, este es tu panel
+              </h1>
+              <p className="mt-2 max-w-xl text-base text-violet-100 sm:text-lg">
+                {panelOpen
+                  ? "Gestioná perfiles QR de emergencia, la libreta de tus mascotas y las alertas de escaneo."
+                  : "Tocá para ver QRs activos, alertas y activar producto."}
               </p>
             </div>
-            <div
-              className={`rounded-2xl border px-4 py-4 backdrop-blur-sm ${
-                !loading && unreadCount > 0
-                  ? "border-red-300/70 bg-red-500/15"
-                  : "border-white/20 bg-white/10"
+            <span
+              className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/15 text-white transition-transform ${
+                panelOpen ? "rotate-180" : ""
               }`}
             >
-              <div
-                className={`flex items-center gap-2 ${
-                  !loading && unreadCount > 0 ? "text-red-100" : "text-violet-200"
-                }`}
-              >
-                <Bell className="h-4 w-4" aria-hidden />
-                <span className="text-xs font-semibold uppercase tracking-wide">
-                  Alertas
-                </span>
-              </div>
-              <p
-                className={`mt-2 text-2xl font-black ${
-                  !loading && unreadCount > 0 ? "text-white" : ""
-                }`}
-              >
-                {loading ? "—" : unreadCount}
-              </p>
-              {!loading && unreadCount > 0 && (
-                <Link
-                  href="/dashboard/actividad"
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm font-bold text-red-700 shadow-sm transition hover:bg-red-50"
-                >
-                  Ver alerta
-                </Link>
-              )}
-            </div>
-          </div>
+              <ChevronDown className="h-5 w-5" aria-hidden />
+            </span>
+          </button>
 
-          {!legalBlocked && (
-            <div className="mt-6" id="activar-producto">
-              <button
-                type="button"
-                onClick={() => setScannerOpen(true)}
-                className="flex w-full items-center gap-3 rounded-2xl border border-white/30 bg-white/15 px-5 py-4 text-left text-white backdrop-blur-sm transition hover:bg-white/25 sm:max-w-md"
-              >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-amber-950">
-                  <QrCode className="h-5 w-5" aria-hidden />
-                </span>
-                <span>
-                  <span className="block text-base font-black">
-                    Activar mi producto
-                  </span>
-                  <span className="mt-0.5 block text-sm text-violet-100">
-                    Escaneá el QR del colgante o sticker
-                  </span>
-                </span>
-              </button>
-            </div>
+          {panelOpen && (
+            <>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-4 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 text-violet-200">
+                    <QrCode className="h-4 w-4" aria-hidden />
+                    <span className="text-xs font-semibold uppercase tracking-wide">
+                      QRs activos
+                    </span>
+                  </div>
+                  <p className="mt-2 text-2xl font-black">
+                    {loading
+                      ? "—"
+                      : (planStatus?.activeCount ?? activeProfilesCount ?? 0)}
+                    {planStatus && (
+                      <span className="text-lg font-semibold text-violet-200">
+                        /{planStatus.currentCount}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <div
+                  className={`rounded-2xl border px-4 py-4 backdrop-blur-sm ${
+                    !loading && unreadCount > 0
+                      ? "border-red-300/70 bg-red-500/15"
+                      : "border-white/20 bg-white/10"
+                  }`}
+                >
+                  <div
+                    className={`flex items-center gap-2 ${
+                      !loading && unreadCount > 0
+                        ? "text-red-100"
+                        : "text-violet-200"
+                    }`}
+                  >
+                    <Bell className="h-4 w-4" aria-hidden />
+                    <span className="text-xs font-semibold uppercase tracking-wide">
+                      Alertas
+                    </span>
+                  </div>
+                  <p
+                    className={`mt-2 text-2xl font-black ${
+                      !loading && unreadCount > 0 ? "text-white" : ""
+                    }`}
+                  >
+                    {loading ? "—" : unreadCount}
+                  </p>
+                  {!loading && unreadCount > 0 && (
+                    <Link
+                      href="/dashboard/actividad"
+                      className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm font-bold text-red-700 shadow-sm transition hover:bg-red-50"
+                    >
+                      Ver alerta
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              {!legalBlocked && (
+                <div className="mt-6" id="activar-producto">
+                  <button
+                    type="button"
+                    onClick={() => setScannerOpen(true)}
+                    className="flex w-full items-center gap-3 rounded-2xl border border-white/30 bg-white/15 px-5 py-4 text-left text-white backdrop-blur-sm transition hover:bg-white/25 sm:max-w-md"
+                  >
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-amber-950">
+                      <QrCode className="h-5 w-5" aria-hidden />
+                    </span>
+                    <span>
+                      <span className="block text-base font-black">
+                        Activar mi producto
+                      </span>
+                      <span className="mt-0.5 block text-sm text-violet-100">
+                        Escaneá el QR del colgante o sticker
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
