@@ -68,6 +68,7 @@ export async function findActivationByCode(
   const code = normalizeActivationCode(rawCode);
   if (!code) return null;
 
+  await ensureBatchProfileTypeColumn();
   const sql = getSql();
   const rows = await sql`
     SELECT
@@ -243,6 +244,28 @@ export async function getActivationStats(): Promise<ActivationStats> {
   return { ...row, activation_rate };
 }
 
+/** Idempotente: la columna se agregó en 028, pero producción puede no haber corrido la migración. */
+let batchProfileTypeReady = false;
+
+export async function ensureBatchProfileTypeColumn(): Promise<void> {
+  if (batchProfileTypeReady) return;
+  const sql = getSql();
+  await sql`
+    ALTER TABLE qr_product_batches
+      ADD COLUMN IF NOT EXISTS profile_type TEXT NOT NULL DEFAULT 'person'
+  `;
+  await sql`
+    ALTER TABLE qr_product_batches
+      DROP CONSTRAINT IF EXISTS qr_product_batches_profile_type_check
+  `;
+  await sql`
+    ALTER TABLE qr_product_batches
+      ADD CONSTRAINT qr_product_batches_profile_type_check
+      CHECK (profile_type IN ('person', 'pet', 'object'))
+  `;
+  batchProfileTypeReady = true;
+}
+
 export async function getProductBatchById(
   batchId: string,
 ): Promise<Omit<
@@ -316,6 +339,7 @@ export async function createProductBatch(input: {
   template_id?: string | null;
   profile_type?: ProfileType;
 }): Promise<{ batch: QrProductBatchRow; activations: QrActivationRow[] }> {
+  await ensureBatchProfileTypeColumn();
   const quantity = Math.min(Math.max(input.quantity, 1), 500);
   const profileType = resolveProfileType(input.profile_type);
   const sql = getSql();

@@ -112,6 +112,7 @@ export function AdminProductBatchesPanel() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const [batchRes, templateRes] = await Promise.all([
         fetch("/api/admin/product-batches"),
@@ -121,6 +122,12 @@ export function AdminProductBatchesPanel() {
         const data = await batchRes.json();
         setBatches(data.batches ?? []);
         setStats(data.stats ?? null);
+      } else {
+        const data = await batchRes.json().catch(() => ({}));
+        setError(
+          data.error ??
+            "No se pudieron cargar los lotes. Si acabás de desplegar, falta correr la migración de categoría.",
+        );
       }
       if (templateRes.ok) {
         const data = await templateRes.json();
@@ -132,6 +139,8 @@ export function AdminProductBatchesPanel() {
           return defaultTemplate?.id ?? "";
         });
       }
+    } catch {
+      setError("Error de conexión al cargar los lotes");
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { withApi } from "@/lib/api/with-api";
 import {
   createProductBatch,
+  ensureBatchProfileTypeColumn,
   getActivationStats,
   listProductBatches,
 } from "@/lib/db/queries-activation";
@@ -10,6 +11,7 @@ import { isProfileType } from "@/lib/profile-types";
 export const GET = withApi(
   { requireAdmin: true, rateLimit: "admin" },
   async () => {
+    await ensureBatchProfileTypeColumn();
     const [batches, stats] = await Promise.all([
       listProductBatches(),
       getActivationStats(),
