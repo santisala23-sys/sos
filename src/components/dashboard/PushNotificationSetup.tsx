@@ -151,7 +151,7 @@ export type PushNotificationsState = {
   unsubscribe: () => Promise<void>;
   testPush: () => Promise<void>;
   removeDevice: (device: PushDeviceSummary) => Promise<void>;
-  refreshDevices: () => Promise<void>;
+  refreshDevices: () => Promise<PushDeviceSummary[]>;
   messageTone: "success" | "error" | "info";
 };
 
