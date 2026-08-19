@@ -228,11 +228,11 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <StoreCatalogSection />
-
         <HowItWorksSection />
 
         <PetHealthBookletSection />
+
+        <StoreCatalogSection />
 
         {/* Qué incluye */}
         <section className="mx-auto max-w-[88rem] px-4 py-24 sm:px-6 lg:px-8">
