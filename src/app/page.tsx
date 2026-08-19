@@ -166,10 +166,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <StoreCatalogSection />
-
-        <HowItWorksSection />
-
         {/* Casos de uso */}
         <section
           id="casos"
@@ -231,6 +227,10 @@ export default async function HomePage() {
             )}
           </div>
         </section>
+
+        <StoreCatalogSection />
+
+        <HowItWorksSection />
 
         <PetHealthBookletSection />
 

@@ -61,7 +61,7 @@ const STEPS: ReadonlyArray<{
   {
     step: "03",
     title: "Te avisamos y queda guardado",
-    text: "Recibís una notificación push al instante. Tocás y volvés a la libreta con la visita ya cargada y verificada.",
+    text: "Recibís una notificación al instante. Tocás y volvés a la libreta con la visita ya cargada y verificada.",
     icon: Bell,
     media: {
       kind: "image",
@@ -99,7 +99,19 @@ function StepMediaFrame({ media }: { media: StepMedia }) {
   }
 
   return (
-    <div className="relative mx-auto mt-8 w-full max-w-[16rem] aspect-[9/19] overflow-hidden rounded-[2.5rem] border-[6px] border-neutral-900 bg-gradient-to-b from-neutral-800 to-neutral-950 shadow-2xl shadow-teal-500/20">
+    <div className="relative mx-auto mt-8 w-full max-w-[16rem] aspect-[9/19] overflow-hidden rounded-[2.5rem] border-[6px] border-neutral-900 bg-neutral-950 shadow-2xl shadow-teal-500/20">
+      <Image
+        src="/images/landing/hero-golden-retriever-2.jpg"
+        alt=""
+        fill
+        className="object-cover"
+        sizes="256px"
+        aria-hidden
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/55" />
+      <div className="absolute left-1/2 top-14 -translate-x-1/2 text-center text-white">
+        <p className="text-4xl font-black tracking-tight">11:11</p>
+      </div>
       <div className="absolute top-1/3 w-full px-4">
         <Image
           src={media.src}
