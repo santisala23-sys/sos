@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
-import { createQrProfile, countQrProfilesByTutor, findUserPlanById, listQrProfilesByTutor, setProfileAvatar } from "@/lib/db/queries";
+import { createQrProfile, countQrProfilesByTutor, findUserPlanById, generateUniqueProfileSlug, listQrProfilesByTutor, setProfileAvatar } from "@/lib/db/queries";
 import { getProfileLimitStatus } from "@/lib/billing/limits";
-import { generateSlug } from "@/lib/utils/slug";
 import { isProfileType, type ProfileType } from "@/lib/profile-types";
 import { normalizeBloodType } from "@/lib/blood-types";
 import {
@@ -111,7 +110,7 @@ export async function POST(request: Request) {
 
     const profile = await createQrProfile({
       tutor_id: session.userId,
-      slug: generateSlug(beneficiary_name),
+      slug: await generateUniqueProfileSlug(),
       beneficiary_name,
       emergency_contact_name,
       emergency_contact_phone,

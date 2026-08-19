@@ -63,6 +63,7 @@ const migrations = [
   "030_preventive_checkup_kind.sql",
   "031_object_location_history.sql",
   "032_pet_profile_ficha.sql",
+  "033_slug_nanoid.sql",
 ];
 
 for (const file of migrations) {

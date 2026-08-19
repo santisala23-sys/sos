@@ -1,5 +1,5 @@
 import { getAppUrl } from "@/lib/utils/app-url";
-import { slugify } from "@/lib/utils/slug";
+import { generateOpaqueSlug } from "@/lib/utils/slug";
 
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
@@ -15,10 +15,8 @@ export function generateActivationCode(length = 8): string {
   return code;
 }
 
-export function generateProductSlug(prefix: string): string {
-  const base = slugify(prefix) || "producto";
-  const suffix = Math.random().toString(36).slice(2, 8);
-  return `${base}-${suffix}`;
+export function generateProductSlug(_prefix?: string): string {
+  return generateOpaqueSlug(21);
 }
 
 export function getActivationUrl(code: string): string {

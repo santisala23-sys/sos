@@ -11,7 +11,7 @@ import {
   MessageCircle,
   Phone,
 } from "lucide-react";
-import type { PublicQrProfile } from "@/types/database";
+import type { PublicEmergencyProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
 import { PublicThemeToggle } from "@/components/public/PublicThemeToggle";
@@ -33,7 +33,7 @@ import {
 } from "@/lib/utils/geolocation";
 
 type EmergencyProfileViewProps = {
-  profile: PublicQrProfile;
+  profile: PublicEmergencyProfile;
   /** Vista del tutor: no registra escaneo ni abre chat/SOS reales. */
   previewMode?: boolean;
 };

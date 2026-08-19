@@ -73,4 +73,20 @@ async function applyDeferredMigrations(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_object_saved_locations_profile_created
       ON object_saved_locations (profile_id, created_at DESC)
   `;
+
+  await sql`
+    ALTER TABLE qr_profiles DROP CONSTRAINT IF EXISTS qr_profiles_slug_format
+  `;
+
+  await sql`
+    DO $$ BEGIN
+      ALTER TABLE qr_profiles
+        ADD CONSTRAINT qr_profiles_slug_format CHECK (
+          slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'
+          OR slug ~ '^[A-Za-z0-9_-]{21}$'
+        );
+    EXCEPTION
+      WHEN duplicate_object THEN NULL;
+    END $$
+  `;
 }

@@ -11,7 +11,26 @@ export interface User {
   created_at: string;
 }
 
-/** Perfil público sin IDs internos ni ubicación guardada del dueño */
+/** Perfil público sin IDs internos, teléfonos ni ubicación guardada del dueño */
+export interface PublicEmergencyProfile {
+  slug: string;
+  profile_type: ProfileType;
+  beneficiary_name: string;
+  emergency_contact_name: string;
+  secondary_contact_name: string | null;
+  instructions: string;
+  medical_notes: string | null;
+  allergies: string | null;
+  blood_type: string | null;
+  clinical_pdf_filename: string | null;
+  clinical_pdf_uploaded_at: string | null;
+  is_active: boolean;
+  created_at: string;
+  avatar_b64?: string | null;
+  avatar_mime?: string | null;
+}
+
+/** @deprecated Usar PublicEmergencyProfile para vistas públicas. */
 export type PublicQrProfile = Omit<
   QrProfile,
   | "id"

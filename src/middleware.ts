@@ -4,19 +4,41 @@ import {
   verifySessionToken,
 } from "@/lib/auth/session";
 import { isUserAdmin } from "@/lib/auth/admin";
+import {
+  checkEdgeRateLimit,
+  edgeRateLimitResponse,
+  getEdgeClientIp,
+} from "@/lib/security/edge-rate-limit";
+
+function getPublicRateLimitPreset(pathname: string): "public" | "contact" | null {
+  if (pathname === "/api/contact") return "contact";
+  if (/^\/p\/[^/]+$/.test(pathname)) return "public";
+  if (/^\/api\/p\/[^/]+/.test(pathname)) return "public";
+  if (pathname.startsWith("/api/alerts/")) return "public";
+  return null;
+}
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  const rateLimitPreset = getPublicRateLimitPreset(pathname);
+  if (rateLimitPreset) {
+    const ip = getEdgeClientIp(request);
+    const rl = checkEdgeRateLimit(ip, rateLimitPreset, pathname);
+    if (!rl.allowed) {
+      return edgeRateLimitResponse(rl.retryAfterSec);
+    }
+  }
+
   const token = request.cookies.get(SESSION_COOKIE)?.value;
   const session = token ? await verifySessionToken(token) : null;
 
-  const pathname = request.nextUrl.pathname;
   const isDashboard = pathname.startsWith("/dashboard");
   const isAdmin = pathname.startsWith("/admin");
   const isAuthPage =
     pathname === "/login" || pathname === "/register";
   const isVerifyPage = pathname === "/verificar";
 
-  // `emailVerified === false` marca una sesión pendiente de verificar el email.
   const needsVerification = !!session && session.emailVerified === false;
 
   if (isVerifyPage) {
@@ -38,7 +60,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Sesión sin verificar: forzamos el paso por /verificar.
   if (needsVerification && (isDashboard || isAdmin || isAuthPage)) {
     return NextResponse.redirect(new URL("/verificar", request.url));
   }
@@ -64,6 +85,10 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/p/:slug",
+    "/api/contact",
+    "/api/p/:slug/:path*",
+    "/api/alerts/:path*",
     "/dashboard/:path*",
     "/admin/:path*",
     "/login",

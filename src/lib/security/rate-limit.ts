@@ -5,7 +5,9 @@ export type RateLimitPreset =
   | "alerts"
   | "messages"
   | "api"
-  | "admin";
+  | "admin"
+  | "public"
+  | "contact";
 
 const PRESETS: Record<
   RateLimitPreset,
@@ -17,6 +19,10 @@ const PRESETS: Record<
   messages: { limit: 40, windowMs: 60 * 60 * 1000 },
   api: { limit: 120, windowMs: 60 * 1000 },
   admin: { limit: 200, windowMs: 60 * 1000 },
+  /** Perfiles públicos y rutas /p/* */
+  public: { limit: 30, windowMs: 60 * 1000 },
+  /** Revelación de contactos vía /api/contact */
+  contact: { limit: 10, windowMs: 60 * 1000 },
 };
 
 export type RateLimitResult =

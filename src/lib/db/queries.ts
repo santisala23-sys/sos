@@ -10,6 +10,7 @@ import type {
 } from "@/types/database";
 import { getSql } from "@/lib/db/index";
 import { ensureDeferredMigrations } from "@/lib/db/ensure-schema";
+import { generateSlug, isValidProfileSlug } from "@/lib/utils/slug";
 
 type UserRow = User & {
   password_hash: string | null;
@@ -419,6 +420,20 @@ export async function findActiveQrProfileById(
     LIMIT 1
   `;
   return (rows[0] as QrProfile | undefined) ?? null;
+}
+
+/** Genera un slug opaco verificando unicidad en la base de datos. */
+export async function generateUniqueProfileSlug(): Promise<string> {
+  await ensureDeferredMigrations();
+  const sql = getSql();
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const slug = generateSlug();
+    const rows = await sql`
+      SELECT 1 AS found FROM qr_profiles WHERE slug = ${slug} LIMIT 1
+    `;
+    if (!rows[0]) return slug;
+  }
+  throw new Error("No se pudo generar un slug único para el perfil");
 }
 
 export async function createQrProfile(

@@ -2,8 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth/session";
 import { findQrProfileById } from "@/lib/db/queries";
+import { findPublicProfileBySlug } from "@/lib/db/public-queries";
 import { EmergencyProfileView } from "@/components/public/EmergencyProfileView";
-import { toPublicProfile } from "@/lib/utils/public-profile";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -28,14 +28,19 @@ export default async function TutorPublicPreviewPage({ params }: PageProps) {
   }
 
   const { id } = await params;
-  const profile = await findQrProfileById(id);
-  if (!profile || profile.tutor_id !== session.userId) {
+  const owned = await findQrProfileById(id);
+  if (!owned || owned.tutor_id !== session.userId) {
+    notFound();
+  }
+
+  const profile = await findPublicProfileBySlug(owned.slug, false);
+  if (!profile) {
     notFound();
   }
 
   return (
     <EmergencyProfileView
-      profile={toPublicProfile(profile)}
+      profile={profile}
       previewMode
     />
   );

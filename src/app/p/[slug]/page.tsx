@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { findQrProfileBySlug } from "@/lib/db/queries";
+import { findPublicProfileBySlug } from "@/lib/db/public-queries";
 import { EmergencyProfileView } from "@/components/public/EmergencyProfileView";
-import { toPublicProfile } from "@/lib/utils/public-profile";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -10,7 +9,7 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const profile = await findQrProfileBySlug(slug);
+  const profile = await findPublicProfileBySlug(slug);
 
   return {
     title: profile
@@ -23,11 +22,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PublicProfilePage({ params }: PageProps) {
   const { slug } = await params;
-  const profile = await findQrProfileBySlug(slug);
+  const profile = await findPublicProfileBySlug(slug);
 
   if (!profile) {
     notFound();
   }
 
-  return <EmergencyProfileView profile={toPublicProfile(profile)} />;
+  return <EmergencyProfileView profile={profile} />;
 }

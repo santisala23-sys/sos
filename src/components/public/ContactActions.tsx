@@ -1,15 +1,13 @@
 "use client";
 
-import type { PublicQrProfile } from "@/types/database";
-import {
-  buildWhatsAppEmergencyMessage,
-  buildWhatsAppUrl,
-} from "@/lib/utils/whatsapp";
+import { useCallback, useEffect, useState } from "react";
+import type { PublicEmergencyProfile } from "@/types/database";
+import type { PublicContactLinksResponse } from "@/types/public-contact";
 import { Phone } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 type ContactActionsProps = {
-  profile: PublicQrProfile;
+  profile: PublicEmergencyProfile;
   alertType?: "scan" | "sos" | "general";
   latitude?: number | null;
   longitude?: number | null;
@@ -34,26 +32,27 @@ function WhatsAppIcon({ className }: { className?: string }) {
 }
 
 type ContactRowProps = {
-  name: string;
-  phone: string;
-  whatsAppMessage: string;
+  contact: PublicContactLinksResponse["primary"];
   label?: string;
   compact?: boolean;
   emergency?: boolean;
   isLight?: boolean;
+  loading?: boolean;
+  error?: boolean;
+  onRetry?: () => void;
 };
 
 function ContactRow({
-  name,
-  phone,
-  whatsAppMessage,
+  contact,
   label,
   compact,
   emergency,
   isLight = false,
+  loading = false,
+  error = false,
+  onRetry,
 }: ContactRowProps) {
-  const telHref = `tel:${phone.replace(/\s/g, "")}`;
-  const waHref = buildWhatsAppUrl(phone, whatsAppMessage);
+  const disabled = loading || error;
 
   if (emergency) {
     return (
@@ -66,12 +65,7 @@ function ContactRow({
         )}
       >
         {label && (
-          <p
-            className={cn(
-              "text-[11px] font-bold uppercase tracking-wider",
-              isLight ? "text-neutral-500" : "text-neutral-500",
-            )}
-          >
+          <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">
             {label}
           </p>
         )}
@@ -81,34 +75,48 @@ function ContactRow({
             isLight ? "text-neutral-900" : "text-white",
           )}
         >
-          {name}
+          {contact.name}
         </p>
-        <p
-          className={cn(
-            "mt-0.5 font-mono text-sm",
-            isLight ? "text-neutral-600" : "text-neutral-400",
-          )}
-        >
-          {phone}
-        </p>
-        <div className="mt-4 grid grid-cols-2 gap-2.5">
-          <a
-            href={telHref}
-            className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-green-600 px-3 py-3 text-sm font-bold text-white shadow-lg shadow-green-900/30 transition-transform active:scale-[0.98]"
+        {error ? (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="mt-3 text-sm text-amber-500 underline"
           >
-            <Phone className="h-5 w-5 shrink-0" aria-hidden />
-            Llamar
-          </a>
-          <a
-            href={waHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-[#25D366] px-3 py-3 text-sm font-bold text-white shadow-lg shadow-green-900/20 transition-transform active:scale-[0.98]"
-          >
-            <WhatsAppIcon className="h-5 w-5 shrink-0" />
-            WhatsApp
-          </a>
-        </div>
+            No se pudieron cargar los contactos. Reintentar
+          </button>
+        ) : (
+          <div className="mt-4 grid grid-cols-2 gap-2.5">
+            <a
+              href={disabled ? undefined : contact.telUrl}
+              aria-disabled={disabled}
+              className={cn(
+                "flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-green-600 px-3 py-3 text-sm font-bold text-white shadow-lg shadow-green-900/30 transition-transform",
+                disabled
+                  ? "pointer-events-none opacity-50"
+                  : "active:scale-[0.98]",
+              )}
+            >
+              <Phone className="h-5 w-5 shrink-0" aria-hidden />
+              {loading ? "Cargando…" : "Llamar"}
+            </a>
+            <a
+              href={disabled ? undefined : contact.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-disabled={disabled}
+              className={cn(
+                "flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-[#25D366] px-3 py-3 text-sm font-bold text-white shadow-lg shadow-green-900/20 transition-transform",
+                disabled
+                  ? "pointer-events-none opacity-50"
+                  : "active:scale-[0.98]",
+              )}
+            >
+              <WhatsAppIcon className="h-5 w-5 shrink-0" />
+              {loading ? "Cargando…" : "WhatsApp"}
+            </a>
+          </div>
+        )}
       </div>
     );
   }
@@ -121,26 +129,43 @@ function ContactRow({
             {label}
           </p>
         )}
-        <p className="text-base font-bold text-white">{name}</p>
-        <p className="text-sm text-neutral-400">{phone}</p>
-        <div className="grid grid-cols-2 gap-2">
-          <a
-            href={telHref}
-            className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-4 text-sm font-bold text-white"
+        <p className="text-base font-bold text-white">{contact.name}</p>
+        {error ? (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="text-sm text-amber-400 underline"
           >
-            <Phone className="h-5 w-5" aria-hidden />
-            Llamar
-          </a>
-          <a
-            href={waHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-4 text-sm font-bold text-white"
-          >
-            <WhatsAppIcon className="h-5 w-5" />
-            WhatsApp
-          </a>
-        </div>
+            Reintentar carga de contacto
+          </button>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            <a
+              href={disabled ? undefined : contact.telUrl}
+              aria-disabled={disabled}
+              className={cn(
+                "flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-4 text-sm font-bold text-white",
+                disabled && "pointer-events-none opacity-50",
+              )}
+            >
+              <Phone className="h-5 w-5" aria-hidden />
+              {loading ? "…" : "Llamar"}
+            </a>
+            <a
+              href={disabled ? undefined : contact.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-disabled={disabled}
+              className={cn(
+                "flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-4 text-sm font-bold text-white",
+                disabled && "pointer-events-none opacity-50",
+              )}
+            >
+              <WhatsAppIcon className="h-5 w-5" />
+              {loading ? "…" : "WhatsApp"}
+            </a>
+          </div>
+        )}
       </div>
     );
   }
@@ -152,28 +177,47 @@ function ContactRow({
           {label}
         </p>
       )}
-      <p className="text-sm font-medium text-neutral-300">{name}</p>
-      <a
-        href={telHref}
-        className="flex min-h-[64px] items-center justify-center gap-3 rounded-2xl bg-green-600 px-6 py-4 text-lg font-black text-white shadow-lg active:scale-[0.98]"
-      >
-        <Phone className="h-7 w-7 shrink-0" aria-hidden />
-        <span>
-          Llamar a {name}
-          <span className="mt-0.5 block text-sm font-semibold opacity-90">
-            {phone}
-          </span>
-        </span>
-      </a>
-      <a
-        href={waHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-[#25D366] px-6 py-4 text-lg font-bold text-white shadow-lg active:scale-[0.98]"
-      >
-        <WhatsAppIcon className="h-7 w-7 shrink-0" />
-        WhatsApp a {name}
-      </a>
+      <p className="text-sm font-medium text-neutral-300">{contact.name}</p>
+      {error ? (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="text-sm text-amber-400 underline"
+        >
+          Reintentar carga de contacto
+        </button>
+      ) : (
+        <>
+          <a
+            href={disabled ? undefined : contact.telUrl}
+            aria-disabled={disabled}
+            className={cn(
+              "flex min-h-[64px] items-center justify-center gap-3 rounded-2xl bg-green-600 px-6 py-4 text-lg font-black text-white shadow-lg",
+              disabled
+                ? "pointer-events-none opacity-50"
+                : "active:scale-[0.98]",
+            )}
+          >
+            <Phone className="h-7 w-7 shrink-0" aria-hidden />
+            {loading ? "Cargando contacto…" : `Llamar a ${contact.name}`}
+          </a>
+          <a
+            href={disabled ? undefined : contact.whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-disabled={disabled}
+            className={cn(
+              "flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-[#25D366] px-6 py-4 text-lg font-bold text-white shadow-lg",
+              disabled
+                ? "pointer-events-none opacity-50"
+                : "active:scale-[0.98]",
+            )}
+          >
+            <WhatsAppIcon className="h-7 w-7 shrink-0" />
+            {loading ? "Cargando…" : `WhatsApp a ${contact.name}`}
+          </a>
+        </>
+      )}
     </div>
   );
 }
@@ -189,50 +233,91 @@ export function ContactActions({
   variant = "default",
   isLight = false,
 }: ContactActionsProps) {
-  const message = buildWhatsAppEmergencyMessage({
-    beneficiaryName: profile.beneficiary_name,
+  const [links, setLinks] = useState<PublicContactLinksResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const fetchLinks = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug: profile.slug,
+          alertType,
+          latitude,
+          longitude,
+          scannerNote,
+          scanLogId,
+        }),
+      });
+      if (!res.ok) {
+        setError(true);
+        setLinks(null);
+        return;
+      }
+      const data = (await res.json()) as PublicContactLinksResponse;
+      setLinks(data);
+    } catch {
+      setError(true);
+      setLinks(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    profile.slug,
     alertType,
     latitude,
     longitude,
     scannerNote,
     scanLogId,
-  });
+  ]);
 
-  const secondaryMessage = buildWhatsAppEmergencyMessage({
-    beneficiaryName: profile.beneficiary_name,
-    alertType,
-    latitude,
-    longitude,
-    scannerNote,
-    scanLogId,
-  });
-
-  const hasSecondary =
-    profile.secondary_contact_phone?.trim() &&
-    profile.secondary_contact_name?.trim();
+  useEffect(() => {
+    void fetchLinks();
+  }, [fetchLinks]);
 
   const isEmergency = variant === "emergency";
+
+  const primaryPlaceholder: PublicContactLinksResponse["primary"] = {
+    name: profile.emergency_contact_name,
+    telUrl: "",
+    whatsappUrl: "",
+  };
+
+  const secondaryPlaceholder: PublicContactLinksResponse["secondary"] =
+    profile.secondary_contact_name?.trim()
+      ? {
+          name: profile.secondary_contact_name.trim(),
+          telUrl: "",
+          whatsappUrl: "",
+        }
+      : null;
 
   return (
     <div className={`flex flex-col ${isEmergency ? "gap-3" : "gap-6"}`}>
       <ContactRow
-        name={profile.emergency_contact_name}
-        phone={profile.emergency_contact_phone}
-        whatsAppMessage={message}
+        contact={links?.primary ?? primaryPlaceholder}
         label="Contacto principal"
         compact={compact && !isEmergency}
         emergency={isEmergency}
         isLight={isLight}
+        loading={loading}
+        error={error}
+        onRetry={() => void fetchLinks()}
       />
-      {hasSecondary && (
+      {(links?.secondary ?? secondaryPlaceholder) && (
         <ContactRow
-          name={profile.secondary_contact_name!}
-          phone={profile.secondary_contact_phone!}
-          whatsAppMessage={secondaryMessage}
+          contact={links?.secondary ?? secondaryPlaceholder!}
           label="Contacto secundario"
           compact={compact && !isEmergency}
           emergency={isEmergency}
           isLight={isLight}
+          loading={loading}
+          error={error}
+          onRetry={() => void fetchLinks()}
         />
       )}
     </div>

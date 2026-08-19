@@ -9,7 +9,7 @@ import {
   resolveProfileType,
   type ProfileType,
 } from "@/lib/profile-types";
-import { createQrProfile } from "@/lib/db/queries";
+import { createQrProfile, generateUniqueProfileSlug } from "@/lib/db/queries";
 
 export type QrProductBatchRow = {
   id: string;
@@ -159,7 +159,7 @@ export async function claimActivationForUser(
     );
   }
 
-  const slug = activation.public_slug ?? generateProductSlug(code);
+  const slug = activation.public_slug ?? (await generateUniqueProfileSlug());
   const profile = await createQrProfile({
     tutor_id: userId,
     slug,
