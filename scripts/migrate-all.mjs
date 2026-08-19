@@ -61,6 +61,7 @@ const migrations = [
   "028_batch_profile_type.sql",
   "029_preventive_reminders.sql",
   "030_preventive_checkup_kind.sql",
+  "031_object_location_history.sql",
 ];
 
 for (const file of migrations) {

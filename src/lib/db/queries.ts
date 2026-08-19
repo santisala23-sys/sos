@@ -596,7 +596,7 @@ export async function deleteQrProfile(
 }
 
 /**
- * Guarda la última ubicación de un perfil objeto. No crea alerta ni notifica.
+ * Guarda una ubicación de perfil objeto (historial + última posición). No crea alerta ni notifica.
  */
 export async function saveObjectProfileLocation(
   slug: string,
@@ -605,20 +605,55 @@ export async function saveObjectProfileLocation(
 ): Promise<{ id: string; beneficiary_name: string; saved_location_at: string } | null> {
   const sql = getSql();
   const rows = await sql`
-    UPDATE qr_profiles
-    SET
-      saved_latitude = ${latitude},
-      saved_longitude = ${longitude},
-      saved_location_at = NOW()
-    WHERE slug = ${slug}
-      AND is_active = TRUE
-      AND profile_type = 'object'
-    RETURNING id, beneficiary_name, saved_location_at
+    WITH updated AS (
+      UPDATE qr_profiles
+      SET
+        saved_latitude = ${latitude},
+        saved_longitude = ${longitude},
+        saved_location_at = NOW()
+      WHERE slug = ${slug}
+        AND is_active = TRUE
+        AND profile_type = 'object'
+      RETURNING id, beneficiary_name, saved_location_at
+    ),
+    inserted AS (
+      INSERT INTO object_saved_locations (profile_id, latitude, longitude)
+      SELECT id, ${latitude}, ${longitude} FROM updated
+      RETURNING profile_id
+    )
+    SELECT id, beneficiary_name, saved_location_at FROM updated
   `;
   const row = rows[0] as
     | { id: string; beneficiary_name: string; saved_location_at: string }
     | undefined;
   return row ?? null;
+}
+
+export async function listObjectSavedLocations(
+  profileId: string,
+  limit = 30,
+): Promise<
+  Array<{
+    id: string;
+    latitude: number;
+    longitude: number;
+    created_at: string;
+  }>
+> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, latitude, longitude, created_at
+    FROM object_saved_locations
+    WHERE profile_id = ${profileId}
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+  return rows as Array<{
+    id: string;
+    latitude: number;
+    longitude: number;
+    created_at: string;
+  }>;
 }
 
 export async function createScanLog(data: {

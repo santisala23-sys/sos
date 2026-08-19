@@ -50,6 +50,14 @@ export interface QrProfile {
   avatar_mime?: string | null;
 }
 
+export interface ObjectSavedLocation {
+  id: string;
+  profile_id: string;
+  latitude: number;
+  longitude: number;
+  created_at: string;
+}
+
 export interface ScanLog {
   id: string;
   profile_id: string;

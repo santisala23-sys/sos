@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, ExternalLink, Pencil } from "lucide-react";
-import type { QrProfile } from "@/types/database";
+import type { ObjectSavedLocation, QrProfile } from "@/types/database";
 import { PublicQrButton } from "@/components/dashboard/PublicQrButton";
+import { ObjectSavedLocationsHistory } from "@/components/dashboard/ObjectSavedLocationsHistory";
 import { SavedLocationPanel } from "@/components/dashboard/SavedLocationPanel";
 import { dashboardHashForProfileType } from "@/lib/dashboard/profile-section-order";
 import { PROFILE_TYPES } from "@/lib/profile-types";
@@ -19,6 +20,7 @@ export default function ProfileDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [profile, setProfile] = useState<QrProfile | null>(null);
+  const [savedLocations, setSavedLocations] = useState<ObjectSavedLocation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,6 +37,22 @@ export default function ProfileDetailPage() {
         return;
       }
       setProfile(loaded ?? null);
+      if (loaded?.profile_type === "object") {
+        const historyRes = await fetch(
+          `/api/qr-profiles/${params.id}/saved-locations`,
+        );
+        if (historyRes.ok) {
+          const historyData = await historyRes.json();
+          setSavedLocations(
+            (historyData.locations ?? []).map(
+              (row: ObjectSavedLocation & { profile_id?: string }) => ({
+                ...row,
+                profile_id: row.profile_id ?? loaded.id,
+              }),
+            ),
+          );
+        }
+      }
       setLoading(false);
     }
     void load();
@@ -134,6 +152,29 @@ export default function ProfileDetailPage() {
           )}
 
           {profile.profile_type === "object" &&
+            savedLocations.length > 0 && (
+              <div className="space-y-3">
+                <ObjectSavedLocationsHistory
+                  beneficiaryName={profile.beneficiary_name}
+                  locations={savedLocations}
+                />
+                <div className="overflow-hidden rounded-2xl border border-sky-100">
+                  <iframe
+                    title={`Mapa — ${profile.beneficiary_name}`}
+                    src={getGoogleMapsEmbedUrl(
+                      Number(savedLocations[0].latitude),
+                      Number(savedLocations[0].longitude),
+                    )}
+                    className="h-56 w-full border-0"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+              </div>
+            )}
+
+          {profile.profile_type === "object" &&
+            savedLocations.length === 0 &&
             profile.saved_latitude != null &&
             profile.saved_longitude != null &&
             profile.saved_location_at && (
@@ -160,11 +201,12 @@ export default function ProfileDetailPage() {
             )}
 
           {profile.profile_type === "object" &&
+            savedLocations.length === 0 &&
             (profile.saved_latitude == null ||
               profile.saved_longitude == null) && (
               <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/40 px-4 py-5 text-sm text-sky-900/80">
                 Todavía no hay una ubicación guardada. Escaneá el QR del objeto y
-                tocá <strong>Guardar ubicación</strong> para marcar dónde lo
+                tocá <strong>GUARDAR UBICACIÓN</strong> para marcar dónde lo
                 dejaste.
               </div>
             )}

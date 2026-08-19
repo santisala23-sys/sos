@@ -66,8 +66,11 @@ export function EmergencyProfileView({
   const [scanLogId, setScanLogId] = useState<string | null>(null);
   const [scanToken, setScanToken] = useState<string | null>(null);
   const [geoPhase, setGeoPhase] = useState<
-    "skipped" | "loading" | "granted" | "denied" | "saving" | "saved"
+    "skipped" | "loading" | "granted" | "denied"
   >("skipped");
+  const [objectSavePhase, setObjectSavePhase] = useState<
+    "idle" | "loading" | "success" | "denied"
+  >("idle");
   const [sosLoading, setSosLoading] = useState(false);
   const [sosSent, setSosSent] = useState(false);
   const [coords, setCoords] = useState<{
@@ -77,7 +80,7 @@ export function EmergencyProfileView({
   const [sessionReady, setSessionReady] = useState(false);
   const [sessionRestored, setSessionRestored] = useState(false);
 
-  const locationShared = geoPhase === "granted" || geoPhase === "saved";
+  const locationShared = geoPhase === "granted";
   const isObjectProfile = profile.profile_type === "object";
   const typeConfig = getProfileTypeConfig(profile.profile_type);
   const hasClinicalPdf =
@@ -177,7 +180,7 @@ export function EmergencyProfileView({
       scanToken,
       scanLogId,
       geoPhase:
-        geoPhase === "granted" || geoPhase === "saved" ? "granted" : "skipped",
+        geoPhase === "granted" ? "granted" : "skipped",
     });
   }, [scanLogId, scanToken, geoPhase, profile.slug]);
 
@@ -227,11 +230,11 @@ export function EmergencyProfileView({
   }
 
   async function handleSaveLocation() {
-    setGeoPhase("saving");
+    setObjectSavePhase("loading");
     const location = await requestGeolocation();
 
     if (!location) {
-      setGeoPhase("denied");
+      setObjectSavePhase("denied");
       return;
     }
 
@@ -247,12 +250,15 @@ export function EmergencyProfileView({
         }),
       });
       if (!res.ok) {
-        setGeoPhase("denied");
+        setObjectSavePhase("denied");
         return;
       }
-      setGeoPhase("saved");
+      setObjectSavePhase("success");
+      window.setTimeout(() => {
+        setObjectSavePhase("idle");
+      }, 3500);
     } catch {
-      setGeoPhase("denied");
+      setObjectSavePhase("denied");
     }
   }
 
@@ -387,6 +393,70 @@ export function EmergencyProfileView({
 
         {sessionReady && (
           <>
+            {isObjectProfile && !previewMode && (
+              <section
+                aria-labelledby="save-location-heading"
+                className={t.card}
+              >
+                <div className="p-5">
+                  <div className="flex items-start gap-3">
+                    <span className={t.iconWrapGreen}>
+                      <MapPin className="h-5 w-5" aria-hidden />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <h2 id="save-location-heading" className={t.cardTitle}>
+                        Guardar ubicación
+                      </h2>
+                      <p className={t.cardSubtitle}>
+                        Marcá dónde dejaste {profile.beneficiary_name}. Podés
+                        escanear de nuevo cada vez que lo muevas.
+                      </p>
+                    </div>
+                  </div>
+
+                  {objectSavePhase === "success" && (
+                    <p
+                      className={`mt-4 rounded-xl px-4 py-3 text-sm font-semibold ${
+                        isLight
+                          ? "bg-green-50 text-green-800"
+                          : "bg-green-950/50 text-green-200"
+                      }`}
+                      role="status"
+                    >
+                      Ubicación guardada. La ves en tu panel de SOSme.
+                    </p>
+                  )}
+
+                  {objectSavePhase === "denied" && (
+                    <p
+                      className={`mt-4 rounded-xl px-4 py-3 text-sm ${
+                        isLight
+                          ? "bg-amber-50 text-amber-900"
+                          : "bg-amber-950/40 text-amber-100"
+                      }`}
+                      role="alert"
+                    >
+                      No pudimos obtener tu ubicación. Revisá los permisos del
+                      navegador e intentá de nuevo.
+                    </p>
+                  )}
+
+                  <Button
+                    type="button"
+                    size="xl"
+                    disabled={objectSavePhase === "loading"}
+                    onClick={handleSaveLocation}
+                    className="mt-4 w-full gap-2 bg-sky-500 py-5 text-lg font-black tracking-wide text-white hover:bg-sky-400"
+                  >
+                    <MapPin className="h-6 w-6" aria-hidden />
+                    {objectSavePhase === "loading"
+                      ? "Guardando..."
+                      : "GUARDAR UBICACIÓN"}
+                  </Button>
+                </div>
+              </section>
+            )}
+
             <section aria-labelledby="contacts-heading" className={t.card}>
               <div className={t.cardHeader}>
                 <div className="flex items-center gap-2">
@@ -403,14 +473,12 @@ export function EmergencyProfileView({
                   </div>
                 </div>
               </div>
-              {!previewMode && (
+              {!previewMode && !isObjectProfile && (
               <div className={`border-b px-4 py-4 ${isLight ? "border-neutral-100 bg-neutral-50/80" : "border-white/10 bg-white/5"}`}>
                 {locationShared ? (
                   <p className={`flex items-center gap-2 text-sm font-semibold ${isLight ? "text-green-800" : "text-green-300"}`}>
                     <MapPin className="h-4 w-4 shrink-0" aria-hidden />
-                    {geoPhase === "saved"
-                      ? "Ubicación guardada. La ves en tu panel de SOSme."
-                      : "Ubicación compartida con la familia"}
+                    Ubicación compartida con la familia
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -423,7 +491,7 @@ export function EmergencyProfileView({
                       <Button
                         type="button"
                         size="lg"
-                        disabled={geoPhase === "loading" || geoPhase === "saving"}
+                        disabled={geoPhase === "loading"}
                         onClick={handleShareLocation}
                         className="w-full gap-2 bg-amber-500 font-bold text-black hover:bg-amber-400 sm:w-auto"
                       >
@@ -432,21 +500,6 @@ export function EmergencyProfileView({
                           ? "Obteniendo GPS..."
                           : "Compartir mi ubicación"}
                       </Button>
-                      {isObjectProfile && (
-                        <Button
-                          type="button"
-                          size="lg"
-                          variant="secondary"
-                          disabled={geoPhase === "loading" || geoPhase === "saving"}
-                          onClick={handleSaveLocation}
-                          className="w-full gap-2 sm:w-auto"
-                        >
-                          <MapPin className="h-5 w-5" aria-hidden />
-                          {geoPhase === "saving"
-                            ? "Guardando..."
-                            : "Guardar ubicación del objeto"}
-                        </Button>
-                      )}
                     </div>
                   </div>
                 )}
