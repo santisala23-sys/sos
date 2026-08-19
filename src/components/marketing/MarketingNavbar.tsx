@@ -20,6 +20,7 @@ const NAV_LINKS = [
   { href: "#como-funciona", label: "Cómo funciona" },
   { href: "#casos", label: "Casos de uso" },
   { href: "/#catalogo", label: "Tienda" },
+  { href: "/ayuda", label: "Ayuda" },
 ] as const;
 
 type MarketingNavbarProps = {
