@@ -79,29 +79,37 @@ type PetHealthBookletSectionProps = {
 };
 
 function StepMediaFrame({ media }: { media: StepMedia }) {
-  return (
-    <div className="relative mx-auto mt-6 w-full max-w-[14rem] overflow-hidden rounded-2xl border border-teal-100/80 bg-neutral-950 shadow-lg shadow-teal-500/10">
-      {media.kind === "video" ? (
+  if (media.kind === "video") {
+    return (
+      <div className="relative mx-auto mt-8 w-full max-w-[16rem] overflow-hidden rounded-[2.5rem] border-[6px] border-neutral-900 bg-neutral-950 shadow-2xl shadow-teal-500/20">
         <video
-          controls
+          autoPlay
+          loop
+          muted
           playsInline
           preload="metadata"
           poster={media.poster}
-          className="h-auto w-full"
+          className="h-auto w-full rounded-[2rem] object-cover"
           aria-label={media.alt}
         >
           <source src={media.src} type="video/mp4" />
         </video>
-      ) : (
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative mx-auto mt-8 w-full max-w-[16rem] aspect-[9/19] overflow-hidden rounded-[2.5rem] border-[6px] border-neutral-900 bg-gradient-to-b from-neutral-800 to-neutral-950 shadow-2xl shadow-teal-500/20">
+      <div className="absolute top-1/3 w-full px-4">
         <Image
           src={media.src}
           alt={media.alt}
           width={media.width}
           height={media.height}
-          className="h-auto w-full"
-          sizes="(max-width: 640px) 224px, 224px"
+          className="h-auto w-full rounded-2xl shadow-xl"
+          sizes="(max-width: 640px) 256px, 256px"
         />
-      )}
+      </div>
     </div>
   );
 }
@@ -130,7 +138,7 @@ export function PetHealthBookletSection({
           {STEPS.map(({ step, title, text, icon: Icon, media }) => (
             <article
               key={step}
-              className="group relative flex flex-col overflow-hidden rounded-3xl border border-teal-100/80 bg-gradient-to-b from-white to-teal-50/40 p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-teal-500/10"
+              className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-teal-100/80 bg-gradient-to-b from-white to-teal-50/40 p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-teal-500/10"
             >
               <span className="text-6xl font-black text-teal-100/90">
                 {step}
