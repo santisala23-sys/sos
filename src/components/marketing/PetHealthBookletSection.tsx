@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   Bell,
-  ClipboardList,
   QrCode,
   Stethoscope,
 } from "lucide-react";
@@ -140,11 +139,6 @@ export function PetHealthBookletSection({
           title="El veterinario escanea, carga la visita y vos tenés el historial"
           description="Capturas y videos reales del flujo completo: la libreta del tutor, la carga del profesional y la alerta en tu celular."
         />
-
-        <div className="mx-auto mt-10 flex max-w-xl items-center justify-center gap-3 rounded-2xl border border-teal-200/80 bg-gradient-to-r from-teal-50 to-emerald-50 px-5 py-4 text-sm font-semibold text-teal-900 shadow-sm">
-          <ClipboardList className="h-5 w-5 shrink-0 text-teal-700" aria-hidden />
-          Vacunas, próximas dosis, visitas y archivos (imagen o PDF)
-        </div>
 
         <div className="mt-14 grid gap-8 md:grid-cols-3 md:gap-6">
           {STEPS.map(({ step, title, text, icon: Icon, media }) => (
