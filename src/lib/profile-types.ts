@@ -8,12 +8,14 @@ export const PROFILE_TYPES: {
   {
     value: "person",
     label: "Persona",
-    description: "Asistencia, alergias, datos médicos y contactos de emergencia.",
+    description:
+      "Asistencia, alergias, tipo de sangre, obra social y contactos de emergencia.",
   },
   {
     value: "pet",
     label: "Mascota",
-    description: "Contacto del dueño e instrucciones si la encuentran.",
+    description:
+      "Contacto del dueño, instrucciones y PDF clínico opcional si la encuentran.",
   },
   {
     value: "object",
@@ -36,10 +38,13 @@ export type ProfileTypeConfig = {
   showAllergies: boolean;
   showMedicalNotes: boolean;
   showBloodType: boolean;
+  showHealthInsurance: boolean;
   showClinicalPdf: boolean;
   allergiesLabel: string;
   medicalNotesLabel: string;
   medicalNotesPlaceholder: string;
+  healthInsuranceLabel: string;
+  healthInsurancePlaceholder: string;
 };
 
 const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
@@ -57,11 +62,14 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     showAllergies: true,
     showMedicalNotes: true,
     showBloodType: true,
-    showClinicalPdf: true,
+    showHealthInsurance: true,
+    showClinicalPdf: false,
     allergiesLabel: "Alergias",
-    medicalNotesLabel: "Información médica",
+    medicalNotesLabel: "Condiciones médicas crónicas / Medicación",
     medicalNotesPlaceholder:
-      "Medicación, condiciones, observaciones para el personal de salud...",
+      "Ej: Diabetes, marcapasos, anticoagulantes, asma controlada con inhalador...",
+    healthInsuranceLabel: "Obra social / prepaga y N° de socio",
+    healthInsurancePlaceholder: "Ej: OSDE 310 / Swiss Medical 12345678",
   },
   pet: {
     beneficiaryLabel: "Nombre de la mascota",
@@ -77,10 +85,13 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     showAllergies: false,
     showMedicalNotes: false,
     showBloodType: false,
-    showClinicalPdf: false,
+    showHealthInsurance: false,
+    showClinicalPdf: true,
     allergiesLabel: "Alergias o restricciones",
     medicalNotesLabel: "Datos veterinarios (opcional)",
     medicalNotesPlaceholder: "Vacunas, chip, condiciones, veterinario habitual...",
+    healthInsuranceLabel: "",
+    healthInsurancePlaceholder: "",
   },
   object: {
     beneficiaryLabel: "Nombre o descripción del objeto",
@@ -96,10 +107,13 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     showAllergies: false,
     showMedicalNotes: false,
     showBloodType: false,
+    showHealthInsurance: false,
     showClinicalPdf: false,
     allergiesLabel: "",
     medicalNotesLabel: "",
     medicalNotesPlaceholder: "",
+    healthInsuranceLabel: "",
+    healthInsurancePlaceholder: "",
   },
 };
 
@@ -137,7 +151,7 @@ export function getActivationTypeCopy(
       title: "Activar QR de mascota",
       subtitle: "Este código es para una chapita o collar.",
       formTitle: "Datos de tu mascota",
-      formHint: "Foto, contactos y, si querés, cómo acercarse a tu mascota.",
+      formHint: "Foto, contactos y, si querés, PDF clínico o cómo acercarse a tu mascota.",
       loginTitle: "Activá la chapita de tu mascota",
       loginBody:
         "Creá una cuenta o ingresá para vincular este QR a tu mascota. Después, quien la encuentre ve cómo avisarte.",

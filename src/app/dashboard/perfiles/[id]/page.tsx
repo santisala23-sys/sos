@@ -211,10 +211,14 @@ export default function ProfileDetailPage() {
               </div>
             )}
 
-          {(profile.allergies || profile.blood_type || profile.medical_notes) && (
+          {(profile.allergies ||
+            profile.blood_type ||
+            profile.medical_notes ||
+            profile.health_insurance) &&
+            profile.profile_type === "person" && (
             <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-4">
               <h2 className="text-sm font-bold uppercase tracking-wide text-rose-700">
-                Datos médicos
+                Datos de salud
               </h2>
               <dl className="mt-3 space-y-2 text-sm text-neutral-800">
                 {profile.blood_type && (
@@ -231,15 +235,23 @@ export default function ProfileDetailPage() {
                 )}
                 {profile.medical_notes?.trim() && (
                   <div>
-                    <dt className="font-semibold text-neutral-500">Notas médicas</dt>
+                    <dt className="font-semibold text-neutral-500">
+                      Condiciones / medicación
+                    </dt>
                     <dd className="whitespace-pre-wrap">{profile.medical_notes}</dd>
+                  </div>
+                )}
+                {profile.health_insurance?.trim() && (
+                  <div>
+                    <dt className="font-semibold text-neutral-500">Obra social / prepaga</dt>
+                    <dd className="whitespace-pre-wrap">{profile.health_insurance}</dd>
                   </div>
                 )}
               </dl>
             </div>
           )}
 
-          {profile.clinical_pdf_filename && (
+          {profile.profile_type === "pet" && profile.clinical_pdf_filename && (
             <p className="text-sm text-neutral-600">
               Historial clínico:{" "}
               <span className="font-medium text-neutral-900">

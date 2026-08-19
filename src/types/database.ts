@@ -22,6 +22,8 @@ export interface PublicEmergencyProfile {
   medical_notes: string | null;
   allergies: string | null;
   blood_type: string | null;
+  /** Obra social / prepaga y N° de socio (solo perfiles persona). */
+  health_insurance: string | null;
   clinical_pdf_filename: string | null;
   clinical_pdf_uploaded_at: string | null;
   is_active: boolean;
@@ -56,6 +58,8 @@ export interface QrProfile {
   medical_notes: string | null;
   allergies: string | null;
   blood_type: string | null;
+  /** Obra social / prepaga y N° de socio (solo perfiles persona). */
+  health_insurance: string | null;
   clinical_pdf_filename: string | null;
   clinical_pdf_uploaded_at: string | null;
   /** Última ubicación guardada (perfiles objeto: auto, valija, etc.). */

@@ -32,6 +32,7 @@
     "db:migrate:024": "node scripts/migrate-024.mjs",
     "db:migrate:028": "node scripts/migrate-028.mjs",
     "db:migrate:033": "node scripts/migrate-033.mjs",
+    "db:migrate:034": "node scripts/migrate-034.mjs",
     "db:migrate:all": "node scripts/migrate-all.mjs",
     "db:seed": "node scripts/seed.mjs",
     "vapid:generate": "node scripts/generate-vapid-keys.mjs",

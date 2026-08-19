@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import {
   clearClinicalPdf,
+  findQrProfileById,
   getClinicalPdfForTutor,
   setClinicalPdf,
 } from "@/lib/db/queries";
@@ -49,6 +50,17 @@ export async function POST(request: Request, { params }: RouteContext) {
   const { id } = await params;
 
   try {
+    const existing = await findQrProfileById(id);
+    if (!existing || existing.tutor_id !== session.userId) {
+      return NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 });
+    }
+    if (existing.profile_type !== "pet") {
+      return NextResponse.json(
+        { error: "El PDF clínico solo está disponible para perfiles de mascota" },
+        { status: 400 },
+      );
+    }
+
     const contentType = request.headers.get("content-type") ?? "";
     let base64Data: string;
     let filename: string;

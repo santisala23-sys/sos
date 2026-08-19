@@ -14,6 +14,7 @@ export function toPublicEmergencyProfile(
     medical_notes: profile.medical_notes,
     allergies: profile.allergies,
     blood_type: profile.blood_type,
+    health_insurance: profile.health_insurance,
     clinical_pdf_filename: profile.clinical_pdf_filename,
     clinical_pdf_uploaded_at: profile.clinical_pdf_uploaded_at,
     is_active: profile.is_active,

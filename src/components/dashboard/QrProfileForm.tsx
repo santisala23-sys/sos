@@ -114,6 +114,9 @@ export function QrProfileForm({
   const [allergies, setAllergies] = useState(profile?.allergies ?? "");
   const [bloodType, setBloodType] = useState(profile?.blood_type ?? "");
   const [medicalNotes, setMedicalNotes] = useState(profile?.medical_notes ?? "");
+  const [healthInsurance, setHealthInsurance] = useState(
+    profile?.health_insurance ?? "",
+  );
   const [isActive, setIsActive] = useState(profile?.is_active ?? true);
   const [sensitiveDataConsent, setSensitiveDataConsent] = useState(
     Boolean(profile?.sensitive_data_consent_at),
@@ -126,7 +129,8 @@ export function QrProfileForm({
       allergies,
       medicalNotes,
       bloodType,
-      hasClinicalPdf: Boolean(clinicalPdfFilename),
+      healthInsurance,
+      hasClinicalPdf: profileType === "pet" && Boolean(clinicalPdfFilename),
     }) && !profile?.sensitive_data_consent_at;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -163,6 +167,11 @@ export function QrProfileForm({
         : isEditing
           ? {}
           : { medical_notes: null }),
+      ...(typeConfig.showHealthInsurance
+        ? { health_insurance: healthInsurance.trim() || null }
+        : isEditing
+          ? {}
+          : { health_insurance: null }),
       ...(needsSensitiveConsent ? { sensitiveDataConsent } : {}),
       ...(isEditing ? { is_active: isActive } : {}),
       ...(avatarChange !== undefined
@@ -536,11 +545,12 @@ export function QrProfileForm({
 
       {(typeConfig.showBloodType ||
         typeConfig.showAllergies ||
-        typeConfig.showMedicalNotes) && (
+        typeConfig.showMedicalNotes ||
+        typeConfig.showHealthInsurance) && (
         <fieldset className={sectionClass}>
           <legend className={legendClass}>
             <HeartPulse className="h-4 w-4 text-rose-500" aria-hidden />
-            Datos médicos (opcional)
+            {profileType === "person" ? "Datos de salud (opcional)" : "Datos médicos (opcional)"}
           </legend>
           <div className="mt-1 flex flex-col gap-3">
             {typeConfig.showBloodType && (
@@ -603,19 +613,37 @@ export function QrProfileForm({
                 />
               </label>
             )}
+
+            {typeConfig.showHealthInsurance && (
+              <label className="flex flex-col gap-1">
+                <span className="text-sm font-medium">
+                  {typeConfig.healthInsuranceLabel}
+                </span>
+                <input
+                  value={healthInsurance}
+                  onChange={(e) => setHealthInsurance(e.target.value)}
+                  className={inputClass}
+                  placeholder={typeConfig.healthInsurancePlaceholder}
+                  maxLength={200}
+                />
+                <span className="text-xs text-neutral-500">
+                  Se muestra en la vista de emergencia para personal de salud.
+                </span>
+              </label>
+            )}
           </div>
         </fieldset>
       )}
 
-      {isEditing && typeConfig.showClinicalPdf && (
+      {isEditing && profileType === "pet" && typeConfig.showClinicalPdf && (
         <fieldset className={sectionClass}>
           <legend className={legendClass}>
             <FileText className="h-4 w-4 text-violet-600" aria-hidden />
-            Historial clínico PDF (opcional)
+            Historial clínico PDF (opcional, mascotas)
           </legend>
           <p className="mb-3 text-xs text-neutral-500">
-            El médico o quien escanee el QR puede descargarlo si lo necesita.
-            Máximo 5 MB.
+            El veterinario o quien encuentre la mascota puede descargarlo si lo
+            necesita. Máximo 5 MB.
           </p>
           {clinicalPdfFilename ? (
             <div className="flex flex-wrap items-center gap-3">
@@ -655,9 +683,9 @@ export function QrProfileForm({
         </fieldset>
       )}
 
-      {!isEditing && typeConfig.showClinicalPdf && (
+      {!isEditing && profileType === "pet" && typeConfig.showClinicalPdf && (
         <p className="rounded-lg bg-violet-50 px-4 py-3 text-sm text-violet-900">
-          Después de crear el perfil podés subir un PDF con el historial clínico.
+          Después de crear el perfil de mascota podés subir un PDF con su historial clínico.
         </p>
       )}
 

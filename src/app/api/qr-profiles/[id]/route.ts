@@ -75,13 +75,19 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       patch.medical_notes !== undefined ? patch.medical_notes : existing.medical_notes;
     const mergedBloodType =
       patch.blood_type !== undefined ? patch.blood_type : existing.blood_type;
+    const mergedHealthInsurance =
+      patch.health_insurance !== undefined
+        ? patch.health_insurance
+        : existing.health_insurance;
 
     const consentError = validateSensitiveDataConsent({
       profileType: resolvedType,
       allergies: mergedAllergies,
       medicalNotes: mergedMedicalNotes,
       bloodType: mergedBloodType,
-      hasClinicalPdf: Boolean(existing.clinical_pdf_filename),
+      healthInsurance: mergedHealthInsurance,
+      hasClinicalPdf:
+        resolvedType === "pet" && Boolean(existing.clinical_pdf_filename),
       sensitiveDataConsent: body.sensitiveDataConsent,
       alreadyConsented: Boolean(existing.sensitive_data_consent_at),
     });
@@ -91,6 +97,20 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
     if (body.sensitiveDataConsent) {
       Object.assign(patch, sensitiveConsentFields(true));
+    }
+
+    if (resolvedType === "pet") {
+      patch.health_insurance = null;
+      patch.allergies = null;
+      patch.medical_notes = null;
+      patch.blood_type = null;
+    } else if (resolvedType === "object") {
+      patch.health_insurance = null;
+      patch.allergies = null;
+      patch.medical_notes = null;
+      patch.blood_type = null;
+    } else if (resolvedType === "person") {
+      /* PDF clínico solo para mascotas; no se borra automáticamente al editar persona. */
     }
 
     if (body.pet_breed !== undefined || body.pet_birth_date !== undefined) {

@@ -68,9 +68,12 @@ export function EmergencyProfileView({
 
   const locationShared = geoPhase === "granted";
   const isObjectProfile = profile.profile_type === "object";
+  const isPetProfile = profile.profile_type === "pet";
   const typeConfig = getProfileTypeConfig(profile.profile_type);
   const hasClinicalPdf =
-    typeConfig.showClinicalPdf && Boolean(profile.clinical_pdf_filename);
+    isPetProfile &&
+    typeConfig.showClinicalPdf &&
+    Boolean(profile.clinical_pdf_filename);
 
   const triggerScanAlert = useCallback(async () => {
     if (scanTriggered.current) return;
@@ -566,39 +569,6 @@ export function EmergencyProfileView({
               </section>
             )}
 
-            {typeConfig.showAllergies && profile.allergies?.trim() && (
-              <section aria-labelledby="allergies-heading" className={t.card}>
-                <div className="p-5">
-                  <h2 id="allergies-heading" className={t.sectionHeadingRed}>
-                    ⚠️ {typeConfig.allergiesLabel}
-                  </h2>
-                  <div className={t.infoAllergies}>{profile.allergies}</div>
-                </div>
-              </section>
-            )}
-
-            {profile.instructions?.trim() && (
-            <section aria-labelledby="instructions-heading" className={t.card}>
-              <div className="p-5">
-                <h2 id="instructions-heading" className={t.sectionHeadingYellow}>
-                  {typeConfig.instructionsLabel}
-                </h2>
-                <div className={t.infoInstructions}>{profile.instructions}</div>
-              </div>
-            </section>
-            )}
-
-            {typeConfig.showMedicalNotes && profile.medical_notes?.trim() && (
-              <section aria-labelledby="medical-heading" className={t.card}>
-                <div className="p-5">
-                  <h2 id="medical-heading" className={t.sectionHeadingMuted}>
-                    {typeConfig.medicalNotesLabel}
-                  </h2>
-                  <p className={t.infoMedical}>{profile.medical_notes}</p>
-                </div>
-              </section>
-            )}
-
             {typeConfig.showBloodType && profile.blood_type?.trim() && (
               <section aria-labelledby="blood-type-heading" className={t.card}>
                 <div className="p-5">
@@ -613,11 +583,62 @@ export function EmergencyProfileView({
               </section>
             )}
 
+            {typeConfig.showAllergies && profile.allergies?.trim() && (
+              <section aria-labelledby="allergies-heading" className={t.card}>
+                <div className="p-5">
+                  <h2 id="allergies-heading" className={t.sectionHeadingRed}>
+                    ⚠️ {typeConfig.allergiesLabel}
+                  </h2>
+                  <div className={t.infoAllergies}>{profile.allergies}</div>
+                </div>
+              </section>
+            )}
+
+            {typeConfig.showMedicalNotes && profile.medical_notes?.trim() && (
+              <section aria-labelledby="medical-heading" className={t.card}>
+                <div className="p-5">
+                  <h2 id="medical-heading" className={t.sectionHeadingMuted}>
+                    {typeConfig.medicalNotesLabel}
+                  </h2>
+                  <p className={t.infoMedical}>{profile.medical_notes}</p>
+                </div>
+              </section>
+            )}
+
+            {typeConfig.showHealthInsurance &&
+              profile.health_insurance?.trim() && (
+                <section
+                  aria-labelledby="health-insurance-heading"
+                  className={t.card}
+                >
+                  <div className="p-5">
+                    <h2
+                      id="health-insurance-heading"
+                      className={t.sectionHeadingViolet}
+                    >
+                      {typeConfig.healthInsuranceLabel}
+                    </h2>
+                    <p className={t.infoMedical}>{profile.health_insurance}</p>
+                  </div>
+                </section>
+              )}
+
+            {profile.instructions?.trim() && (
+            <section aria-labelledby="instructions-heading" className={t.card}>
+              <div className="p-5">
+                <h2 id="instructions-heading" className={t.sectionHeadingYellow}>
+                  {typeConfig.instructionsLabel}
+                </h2>
+                <div className={t.infoInstructions}>{profile.instructions}</div>
+              </div>
+            </section>
+            )}
+
             {hasClinicalPdf && scanToken && (
               <section aria-labelledby="clinical-pdf-heading" className={t.card}>
                 <div className="p-5">
                   <h2 id="clinical-pdf-heading" className={t.sectionHeadingMuted}>
-                    Historial clínico
+                    Historial clínico (PDF)
                   </h2>
                   <button
                     type="button"

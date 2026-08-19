@@ -24,7 +24,7 @@ export async function getAccountExport(userId: string) {
       id, slug, profile_type, beneficiary_name,
       emergency_contact_name, emergency_contact_phone,
       secondary_contact_name, secondary_contact_phone,
-      instructions, medical_notes, allergies, blood_type,
+      instructions, medical_notes, allergies, blood_type, health_insurance,
       clinical_pdf_filename, clinical_pdf_uploaded_at,
       sensitive_data_consent_at, sensitive_data_consent_version,
       is_active, created_at

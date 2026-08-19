@@ -37,6 +37,7 @@ export async function POST(request: Request) {
       medical_notes,
       allergies,
       blood_type,
+      health_insurance,
       profile_type,
       sensitiveDataConsent,
       avatar,
@@ -50,6 +51,7 @@ export async function POST(request: Request) {
       medical_notes?: string;
       allergies?: string;
       blood_type?: string | null;
+      health_insurance?: string | null;
       profile_type?: string;
       sensitiveDataConsent?: boolean;
       avatar?: { mime?: string; data?: string } | null;
@@ -81,6 +83,7 @@ export async function POST(request: Request) {
       allergies: isPet ? "" : allergies,
       medicalNotes: isPet ? "" : medical_notes,
       bloodType: resolvedBloodType,
+      healthInsurance: isPet ? "" : health_insurance,
       sensitiveDataConsent,
     });
     if (consentError) {
@@ -120,6 +123,7 @@ export async function POST(request: Request) {
       medical_notes: isPet ? "" : medical_notes ?? "",
       allergies: isPet ? "" : allergies ?? "",
       blood_type: resolvedBloodType,
+      health_insurance: isPet ? null : health_insurance?.trim() || null,
       profile_type: resolvedProfileType,
       ...sensitiveConsentFields(Boolean(sensitiveDataConsent)),
     });
