@@ -605,28 +605,31 @@ export async function saveObjectProfileLocation(
 ): Promise<{ id: string; beneficiary_name: string; saved_location_at: string } | null> {
   const sql = getSql();
   const rows = await sql`
-    WITH updated AS (
-      UPDATE qr_profiles
-      SET
-        saved_latitude = ${latitude},
-        saved_longitude = ${longitude},
-        saved_location_at = NOW()
-      WHERE slug = ${slug}
-        AND is_active = TRUE
-        AND profile_type = 'object'
-      RETURNING id, beneficiary_name, saved_location_at
-    ),
-    inserted AS (
-      INSERT INTO object_saved_locations (profile_id, latitude, longitude)
-      SELECT id, ${latitude}, ${longitude} FROM updated
-      RETURNING profile_id
-    )
-    SELECT id, beneficiary_name, saved_location_at FROM updated
+    UPDATE qr_profiles
+    SET
+      saved_latitude = ${latitude},
+      saved_longitude = ${longitude},
+      saved_location_at = NOW()
+    WHERE slug = ${slug}
+      AND is_active = TRUE
+      AND profile_type = 'object'
+    RETURNING id, beneficiary_name, saved_location_at
   `;
   const row = rows[0] as
     | { id: string; beneficiary_name: string; saved_location_at: string }
     | undefined;
-  return row ?? null;
+  if (!row) return null;
+
+  try {
+    await sql`
+      INSERT INTO object_saved_locations (profile_id, latitude, longitude)
+      VALUES (${row.id}, ${latitude}, ${longitude})
+    `;
+  } catch {
+    /* Historial opcional si la migración 031 aún no corrió en prod */
+  }
+
+  return row;
 }
 
 export async function listObjectSavedLocations(

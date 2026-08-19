@@ -27,31 +27,16 @@ import {
   storeScanSession,
   touchScanSession,
 } from "@/lib/scan-session/storage";
+import {
+  geolocationErrorMessage,
+  requestGeolocation,
+} from "@/lib/utils/geolocation";
 
 type EmergencyProfileViewProps = {
   profile: PublicQrProfile;
   /** Vista del tutor: no registra escaneo ni abre chat/SOS reales. */
   previewMode?: boolean;
 };
-
-async function requestGeolocation(): Promise<{
-  latitude: number;
-  longitude: number;
-} | null> {
-  if (!navigator.geolocation) return null;
-
-  return new Promise((resolve) => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) =>
-        resolve({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        }),
-      () => resolve(null),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
-    );
-  });
-}
 
 export function EmergencyProfileView({
   profile,
@@ -69,8 +54,9 @@ export function EmergencyProfileView({
     "skipped" | "loading" | "granted" | "denied"
   >("skipped");
   const [objectSavePhase, setObjectSavePhase] = useState<
-    "idle" | "loading" | "success" | "denied"
+    "idle" | "loading" | "success" | "error"
   >("idle");
+  const [objectSaveError, setObjectSaveError] = useState<string | null>(null);
   const [sosLoading, setSosLoading] = useState(false);
   const [sosSent, setSosSent] = useState(false);
   const [coords, setCoords] = useState<{
@@ -209,21 +195,21 @@ export function EmergencyProfileView({
 
   async function handleShareLocation() {
     setGeoPhase("loading");
-    const location = await requestGeolocation();
+    const result = await requestGeolocation();
 
-    if (!location) {
+    if (!result.ok) {
       setGeoPhase("denied");
       return;
     }
 
-    setCoords(location);
+    setCoords(result);
 
     for (let attempt = 0; attempt < 8 && !scanTokenRef.current; attempt++) {
       await new Promise((resolve) => setTimeout(resolve, 400));
     }
 
     if (scanTokenRef.current) {
-      await sendLocationToServer(location);
+      await sendLocationToServer(result);
     }
 
     setGeoPhase("granted");
@@ -231,45 +217,62 @@ export function EmergencyProfileView({
 
   async function handleSaveLocation() {
     setObjectSavePhase("loading");
-    const location = await requestGeolocation();
+    setObjectSaveError(null);
+    const result = await requestGeolocation();
 
-    if (!location) {
-      setObjectSavePhase("denied");
+    if (!result.ok) {
+      setObjectSaveError(geolocationErrorMessage(result.reason));
+      setObjectSavePhase("error");
       return;
     }
 
-    setCoords(location);
+    setCoords(result);
 
     try {
       const res = await fetch(`/api/p/${profile.slug}/saved-location`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          latitude: location.latitude,
-          longitude: location.longitude,
+          latitude: result.latitude,
+          longitude: result.longitude,
         }),
       });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
-        setObjectSavePhase("denied");
+        setObjectSaveError(
+          data.error ??
+            "No pudimos guardar la ubicación en SOSme. Intentá de nuevo en unos segundos.",
+        );
+        setObjectSavePhase("error");
         return;
       }
       setObjectSavePhase("success");
       window.setTimeout(() => {
         setObjectSavePhase("idle");
+        setObjectSaveError(null);
       }, 3500);
     } catch {
-      setObjectSavePhase("denied");
+      setObjectSaveError(
+        "Error de conexión al guardar. Revisá tu internet e intentá de nuevo.",
+      );
+      setObjectSavePhase("error");
     }
   }
 
   async function handleSos() {
     setSosLoading(true);
-    const location = coords ?? (await requestGeolocation());
-    if (location) {
-      setCoords(location);
-      if (scanTokenRef.current) {
-        await sendLocationToServer(location);
+    const cached = coords;
+    let location = cached;
+    if (!location) {
+      const result = await requestGeolocation();
+      if (result.ok) {
+        location = result;
+        setCoords(result);
       }
+    }
+
+    if (location && scanTokenRef.current) {
+      await sendLocationToServer(location);
     }
 
     try {
@@ -427,7 +430,7 @@ export function EmergencyProfileView({
                     </p>
                   )}
 
-                  {objectSavePhase === "denied" && (
+                  {objectSavePhase === "error" && objectSaveError && (
                     <p
                       className={`mt-4 rounded-xl px-4 py-3 text-sm ${
                         isLight
@@ -436,8 +439,7 @@ export function EmergencyProfileView({
                       }`}
                       role="alert"
                     >
-                      No pudimos obtener tu ubicación. Revisá los permisos del
-                      navegador e intentá de nuevo.
+                      {objectSaveError}
                     </p>
                   )}
 
