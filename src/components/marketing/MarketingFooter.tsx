@@ -36,6 +36,7 @@ const PRODUCT_LINKS = [
 const ACCOUNT_LINKS = [
   { href: "/register", label: "Crear cuenta" },
   { href: "/login", label: "Iniciar sesión" },
+  { href: "/ayuda", label: "Ayuda" },
   { href: "/contacto", label: "Contacto" },
 ] as const;
 

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import {
   Activity,
   ClipboardList,
+  HelpCircle,
   LayoutDashboard,
   LogOut,
   Package,
@@ -251,6 +252,18 @@ export function DashboardNavbar() {
             <ShoppingBag className="h-4 w-4" aria-hidden />
             Tienda
           </Link>
+          <Link
+            href="/ayuda"
+            className={cn(
+              "relative inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-base font-medium transition-colors",
+              pathname === "/ayuda"
+                ? "bg-violet-100 text-violet-800"
+                : "text-neutral-600 hover:bg-violet-50 hover:text-violet-800",
+            )}
+          >
+            <HelpCircle className="h-4 w-4" aria-hidden />
+            Ayuda
+          </Link>
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
@@ -422,6 +435,14 @@ export function DashboardNavbar() {
           <div className="mt-2">
             <NavSectionLabel>Más</NavSectionLabel>
             <div className="flex flex-col gap-1.5">
+              <Link
+                href="/ayuda"
+                className={drawerLinkClass(pathname === "/ayuda")}
+                onClick={() => setOpen(false)}
+              >
+                <HelpCircle className="h-5 w-5 shrink-0" aria-hidden />
+                Ayuda
+              </Link>
               <Link
                 href="/#catalogo"
                 className={drawerLinkClass(false)}
