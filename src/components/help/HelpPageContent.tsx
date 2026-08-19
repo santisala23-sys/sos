@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  AlertTriangle,
   BookOpen,
   ChevronDown,
   CircleHelp,
@@ -14,11 +13,7 @@ import {
 } from "lucide-react";
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { Button } from "@/components/ui/Button";
-import {
-  HELP_FAQ,
-  HELP_IMPORTANT_CALLOUT,
-  HELP_MANUAL,
-} from "@/lib/help/content";
+import { HELP_FAQ, HELP_MANUAL } from "@/lib/help/content";
 import { cn } from "@/lib/utils/cn";
 
 type HelpPageContentProps = {
@@ -26,28 +21,6 @@ type HelpPageContentProps = {
 };
 
 type HelpTab = "faq" | "manual";
-
-function ImportantCallout() {
-  return (
-    <aside className="rounded-[1.75rem] border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-orange-50 p-6 shadow-lg shadow-amber-500/10 sm:p-8">
-      <div className="flex items-start gap-4">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-          <AlertTriangle className="h-6 w-6" aria-hidden />
-        </span>
-        <div>
-          <h2 className="text-xl font-black text-neutral-900">
-            {HELP_IMPORTANT_CALLOUT.title}
-          </h2>
-          <div className="mt-4 space-y-3 text-sm leading-relaxed text-neutral-700 sm:text-base">
-            {HELP_IMPORTANT_CALLOUT.paragraphs.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
-        </div>
-      </div>
-    </aside>
-  );
-}
 
 function FaqAccordion({ query }: { query: string }) {
   const normalizedQuery = query.trim().toLowerCase();
@@ -200,10 +173,6 @@ export function HelpPageContent({ loggedIn = false }: HelpPageContentProps) {
             Guía completa para configurar tus QRs, entender el panel del tutor y
             usar la libreta sanitaria de tus mascotas.
           </p>
-        </div>
-
-        <div className="mx-auto mt-10 max-w-4xl">
-          <ImportantCallout />
         </div>
 
         <div className="mx-auto mt-10 max-w-4xl">

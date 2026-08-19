@@ -18,15 +18,6 @@ export type HelpManualChapter = {
   subsections: HelpManualSubsection[];
 };
 
-export const HELP_IMPORTANT_CALLOUT = {
-  title: "Importante: hay tres accesos distintos y no se mezclan",
-  paragraphs: [
-    "El QR de emergencia es único y permanente. Va en la chapita, collar o sticker. Quien lo escanea ve cómo contactarte en una urgencia, pero no entra a tu panel ni a la libreta sanitaria.",
-    "La libreta sanitaria solo la ves vos como tutor, iniciando sesión en sosme.com.ar y entrando al panel → Mascotas → Abrir libreta sanitaria. No se abre escaneando el QR de emergencia.",
-    "El QR para veterinario es temporal (24 horas), se genera desde la libreta y sirve únicamente para que el profesional cargue una visita. No reemplaza al QR de emergencia ni da acceso a tu cuenta.",
-  ],
-};
-
 export const HELP_FAQ: HelpFaqItem[] = [
   {
     id: "faq-qr-emergencia-vs-vet",
