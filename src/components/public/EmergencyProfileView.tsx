@@ -246,6 +246,16 @@ export function EmergencyProfileView({
         setObjectSavePhase("error");
         return;
       }
+
+      for (let attempt = 0; attempt < 8 && !scanTokenRef.current; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 400));
+      }
+
+      if (scanTokenRef.current) {
+        await sendLocationToServer(result);
+        setGeoPhase("granted");
+      }
+
       setObjectSavePhase("success");
       window.setTimeout(() => {
         setObjectSavePhase("idle");
@@ -426,7 +436,8 @@ export function EmergencyProfileView({
                       }`}
                       role="status"
                     >
-                      Ubicación guardada. La ves en tu panel de SOSme.
+                      Ubicación guardada. La familia la ve en Actividad y en tu
+                      panel de SOSme.
                     </p>
                   )}
 
