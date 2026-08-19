@@ -6,6 +6,7 @@ import {
   listPreventiveItems,
 } from "@/lib/db/queries-pet-medical";
 import { isUuid } from "@/lib/pet-medical";
+import { PetClinicalSummary } from "@/components/dashboard/PetClinicalProfile";
 import { VetViewPanels } from "@/components/vet/VetViewPanels";
 
 type PageProps = {
@@ -106,6 +107,12 @@ export default async function VetViewPage({ params }: PageProps) {
               )}
             </div>
           )}
+
+          <PetClinicalSummary
+            breed={pet.pet_breed}
+            birthDate={pet.pet_birth_date}
+            latestWeightKg={pet.latest_weight_kg}
+          />
 
           <VetViewPanels
             token={token}

@@ -41,6 +41,7 @@ export const POST = withApi(
         vet_name: parsed.data.vet_name!,
         vet_license: parsed.data.vet_license!,
         attachments: parsed.data.attachments,
+        weight_kg: parsed.data.weight_kg,
       });
 
       if (!result) {

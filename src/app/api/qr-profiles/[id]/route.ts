@@ -10,6 +10,10 @@ import {
 import { normalizeBloodType } from "@/lib/blood-types";
 import { isProfileType } from "@/lib/profile-types";
 import {
+  parsePetBirthDate,
+  parsePetBreed,
+} from "@/lib/pet-weight-validate";
+import {
   sensitiveConsentFields,
   validateSensitiveDataConsent,
 } from "@/lib/legal/validate-sensitive";
@@ -87,6 +91,36 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
     if (body.sensitiveDataConsent) {
       Object.assign(patch, sensitiveConsentFields(true));
+    }
+
+    if (body.pet_breed !== undefined || body.pet_birth_date !== undefined) {
+      if (resolvedType !== "pet") {
+        return NextResponse.json(
+          { error: "Raza y fecha de nacimiento solo aplican a mascotas" },
+          { status: 400 },
+        );
+      }
+      if (body.pet_breed !== undefined) {
+        const breed = parsePetBreed(body.pet_breed);
+        if (breed === null && body.pet_breed !== null && body.pet_breed !== "") {
+          return NextResponse.json({ error: "Raza inválida" }, { status: 400 });
+        }
+        patch.pet_breed = breed ?? null;
+      }
+      if (body.pet_birth_date !== undefined) {
+        const birth = parsePetBirthDate(body.pet_birth_date);
+        if (
+          birth === null &&
+          body.pet_birth_date !== null &&
+          body.pet_birth_date !== ""
+        ) {
+          return NextResponse.json(
+            { error: "Fecha de nacimiento inválida" },
+            { status: 400 },
+          );
+        }
+        patch.pet_birth_date = birth ?? null;
+      }
     }
 
     const profile = await updateQrProfile(id, session.userId, patch);

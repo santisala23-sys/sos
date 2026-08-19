@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { ChevronDown, ClipboardList, Plus } from "lucide-react";
-import type { PetPreventiveItem, PetVetVisit } from "@/types/database";
+import type { PetPreventiveItem, PetVetVisit, PetWeightEntry } from "@/types/database";
 import { VetVisitsList } from "@/components/vet/VetVisitsList";
 import { TutorVisitForm } from "@/components/dashboard/TutorVisitForm";
+import { PetClinicalProfile } from "@/components/dashboard/PetClinicalProfile";
 import { ShareWithVetButton } from "@/components/dashboard/ShareWithVetButton";
 import { PreventiveCareSection } from "@/components/dashboard/PreventiveCareSection";
 import { ScheduledPreventiveBanner } from "@/components/dashboard/ScheduledPreventiveBanner";
@@ -13,41 +14,63 @@ import { Button } from "@/components/ui/Button";
 type PetMedicalHistoryProps = {
   petId: string;
   petName: string;
+  petBreed?: string | null;
+  petBirthDate?: string | null;
   embedded?: boolean;
 };
 
 export function PetMedicalHistory({
   petId,
   petName,
+  petBreed = null,
+  petBirthDate = null,
   embedded = false,
 }: PetMedicalHistoryProps) {
   const [visits, setVisits] = useState<PetVetVisit[]>([]);
   const [preventive, setPreventive] = useState<PetPreventiveItem[]>([]);
+  const [weightEntries, setWeightEntries] = useState<PetWeightEntry[]>([]);
+  const [breed, setBreed] = useState<string | null>(petBreed);
+  const [birthDate, setBirthDate] = useState<string | null>(petBirthDate);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [visitFormOpen, setVisitFormOpen] = useState(false);
   const [visitsOpen, setVisitsOpen] = useState(false);
 
   useEffect(() => {
+    setBreed(petBreed);
+    setBirthDate(petBirthDate);
+  }, [petBreed, petBirthDate]);
+
+  useEffect(() => {
     async function load() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/qr-profiles/${petId}/medical-records`);
-        const data = (await res.json()) as {
+        const [medicalRes, weightRes] = await Promise.all([
+          fetch(`/api/qr-profiles/${petId}/medical-records`),
+          fetch(`/api/qr-profiles/${petId}/weight-entries`),
+        ]);
+        const data = (await medicalRes.json()) as {
           visits?: PetVetVisit[];
           records?: PetVetVisit[];
           preventive?: PetPreventiveItem[];
           error?: string;
         };
-        if (!res.ok) {
+        const weightData = (await weightRes.json()) as {
+          entries?: PetWeightEntry[];
+        };
+        if (!medicalRes.ok) {
           setError(data.error ?? "No se pudo cargar el historial");
           setVisits([]);
           setPreventive([]);
+          setWeightEntries([]);
           return;
         }
         setVisits(data.visits ?? data.records ?? []);
         setPreventive(data.preventive ?? []);
+        if (weightRes.ok) {
+          setWeightEntries(weightData.entries ?? []);
+        }
       } catch {
         setError("Error de conexión");
       } finally {
@@ -101,6 +124,22 @@ export function PetMedicalHistory({
           </div>
 
           <ScheduledPreventiveBanner items={preventive} />
+
+          <div className="mt-5">
+            <PetClinicalProfile
+              petId={petId}
+              breed={breed}
+              birthDate={birthDate}
+              weightEntries={weightEntries}
+              onBreedBirthChange={({ pet_breed, pet_birth_date }) => {
+                setBreed(pet_breed);
+                setBirthDate(pet_birth_date);
+              }}
+              onWeightEntryAdded={(entry) =>
+                setWeightEntries((prev) => [entry, ...prev])
+              }
+            />
+          </div>
 
           <PreventiveCareSection
             petId={petId}
@@ -156,7 +195,15 @@ export function PetMedicalHistory({
                   open={visitFormOpen}
                   onOpenChange={setVisitFormOpen}
                   preventiveItems={preventive}
-                  onCreated={(visit) => setVisits((prev) => [visit, ...prev])}
+                  onCreated={(visit) => {
+                    setVisits((prev) => [visit, ...prev]);
+                    void fetch(`/api/qr-profiles/${petId}/weight-entries`)
+                      .then((r) => r.json())
+                      .then((data: { entries?: PetWeightEntry[] }) => {
+                        if (data.entries) setWeightEntries(data.entries);
+                      })
+                      .catch(() => undefined);
+                  }}
                   onPreventiveAdded={(item) =>
                     setPreventive((prev) => {
                       const idx = prev.findIndex((row) => row.id === item.id);

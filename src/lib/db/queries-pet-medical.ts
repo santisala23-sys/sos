@@ -2,6 +2,8 @@ import type {
   PetPreventiveItem,
   PetVisitAttachmentMeta,
   PetVetVisit,
+  PetWeightEntry,
+  PetWeightSource,
   PreventiveKind,
   VetAccessToken,
   VisitTag,
@@ -26,6 +28,9 @@ export type VetViewPet = {
   slug: string;
   allergies: string | null;
   medical_notes: string | null;
+  pet_breed: string | null;
+  pet_birth_date: string | null;
+  latest_weight_kg: number | null;
   avatar_b64: string | null;
   avatar_mime: string | null;
 };
@@ -94,6 +99,19 @@ function mapVisit(row: Record<string, unknown>): PetVetVisit {
   };
 }
 
+function mapWeightEntry(row: Record<string, unknown>): PetWeightEntry {
+  return {
+    id: String(row.id),
+    pet_id: String(row.pet_id),
+    weight_kg: Number(row.weight_kg),
+    recorded_at: String(row.recorded_at),
+    source: row.source as PetWeightSource,
+    visit_id: row.visit_id ? String(row.visit_id) : null,
+    notes: String(row.notes ?? ""),
+    vet_name: (row.vet_name as string | null) ?? null,
+  };
+}
+
 function mapPreventive(row: Record<string, unknown>): PetPreventiveItem {
   return {
     id: String(row.id),
@@ -143,6 +161,15 @@ export async function getPetByValidVetToken(
       p.slug,
       p.allergies,
       p.medical_notes,
+      p.pet_breed,
+      p.pet_birth_date::text AS pet_birth_date,
+      (
+        SELECT w.weight_kg::float
+        FROM pet_weight_entries w
+        WHERE w.pet_id = p.id
+        ORDER BY w.recorded_at DESC, w.id DESC
+        LIMIT 1
+      ) AS latest_weight_kg,
       CASE WHEN p.avatar_data IS NOT NULL THEN encode(p.avatar_data, 'base64') ELSE NULL END AS avatar_b64,
       p.avatar_mime
     FROM vet_access_tokens t
@@ -217,7 +244,90 @@ export type VisitInsertInput = {
   vet_name?: string | null;
   vet_license?: string | null;
   attachments?: VisitAttachmentInput[];
+  weight_kg?: number | null;
 };
+
+async function insertWeightForVisit(
+  petId: string,
+  visitId: string,
+  visitDate: string,
+  source: PetWeightSource,
+  weightKg: number,
+  vetName?: string | null,
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    INSERT INTO pet_weight_entries (
+      pet_id, weight_kg, recorded_at, source, visit_id, vet_name
+    )
+    VALUES (
+      ${petId},
+      ${weightKg},
+      ${visitDate}::date + TIME '12:00',
+      ${source},
+      ${visitId},
+      ${vetName?.trim() || null}
+    )
+  `;
+}
+
+export async function listPetWeightEntries(
+  petId: string,
+  limit = 20,
+): Promise<PetWeightEntry[]> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      id, pet_id, weight_kg::float AS weight_kg,
+      recorded_at, source, visit_id, notes, vet_name
+    FROM pet_weight_entries
+    WHERE pet_id = ${petId}
+    ORDER BY recorded_at DESC, id DESC
+    LIMIT ${limit}
+  `;
+  return (rows as Record<string, unknown>[]).map(mapWeightEntry);
+}
+
+export async function listPetWeightEntriesForTutor(
+  petId: string,
+  tutorId: string,
+  limit = 20,
+): Promise<PetWeightEntry[] | null> {
+  if (!(await assertPetOwnedByTutor(petId, tutorId))) return null;
+  return listPetWeightEntries(petId, limit);
+}
+
+export async function insertPetWeightEntryForTutor(
+  petId: string,
+  tutorId: string,
+  data: {
+    weight_kg: number;
+    notes?: string;
+    recorded_at?: string;
+  },
+): Promise<PetWeightEntry | null> {
+  const sql = getSql();
+  const notes = data.notes?.trim().slice(0, 500) ?? "";
+  const recordedAt = data.recorded_at ?? new Date().toISOString();
+  const rows = await sql`
+    INSERT INTO pet_weight_entries (pet_id, weight_kg, recorded_at, source, notes)
+    SELECT
+      p.id,
+      ${data.weight_kg},
+      ${recordedAt}::timestamptz,
+      'tutor',
+      ${notes}
+    FROM qr_profiles p
+    WHERE p.id = ${petId}
+      AND p.tutor_id = ${tutorId}
+      AND p.profile_type = 'pet'
+    RETURNING
+      id, pet_id, weight_kg::float AS weight_kg,
+      recorded_at, source, visit_id, notes, vet_name
+  `;
+  const row = rows[0] as Record<string, unknown> | undefined;
+  return row ? mapWeightEntry(row) : null;
+}
 
 async function insertVisitAttachments(
   visitId: string,
@@ -290,6 +400,16 @@ export async function insertVisitByTutor(
     visit.id,
     data.attachments,
   );
+  if (data.weight_kg != null) {
+    await insertWeightForVisit(
+      petId,
+      visit.id,
+      data.visit_date,
+      "tutor",
+      data.weight_kg,
+      data.vet_name,
+    );
+  }
   return visit;
 }
 
@@ -352,6 +472,17 @@ export async function insertVisitByVet(
     visit.id,
     data.attachments,
   );
+
+  if (data.weight_kg != null) {
+    await insertWeightForVisit(
+      visit.pet_id,
+      visit.id,
+      data.visit_date,
+      "vet",
+      data.weight_kg,
+      data.vet_name,
+    );
+  }
 
   return {
     visit,

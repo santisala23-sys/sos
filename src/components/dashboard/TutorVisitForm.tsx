@@ -41,6 +41,7 @@ export function TutorVisitForm({
   const [tags, setTags] = useState<VisitTag[]>([]);
   const [vetName, setVetName] = useState("");
   const [vetLicense, setVetLicense] = useState("");
+  const [weightKg, setWeightKg] = useState("");
   const [files, setFiles] = useState<PendingVisitFile[]>([]);
   const [updateCalendar, setUpdateCalendar] = useState(false);
   const [preventiveKind, setPreventiveKind] = useState<PreventiveKind>("vaccine");
@@ -67,6 +68,7 @@ export function TutorVisitForm({
     setTags([]);
     setVetName("");
     setVetLicense("");
+    setWeightKg("");
     setFiles([]);
     setUpdateCalendar(false);
     setPreventiveName("");
@@ -113,6 +115,7 @@ export function TutorVisitForm({
           tags,
           vet_name: vetName || null,
           vet_license: vetLicense || null,
+          weight_kg: weightKg.trim() || null,
           attachments: files,
         }),
       });
@@ -294,6 +297,22 @@ export function TutorVisitForm({
       />
 
       <VisitFilePicker files={files} onChange={setFiles} accent="violet" />
+
+      <div>
+        <label htmlFor="tutor_weight_kg" className="text-sm font-semibold text-neutral-700">
+          Peso (kg){" "}
+          <span className="font-normal text-neutral-400">(opcional)</span>
+        </label>
+        <input
+          id="tutor_weight_kg"
+          type="text"
+          inputMode="decimal"
+          value={weightKg}
+          onChange={(e) => setWeightKg(e.target.value)}
+          className={inputClass}
+          placeholder="Ej. 12.5"
+        />
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>

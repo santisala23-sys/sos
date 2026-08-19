@@ -78,6 +78,8 @@ export default function PetHealthBookPage() {
           <PetMedicalHistory
             petId={profile.id}
             petName={profile.beneficiary_name}
+            petBreed={profile.pet_breed ?? null}
+            petBirthDate={profile.pet_birth_date ?? null}
             embedded
           />
         </div>

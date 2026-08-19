@@ -62,6 +62,7 @@ const migrations = [
   "029_preventive_reminders.sql",
   "030_preventive_checkup_kind.sql",
   "031_object_location_history.sql",
+  "032_pet_profile_ficha.sql",
 ];
 
 for (const file of migrations) {

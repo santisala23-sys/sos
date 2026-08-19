@@ -39,6 +39,7 @@ export function VetVisitForm({
   const [tags, setTags] = useState<VisitTag[]>(["checkup"]);
   const [vetName, setVetName] = useState("");
   const [vetLicense, setVetLicense] = useState("");
+  const [weightKg, setWeightKg] = useState("");
   const [files, setFiles] = useState<PendingVisitFile[]>([]);
   const [updateCalendar, setUpdateCalendar] = useState(false);
   const [preventiveKind, setPreventiveKind] = useState<PreventiveKind>("vaccine");
@@ -96,6 +97,7 @@ export function VetVisitForm({
           tags,
           vet_name: vetName,
           vet_license: vetLicense,
+          weight_kg: weightKg.trim() || null,
           attachments: files,
         }),
       });
@@ -125,6 +127,7 @@ export function VetVisitForm({
       setSummary("");
       setIndications("");
       setTags(["checkup"]);
+      setWeightKg("");
       setFiles([]);
       setUpdateCalendar(false);
       setPreventiveName("");
@@ -243,6 +246,22 @@ export function VetVisitForm({
       />
 
       <VisitFilePicker files={files} onChange={setFiles} accent="teal" />
+
+      <div>
+        <label htmlFor="vet_weight_kg" className="text-sm font-semibold text-neutral-700">
+          Peso (kg){" "}
+          <span className="font-normal text-neutral-400">(opcional)</span>
+        </label>
+        <input
+          id="vet_weight_kg"
+          type="text"
+          inputMode="decimal"
+          value={weightKg}
+          onChange={(e) => setWeightKg(e.target.value)}
+          className={inputClass}
+          placeholder="Ej. 12.5"
+        />
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>

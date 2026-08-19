@@ -1,4 +1,5 @@
 import { isUuid, isPreventiveKind, normalizeVisitTags } from "@/lib/pet-medical";
+import { parseWeightKg } from "@/lib/pet-weight-validate";
 import type { PreventiveKind, VisitTag } from "@/types/database";
 import type { VisitAttachmentInput } from "@/lib/db/queries-pet-medical";
 
@@ -13,6 +14,7 @@ export type ParsedVisitBody = {
   vet_name: string | null;
   vet_license: string | null;
   attachments: VisitAttachmentInput[];
+  weight_kg: number | null;
 };
 
 function parseAttachments(raw: unknown):
@@ -103,6 +105,15 @@ export function parseVisitBody(
   const attachments = parseAttachments(raw.attachments);
   if (!attachments.ok) return attachments;
 
+  const weightRaw = raw.weight_kg;
+  let weight_kg: number | null = null;
+  if (weightRaw !== undefined && weightRaw !== null && weightRaw !== "") {
+    weight_kg = parseWeightKg(weightRaw);
+    if (weight_kg === null) {
+      return { ok: false, error: "Peso inválido (usá un valor entre 0.1 y 200 kg)" };
+    }
+  }
+
   return {
     ok: true,
     data: {
@@ -113,6 +124,7 @@ export function parseVisitBody(
       vet_name: vetName || null,
       vet_license: vetLicense || null,
       attachments: attachments.files,
+      weight_kg,
     },
   };
 }

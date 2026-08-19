@@ -7,6 +7,8 @@ export function toPublicProfile(profile: QrProfile): PublicQrProfile {
     saved_latitude: _savedLat,
     saved_longitude: _savedLng,
     saved_location_at: _savedAt,
+    pet_breed: _petBreed,
+    pet_birth_date: _petBirth,
     ...publicFields
   } = profile;
   return publicFields;

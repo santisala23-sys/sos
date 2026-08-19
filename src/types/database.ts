@@ -19,6 +19,8 @@ export type PublicQrProfile = Omit<
   | "saved_latitude"
   | "saved_longitude"
   | "saved_location_at"
+  | "pet_breed"
+  | "pet_birth_date"
 >;
 
 export interface QrProfile {
@@ -41,6 +43,9 @@ export interface QrProfile {
   saved_latitude?: number | null;
   saved_longitude?: number | null;
   saved_location_at?: string | null;
+  /** Ficha clínica opcional (solo mascotas). */
+  pet_breed?: string | null;
+  pet_birth_date?: string | null;
   sensitive_data_consent_at?: string | null;
   sensitive_data_consent_version?: string | null;
   is_active: boolean;
@@ -168,6 +173,19 @@ export interface PetVetVisit {
   vet_license: string | null;
   created_at: string;
   attachments?: PetVisitAttachmentMeta[];
+}
+
+export type PetWeightSource = "tutor" | "vet";
+
+export interface PetWeightEntry {
+  id: string;
+  pet_id: string;
+  weight_kg: number;
+  recorded_at: string;
+  source: PetWeightSource;
+  visit_id: string | null;
+  notes: string;
+  vet_name: string | null;
 }
 
 export interface VetAccessToken {
