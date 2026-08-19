@@ -9,6 +9,7 @@ import type {
   VisitTag,
 } from "@/types/database";
 import { getSql } from "@/lib/db/index";
+import { ensureDeferredMigrations } from "@/lib/db/ensure-schema";
 
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 const MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024;
@@ -152,6 +153,7 @@ export async function createVetAccessToken(
 export async function getPetByValidVetToken(
   token: string,
 ): Promise<VetViewPet | null> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   const rows = await sql`
     SELECT
@@ -255,6 +257,7 @@ async function insertWeightForVisit(
   weightKg: number,
   vetName?: string | null,
 ): Promise<void> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   await sql`
     INSERT INTO pet_weight_entries (
@@ -275,6 +278,7 @@ export async function listPetWeightEntries(
   petId: string,
   limit = 20,
 ): Promise<PetWeightEntry[]> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   const rows = await sql`
     SELECT
@@ -306,6 +310,7 @@ export async function insertPetWeightEntryForTutor(
     recorded_at?: string;
   },
 ): Promise<PetWeightEntry | null> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   const notes = data.notes?.trim().slice(0, 500) ?? "";
   const recordedAt = data.recorded_at ?? new Date().toISOString();

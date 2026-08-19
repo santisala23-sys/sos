@@ -9,6 +9,7 @@ import type {
   User,
 } from "@/types/database";
 import { getSql } from "@/lib/db/index";
+import { ensureDeferredMigrations } from "@/lib/db/ensure-schema";
 
 type UserRow = User & {
   password_hash: string | null;
@@ -311,6 +312,7 @@ export async function findOrCreateGoogleUser(
 }
 
 export async function listQrProfilesByTutor(tutorId: string): Promise<QrProfile[]> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   const rows = await sql`
     SELECT
@@ -336,6 +338,7 @@ export async function findQrProfileBySlug(
   slug: string,
   activeOnly = true,
 ): Promise<QrProfile | null> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   const rows = activeOnly
     ? await sql`
@@ -374,6 +377,7 @@ export async function findQrProfileBySlug(
 }
 
 export async function findQrProfileById(id: string): Promise<QrProfile | null> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   const rows = await sql`
     SELECT
@@ -398,6 +402,7 @@ export async function findQrProfileById(id: string): Promise<QrProfile | null> {
 export async function findActiveQrProfileById(
   id: string,
 ): Promise<QrProfile | null> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   const rows = await sql`
     SELECT
@@ -435,6 +440,7 @@ export async function createQrProfile(
     sensitive_data_consent_version?: string | null;
   },
 ): Promise<QrProfile> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   const rows = await sql`
     INSERT INTO qr_profiles (
@@ -556,6 +562,7 @@ export async function updateQrProfile(
     >
   >,
 ): Promise<QrProfile | null> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   const existing = await findQrProfileById(id);
   if (!existing || existing.tutor_id !== tutorId) return null;
@@ -614,6 +621,7 @@ export async function saveObjectProfileLocation(
   latitude: number,
   longitude: number,
 ): Promise<{ id: string; beneficiary_name: string; saved_location_at: string } | null> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   const rows = await sql`
     UPDATE qr_profiles
@@ -654,6 +662,7 @@ export async function listObjectSavedLocations(
     created_at: string;
   }>
 > {
+  await ensureDeferredMigrations();
   const sql = getSql();
   const rows = await sql`
     SELECT id, latitude, longitude, created_at
