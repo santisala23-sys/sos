@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
+import type { ReactNode } from "react";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
@@ -10,9 +11,10 @@ import { SERVICE_LIST, type ServiceContent } from "@/lib/marketing/services";
 
 type ServicePageProps = {
   service: ServiceContent;
+  bookletSlot?: ReactNode;
 };
 
-export function ServicePage({ service }: ServicePageProps) {
+export function ServicePage({ service, bookletSlot }: ServicePageProps) {
   const others = SERVICE_LIST.filter((s) => s.slug !== service.slug);
 
   return (
@@ -91,6 +93,8 @@ export function ServicePage({ service }: ServicePageProps) {
             ))}
           </div>
         </section>
+
+        {bookletSlot}
 
         {/* Scenarios */}
         <section className="border-y border-violet-100/80 bg-white/70 px-4 py-24 backdrop-blur-sm sm:px-6 lg:px-8">

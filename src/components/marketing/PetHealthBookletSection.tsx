@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -9,28 +10,105 @@ import {
 import { SectionHeading } from "@/components/marketing/SectionHeading";
 import { Button } from "@/components/ui/Button";
 
-const STEPS = [
+const MEDIA_BASE = "/images/landing/libreta-sanitaria";
+
+type StepMedia =
+  | {
+      kind: "video";
+      src: string;
+      poster: string;
+      alt: string;
+    }
+  | {
+      kind: "image";
+      src: string;
+      alt: string;
+      width: number;
+      height: number;
+    };
+
+const STEPS: ReadonlyArray<{
+  step: string;
+  title: string;
+  text: string;
+  icon: typeof QrCode;
+  media: StepMedia;
+}> = [
   {
     step: "01",
-    title: "El tutor comparte un QR temporal",
-    text: "Desde la libreta de la mascota generás un enlace y QR válidos por 24 horas para el veterinario.",
+    title: "Abrís la libreta y compartís el QR",
+    text: "Desde el panel de tu mascota ves vacunas, próximas dosis e historial. Generás un acceso temporal de 24 h para el veterinario.",
     icon: QrCode,
+    media: {
+      kind: "video",
+      src: `${MEDIA_BASE}/demo-tutor-libreta.mp4`,
+      poster: `${MEDIA_BASE}/vista-tutor.png`,
+      alt: "Libreta sanitaria de Firu con botón QR para veterinario y próximas dosis",
+    },
   },
   {
     step: "02",
     title: "El vet ve el historial y carga la visita",
-    text: "Consulta vacunas, desparasitaciones e historial. Registra qué hizo e indicaciones (opcionales).",
+    text: "Con el enlace temporal consulta el historial, elige el tipo de control y registra qué hizo e indicaciones para el hogar.",
     icon: Stethoscope,
+    media: {
+      kind: "video",
+      src: `${MEDIA_BASE}/demo-veterinario.mp4`,
+      poster: `${MEDIA_BASE}/demo-veterinario-poster.png`,
+      alt: "Formulario veterinario para cargar una visita en la libreta de Firu",
+    },
   },
   {
     step: "03",
-    title: "Vos recibís el aviso y queda guardado",
-    text: "La visita queda en la libreta con verificación profesional. También podés cargar visitas vos.",
+    title: "Te avisamos y queda guardado",
+    text: "Recibís una notificación push al instante. Tocás y volvés a la libreta con la visita ya cargada y verificada.",
     icon: Bell,
+    media: {
+      kind: "image",
+      src: `${MEDIA_BASE}/notificacion-visita.png`,
+      alt: "Notificación push de SOSme: Roberto Perez cargó una visita veterinaria para Firu",
+      width: 503,
+      height: 220,
+    },
   },
-] as const;
+];
 
-export function PetHealthBookletSection() {
+type PetHealthBookletSectionProps = {
+  /** En la página de servicio no enlazamos otra vez a /servicios/mascotas */
+  showServiceLink?: boolean;
+};
+
+function StepMediaFrame({ media }: { media: StepMedia }) {
+  return (
+    <div className="relative mx-auto mt-6 w-full max-w-[14rem] overflow-hidden rounded-2xl border border-teal-100/80 bg-neutral-950 shadow-lg shadow-teal-500/10">
+      {media.kind === "video" ? (
+        <video
+          controls
+          playsInline
+          preload="metadata"
+          poster={media.poster}
+          className="h-auto w-full"
+          aria-label={media.alt}
+        >
+          <source src={media.src} type="video/mp4" />
+        </video>
+      ) : (
+        <Image
+          src={media.src}
+          alt={media.alt}
+          width={media.width}
+          height={media.height}
+          className="h-auto w-full"
+          sizes="(max-width: 640px) 224px, 224px"
+        />
+      )}
+    </div>
+  );
+}
+
+export function PetHealthBookletSection({
+  showServiceLink = true,
+}: PetHealthBookletSectionProps) {
   return (
     <section
       id="libreta-sanitaria"
@@ -40,7 +118,7 @@ export function PetHealthBookletSection() {
         <SectionHeading
           eyebrow="Libreta sanitaria digital"
           title="El veterinario escanea, carga la visita y vos tenés el historial"
-          description="Además del QR de emergencia, tus mascotas tienen libreta sanitaria: vacunas, desparasitaciones, visitas e indicaciones, con acceso temporal y seguro para el profesional."
+          description="Capturas y videos reales del flujo completo: la libreta del tutor, la carga del profesional y la alerta en tu celular."
         />
 
         <div className="mx-auto mt-10 flex max-w-xl items-center justify-center gap-3 rounded-2xl border border-teal-200/80 bg-gradient-to-r from-teal-50 to-emerald-50 px-5 py-4 text-sm font-semibold text-teal-900 shadow-sm">
@@ -48,11 +126,11 @@ export function PetHealthBookletSection() {
           Vacunas, próximas dosis, visitas y archivos (imagen o PDF)
         </div>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
-          {STEPS.map(({ step, title, text, icon: Icon }) => (
+        <div className="mt-14 grid gap-8 md:grid-cols-3 md:gap-6">
+          {STEPS.map(({ step, title, text, icon: Icon, media }) => (
             <article
               key={step}
-              className="group relative overflow-hidden rounded-3xl border border-teal-100/80 bg-gradient-to-b from-white to-teal-50/40 p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-teal-500/10"
+              className="group relative flex flex-col overflow-hidden rounded-3xl border border-teal-100/80 bg-gradient-to-b from-white to-teal-50/40 p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-teal-500/10"
             >
               <span className="text-6xl font-black text-teal-100/90">
                 {step}
@@ -63,21 +141,36 @@ export function PetHealthBookletSection() {
               <h3 className="mt-6 text-xl font-bold text-neutral-900">
                 {title}
               </h3>
-              <p className="mt-3 leading-relaxed text-neutral-600">{text}</p>
+              <p className="mt-3 flex-1 leading-relaxed text-neutral-600">
+                {text}
+              </p>
+              <StepMediaFrame media={media} />
             </article>
           ))}
         </div>
 
         <div className="mt-12 text-center">
-          <Link href="/servicios/mascotas">
-            <Button
-              size="lg"
-              className="gap-2 !from-teal-600 !to-emerald-700 hover:!from-teal-700 hover:!to-emerald-800"
-            >
-              Ver servicio para mascotas
-              <ArrowRight className="h-5 w-5" aria-hidden />
-            </Button>
-          </Link>
+          {showServiceLink ? (
+            <Link href="/servicios/mascotas">
+              <Button
+                size="lg"
+                className="gap-2 !from-teal-600 !to-emerald-700 hover:!from-teal-700 hover:!to-emerald-800"
+              >
+                Ver servicio para mascotas
+                <ArrowRight className="h-5 w-5" aria-hidden />
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/register">
+              <Button
+                size="lg"
+                className="gap-2 !from-teal-600 !to-emerald-700 hover:!from-teal-700 hover:!to-emerald-800"
+              >
+                Activar libreta de mi mascota
+                <ArrowRight className="h-5 w-5" aria-hidden />
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </section>
