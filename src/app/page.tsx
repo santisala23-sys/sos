@@ -301,7 +301,7 @@ export default async function HomePage() {
                 {[
                   "Pedís el collar, colgante o credencial",
                   "Escaneás el QR una sola vez y te registrás",
-                  "Listo: queda vinculado a tu perfil para siempre",
+                  "Listo: queda vinculado a tu perfil activo, sin costo de mantenimiento",
                 ].map((item, i) => (
                   <li key={item} className="flex gap-4">
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-sm font-bold text-neutral-700">

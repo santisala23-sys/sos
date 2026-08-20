@@ -1,8 +1,8 @@
 # Términos y Condiciones de Uso — SOSme
 
-**Versión:** 1.0  
-**Fecha de vigencia:** 30 de junio de 2026  
-**Última actualización:** 30 de junio de 2026
+**Versión:** 1.1  
+**Fecha de vigencia:** 20 de agosto de 2026  
+**Última actualización:** 20 de agosto de 2026
 
 ## Índice
 
@@ -20,7 +20,7 @@
 12. [Propiedad intelectual](#12-propiedad-intelectual)
 13. [Disponibilidad, limitaciones técnicas y responsabilidad](#13-disponibilidad-limitaciones-técnicas-y-responsabilidad)
 14. [Suspensión y terminación](#14-suspensión-y-terminación)
-15. [Modificaciones del servicio y de los Términos](#15-modificaciones-del-servicio-y-de-los-términos)
+15. [Modificaciones y cese del servicio](#15-modificaciones-y-cese-del-servicio)
 16. [Ley aplicable y jurisdicción](#16-ley-aplicable-y-jurisdicción)
 17. [Contacto](#17-contacto)
 18. [No constituye asesoramiento legal](#18-no-constituye-asesoramiento-legal)
@@ -95,9 +95,10 @@ El Operador puede suspender o cancelar cuentas que incumplan estos Términos o q
 Al crear un perfil QR, entendés y aceptás que:
 
 - La URL pública (`/p/{slug}`) es **accesible a cualquier persona** que escanee el QR o conozca el enlace
-- Los datos configurados como visibles (contactos, instrucciones, alergias, notas médicas, tipo de sangre, etc.) **serán expuestos** a quien acceda al perfil
+- Los datos configurados como visibles (nombre, instrucciones, alergias, notas médicas, tipo de sangre, obra social u otros campos públicos según el tipo de perfil) **serán expuestos** a quien acceda al perfil
+- Los números de teléfono de contacto **no se muestran en texto plano** en el HTML público; se revelan bajo demanda en el servidor para acciones de llamada o WhatsApp
 - El slug es semi-público: aunque no sea adivinable fácilmente, **no constituye autenticación** ni seguridad por oscuridad
-- El PDF clínico **no es descargable** solo con conocer el slug; requiere una sesión de escaneo activa con token válido (48 horas). Aun así, quien escanee el QR y mantenga sesión activa podrá descargarlo si el Tutor lo cargó
+- El PDF clínico opcional aplica a perfiles de **mascota**. Su descarga pública requiere una sesión de escaneo activa con token válido (48 horas). Aun así, quien escanee el QR y mantenga sesión activa podrá descargarlo si el Tutor lo cargó
 - Podés desactivar un perfil (`is_active = false`) para impedir su visualización pública, pero los escaneos previos y logs asociados pueden conservarse según nuestra política de retención
 
 Sos responsable de decidir qué datos incluir en cada perfil y de la colocación física del QR (collar, pulsera, equipaje, etc.).
@@ -116,7 +117,7 @@ Para perfiles de **menores de edad**, solo podés crearlos si sos su padre, madr
 
 ## 8. Datos sensibles de salud
 
-Los perfiles de tipo persona pueden incluir **datos sensibles** según la Ley 25.326 de Protección de Datos Personales de Argentina: alergias, notas médicas, tipo de sangre y PDF clínico.
+Los perfiles de tipo persona pueden incluir **datos sensibles** según la Ley 25.326 de Protección de Datos Personales de Argentina: alergias, notas médicas / condiciones y medicación, tipo de sangre y obra social / prepaga. Los perfiles de tipo mascota pueden incluir un PDF clínico opcional.
 
 Al cargar estos datos, declarás contar con **consentimiento expreso** del titular o de quien tenga legitimación para otorgarlo, conforme al [Aviso de Datos Sensibles y Consentimiento](/aviso-datos-sensibles).
 
@@ -193,11 +194,23 @@ Podemos suspender o terminar tu acceso si incumplís estos Términos, si hay rie
 
 Podés dejar de usar el Servicio en cualquier momento. La eliminación de datos se rige por la [Política de Retención y Eliminación](/retencion-datos).
 
-## 15. Modificaciones del servicio y de los Términos
+## 15. Modificaciones y cese del servicio
 
-Podemos modificar funcionalidades, corregir errores o actualizar estos Términos. Publicaremos la versión vigente con su fecha en el sitio. Los cambios materiales serán comunicados por medios razonables (aviso en el sitio, email al Tutor registrado).
+SOSme se reserva el derecho de modificar, actualizar, suspender o discontinuar la plataforma digital y sus funcionalidades (total o parcialmente) en cualquier momento, con el fin de mejorar el sistema o por motivos operativos.
 
-El uso continuado del Servicio después de la entrada en vigencia de cambios implica aceptación, salvo que la normativa exija consentimiento adicional.
+También podemos actualizar estos Términos. Publicaremos la versión vigente con su fecha en el sitio. Los cambios materiales serán comunicados por medios razonables (aviso en el sitio, email al Tutor registrado). El uso continuado del Servicio después de la entrada en vigencia de cambios implica aceptación, salvo que la normativa exija consentimiento adicional.
+
+### Cierre definitivo de la plataforma
+
+En el caso excepcional de un cierre definitivo de la plataforma, SOSme se compromete a cumplir con el siguiente protocolo:
+
+**Aviso previo:** Se notificará a todos los usuarios registrados a través del correo electrónico asociado a su cuenta con un mínimo de sesenta (60) días corridos de anticipación a la fecha de baja definitiva.
+
+**Recuperación de datos:** Durante dicho período de gracia de 60 días, los usuarios tendrán garantizado el acceso a su panel para descargar y respaldar cualquier información, historial o archivo que hayan cargado en el sistema.
+
+**Servicio Básico y Hardware:** El pago inicial realizado por el usuario corresponde exclusivamente a la compra del producto físico (chapita, credencial, sticker, etc.). El acceso al plan "SOSme Básico" se bonifica sin costo de mantenimiento mensual. Por lo tanto, el cierre definitivo del servicio digital no generará derecho a reclamos, devoluciones ni resarcimientos económicos por el producto físico ni por la interrupción de las funciones gratuitas.
+
+**Suscripciones Premium:** Si al momento de efectuarse el cierre de la plataforma un usuario contara con una suscripción paga anual activa ("SOSme Pro"), la empresa procederá a reembolsar el importe equivalente de manera estrictamente proporcional a los meses no utilizados de dicha suscripción.
 
 ## 16. Ley aplicable y jurisdicción
 

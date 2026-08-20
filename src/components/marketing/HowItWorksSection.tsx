@@ -19,7 +19,7 @@ const STEPS = [
   {
     step: "3",
     title: "Contacto directo",
-    text: "Llamada y WhatsApp a contactos de emergencia con un toque.",
+    text: "Llamada y WhatsApp a contactos de emergencia con un toque. Tus números telefónicos se mantienen ocultos y privados en el servidor.",
     image: "/images/landing/screenshots/step-03-contacts.png",
     imageAlt: "Contactos de emergencia con botones de llamar y WhatsApp",
   },

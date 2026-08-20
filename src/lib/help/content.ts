@@ -65,7 +65,7 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-activar-producto",
     question: "Compré una chapita o collar, ¿cómo la activo?",
     answer:
-      "En el panel, expandí el bloque «Hola, este es tu panel» y tocá Activar mi producto. Escaneá el QR del producto o ingresá el código manual. Completá los datos del perfil y quedará vinculado a tu cuenta para siempre.",
+      "En el panel, expandí el bloque «Hola, este es tu panel» y tocá Activar mi producto. Escaneá el QR del producto o ingresá el código manual. Completá los datos del perfil y quedará vinculado a tu cuenta, sin costo de mantenimiento.",
   },
   {
     id: "faq-qr-descargar",
