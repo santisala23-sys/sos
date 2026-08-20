@@ -14,6 +14,7 @@ import {
 import type { PublicEmergencyProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { ContactActions } from "@/components/public/ContactActions";
+import { OfficialEmergencyNumbers } from "@/components/public/OfficialEmergencyNumbers";
 import { PublicThemeToggle } from "@/components/public/PublicThemeToggle";
 import { publicThemeStyles } from "@/components/public/publicThemeStyles";
 import { ScannerPushPrompt } from "@/components/public/ScannerPushPrompt";
@@ -59,6 +60,7 @@ export function EmergencyProfileView({
   const [objectSaveError, setObjectSaveError] = useState<string | null>(null);
   const [sosLoading, setSosLoading] = useState(false);
   const [sosSent, setSosSent] = useState(false);
+  const [showOfficialEmergency, setShowOfficialEmergency] = useState(false);
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
@@ -273,7 +275,14 @@ export function EmergencyProfileView({
   }
 
   async function handleSos() {
+    setShowOfficialEmergency(true);
     setSosLoading(true);
+    // Dejá visibles los números oficiales mientras corre el aviso a la familia.
+    window.setTimeout(() => {
+      document
+        .getElementById("official-emergency-numbers")
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 50);
     const cached = coords;
     let location = cached;
     if (!location) {
@@ -402,7 +411,9 @@ export function EmergencyProfileView({
         className={`relative space-y-5 px-4 py-5 ${
           previewMode
             ? "pb-8"
-            : "pb-[calc(10.5rem+env(safe-area-inset-bottom))]"
+            : showOfficialEmergency
+              ? "pb-[calc(12rem+env(safe-area-inset-bottom))]"
+              : "pb-[calc(10.5rem+env(safe-area-inset-bottom))]"
         }`}
       >
         {!sessionReady && <p className={t.loading}>Cargando...</p>}
@@ -654,15 +665,25 @@ export function EmergencyProfileView({
           </>
         )}
 
+        {showOfficialEmergency && !previewMode && (
+          <OfficialEmergencyNumbers isLight={isLight} />
+        )}
+
         <p className={t.footerBrand}>{typeConfig.publicHeader} · SOSme</p>
       </main>
 
       {!previewMode && (
       <footer className={t.footer}>
         <p className={t.footerNote}>
-          En emergencia grave, llamá al{" "}
-          <strong className={t.footerNoteStrong}>911</strong> además de usar este
-          botón.
+          {showOfficialEmergency
+            ? "Arriba tenés los números oficiales. Llamá al 911 si la situación es grave."
+            : (
+              <>
+                En emergencia grave, llamá al{" "}
+                <strong className={t.footerNoteStrong}>911</strong> además de usar este
+                botón.
+              </>
+            )}
         </p>
         <Button
           type="button"
@@ -674,7 +695,7 @@ export function EmergencyProfileView({
         >
           <AlertTriangle className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" aria-hidden />
           {sosSent
-            ? "Alerta enviada"
+            ? "Alerta enviada a la familia"
             : sosLoading
               ? "Enviando alerta..."
               : "NECESITO AYUDA / SOS"}
