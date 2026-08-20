@@ -47,7 +47,19 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-perfiles-tipos",
     question: "¿Qué diferencia hay entre Personas, Mascotas y Objetos?",
     answer:
-      "Son tres secciones del mismo panel, cada una con perfiles QR de emergencia adaptados al caso. Personas incluye datos médicos y SOS. Mascotas suma libreta sanitaria y QR temporal para el vet. Objetos permite que quien encuentre el bien guarde ubicación y te contacte.",
+      "Son tres secciones del mismo panel, cada una con perfiles QR de emergencia adaptados al caso. Personas muestra en emergencia datos de salud en texto (tipo de sangre, alergias, condiciones/medicación, obra social) y SOS. Mascotas suma libreta sanitaria, QR temporal para el vet y PDF clínico opcional en el perfil público. Objetos permite que quien encuentre el bien guarde ubicación y te contacte.",
+  },
+  {
+    id: "faq-persona-sin-pdf",
+    question: "¿Puedo subir un PDF clínico en un perfil de Persona?",
+    answer:
+      "No. En Personas los datos de salud van solo en texto (tipo de sangre, alergias, condiciones/medicación y obra social/prepaga) para que quien asista los lea al instante, sin descargar archivos. El PDF clínico opcional está disponible solo en perfiles de Mascota.",
+  },
+  {
+    id: "faq-obra-social",
+    question: "¿Dónde cargo la obra social o prepaga?",
+    answer:
+      "En un perfil de Persona: Panel → Personas → Editar perfil → sección Datos de salud → campo «Obra social / prepaga y N° de socio». Quien escanee el QR lo verá en la página de emergencia.",
   },
   {
     id: "faq-activar-producto",
@@ -171,9 +183,9 @@ export const HELP_MANUAL: HelpManualChapter[] = [
           "El panel está dividido en tres bloques colapsables. Cada uno agrupa perfiles del mismo tipo:",
         ],
         bullets: [
-          "Personas (rosa): familiares o vos mismo. Perfil de emergencia con contactos, datos médicos y SOS.",
+          "Personas (rosa): familiares o vos mismo. Contactos, datos de salud en texto (sangre, alergias, medicación, obra social) y SOS.",
           "Objetos (celeste): valijas, autos, equipos. Contacto del dueño + opción de guardar ubicación.",
-          "Mascotas (verde): libreta sanitaria + QR de emergencia para si se pierde.",
+          "Mascotas (verde): libreta sanitaria + QR de emergencia (contacto del dueño y PDF clínico opcional) para si se pierde.",
         ],
       },
       {
@@ -204,7 +216,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         title: "Crear un perfil y generar el QR",
         paragraphs: [
           "Desde la sección correspondiente, tocá Agregar persona, Agregar objeto o Agregar mascota.",
-          "Completá el formulario con foto, contactos, instrucciones y —según el tipo— datos médicos o veterinarios básicos.",
+          "Completá el formulario con foto, contactos e instrucciones. En Personas sumá datos de salud en texto; en Mascotas podés subir un PDF clínico después de crear el perfil.",
           "Al guardar, volvés al panel. En la tarjeta del perfil, tocá Ver QR para verlo, descargar PNG o imprimir PDF.",
         ],
       },
@@ -216,9 +228,11 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         ],
         bullets: [
           "Foto y nombre del beneficiario (persona, mascota u objeto).",
-          "Botones para llamar o escribir por WhatsApp a los contactos de emergencia.",
-          "Opción de compartir ubicación (si acepta).",
-          "Instrucciones que cargaste (cómo acercarse, alergias, etc.).",
+          "Botones para llamar o escribir por WhatsApp a los contactos de emergencia (el número no se muestra en texto plano).",
+          "En Personas: tipo de sangre, alergias, condiciones/medicación y obra social, si los cargaste.",
+          "En Mascotas: contacto del dueño e instrucciones; PDF clínico opcional si lo subiste.",
+          "En Objetos: opción de guardar ubicación del hallazgo.",
+          "Opción de compartir ubicación del escaneo (si acepta).",
           "Botón SOS / Necesito ayuda en perfiles de persona.",
           "Chat en vivo para coordinar con la familia.",
         ],
@@ -262,10 +276,17 @@ export const HELP_MANUAL: HelpManualChapter[] = [
           "Foto de perfil.",
           "Nombre de la persona beneficiaria.",
           "Contacto principal y secundario (nombre + teléfono).",
-          "Instrucciones de ayuda (cómo acercarse, medicación, etc.).",
-          "Alergias, grupo sanguíneo y notas médicas.",
-          "PDF clínico opcional.",
+          "Instrucciones de manejo / comportamiento.",
+          "Datos de salud en texto: tipo de sangre, alergias, condiciones médicas crónicas / medicación, y obra social / prepaga con N° de socio.",
           "Interruptor Perfil activo: si está apagado, el QR público no funciona.",
+        ],
+      },
+      {
+        id: "personas-sin-pdf",
+        title: "Sin PDF clínico en Personas",
+        paragraphs: [
+          "En perfiles de Persona no se sube historial en PDF. En una emergencia importa leer rápido lo esencial en pantalla (sangre, alergias, medicación, obra social).",
+          "Si necesitás un archivo clínico adjunto, usá un perfil de Mascota (PDF opcional) o guardá documentación fuera de SOSme.",
         ],
       },
     ],
@@ -280,7 +301,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         title: "Emergencia vs libreta sanitaria",
         paragraphs: [
           "Cada mascota tiene dos mundos separados:",
-          "1) QR de emergencia (público): igual que personas/objetos. Si alguien encuentra a tu mascota, escanea y te contacta.",
+          "1) QR de emergencia (público): si alguien encuentra a tu mascota, escanea, te contacta y —si lo cargaste— puede descargar un PDF clínico opcional.",
           "2) Libreta sanitaria (privada): vacunas, desparasitaciones, visitas e indicaciones. Solo la ves vos logueado en el panel.",
         ],
       },
@@ -293,16 +314,16 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         bullets: [
           "Abrir libreta sanitaria: entra al historial clínico completo.",
           "Ver perfil público: vista previa del QR de emergencia (contacto del dueño).",
-          "Editar datos: foto, contactos e instrucciones del perfil QR.",
+          "Editar datos: foto, contactos, instrucciones y PDF clínico opcional del perfil QR.",
           "Ver QR: descarga del QR de emergencia para la chapita.",
         ],
       },
       {
         id: "mascotas-publico",
-        title: "Qué NO aparece en el QR público de la mascota",
+        title: "Qué aparece (y qué no) en el QR público de la mascota",
         paragraphs: [
-          "Quien escanea el QR de emergencia de la mascota ve cómo contactarte al dueño, pero no ve la libreta sanitaria, vacunas ni visitas veterinarias.",
-          "Esa información solo está en tu panel, dentro de la libreta.",
+          "Quien escanea el QR de emergencia de la mascota ve cómo contactarte al dueño, las instrucciones que cargaste y, si lo subiste, un botón para descargar el PDF clínico.",
+          "No ve la libreta sanitaria completa (vacunas, visitas ni el historial del panel). Esa información solo está en tu cuenta, dentro de la libreta.",
         ],
       },
     ],
