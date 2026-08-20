@@ -1,6 +1,6 @@
 # Términos y Condiciones de Uso — SOSme
 
-**Versión:** 1.1  
+**Versión:** 1.2  
 **Fecha de vigencia:** 20 de agosto de 2026  
 **Última actualización:** 20 de agosto de 2026
 
@@ -88,7 +88,7 @@ Para crear una cuenta de Tutor debés:
 
 El Operador puede suspender o cancelar cuentas que incumplan estos Términos o que representen riesgo para terceros o para el Servicio.
 
-**Eliminación de cuenta:** al día de la vigencia de estos Términos, el Servicio **no ofrece eliminación automática de cuenta desde la interfaz de usuario**. Podés solicitar la baja y eliminación de tus datos conforme a la [Política de Retención y Eliminación de Datos](/retencion-datos), enviando un email a **somososme@gmail.com**. Procesaremos la solicitud en un plazo razonable, generalmente dentro de los **30 días hábiles**.
+**Eliminación de cuenta:** el usuario puede solicitar la eliminación definitiva de su cuenta y el borrado de sus datos en cualquier momento, utilizando la opción correspondiente dentro de su panel de control. El procedimiento y los plazos se detallan en la [Política de Retención y Eliminación de Datos](/retencion-datos). También podés escribir a **somososme@gmail.com** si necesitás asistencia.
 
 ## 6. Perfiles QR y exposición de datos
 
@@ -208,9 +208,9 @@ En el caso excepcional de un cierre definitivo de la plataforma, SOSme se compro
 
 **Recuperación de datos:** Durante dicho período de gracia de 60 días, los usuarios tendrán garantizado el acceso a su panel para descargar y respaldar cualquier información, historial o archivo que hayan cargado en el sistema.
 
-**Servicio Básico y Hardware:** El pago inicial realizado por el usuario corresponde exclusivamente a la compra del producto físico (chapita, credencial, sticker, etc.). El acceso al plan "SOSme Básico" se bonifica sin costo de mantenimiento mensual. Por lo tanto, el cierre definitivo del servicio digital no generará derecho a reclamos, devoluciones ni resarcimientos económicos por el producto físico ni por la interrupción de las funciones gratuitas.
+**Plan Inicial y Hardware:** El pago inicial realizado por el usuario corresponde exclusivamente a la compra del producto físico (chapita, credencial, sticker, etc.). El acceso al plan **"Inicial"** (plan gratuito de la plataforma) se bonifica sin costo de mantenimiento mensual. Por lo tanto, el cierre definitivo del servicio digital no generará derecho a reclamos, devoluciones ni resarcimientos económicos por el producto físico ni por la interrupción de las funciones gratuitas.
 
-**Suscripciones Premium:** Si al momento de efectuarse el cierre de la plataforma un usuario contara con una suscripción paga anual activa ("SOSme Pro"), la empresa procederá a reembolsar el importe equivalente de manera estrictamente proporcional a los meses no utilizados de dicha suscripción.
+**Planes pagos:** Si al momento de efectuarse el cierre de la plataforma un usuario contara con un plan pago activo (por ejemplo, **"Ampliado"** u otro plan con cobro periódico), la empresa procederá a reembolsar el importe equivalente de manera estrictamente proporcional a los meses no utilizados de dicho período de facturación.
 
 ## 16. Ley aplicable y jurisdicción
 

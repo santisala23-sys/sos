@@ -1,8 +1,8 @@
 # Política de Privacidad — SOSme
 
-**Versión:** 1.0  
-**Fecha de vigencia:** 30 de junio de 2026  
-**Última actualización:** 30 de junio de 2026
+**Versión:** 1.1  
+**Fecha de vigencia:** 20 de agosto de 2026  
+**Última actualización:** 20 de agosto de 2026
 
 ## Índice
 
@@ -66,7 +66,8 @@ Tratamos datos con licitud, lealtad, finalidad determinada, proporcionalidad, ca
 | **Perfil QR — identificación** | Nombre beneficiario, slug, tipo (persona/mascota/objeto), estado activo | Beneficiario / Tutor | Perfil público QR, alertas | Ejecución; legitimación del Tutor | Mientras el perfil exista + backups según retención | Público que escanea; encargados |
 | **Perfil QR — contacto** | Nombre/teléfono contacto emergencia y secundario | Contactos / Tutor | Asistencia, llamadas | Ejecución; consentimiento del Tutor | Igual que perfil | Escáneres; Tutor; webhook si configurado |
 | **Perfil QR — asistencia** | Instrucciones de ayuda | Beneficiario / Tutor | Vista pública | Ejecución | Igual que perfil | Escáneres |
-| **Datos sensibles de salud** | Alergias, notas médicas, tipo de sangre, PDF clínico (BYTEA ≤5 MB) | Beneficiario | Emergencia, información médica | **Consentimiento expreso** | Igual que perfil | Escáneres con sesión; Tutor; admin autorizado |
+| **Datos sensibles de salud (persona)** | Alergias, condiciones/medicación, tipo de sangre, obra social / prepaga (solo texto) | Beneficiario | Emergencia, información médica | **Consentimiento expreso** | Igual que perfil | Escáneres; Tutor; admin autorizado |
+| **Archivo clínico (mascota)** | PDF clínico opcional (BYTEA ≤5 MB) | Tutor / dueño | Información veterinaria en emergencia | Consentimiento del Tutor | Igual que perfil | Escáneres con sesión; Tutor; admin autorizado |
 | **Escaneo (`scan_log`)** | Fecha/hora, tipo scan/SOS, User-Agent, lat/long opcional, nota escáner | Escáner (indirecto) | Alertas, historial Tutor, seguridad | Interés legítimo; consentimiento (GPS) | **24 meses** desde el evento (ver retención) | Tutor; admin; webhook |
 | **Chat (`scan_messages`)** | Mensajes público ↔ tutor por evento | Escáner / Tutor | Comunicación durante incidente | Ejecución del servicio | **24 meses** o hasta eliminación del scan_log | Tutor; Escáner con sesión |
 | **Sesión escaneo** | JWT 48h en localStorage + cookie por slug | Escáner | Autorizar chat, PDF, push escáner | Ejecución | **48 horas** | Solo dispositivo del escáner |
@@ -104,13 +105,16 @@ Tus datos pueden almacenarse y procesarse en **Estados Unidos** y otras jurisdic
 Medidas implementadas incluyen:
 
 - Contraseñas con hash **bcrypt**; JWT en cookie **httpOnly** (Tutor, 7 días)
-- PDF clínico solo con token de sesión de escaneo válido
+- PDF clínico (solo perfiles de mascota) accesible con token de sesión de escaneo válido
+- Números de teléfono de contacto no expuestos en texto plano en el HTML público; se revelan bajo demanda en el servidor
 - IPs almacenadas como **hash SHA-256** (no IP en claro en logs)
 - Rate limiting y auditoría de eventos de seguridad
 - Panel admin restringido a emails en `ADMIN_EMAILS`
 - HTTPS en producción
 
 Ningún sistema es 100% seguro. Notificanos incidentes a **somososme@gmail.com**.
+
+**Archivos adjuntos y perfiles:** la funcionalidad de almacenamiento de archivos adjuntos (como historial clínico en PDF) aplica de manera exclusiva a los perfiles de **Mascotas**. En el caso de perfiles de **Personas**, solo se procesan y exhiben los datos vitales ingresados en formato de texto (por ejemplo alergias, tipo de sangre, condiciones/medicación y obra social).
 
 ## 9. Derechos ARCO y consultas
 
@@ -122,7 +126,7 @@ Podés ejercer **Acceso, Rectificación, Cancelación, Oposición**, revocar con
 
 Respondemos en un plazo máximo de **10 días corridos** (Ley 25.326), prorrogables 5 días si es complejo.
 
-**Eliminación de cuenta:** hoy no hay botón self-service; solicitá baja por email. Ver [Política de Retención](/retencion-datos).
+**Eliminación de cuenta:** podés solicitar la baja desde tu panel de control. Ver [Política de Retención](/retencion-datos).
 
 Autoridad de control: **AAIP** — [www.argentina.gob.ar/aaip](https://www.argentina.gob.ar/aaip)
 
