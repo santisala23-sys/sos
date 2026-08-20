@@ -20,12 +20,12 @@ import type {
   AdminTopEndpoint,
   AdminStatusBreakdown,
   AdminUserRow,
-  AdminProfileRow,
   AdminScanRow,
   ApiRequestLogRow,
   SecurityAuditRow,
 } from "@/lib/db/queries";
 import { formatDateTime } from "@/lib/utils/format";
+import { AdminActiveQrsPanel } from "@/components/admin/AdminActiveQrsPanel";
 import {
   AdminDetailPanel,
   type AdminDetailTarget,
@@ -145,13 +145,13 @@ export function AdminDashboard() {
   const [topEndpoints, setTopEndpoints] = useState<AdminTopEndpoint[]>([]);
   const [statusBreakdown, setStatusBreakdown] = useState<AdminStatusBreakdown[]>([]);
   const [users, setUsers] = useState<AdminUserRow[]>([]);
-  const [profiles, setProfiles] = useState<AdminProfileRow[]>([]);
   const [scanLogs, setScanLogs] = useState<AdminScanRow[]>([]);
   const [apiLogs, setApiLogs] = useState<ApiRequestLogRow[]>([]);
   const [securityLogs, setSecurityLogs] = useState<SecurityAuditRow[]>([]);
   const [apiErrorsOnly, setApiErrorsOnly] = useState(false);
   const [search, setSearch] = useState("");
   const [detail, setDetail] = useState<AdminDetailTarget | null>(null);
+  const [profilesRefreshKey, setProfilesRefreshKey] = useState(0);
 
   const loadOverview = useCallback(async () => {
     const res = await fetch("/api/admin/stats");
@@ -174,8 +174,8 @@ export function AdminDashboard() {
         const res = await fetch("/api/admin/users");
         if (res.ok) setUsers((await res.json()).users ?? []);
       } else if (tab === "profiles") {
-        const res = await fetch("/api/admin/profiles");
-        if (res.ok) setProfiles((await res.json()).profiles ?? []);
+        setLoading(false);
+        return;
       } else if (tab === "activity") {
         const res = await fetch("/api/admin/scan-logs");
         if (res.ok) setScanLogs((await res.json()).logs ?? []);
@@ -214,9 +214,12 @@ export function AdminDashboard() {
   const pageDescription =
     tab === "overview"
       ? "Métricas en tiempo real de usuarios, escaneos, API y alertas."
-      : "Gestioná usuarios, tienda, plantillas, escaneos y auditoría de seguridad.";
+      : tab === "profiles"
+        ? "QRs activos de toda la plataforma: tutor, user, tag, filtros y formato."
+        : "Gestioná usuarios, tienda, plantillas, escaneos y auditoría de seguridad.";
   const showSearch =
     tab !== "overview" &&
+    tab !== "profiles" &&
     tab !== "templates" &&
     tab !== "batches" &&
     tab !== "store" &&
@@ -243,7 +246,13 @@ export function AdminDashboard() {
             actions={
               <button
                 type="button"
-                onClick={() => loadTab()}
+                onClick={() => {
+                  if (tab === "profiles") {
+                    setProfilesRefreshKey((k) => k + 1);
+                  } else {
+                    loadTab();
+                  }
+                }}
                 className={adminUi.refreshBtn}
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
@@ -414,39 +423,11 @@ export function AdminDashboard() {
         </DataTable>
       )}
 
-      {tab === "profiles" && !loading && (
-        <DataTable headers={["Beneficiario", "Slug", "Tutor", "Tipo", "Escaneos", "Estado", "Creado", ""]}>
-          {filterRows(profiles, search, [
-            "beneficiary_name",
-            "slug",
-            "tutor_email",
-          ]).map((p) => (
-            <tr key={p.id} className={adminUi.tableRow}>
-              <td className={`${adminUi.tableCell} font-medium`}>{p.beneficiary_name}</td>
-              <td className={`${adminUi.tableCell} font-mono text-xs text-violet-700`}>/p/{p.slug}</td>
-              <td className="px-4 py-3 text-xs text-neutral-400">{p.tutor_email}</td>
-              <td className="px-4 py-3">{p.profile_type}</td>
-              <td className="px-4 py-3 tabular-nums">{p.scan_count}</td>
-              <td className="px-4 py-3">
-                <span
-                  className={`rounded px-2 py-0.5 text-xs ${
-                    p.is_active
-                      ? "bg-green-100 text-green-800"
-                      : "bg-neutral-100 text-neutral-500"
-                  }`}
-                >
-                  {p.is_active ? "activo" : "inactivo"}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-xs text-neutral-500">
-                {formatDateTime(p.created_at)}
-              </td>
-              <td className="px-4 py-3">
-                <EditButton onClick={() => setDetail({ type: "profile", id: p.id })} />
-              </td>
-            </tr>
-          ))}
-        </DataTable>
+      {tab === "profiles" && (
+        <AdminActiveQrsPanel
+          key={profilesRefreshKey}
+          onManage={(id) => setDetail({ type: "profile", id })}
+        />
       )}
 
       {tab === "templates" && <AdminPrintTemplatesPanel />}
@@ -565,7 +546,10 @@ export function AdminDashboard() {
       <AdminDetailPanel
         target={detail}
         onClose={() => setDetail(null)}
-        onUpdated={loadTab}
+        onUpdated={() => {
+          loadTab();
+          if (tab === "profiles") setProfilesRefreshKey((k) => k + 1);
+        }}
       />
         </div>
       </main>

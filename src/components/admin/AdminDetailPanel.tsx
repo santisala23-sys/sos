@@ -373,13 +373,53 @@ export function AdminDetailPanel({
               </div>
 
               <div className="rounded-xl border border-neutral-100 bg-neutral-50 p-4 text-xs text-neutral-600">
-                <p>Tutor: {profile.tutor_email}</p>
+                <p>
+                  Tutor: {profile.tutor_name?.trim() || "—"} ·{" "}
+                  <span className="font-mono text-violet-700">{profile.tutor_email}</span>
+                </p>
                 <p className="mt-1 font-mono">ID: {profile.id}</p>
                 <p className="mt-1">Slug: /p/{profile.slug}</p>
                 <p className="mt-1">Escaneos: {profile.scan_count}</p>
+                <p className="mt-1">
+                  Tag:{" "}
+                  {profile.tag || profile.partner_name
+                    ? `${profile.tag ?? "Sin etiqueta"}${
+                        profile.partner_name ? ` · ${profile.partner_name}` : ""
+                      }${
+                        profile.activation_code
+                          ? ` · ${profile.activation_code}`
+                          : ""
+                      }`
+                    : "Digital (sin lote)"}
+                </p>
                 {profile.clinical_pdf_filename && (
                   <p className="mt-1">PDF: {profile.clinical_pdf_filename}</p>
                 )}
+              </div>
+
+              <div className="rounded-xl border border-violet-100 bg-violet-50/60 p-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-violet-700">
+                  Descargar formato
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {(
+                    [
+                      "minimal",
+                      "llavero",
+                      "sticker",
+                      "credencial",
+                      "valija",
+                    ] as const
+                  ).map((tpl) => (
+                    <a
+                      key={tpl}
+                      href={`/api/admin/profiles/${profile.id}/export?template=${tpl}&output=png`}
+                      className="rounded-lg border border-violet-200 bg-white px-2.5 py-1.5 text-xs font-medium text-violet-800 hover:bg-violet-100"
+                    >
+                      {tpl}
+                    </a>
+                  ))}
+                </div>
               </div>
 
               <Field label="Beneficiario">
@@ -393,6 +433,23 @@ export function AdminDetailPanel({
                     }))
                   }
                 />
+              </Field>
+
+              <Field label="Tipo de perfil">
+                <select
+                  className={inputClass}
+                  value={profileForm.profile_type ?? profile.profile_type}
+                  onChange={(e) =>
+                    setProfileForm((f) => ({
+                      ...f,
+                      profile_type: e.target.value as AdminProfileRow["profile_type"],
+                    }))
+                  }
+                >
+                  <option value="person">Persona</option>
+                  <option value="pet">Mascota</option>
+                  <option value="object">Objeto</option>
+                </select>
               </Field>
 
               <div className="grid grid-cols-2 gap-3">

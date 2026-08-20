@@ -40,7 +40,7 @@ const NAV_GROUPS: {
     items: [
       { id: "overview", label: "Overview", icon: <BarChart3 className="h-4 w-4" /> },
       { id: "users", label: "Usuarios", icon: <Users className="h-4 w-4" /> },
-      { id: "profiles", label: "Perfiles QR", icon: <QrCode className="h-4 w-4" /> },
+      { id: "profiles", label: "QRs activos", icon: <QrCode className="h-4 w-4" /> },
       { id: "activity", label: "Escaneos", icon: <Activity className="h-4 w-4" /> },
     ],
   },

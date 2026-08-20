@@ -1442,14 +1442,57 @@ export async function listAdminUsers(limit = 100, offset = 0): Promise<AdminUser
 
 export type AdminProfileRow = QrProfile & {
   tutor_email: string;
+  tutor_name: string | null;
   scan_count: number;
+  activation_code: string | null;
+  activation_status: string | null;
+  partner_name: string | null;
+  /** Etiqueta de producto físico (lote), si aplica. */
+  tag: string | null;
+};
+
+export type ListAdminProfilesFilters = {
+  q?: string;
+  isActive?: boolean | null;
+  profileType?: string | null;
+  source?: "all" | "product" | "digital";
 };
 
 export async function listAdminProfiles(
   limit = 100,
   offset = 0,
+  filters: ListAdminProfilesFilters = {},
 ): Promise<AdminProfileRow[]> {
   const sql = getSql();
+  const q = filters.q?.trim().toLowerCase() ?? "";
+  const activeFilter =
+    filters.isActive === true
+      ? sql`AND qp.is_active = TRUE`
+      : filters.isActive === false
+        ? sql`AND qp.is_active = FALSE`
+        : sql``;
+  const typeFilter =
+    filters.profileType && ["person", "pet", "object"].includes(filters.profileType)
+      ? sql`AND qp.profile_type = ${filters.profileType}`
+      : sql``;
+  const sourceFilter =
+    filters.source === "product"
+      ? sql`AND qa.id IS NOT NULL`
+      : filters.source === "digital"
+        ? sql`AND qa.id IS NULL`
+        : sql``;
+  const searchFilter = q
+    ? sql`AND (
+        LOWER(qp.beneficiary_name) LIKE ${`%${q}%`}
+        OR LOWER(qp.slug) LIKE ${`%${q}%`}
+        OR LOWER(u.email) LIKE ${`%${q}%`}
+        OR LOWER(COALESCE(u.full_name, '')) LIKE ${`%${q}%`}
+        OR LOWER(COALESCE(b.product_label, '')) LIKE ${`%${q}%`}
+        OR LOWER(COALESCE(b.partner_name, '')) LIKE ${`%${q}%`}
+        OR LOWER(COALESCE(qa.activation_code, '')) LIKE ${`%${q}%`}
+      )`
+    : sql``;
+
   const rows = await sql`
     SELECT
       qp.id, qp.tutor_id, qp.slug, qp.profile_type, qp.beneficiary_name,
@@ -1459,11 +1502,25 @@ export async function listAdminProfiles(
       qp.clinical_pdf_filename, qp.clinical_pdf_uploaded_at,
       qp.is_active, qp.created_at,
       u.email AS tutor_email,
-      COUNT(sl.id)::int AS scan_count
+      u.full_name AS tutor_name,
+      COUNT(sl.id)::int AS scan_count,
+      qa.activation_code,
+      qa.status AS activation_status,
+      b.partner_name,
+      b.product_label AS tag
     FROM qr_profiles qp
     JOIN users u ON u.id = qp.tutor_id
     LEFT JOIN scan_logs sl ON sl.profile_id = qp.id
-    GROUP BY qp.id, u.email
+    LEFT JOIN qr_activations qa ON qa.profile_id = qp.id
+    LEFT JOIN qr_product_batches b ON b.id = qa.batch_id
+    WHERE 1=1
+    ${activeFilter}
+    ${typeFilter}
+    ${sourceFilter}
+    ${searchFilter}
+    GROUP BY
+      qp.id, u.email, u.full_name,
+      qa.activation_code, qa.status, b.partner_name, b.product_label
     ORDER BY qp.created_at DESC
     LIMIT ${limit} OFFSET ${offset}
   `;
@@ -1675,12 +1732,21 @@ export async function findAdminProfileById(
       qp.clinical_pdf_filename, qp.clinical_pdf_uploaded_at,
       qp.is_active, qp.created_at,
       u.email AS tutor_email,
-      COUNT(sl.id)::int AS scan_count
+      u.full_name AS tutor_name,
+      COUNT(sl.id)::int AS scan_count,
+      qa.activation_code,
+      qa.status AS activation_status,
+      b.partner_name,
+      b.product_label AS tag
     FROM qr_profiles qp
     JOIN users u ON u.id = qp.tutor_id
     LEFT JOIN scan_logs sl ON sl.profile_id = qp.id
+    LEFT JOIN qr_activations qa ON qa.profile_id = qp.id
+    LEFT JOIN qr_product_batches b ON b.id = qa.batch_id
     WHERE qp.id = ${profileId}
-    GROUP BY qp.id, u.email
+    GROUP BY
+      qp.id, u.email, u.full_name,
+      qa.activation_code, qa.status, b.partner_name, b.product_label
     LIMIT 1
   `;
   return (rows[0] as AdminProfileRow | undefined) ?? null;
