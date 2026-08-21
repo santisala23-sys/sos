@@ -205,9 +205,9 @@ export default function ProfileDetailPage() {
             (profile.saved_latitude == null ||
               profile.saved_longitude == null) && (
               <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/40 px-4 py-5 text-sm text-sky-900/80">
-                Todavía no hay una ubicación guardada. Escaneá el QR del objeto y
-                tocá <strong>GUARDAR UBICACIÓN</strong> para marcar dónde lo
-                dejaste.
+                Todavía no hay una ubicación guardada. Desde el panel tocá{" "}
+                <strong>Guardar ubicación</strong> en la tarjeta del objeto, o
+                escaneá el QR y usá la misma opción en la vista pública.
               </div>
             )}
 

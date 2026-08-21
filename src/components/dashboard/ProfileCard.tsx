@@ -2,13 +2,25 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, ExternalLink, Pencil, Trash2, QrCode, X } from "lucide-react";
+import {
+  Eye,
+  ExternalLink,
+  MapPin,
+  Pencil,
+  Trash2,
+  QrCode,
+  X,
+} from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
 import { PROFILE_TYPES } from "@/lib/profile-types";
 import { dashboardHashForProfileType } from "@/lib/dashboard/profile-section-order";
 import { getTutorPublicPreviewUrl } from "@/lib/utils/slug";
+import {
+  geolocationErrorMessage,
+  requestGeolocation,
+} from "@/lib/utils/geolocation";
 import { cn } from "@/lib/utils/cn";
 
 type ProfileCardProps = {
@@ -17,6 +29,8 @@ type ProfileCardProps = {
   defaultShowQr?: boolean;
 };
 
+type SaveLocationPhase = "idle" | "loading" | "success" | "error";
+
 const actionClass =
   "inline-flex items-center justify-center gap-1.5 rounded-lg border border-neutral-300 bg-neutral-100 px-3 py-2 text-sm font-semibold text-neutral-900 transition-colors hover:bg-neutral-200";
 
@@ -24,10 +38,13 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
   const [showQr, setShowQr] = useState(defaultShowQr);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [savePhase, setSavePhase] = useState<SaveLocationPhase>("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
   const typeLabel =
     PROFILE_TYPES.find((t) => t.value === profile.profile_type)?.label ??
     "Persona";
   const previewUrl = getTutorPublicPreviewUrl(profile.id);
+  const isObject = profile.profile_type === "object";
 
   async function handleDelete() {
     setDeleting(true);
@@ -35,6 +52,52 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
     setDeleting(false);
     setConfirmDelete(false);
     onRefresh();
+  }
+
+  async function handleSaveLocation() {
+    if (!isObject || savePhase === "loading") return;
+
+    setSavePhase("loading");
+    setSaveError(null);
+
+    const result = await requestGeolocation();
+    if (!result.ok) {
+      setSaveError(geolocationErrorMessage(result.reason));
+      setSavePhase("error");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/qr-profiles/${profile.id}/saved-locations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latitude: result.latitude,
+          longitude: result.longitude,
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        setSaveError(
+          data.error ??
+            "No pudimos guardar la ubicación. Intentá de nuevo en unos segundos.",
+        );
+        setSavePhase("error");
+        return;
+      }
+
+      setSavePhase("success");
+      onRefresh();
+      window.setTimeout(() => {
+        setSavePhase("idle");
+        setSaveError(null);
+      }, 3500);
+    } catch {
+      setSaveError(
+        "No pudimos guardar la ubicación. Intentá de nuevo en unos segundos.",
+      );
+      setSavePhase("error");
+    }
   }
 
   return (
@@ -126,6 +189,33 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
             <ExternalLink className="h-4 w-4" aria-hidden />
             Ver perfil público
           </a>
+          {isObject && (
+            <>
+              <button
+                type="button"
+                onClick={handleSaveLocation}
+                disabled={savePhase === "loading"}
+                className={cn(
+                  actionClass,
+                  "w-full border-sky-200 bg-sky-50 text-sky-900 hover:bg-sky-100 disabled:cursor-wait disabled:opacity-70",
+                  savePhase === "success" &&
+                    "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-50",
+                )}
+              >
+                <MapPin className="h-4 w-4" aria-hidden />
+                {savePhase === "loading"
+                  ? "Guardando ubicación..."
+                  : savePhase === "success"
+                    ? "Ubicación guardada"
+                    : "Guardar ubicación"}
+              </button>
+              {saveError && (
+                <p className="text-xs text-red-600" role="alert">
+                  {saveError}
+                </p>
+              )}
+            </>
+          )}
           <button
             type="button"
             onClick={() => setShowQr(!showQr)}
