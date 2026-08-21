@@ -91,6 +91,12 @@ export const HELP_FAQ: HelpFaqItem[] = [
     answer:
       "Sí, según tu plan. Si llegaste al límite, el panel te avisa y podés contactarnos para ampliar la cuenta desde la página de contacto.",
   },
+  {
+    id: "faq-cambiar-nombre-tipo",
+    question: "¿Puedo cambiar el nombre o el tipo de un QR después de crearlo?",
+    answer:
+      "No desde el panel: podés editar contactos, instrucciones y el resto de la información, pero no el nombre ni el tipo (Persona, Mascota u Objeto). Si te equivocaste al crearlos, escribinos por los canales de contacto indicando la razón del cambio y a qué valor querés pasar el nombre o el tipo.",
+  },
 ];
 
 export const HELP_MANUAL: HelpManualChapter[] = [
@@ -245,6 +251,15 @@ export const HELP_MANUAL: HelpManualChapter[] = [
           "Sirve para revisar cómo quedó antes de imprimir el QR.",
         ],
       },
+      {
+        id: "qr-editar-nombre-tipo",
+        title: "Editar un perfil: qué sí y qué no",
+        paragraphs: [
+          "Desde Editar perfil podés actualizar contactos, instrucciones, foto, datos de salud (en Personas), PDF clínico (en Mascotas) y activar o desactivar el perfil.",
+          "El nombre del beneficiario y el tipo de QR (Persona, Mascota u Objeto) quedan fijos después de crearlo. No se pueden cambiar desde el panel.",
+          "Si te equivocaste al cargar el nombre o el tipo, escribinos por los canales de contacto con el requerimiento: indicá la razón del cambio y a qué valor querés pasarlo (nombre nuevo y/o tipo correcto).",
+        ],
+      },
     ],
   },
   {
@@ -260,7 +275,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         ],
         bullets: [
           "Ver perfil: detalle completo del perfil en el panel.",
-          "Editar perfil: modificar datos, contactos, médicos e instrucciones.",
+          "Editar perfil: modificar contactos, datos médicos e instrucciones (no el nombre ni el tipo).",
           "Ver perfil público: vista previa de lo que ve quien escanea.",
           "Ver QR / Ocultar QR: muestra el código para descargar o imprimir.",
           "Eliminar perfil: borra el perfil y su QR (acción irreversible).",
@@ -270,11 +285,11 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         id: "personas-formulario",
         title: "Campos del formulario",
         paragraphs: [
-          "Al crear o editar un perfil de persona podés cargar:",
+          "Al crear un perfil de persona cargás tipo, nombre y el resto de los datos. Al editar, el nombre y el tipo ya no se pueden cambiar; sí el resto:",
         ],
         bullets: [
           "Foto de perfil.",
-          "Nombre de la persona beneficiaria.",
+          "Nombre de la persona beneficiaria (solo al crear; después pedilo por contacto si hace falta corregirlo).",
           "Contacto principal y secundario (nombre + teléfono).",
           "Instrucciones de manejo / comportamiento.",
           "Datos de salud en texto: tipo de sangre, alergias, condiciones médicas crónicas / medicación, y obra social / prepaga con N° de socio.",
@@ -314,7 +329,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         bullets: [
           "Abrir libreta sanitaria: entra al historial clínico completo.",
           "Ver perfil público: vista previa del QR de emergencia (contacto del dueño).",
-          "Editar datos: foto, contactos, instrucciones y PDF clínico opcional del perfil QR.",
+          "Editar datos: foto, contactos, instrucciones y PDF clínico opcional del perfil QR (no el nombre ni el tipo).",
           "Ver QR: descarga del QR de emergencia para la chapita.",
         ],
       },
@@ -516,6 +531,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         title: "¿Más dudas?",
         paragraphs: [
           "Escribinos desde la página de contacto si algo no quedó claro o necesitás ayuda con tu cuenta.",
+          "Si necesitás cambiar el nombre o el tipo de un QR porque te equivocaste al crearlo, usá esos mismos canales e indicá la razón y a qué valor querés cambiarlo.",
         ],
       },
     ],

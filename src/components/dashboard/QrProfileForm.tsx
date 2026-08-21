@@ -27,7 +27,7 @@ import { profileHasSensitiveData } from "@/lib/legal/sensitive-data";
 type QrProfileFormProps = {
   profile?: QrProfile;
   defaultProfileType?: ProfileType;
-  /** Si es true, no se puede cambiar el tipo (p. ej. lote de chapitas de mascota). */
+  /** Si es true, no se puede cambiar el tipo (p. ej. lote de chapitas de mascota). En edición siempre queda bloqueado. */
   lockProfileType?: boolean;
   onSuccess: (profile?: QrProfile) => void;
   onCancel?: () => void;
@@ -145,8 +145,12 @@ export function QrProfileForm({
     }
 
     const payload = {
-      profile_type: profileType,
-      beneficiary_name: beneficiaryName,
+      ...(isEditing
+        ? {}
+        : {
+            profile_type: profileType,
+            beneficiary_name: beneficiaryName,
+          }),
       emergency_contact_name: emergencyContactName,
       emergency_contact_phone: emergencyContactPhone,
       secondary_contact_name: secondaryContactName.trim() || null,
@@ -389,7 +393,7 @@ export function QrProfileForm({
         />
       </div>
 
-      {lockProfileType ? (
+      {lockProfileType || isEditing ? (
         <div className={`${sectionClass} flex items-start gap-3`}>
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white">
             <AvatarIcon className="h-5 w-5" aria-hidden />
@@ -404,6 +408,11 @@ export function QrProfileForm({
                   ?.description
               }
             </p>
+            {isEditing && (
+              <p className="mt-1 text-xs text-neutral-500">
+                El tipo de perfil no se puede cambiar.
+              </p>
+            )}
           </div>
         </div>
       ) : (
@@ -468,9 +477,15 @@ export function QrProfileForm({
               required
               value={beneficiaryName}
               onChange={(e) => setBeneficiaryName(e.target.value)}
-              className={inputClass}
+              readOnly={isEditing}
+              className={`${inputClass}${isEditing ? " cursor-not-allowed bg-neutral-100 text-neutral-600" : ""}`}
               placeholder={typeConfig.beneficiaryPlaceholder}
             />
+            {isEditing && (
+              <span className="text-xs text-neutral-500">
+                El nombre no se puede cambiar.
+              </span>
+            )}
           </label>
 
           <label className="flex flex-col gap-1">

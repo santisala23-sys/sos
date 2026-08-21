@@ -50,13 +50,37 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 });
     }
 
-    const resolvedType =
-      body.profile_type && isProfileType(body.profile_type)
-        ? body.profile_type
-        : existing.profile_type;
+    // Tutores no pueden cambiar nombre ni tipo una vez creado el perfil.
+    if (
+      body.profile_type !== undefined &&
+      isProfileType(body.profile_type) &&
+      body.profile_type !== existing.profile_type
+    ) {
+      return NextResponse.json(
+        { error: "No podés cambiar el tipo de perfil" },
+        { status: 403 },
+      );
+    }
+    if (
+      body.beneficiary_name !== undefined &&
+      String(body.beneficiary_name).trim() !== existing.beneficiary_name
+    ) {
+      return NextResponse.json(
+        { error: "No podés cambiar el nombre del perfil" },
+        { status: 403 },
+      );
+    }
+
+    const resolvedType = existing.profile_type;
+
+    const {
+      profile_type: _ignoredType,
+      beneficiary_name: _ignoredName,
+      ...bodyWithoutImmutable
+    } = body;
 
     const patch = {
-      ...body,
+      ...bodyWithoutImmutable,
       ...(body.blood_type !== undefined
         ? {
             blood_type:
@@ -64,9 +88,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
                 ? normalizeBloodType(body.blood_type)
                 : null,
           }
-        : resolvedType !== "person" && body.profile_type
-          ? { blood_type: null }
-          : {}),
+        : {}),
     };
 
     const mergedAllergies =
