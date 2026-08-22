@@ -295,13 +295,13 @@ export default async function HomePage() {
                 Comprás y activás una vez
               </h3>
               <p className="mt-3 text-neutral-600">
-                Ideal si querés collar, chapita o credencial listos para usar.
+                Llevate el producto listo para usar con 1 año de funciones premium de regalo.
               </p>
               <ol className="mt-8 flex-1 space-y-5 text-neutral-700">
                 {[
                   "Pedís el collar, colgante o credencial",
                   "Escaneás el QR una sola vez y te registrás",
-                  "Listo: queda vinculado a tu perfil activo, sin costo de mantenimiento",
+                  "Listo: incluye 1 año de Libreta Sanitaria y red de rescate sin costo de mantenimiento.",
                 ].map((item, i) => (
                   <li key={item} className="flex gap-4">
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-sm font-bold text-neutral-700">
@@ -337,13 +337,13 @@ export default async function HomePage() {
                 Creás la cuenta e imprimís
               </h3>
               <p className="mt-3 text-neutral-600">
-                Perfecto para probar o si preferís armar tu propio QR.
+                Perfecto para armar tu propio QR de emergencia y conocer la plataforma.
               </p>
               <ol className="mt-8 flex-1 space-y-5 text-neutral-700">
                 {[
-                  "Te registrás (1 perfil incluido)",
-                  "Completás los datos de contacto",
-                  "Descargás PNG o imprimís PDF",
+                  "Te registrás (incluye 1 perfil de rescate en el Plan Inicial).",
+                  "Completás tus datos médicos vitales y contactos rápidos.",
+                  "Descargás tu QR sin costo de mantenimiento (funciones premium opcionales).",
                 ].map((item, i) => (
                   <li key={item} className="flex gap-4">
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-sm font-bold text-neutral-700">
