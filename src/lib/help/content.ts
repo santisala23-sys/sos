@@ -38,6 +38,18 @@ export const HELP_FAQ: HelpFaqItem[] = [
       "No. SOSme funciona en el navegador del celular o la computadora. Vos gestionás todo desde el panel web. Quien escanea tu QR también lo hace desde el navegador, sin registrarse.",
   },
   {
+    id: "faq-primera-vez",
+    question: "¿Qué hago la primera vez que inicio sesión?",
+    answer:
+      "Creá tu cuenta o iniciá sesión en sosme.com.ar → entrá al Panel → tocá Agregar persona, Agregar mascota o Agregar objeto → completá contactos e instrucciones → Guardar. En la tarjeta del perfil tocá Ver QR y descargá PNG o PDF para imprimirlo o pegarlo. Si compraste una chapita física, usá Activar mi producto en lugar de crear uno digital nuevo.",
+  },
+  {
+    id: "faq-objeto-ubicacion",
+    question: "¿Cómo funciona el QR de objeto y guardar ubicación?",
+    answer:
+      "Creá un perfil de tipo Objeto (valija, auto, notebook, etc.), descargá el QR e imprimilo o pegalo en el bien. Quien lo encuentre puede contactarte y guardar la ubicación del hallazgo. Vos también podés tocar Guardar ubicación en la tarjeta del objeto desde el panel (por ejemplo si estacionás el auto). Las ubicaciones se ven en el perfil del objeto y con un aviso en el panel principal.",
+  },
+  {
     id: "faq-alertas",
     question: "¿Cuándo recibo una alerta?",
     answer:
@@ -138,6 +150,20 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         paragraphs: [
           "Entrá a sosme.com.ar y tocá Iniciar sesión (arriba a la derecha) o Crear cuenta si todavía no tenés usuario.",
           "Una vez dentro, el menú te lleva a Panel. Esa es tu pantalla principal de tutor.",
+        ],
+      },
+      {
+        id: "acceso-primera-vez",
+        title: "Primera vez: crear tu QR e imprimirlo",
+        paragraphs: [
+          "Si acabás de registrarte y todavía no tenés perfiles, el panel te muestra secciones vacías con botones para empezar.",
+        ],
+        bullets: [
+          "Tocá Agregar persona, Agregar mascota o Agregar objeto según lo que necesites.",
+          "Completá el formulario (nombre, contactos, instrucciones y, en Personas, datos de salud si querés).",
+          "Al guardar, volvés al panel. En la tarjeta del perfil tocá Ver QR.",
+          "Descargá PNG o PDF e imprimilo, o guardalo en el celular para pegarlo después.",
+          "Si compraste una chapita o collar físico, no hace falta crear un QR digital aparte: usá Activar mi producto y ese código queda vinculado a tu cuenta.",
         ],
       },
       {
@@ -432,22 +458,43 @@ export const HELP_MANUAL: HelpManualChapter[] = [
   {
     id: "objetos",
     title: "9. Perfiles de Objetos",
-    summary: "Valijas, autos y equipos con QR de recuperación.",
+    summary: "Valijas, autos y equipos con QR de recuperación y guardado de ubicación.",
     subsections: [
       {
         id: "objetos-funcion",
         title: "Para qué sirven",
         paragraphs: [
-          "Si alguien encuentra tu objeto escaneado, ve cómo contactarte.",
-          "Además, puede guardar la ubicación donde lo encontró. Vos ves ese punto en el panel.",
+          "Un perfil de Objeto es un QR para valijas, autos, notebooks u otros bienes.",
+          "Si alguien lo encuentra y escanea, ve cómo contactarte y puede guardar la ubicación del hallazgo.",
+          "Vos también podés guardar ubicación desde el panel (útil, por ejemplo, al estacionar el auto).",
+        ],
+      },
+      {
+        id: "objetos-crear",
+        title: "Crear, imprimir y pegar el QR",
+        paragraphs: [
+          "Panel → sección Objetos → Agregar objeto.",
+          "Completá nombre o descripción, contacto e instrucciones (qué hacer si lo encuentran).",
+          "Guardá, tocá Ver QR, descargá PNG o PDF e imprimilo o pegalo en el objeto.",
         ],
       },
       {
         id: "objetos-ubicacion",
-        title: "Ubicación guardada",
+        title: "Guardar ubicación",
         paragraphs: [
-          "Cuando un objeto tiene ubicaciones guardadas, aparece un banner en el panel principal.",
-          "Entrá al perfil del objeto para ver el mapa y el detalle de cada ubicación registrada.",
+          "Hay dos formas de registrar un punto en el mapa:",
+        ],
+        bullets: [
+          "Desde el panel: en la tarjeta del objeto tocá Guardar ubicación (usa el GPS de tu dispositivo).",
+          "Desde el QR público: quien encuentra el objeto puede guardar la ubicación del hallazgo al escanear.",
+        ],
+      },
+      {
+        id: "objetos-ver-ubicaciones",
+        title: "Dónde ves las ubicaciones",
+        paragraphs: [
+          "Cuando hay ubicaciones guardadas, aparece un aviso en el panel principal.",
+          "Entrá al perfil del objeto para ver el mapa, el historial de puntos y la última posición registrada.",
         ],
       },
     ],
