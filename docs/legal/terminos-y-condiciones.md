@@ -98,7 +98,6 @@ Al crear un perfil QR, entendés y aceptás que:
 - Los datos configurados como visibles (nombre, instrucciones, alergias, notas médicas, tipo de sangre, obra social u otros campos públicos según el tipo de perfil) **serán expuestos** a quien acceda al perfil
 - Los números de teléfono de contacto **no se muestran en texto plano** en el HTML público; se revelan bajo demanda en el servidor para acciones de llamada o WhatsApp
 - El slug es semi-público: aunque no sea adivinable fácilmente, **no constituye autenticación** ni seguridad por oscuridad
-- El PDF clínico opcional aplica a perfiles de **mascota**. Su descarga pública requiere una sesión de escaneo activa con token válido (48 horas). Aun así, quien escanee el QR y mantenga sesión activa podrá descargarlo si el Tutor lo cargó
 - Podés desactivar un perfil (`is_active = false`) para impedir su visualización pública, pero los escaneos previos y logs asociados pueden conservarse según nuestra política de retención
 
 Sos responsable de decidir qué datos incluir en cada perfil y de la colocación física del QR (collar, pulsera, equipaje, etc.).
@@ -117,7 +116,7 @@ Para perfiles de **menores de edad**, solo podés crearlos si sos su padre, madr
 
 ## 8. Datos sensibles de salud
 
-Los perfiles de tipo persona pueden incluir **datos sensibles** según la Ley 25.326 de Protección de Datos Personales de Argentina: alergias, notas médicas / condiciones y medicación, tipo de sangre y obra social / prepaga. Los perfiles de tipo mascota pueden incluir un PDF clínico opcional.
+Los perfiles de tipo persona pueden incluir **datos sensibles** según la Ley 25.326 de Protección de Datos Personales de Argentina: alergias, notas médicas / condiciones y medicación, tipo de sangre y obra social / prepaga. El QR de emergencia de mascota no incluye archivo clínico adjunto; el historial veterinario se gestiona en la libreta sanitaria privada del Tutor.
 
 Al cargar estos datos, declarás contar con **consentimiento expreso** del titular o de quien tenga legitimación para otorgarlo, conforme al [Aviso de Datos Sensibles y Consentimiento](/aviso-datos-sensibles).
 

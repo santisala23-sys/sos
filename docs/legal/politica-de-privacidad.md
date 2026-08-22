@@ -67,15 +67,15 @@ Tratamos datos con licitud, lealtad, finalidad determinada, proporcionalidad, ca
 | **Perfil QR — contacto** | Nombre/teléfono contacto emergencia y secundario | Contactos / Tutor | Asistencia, llamadas | Ejecución; consentimiento del Tutor | Igual que perfil | Escáneres; Tutor; webhook si configurado |
 | **Perfil QR — asistencia** | Instrucciones de ayuda | Beneficiario / Tutor | Vista pública | Ejecución | Igual que perfil | Escáneres |
 | **Datos sensibles de salud (persona)** | Alergias, condiciones/medicación, tipo de sangre, obra social / prepaga (solo texto) | Beneficiario | Emergencia, información médica | **Consentimiento expreso** | Igual que perfil | Escáneres; Tutor; admin autorizado |
-| **Archivo clínico (mascota)** | PDF clínico opcional (BYTEA ≤5 MB) | Tutor / dueño | Información veterinaria en emergencia | Consentimiento del Tutor | Igual que perfil | Escáneres con sesión; Tutor; admin autorizado |
+| **Libreta sanitaria (mascota)** | Vacunas, visitas, preventivos, adjuntos de visita | Tutor / dueño | Historial veterinario privado | Ejecución del servicio | Igual que perfil | Tutor; veterinario con enlace temporal |
 | **Escaneo (`scan_log`)** | Fecha/hora, tipo scan/SOS, User-Agent, lat/long opcional, nota escáner | Escáner (indirecto) | Alertas, historial Tutor, seguridad | Interés legítimo; consentimiento (GPS) | **24 meses** desde el evento (ver retención) | Tutor; admin; webhook |
 | **Chat (`scan_messages`)** | Mensajes público ↔ tutor por evento | Escáner / Tutor | Comunicación durante incidente | Ejecución del servicio | **24 meses** o hasta eliminación del scan_log | Tutor; Escáner con sesión |
-| **Sesión escaneo** | JWT 48h en localStorage + cookie por slug | Escáner | Autorizar chat, PDF, push escáner | Ejecución | **48 horas** | Solo dispositivo del escáner |
+| **Sesión escaneo** | JWT 48h en localStorage + cookie por slug | Escáner | Autorizar chat y push escáner | Ejecución | **48 horas** | Solo dispositivo del escáner |
 | **Push Tutor** | Endpoint, claves p256dh/auth | Tutor | Notificaciones de alertas | Consentimiento (navegador) | Hasta desuscripción o baja cuenta | Proveedor push del navegador |
 | **Push Escáner** | Endpoint, claves, `scan_log_id` | Escáner | Respuestas del Tutor | Consentimiento | Hasta fin de sesión / 48h / desuscripción | Proveedor push |
 | **Webhook alertas** | Payload JSON: nombre, teléfonos, GPS, notas, URL dashboard | Beneficiario / Tutor / Escáner | Integración n8n/Make u otro | Interés del Operador / Tutor | Depende del receptor externo | Operador del webhook |
 | **Logs API** | Ruta, método, status, duración, hash IP, user_id | Tutor / Escáner | Seguridad, observabilidad | Interés legítimo | **90 días** | Admin; Neon |
-| **Auditoría seguridad** | Login fallido, rate limit, acceso admin, PDF denegado | Usuarios | Prevención fraude | Interés legítimo | **12 meses** | Admin |
+| **Auditoría seguridad** | Login fallido, rate limit, acceso admin | Usuarios | Prevención fraude | Interés legítimo | **12 meses** | Admin |
 | **Rate limiting** | Clave bucket, contador, ventana temporal | — | Protección abuso | Interés legítimo | **24 horas** rolling | Neon |
 | **Consentimientos legales** | `accepted_terms_at`, versión política, consentimiento datos sensibles | Tutor | Prueba de cumplimiento | Obligación legal / consentimiento | **5 años** tras baja | Neon |
 
@@ -105,7 +105,6 @@ Tus datos pueden almacenarse y procesarse en **Estados Unidos** y otras jurisdic
 Medidas implementadas incluyen:
 
 - Contraseñas con hash **bcrypt**; JWT en cookie **httpOnly** (Tutor, 7 días)
-- PDF clínico (solo perfiles de mascota) accesible con token de sesión de escaneo válido
 - Números de teléfono de contacto no expuestos en texto plano en el HTML público; se revelan bajo demanda en el servidor
 - IPs almacenadas como **hash SHA-256** (no IP en claro en logs)
 - Rate limiting y auditoría de eventos de seguridad
@@ -114,7 +113,7 @@ Medidas implementadas incluyen:
 
 Ningún sistema es 100% seguro. Notificanos incidentes a **somososme@gmail.com**.
 
-**Archivos adjuntos y perfiles:** la funcionalidad de almacenamiento de archivos adjuntos (como historial clínico en PDF) aplica de manera exclusiva a los perfiles de **Mascotas**. En el caso de perfiles de **Personas**, solo se procesan y exhiben los datos vitales ingresados en formato de texto (por ejemplo alergias, tipo de sangre, condiciones/medicación y obra social).
+**Perfiles y salud:** en perfiles de **Personas**, los datos de salud se exhiben solo en texto (alergias, tipo de sangre, condiciones/medicación y obra social). En **Mascotas**, el historial clínico se gestiona en la libreta sanitaria privada; el QR de emergencia no incluye PDF adjunto.
 
 ## 9. Derechos ARCO y consultas
 

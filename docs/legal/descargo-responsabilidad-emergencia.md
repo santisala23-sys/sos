@@ -47,7 +47,7 @@ Si vos o alguien más está en **peligro de vida**, sufrís una **emergencia mé
 
 - El **Tutor** es responsable de mantener actualizados los datos del perfil y de colocar el QR de forma visible y apropiada.
 - El **Escáner** debe actuar con criterio y, ante una emergencia real, priorizar el contacto con servicios oficiales.
-- Los **datos médicos** (alergias, medicación, obra social u otros campos de salud en texto; y en mascotas, PDF clínico opcional) son informativos y **no constituyen diagnóstico ni prescripción médica**.
+- Los **datos médicos** (alergias, medicación, obra social u otros campos de salud en texto en perfiles de persona) son informativos y **no constituyen diagnóstico ni prescripción médica**.
 
 ## Limitación
 

@@ -28,7 +28,7 @@
 | 22 | Limitación responsabilidad | Términos §13 | 🟡 Borrador | Revisión abogado (cláusulas adhesión) |
 | 23 | Webhook — responsabilidad operador | Términos §10, Privacidad §6 | 🟢 Documentado | — |
 | 24 | Panel admin — acceso restringido | Privacidad, Registro interno | 🟢 Implementado | Política acceso admin just-in-time |
-| 25 | PDF clínico — acceso restringido | Privacidad §8, código | 🟢 Implementado | — |
+| 25 | Libreta sanitaria mascota (privada) | Privacidad §5, código | 🟢 Implementado | — |
 
 **Leyenda:** 🟢 OK / implementado · 🟡 En progreso o borrador · 🔴 Gap · ⚪ A evaluar
 

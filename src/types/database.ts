@@ -24,8 +24,6 @@ export interface PublicEmergencyProfile {
   blood_type: string | null;
   /** Obra social / prepaga y N° de socio (solo perfiles persona). */
   health_insurance: string | null;
-  clinical_pdf_filename: string | null;
-  clinical_pdf_uploaded_at: string | null;
   is_active: boolean;
   created_at: string;
   avatar_b64?: string | null;

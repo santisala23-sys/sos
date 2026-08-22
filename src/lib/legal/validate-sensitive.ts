@@ -8,7 +8,6 @@ export function validateSensitiveDataConsent(params: {
   medicalNotes?: string | null;
   bloodType?: string | null;
   healthInsurance?: string | null;
-  hasClinicalPdf?: boolean;
   sensitiveDataConsent?: boolean;
   alreadyConsented?: boolean;
 }): string | null {
@@ -19,7 +18,6 @@ export function validateSensitiveDataConsent(params: {
       medicalNotes: params.medicalNotes,
       bloodType: params.bloodType,
       healthInsurance: params.healthInsurance,
-      hasClinicalPdf: params.hasClinicalPdf,
     })
   ) {
     return null;

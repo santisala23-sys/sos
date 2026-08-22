@@ -4,12 +4,10 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import {
   Camera,
-  FileText,
   HeartPulse,
   Package,
   PawPrint,
   Phone,
-  Trash2,
   User,
   Users,
 } from "lucide-react";
@@ -36,23 +34,6 @@ type QrProfileFormProps = {
   createEndpoint?: string;
 };
 
-function readFileAsBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result !== "string") {
-        reject(new Error("No se pudo leer el archivo"));
-        return;
-      }
-      const comma = result.indexOf(",");
-      resolve(comma >= 0 ? result.slice(comma + 1) : result);
-    };
-    reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
-    reader.readAsDataURL(file);
-  });
-}
-
 function dataUrlToAvatarPayload(dataUrl: string): { mime: string; data: string } {
   const semi = dataUrl.indexOf(";");
   const comma = dataUrl.indexOf(",");
@@ -74,11 +55,7 @@ export function QrProfileForm({
 }: QrProfileFormProps) {
   const isEditing = Boolean(profile);
   const [loading, setLoading] = useState(false);
-  const [pdfLoading, setPdfLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [clinicalPdfFilename, setClinicalPdfFilename] = useState(
-    profile?.clinical_pdf_filename ?? null,
-  );
 
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
@@ -130,7 +107,6 @@ export function QrProfileForm({
       medicalNotes,
       bloodType,
       healthInsurance,
-      hasClinicalPdf: profileType === "pet" && Boolean(clinicalPdfFilename),
     }) && !profile?.sensitive_data_consent_at;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -217,81 +193,6 @@ export function QrProfileForm({
 
     setLoading(false);
     onSuccess(data.profile as QrProfile | undefined);
-  }
-
-  async function handlePdfUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file || !profile) return;
-
-    const isPdf =
-      file.type === "application/pdf" ||
-      file.name.toLowerCase().endsWith(".pdf");
-
-    if (!isPdf) {
-      setError("Solo se permiten archivos PDF.");
-      e.target.value = "";
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setError("El PDF no puede superar 5 MB.");
-      e.target.value = "";
-      return;
-    }
-
-    setPdfLoading(true);
-    setError(null);
-
-    try {
-      const data = await readFileAsBase64(file);
-      const res = await fetch(`/api/qr-profiles/${profile.id}/clinical-pdf`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data, filename: file.name }),
-      });
-      const json = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        profile?: QrProfile;
-      };
-
-      if (!res.ok) {
-        setError(json.error ?? "Error al subir el PDF");
-        return;
-      }
-
-      setClinicalPdfFilename(
-        json.profile?.clinical_pdf_filename ?? file.name,
-      );
-    } catch {
-      setError("Error de conexión al subir el PDF. Probá de nuevo.");
-    } finally {
-      setPdfLoading(false);
-      e.target.value = "";
-    }
-  }
-
-  async function handlePdfDelete() {
-    if (!profile) return;
-    setPdfLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch(`/api/qr-profiles/${profile.id}/clinical-pdf`, {
-        method: "DELETE",
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        setError(data.error ?? "Error al eliminar el PDF");
-        return;
-      }
-
-      setClinicalPdfFilename(null);
-    } catch {
-      setError("Error de conexión al eliminar el PDF.");
-    } finally {
-      setPdfLoading(false);
-    }
   }
 
   function handleAvatarSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -650,60 +551,6 @@ export function QrProfileForm({
         </fieldset>
       )}
 
-      {isEditing && profileType === "pet" && typeConfig.showClinicalPdf && (
-        <fieldset className={sectionClass}>
-          <legend className={legendClass}>
-            <FileText className="h-4 w-4 text-violet-600" aria-hidden />
-            Historial clínico PDF (opcional, mascotas)
-          </legend>
-          <p className="mb-3 text-xs text-neutral-500">
-            El veterinario o quien encuentre la mascota puede descargarlo si lo
-            necesita. Máximo 5 MB.
-          </p>
-          {clinicalPdfFilename ? (
-            <div className="flex flex-wrap items-center gap-3">
-              <a
-                href={`/api/qr-profiles/${profile!.id}/clinical-pdf`}
-                className="inline-flex items-center gap-2 text-sm font-medium text-violet-700 hover:underline"
-              >
-                <FileText className="h-4 w-4" aria-hidden />
-                {clinicalPdfFilename}
-              </a>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                disabled={pdfLoading}
-                onClick={handlePdfDelete}
-                className="gap-1 text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4" aria-hidden />
-                Quitar
-              </Button>
-            </div>
-          ) : (
-            <label className="flex flex-col gap-1">
-              <input
-                type="file"
-                accept="application/pdf,.pdf"
-                disabled={pdfLoading}
-                onChange={handlePdfUpload}
-                className="text-sm text-neutral-600 file:mr-3 file:rounded-lg file:border-0 file:bg-violet-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
-              />
-              {pdfLoading && (
-                <span className="text-xs text-neutral-500">Subiendo PDF...</span>
-              )}
-            </label>
-          )}
-        </fieldset>
-      )}
-
-      {!isEditing && profileType === "pet" && typeConfig.showClinicalPdf && (
-        <p className="rounded-lg bg-violet-50 px-4 py-3 text-sm text-violet-900">
-          Después de crear el perfil de mascota podés subir un PDF con su historial clínico.
-        </p>
-      )}
-
       {isEditing && (
         <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
           <input
@@ -756,7 +603,7 @@ export function QrProfileForm({
       <div className="sticky bottom-0 -mx-5 mt-1 flex flex-col-reverse gap-2 border-t border-neutral-200 bg-white/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:flex-row sm:px-8">
         <Button
           type="submit"
-          disabled={loading || pdfLoading}
+          disabled={loading}
           className="flex-1 sm:flex-none"
         >
           {loading

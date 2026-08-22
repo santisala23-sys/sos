@@ -22,11 +22,10 @@ SOSme registra que el QR fue escaneado y **notifica al tutor o familia** respons
 | Botón SOS | Se envía una alerta de urgencia al tutor. **No reemplaza al 911 ni al 107.** |
 | Chat / mensajes | Los mensajes que escribas pueden ser leídos por el tutor. |
 | Notificaciones push | Si las activás, podemos enviarte respuestas del tutor. Podés ignorar este paso. |
-| PDF clínico (solo mascotas) | Solo visible/descargable durante una sesión activa de escaneo (48 h), no por el enlace solo. |
 
 ### Datos que podés ver
 
-Según el tipo de perfil y lo configurado por el tutor, este perfil puede mostrar: nombre del beneficiario, botones de contacto de emergencia, instrucciones, y —en personas— alergias, tipo de sangre, condiciones/medicación y obra social en texto. En mascotas, además, un PDF clínico opcional.
+Según el tipo de perfil y lo configurado por el tutor, este perfil puede mostrar: nombre del beneficiario, botones de contacto de emergencia, instrucciones, y —en personas— alergias, tipo de sangre, condiciones/medicación y obra social en texto. En mascotas, contacto del dueño e instrucciones (sin PDF clínico adjunto).
 
 **No compartas** capturas de pantalla ni datos de este perfil en redes sociales u otros medios sin necesidad.
 

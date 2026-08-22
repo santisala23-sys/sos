@@ -108,8 +108,6 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       medicalNotes: mergedMedicalNotes,
       bloodType: mergedBloodType,
       healthInsurance: mergedHealthInsurance,
-      hasClinicalPdf:
-        resolvedType === "pet" && Boolean(existing.clinical_pdf_filename),
       sensitiveDataConsent: body.sensitiveDataConsent,
       alreadyConsented: Boolean(existing.sensitive_data_consent_at),
     });
@@ -131,8 +129,6 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       patch.allergies = null;
       patch.medical_notes = null;
       patch.blood_type = null;
-    } else if (resolvedType === "person") {
-      /* PDF clínico solo para mascotas; no se borra automáticamente al editar persona. */
     }
 
     if (body.pet_breed !== undefined || body.pet_birth_date !== undefined) {

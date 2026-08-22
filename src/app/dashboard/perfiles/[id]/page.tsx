@@ -11,7 +11,6 @@ import { SavedLocationPanel } from "@/components/dashboard/SavedLocationPanel";
 import { dashboardHashForProfileType } from "@/lib/dashboard/profile-section-order";
 import { PROFILE_TYPES } from "@/lib/profile-types";
 import { getTutorPublicPreviewUrl } from "@/lib/utils/slug";
-import { formatDateTime } from "@/lib/utils/format";
 import {
   getGoogleMapsEmbedUrl,
 } from "@/lib/alerts/send-alert";
@@ -249,18 +248,6 @@ export default function ProfileDetailPage() {
                 )}
               </dl>
             </div>
-          )}
-
-          {profile.profile_type === "pet" && profile.clinical_pdf_filename && (
-            <p className="text-sm text-neutral-600">
-              Historial clínico:{" "}
-              <span className="font-medium text-neutral-900">
-                {profile.clinical_pdf_filename}
-              </span>
-              {profile.clinical_pdf_uploaded_at
-                ? ` · ${formatDateTime(profile.clinical_pdf_uploaded_at)}`
-                : null}
-            </p>
           )}
 
           <div className="flex flex-col gap-3">

@@ -6,10 +6,9 @@ export function profileHasSensitiveData(params: {
   medicalNotes?: string | null;
   bloodType?: string | null;
   healthInsurance?: string | null;
-  hasClinicalPdf?: boolean;
 }): boolean {
   if (params.profileType !== "person") {
-    return Boolean(params.profileType === "pet" && params.hasClinicalPdf);
+    return false;
   }
 
   return (

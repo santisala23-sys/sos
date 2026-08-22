@@ -119,12 +119,6 @@ export function publicThemeStyles(isLight: boolean) {
     sectionHeadingViolet: isLight ? "mb-3 text-lg font-bold uppercase tracking-wide text-violet-700" : "mb-3 text-lg font-bold uppercase tracking-wide text-violet-300",
     bloodType: isLight ? "text-3xl font-black tracking-wide text-violet-900 sm:text-4xl" : "text-3xl font-black tracking-wide text-white sm:text-4xl",
     bloodIcon: isLight ? "h-8 w-8 shrink-0 text-violet-600" : "h-8 w-8 shrink-0 text-violet-300",
-    pdfButton: cn(
-      "flex min-h-[56px] w-full items-center justify-center gap-3 break-words rounded-2xl border-2 px-4 py-4 text-center text-base font-bold shadow-md transition-transform active:scale-[0.98]",
-      isLight
-        ? "border-violet-300 bg-violet-50 text-violet-900 hover:bg-violet-100"
-        : "border-violet-500 bg-violet-950 text-violet-100",
-    ),
     loading: isLight ? "py-8 text-center text-sm text-neutral-500" : "py-8 text-center text-sm text-neutral-400",
     grantedBanner: cn(
       "flex items-center justify-center gap-2 px-4 py-2.5 text-center text-sm font-medium",

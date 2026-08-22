@@ -15,7 +15,7 @@ export const PROFILE_TYPES: {
     value: "pet",
     label: "Mascota",
     description:
-      "Contacto del dueño, instrucciones y PDF clínico opcional si la encuentran.",
+      "Contacto del dueño e instrucciones si la encuentran.",
   },
   {
     value: "object",
@@ -39,7 +39,6 @@ export type ProfileTypeConfig = {
   showMedicalNotes: boolean;
   showBloodType: boolean;
   showHealthInsurance: boolean;
-  showClinicalPdf: boolean;
   allergiesLabel: string;
   medicalNotesLabel: string;
   medicalNotesPlaceholder: string;
@@ -63,7 +62,6 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     showMedicalNotes: true,
     showBloodType: true,
     showHealthInsurance: true,
-    showClinicalPdf: false,
     allergiesLabel: "Alergias",
     medicalNotesLabel: "Condiciones médicas crónicas / Medicación",
     medicalNotesPlaceholder:
@@ -86,7 +84,6 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     showMedicalNotes: false,
     showBloodType: false,
     showHealthInsurance: false,
-    showClinicalPdf: true,
     allergiesLabel: "Alergias o restricciones",
     medicalNotesLabel: "Datos veterinarios (opcional)",
     medicalNotesPlaceholder: "Vacunas, chip, condiciones, veterinario habitual...",
@@ -108,7 +105,6 @@ const CONFIG: Record<ProfileType, ProfileTypeConfig> = {
     showMedicalNotes: false,
     showBloodType: false,
     showHealthInsurance: false,
-    showClinicalPdf: false,
     allergiesLabel: "",
     medicalNotesLabel: "",
     medicalNotesPlaceholder: "",
@@ -151,7 +147,7 @@ export function getActivationTypeCopy(
       title: "Activar QR de mascota",
       subtitle: "Este código es para una chapita o collar.",
       formTitle: "Datos de tu mascota",
-      formHint: "Foto, contactos y, si querés, PDF clínico o cómo acercarse a tu mascota.",
+      formHint: "Foto, contactos e instrucciones si alguien encuentra a tu mascota.",
       loginTitle: "Activá la chapita de tu mascota",
       loginBody:
         "Creá una cuenta o ingresá para vincular este QR a tu mascota. Después, quien la encuentre ve cómo avisarte.",

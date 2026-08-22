@@ -31,7 +31,7 @@ Esta Política establece cuánto tiempo conservamos datos personales en SOSme y 
 | Cuenta Tutor activa | Indefinido mientras uses el servicio | — |
 | Cuenta tras solicitud de baja | Eliminación en **30 días hábiles**; datos residuales en logs hasta plazos abajo | Borrado o anonimización |
 | Perfiles QR | Mientras exista la cuenta o hasta eliminación manual/solicitud | DELETE en cascada |
-| PDF clínico | Mientras exista el perfil | Borrado con perfil |
+| Libreta sanitaria (mascota) | Mientras exista el perfil | Borrado con perfil |
 | `scan_logs` y mensajes asociados | **24 meses** desde `scanned_at` | Job de purga programado (*pendiente implementación*) |
 | Push subscriptions (Tutor) | Hasta desuscripción o baja cuenta | DELETE |
 | Push subscriptions (Escáner) | Hasta **48 h** / fin sesión / CASCADE con scan_log | DELETE |

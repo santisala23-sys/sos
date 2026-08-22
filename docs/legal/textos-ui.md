@@ -38,7 +38,7 @@
 
 ## 2. Checkbox datos sensibles (crear/editar perfil persona)
 
-Mostrar cuando el usuario complete al menos uno de: alergias, notas médicas / condiciones y medicación, tipo de sangre u obra social / prepaga. (El PDF clínico aplica solo a perfiles de mascota; no forma parte del consentimiento de perfil persona.)
+Mostrar cuando el usuario complete al menos uno de: alergias, notas médicas / condiciones y medicación, tipo de sangre u obra social / prepaga.
 
 **Etiqueta (obligatorio si hay datos sensibles):**
 

@@ -14,7 +14,7 @@ Este aviso aplica cuando un **Tutor** carga en un perfil de tipo **persona** dat
 - Tipo de sangre
 - Obra social / prepaga y número de socio
 
-**Archivos adjuntos:** la funcionalidad de almacenamiento de archivos adjuntos (como historial clínico en PDF) aplica de manera exclusiva a los perfiles de **Mascotas**. En el caso de perfiles de **Personas**, solo se procesan y exhiben los datos vitales ingresados en formato de texto.
+**Archivos adjuntos:** el QR de emergencia no incluye historial clínico en PDF. En perfiles de **Personas**, solo se procesan y exhiben datos vitales en texto. En **Mascotas**, el historial veterinario se gestiona en la libreta sanitaria privada del Tutor.
 
 ## 2. Identificación del Operador
 
@@ -27,7 +27,6 @@ Este aviso aplica cuando un **Tutor** carga en un perfil de tipo **persona** dat
 Tratamos estos datos **únicamente** para:
 
 - Mostrarlos en la vista pública del perfil QR cuando esté activo, a quien escanee el código
-- En perfiles de **mascota**, permitir la descarga del PDF clínico opcional a quien tenga una sesión de escaneo válida
 - Incluirlos en alertas al Tutor o en webhooks configurados por el Operador, cuando el flujo del evento lo requiera
 
 **No** utilizamos datos de salud para publicidad, venta a terceros ni elaboración de perfiles comerciales.
@@ -47,8 +46,6 @@ Como Tutor, al marcar el casillero de consentimiento y cargar estos datos, decla
 ## 5. Exposición por diseño del QR
 
 Los datos sensibles cargados en el perfil de **persona** (texto) **serán accesibles** a terceros que escaneen el QR o accedan a la URL pública.
-
-En perfiles de **mascota**, el PDF clínico opcional requiere sesión de escaneo activa, pero sigue estando disponible para quien haya escaneado recientemente.
 
 Evaluá cuidadosamente qué información incluir. Podés omitir campos o desactivar el perfil en cualquier momento.
 

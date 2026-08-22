@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   AlertTriangle,
   Droplet,
-  FileDown,
   HeartPulse,
   MapPin,
   MessageCircle,
@@ -70,12 +69,7 @@ export function EmergencyProfileView({
 
   const locationShared = geoPhase === "granted";
   const isObjectProfile = profile.profile_type === "object";
-  const isPetProfile = profile.profile_type === "pet";
   const typeConfig = getProfileTypeConfig(profile.profile_type);
-  const hasClinicalPdf =
-    isPetProfile &&
-    typeConfig.showClinicalPdf &&
-    Boolean(profile.clinical_pdf_filename);
 
   const triggerScanAlert = useCallback(async () => {
     if (scanTriggered.current) return;
@@ -324,24 +318,6 @@ export function EmergencyProfileView({
     } finally {
       setSosLoading(false);
     }
-  }
-
-  async function downloadClinicalPdf() {
-    const token = scanTokenRef.current;
-    if (!token) return;
-
-    const res = await fetch(`/api/p/${profile.slug}/clinical-pdf`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) return;
-
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = profile.clinical_pdf_filename ?? "historial-clinico.pdf";
-    a.click();
-    URL.revokeObjectURL(url);
   }
 
   if (!mounted) {
@@ -643,24 +619,6 @@ export function EmergencyProfileView({
                 <div className={t.infoInstructions}>{profile.instructions}</div>
               </div>
             </section>
-            )}
-
-            {hasClinicalPdf && scanToken && (
-              <section aria-labelledby="clinical-pdf-heading" className={t.card}>
-                <div className="p-5">
-                  <h2 id="clinical-pdf-heading" className={t.sectionHeadingMuted}>
-                    Historial clínico (PDF)
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={downloadClinicalPdf}
-                    className={t.pdfButton}
-                  >
-                    <FileDown className="h-6 w-6 shrink-0" aria-hidden />
-                    Descargar PDF — {profile.clinical_pdf_filename}
-                  </button>
-                </div>
-              </section>
             )}
           </>
         )}

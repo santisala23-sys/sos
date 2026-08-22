@@ -392,9 +392,6 @@ export function AdminDetailPanel({
                       }`
                     : "Digital (sin lote)"}
                 </p>
-                {profile.clinical_pdf_filename && (
-                  <p className="mt-1">PDF: {profile.clinical_pdf_filename}</p>
-                )}
               </div>
 
               <div className="rounded-xl border border-violet-100 bg-violet-50/60 p-4">
