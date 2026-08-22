@@ -286,8 +286,8 @@ export default async function HomePage() {
           />
 
           <div className="mt-14 grid gap-8 lg:grid-cols-2">
-            <article className="flex flex-col rounded-[2rem] border border-neutral-200 bg-white p-9 shadow-lg">
-              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-neutral-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-neutral-700">
+            <article className="flex flex-col rounded-[2rem] border border-violet-200 bg-white p-9 shadow-xl shadow-violet-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-violet-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-violet-700">
                 <Package className="h-3.5 w-3.5" aria-hidden />
                 Producto físico
               </p>
@@ -304,7 +304,7 @@ export default async function HomePage() {
                   "Listo: incluye 1 año de Libreta Sanitaria y red de rescate sin costo de mantenimiento.",
                 ].map((item, i) => (
                   <li key={item} className="flex gap-4">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-sm font-bold text-neutral-700">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-black text-violet-700">
                       {i + 1}
                     </span>
                     <span className="pt-0.5">{item}</span>
@@ -312,7 +312,11 @@ export default async function HomePage() {
                 ))}
               </ol>
               <a href="#catalogo" className="mt-10 block">
-                <Button variant="secondary" size="lg" className="w-full gap-2">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md hover:from-violet-700 hover:to-indigo-700"
+                >
                   Ver catálogo
                   <ArrowRight className="h-5 w-5" aria-hidden />
                 </Button>
@@ -328,8 +332,8 @@ export default async function HomePage() {
               </p>
             </article>
 
-            <article className="flex flex-col rounded-[2rem] border border-neutral-200 bg-white p-9 shadow-lg">
-              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-neutral-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-neutral-700">
+            <article className="flex flex-col rounded-[2rem] border border-neutral-200 bg-white p-9 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-violet-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-violet-700">
                 <QrCode className="h-3.5 w-3.5" aria-hidden />
                 Perfil digital
               </p>
@@ -346,7 +350,7 @@ export default async function HomePage() {
                   "Descargás tu QR sin costo de mantenimiento (funciones premium opcionales).",
                 ].map((item, i) => (
                   <li key={item} className="flex gap-4">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-sm font-bold text-neutral-700">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-black text-violet-700">
                       {i + 1}
                     </span>
                     <span className="pt-0.5">{item}</span>
@@ -354,7 +358,11 @@ export default async function HomePage() {
                 ))}
               </ol>
               <Link href="/register" className="mt-10 block">
-                <Button variant="secondary" size="lg" className="w-full">
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="w-full bg-violet-50 text-violet-700 hover:bg-violet-100"
+                >
                   Crear perfil
                 </Button>
               </Link>
