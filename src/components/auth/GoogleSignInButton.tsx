@@ -63,7 +63,7 @@ export function GoogleSignInButton({
       size="lg"
       disabled={disabled || loading}
       onClick={handleClick}
-      className="w-full gap-3 rounded-xl border border-neutral-200 bg-white py-3.5 text-base font-semibold text-neutral-800 shadow-sm transition hover:border-neutral-300 hover:bg-neutral-50 hover:shadow-md"
+      className="w-full gap-3 rounded-2xl border border-neutral-200/90 bg-white py-3.5 text-base font-semibold text-neutral-800 shadow-sm transition hover:border-violet-200 hover:bg-violet-50/40 hover:shadow-md focus-visible:ring-violet-200"
     >
       <GoogleIcon />
       {loading ? "Redirigiendo..." : "Continuar con Google"}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Lock, Mail, User } from "lucide-react";
+import { Mail, User } from "lucide-react";
 import {
   GoogleSignInButton,
   startGoogleRegister,
@@ -12,6 +12,7 @@ import {
   LegalAcceptanceModal,
   LegalCheckbox,
 } from "@/components/auth/LegalAcceptanceModal";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
 
@@ -31,11 +32,13 @@ function AuthField({
   children: React.ReactNode;
 }) {
   return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-sm font-semibold text-neutral-800">{label}</span>
+    <label className="flex flex-col gap-2">
+      <span className="text-sm font-semibold tracking-tight text-neutral-800">
+        {label}
+      </span>
       <div className="relative">
         <Icon
-          className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
+          className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
           aria-hidden
         />
         {children}
@@ -44,8 +47,8 @@ function AuthField({
   );
 }
 
-const inputClass =
-  "w-full rounded-xl border border-neutral-200 bg-neutral-50/80 py-3 pl-10 pr-4 text-base text-neutral-900 shadow-sm transition placeholder:text-neutral-400 focus:border-violet-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-violet-100";
+const textInputClass =
+  "w-full rounded-2xl border border-neutral-200/90 bg-white py-3.5 pl-11 pr-4 text-base text-neutral-900 shadow-sm transition placeholder:text-neutral-400 focus:border-violet-400 focus:outline-none focus:ring-4 focus:ring-violet-100";
 
 export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthFormProps) {
   const router = useRouter();
@@ -156,71 +159,78 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
   function renderDivider() {
     if (!googleEnabled) return null;
     return (
-      <div className="flex items-center gap-3 py-1">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
-        <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-neutral-400">
-          o con email
-        </span>
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+      <div className="relative py-1">
+        <div className="absolute inset-0 flex items-center" aria-hidden>
+          <div className="w-full border-t border-neutral-200/90" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-white px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-400">
+            o con email
+          </span>
+        </div>
       </div>
     );
   }
 
+  function renderError() {
+    if (!error) return null;
+    return (
+      <p
+        className="rounded-2xl border border-red-200/90 bg-red-50 px-4 py-3 text-sm leading-relaxed text-red-800"
+        role="alert"
+      >
+        {error}
+      </p>
+    );
+  }
+
+  const submitButtonClass =
+    "w-full rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 py-3.5 text-base font-bold shadow-lg shadow-violet-500/25 transition hover:from-violet-700 hover:to-indigo-700 hover:shadow-violet-500/35 disabled:opacity-60";
+
   if (!isRegister) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
         {googleEnabled && <GoogleSignInButton mode="login" disabled={loading} />}
         {renderDivider()}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <AuthField label="Email" icon={Mail}>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
+              className={textInputClass}
               autoComplete="email"
               placeholder="tu@email.com"
             />
           </AuthField>
 
-          <AuthField label="Contraseña" icon={Lock}>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputClass}
-              autoComplete="current-password"
-              placeholder="••••••••"
-            />
-          </AuthField>
-
-          <div className="flex justify-end">
-            <Link
-              href="/recuperar-contrasena"
-              className="text-sm font-semibold text-violet-700 transition hover:text-violet-900 hover:underline"
-            >
-              Olvidé mi contraseña
-            </Link>
+          <div className="space-y-2">
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold tracking-tight text-neutral-800">
+                Contraseña
+              </span>
+              <PasswordInput
+                value={password}
+                onChange={setPassword}
+                autoComplete="current-password"
+                placeholder="Tu contraseña"
+              />
+            </label>
+            <div className="flex justify-end">
+              <Link
+                href="/recuperar-contrasena"
+                className="text-sm font-semibold text-violet-700 transition hover:text-violet-900 hover:underline"
+              >
+                Olvidé mi contraseña
+              </Link>
+            </div>
           </div>
 
-          {error && (
-            <p
-              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-              role="alert"
-            >
-              {error}
-            </p>
-          )}
+          {renderError()}
 
-          <Button
-            type="submit"
-            size="lg"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/20 hover:from-violet-700 hover:to-indigo-700"
-          >
+          <Button type="submit" size="lg" disabled={loading} className={submitButtonClass}>
             {loading ? "Ingresando..." : "Iniciar sesión"}
           </Button>
         </form>
@@ -230,7 +240,7 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
 
   return (
     <>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
         {googleEnabled && (
           <GoogleSignInButton
             mode="register"
@@ -240,10 +250,10 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
         )}
         {renderDivider()}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="rounded-xl border border-violet-100 bg-gradient-to-r from-violet-50 to-indigo-50 px-4 py-3 text-sm text-violet-900">
-            Después del registro{" "}
-            <strong>escaneá el QR</strong> de tu producto desde el panel.
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div className="rounded-2xl border border-violet-100/90 bg-gradient-to-br from-violet-50 via-white to-indigo-50 px-4 py-3.5 text-sm leading-relaxed text-violet-900">
+            <strong className="font-bold">Después del registro</strong> escaneá el QR de
+            tu producto desde el panel para activarlo.
           </div>
 
           <AuthField label="Nombre completo" icon={User}>
@@ -252,7 +262,7 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className={inputClass}
+              className={textInputClass}
               autoComplete="name"
               placeholder="Ej: María García"
             />
@@ -264,34 +274,34 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
+              className={textInputClass}
               autoComplete="email"
               placeholder="tu@email.com"
             />
           </AuthField>
 
-          <AuthField label="Contraseña" icon={Lock}>
-            <input
-              type="password"
-              required
-              minLength={6}
+          <label className="flex flex-col gap-2">
+            <span className="text-sm font-semibold tracking-tight text-neutral-800">
+              Contraseña
+            </span>
+            <PasswordInput
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputClass}
+              onChange={setPassword}
               autoComplete="new-password"
               placeholder="Mín. 8 caracteres, letra y número"
+              minLength={6}
             />
-          </AuthField>
+          </label>
 
           <fieldset
             className={cn(
-              "flex flex-col gap-3 rounded-2xl border bg-neutral-50/80 p-4 transition-all duration-500",
+              "flex flex-col gap-3 rounded-2xl border bg-neutral-50/70 p-4 transition-all duration-500",
               legalHighlight
                 ? "border-violet-400 shadow-md shadow-violet-500/10"
-                : "border-neutral-200",
+                : "border-neutral-200/90",
             )}
           >
-            <legend className="px-1 text-xs font-bold uppercase tracking-wide text-neutral-700">
+            <legend className="px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-neutral-600">
               Confirmaciones
             </legend>
 
@@ -330,20 +340,13 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
             </LegalCheckbox>
           </fieldset>
 
-          {error && (
-            <p
-              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-              role="alert"
-            >
-              {error}
-            </p>
-          )}
+          {renderError()}
 
           <Button
             type="submit"
             size="lg"
             disabled={loading || googleLoading || !registrationReady}
-            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/20 hover:from-violet-700 hover:to-indigo-700"
+            className={submitButtonClass}
           >
             {loading ? "Creando cuenta..." : "Crear cuenta"}
           </Button>
