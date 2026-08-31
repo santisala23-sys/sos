@@ -9,11 +9,14 @@ import { Button } from "@/components/ui/Button";
 type ActivateCodeInputProps = {
   className?: string;
   buttonLabel?: string;
+  /** Estilos legibles sobre fondos oscuros (panel violeta del dashboard). */
+  onDark?: boolean;
 };
 
 export function ActivateCodeInput({
   className,
   buttonLabel = "Continuar",
+  onDark = false,
 }: ActivateCodeInputProps) {
   const router = useRouter();
   const [code, setCode] = useState("");
@@ -32,7 +35,9 @@ export function ActivateCodeInput({
 
   return (
     <form onSubmit={handleSubmit} className={className}>
-      <label className="block text-sm font-medium text-neutral-700">
+      <label
+        className={`block text-sm font-medium ${onDark ? "text-violet-100" : "text-neutral-700"}`}
+      >
         Código del colgante o etiqueta
         <input
           value={code}
@@ -43,10 +48,16 @@ export function ActivateCodeInput({
           placeholder="Ej. A7K9M2XP"
           autoComplete="off"
           spellCheck={false}
-          className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 font-mono text-base tracking-wider focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
+          className={`mt-1 w-full rounded-xl border px-4 py-3 font-mono text-base tracking-wider focus:outline-none focus:ring-2 ${
+            onDark
+              ? "border-white/30 bg-white/95 text-neutral-900 focus:border-white focus:ring-white/30"
+              : "border-neutral-300 focus:border-violet-500 focus:ring-violet-200"
+          }`}
         />
       </label>
-      <p className="mt-2 text-xs text-neutral-500">
+      <p
+        className={`mt-2 text-xs ${onDark ? "text-violet-200" : "text-neutral-500"}`}
+      >
         Está impreso en la tarjeta, colgante o sticker que te entregaron.
       </p>
       {error && (

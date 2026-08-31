@@ -121,12 +121,12 @@ export async function MarketingFooter({ className = "" }: MarketingFooterProps) 
                 TikTok @{TIKTOK_HANDLE}
               </a>
             </div>
-            <Link href="/register" className="mt-8 inline-block">
+            <Link href="/#catalogo" className="mt-8 inline-block">
               <Button
                 size="lg"
                 className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/30 hover:from-violet-700 hover:to-indigo-700"
               >
-                Crear perfil
+                Ver productos
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
             </Link>

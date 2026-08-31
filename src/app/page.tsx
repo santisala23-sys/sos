@@ -70,21 +70,21 @@ export default async function HomePage() {
               </p>
 
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-                <Link href="/register">
+                <a href="#catalogo">
                   <Button
                     size="lg"
                     className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 px-8 shadow-xl shadow-violet-500/30 hover:from-violet-700 hover:to-indigo-700"
                   >
-                    Crear perfil
+                    Ver productos
                     <ArrowRight className="h-5 w-5" aria-hidden />
                   </Button>
-                </Link>
-                <a href="#catalogo">
-                  <Button variant="secondary" size="lg" className="gap-2 px-8">
-                    <Package className="h-5 w-5" aria-hidden />
-                    Ver productos
-                  </Button>
                 </a>
+                <Link href="/activar">
+                  <Button variant="secondary" size="lg" className="gap-2 px-8">
+                    <QrCode className="h-5 w-5" aria-hidden />
+                    Activar mi producto
+                  </Button>
+                </Link>
               </div>
             </div>
 
@@ -333,47 +333,48 @@ export default async function HomePage() {
             </article>
 
             <article className="flex flex-col rounded-[2rem] border border-neutral-200 bg-white p-9 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-violet-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-violet-700">
+              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-800">
                 <QrCode className="h-3.5 w-3.5" aria-hidden />
-                Perfil digital
+                Ya lo tenés
               </p>
               <h3 className="mt-5 text-2xl font-black text-neutral-900 sm:text-3xl">
-                Creás la cuenta e imprimís
+                Activá tu producto
               </h3>
               <p className="mt-3 text-neutral-600">
-                Perfecto para armar tu propio QR de emergencia y conocer la plataforma.
+                Si ya compraste una chapita, collar o colgante, escaneá el QR del
+                producto para vincularlo a tu cuenta.
               </p>
               <ol className="mt-8 flex-1 space-y-5 text-neutral-700">
                 {[
-                  "Te registrás (incluye 1 perfil de rescate en el Plan Inicial).",
-                  "Completás tus datos médicos vitales y contactos rápidos.",
-                  "Descargás tu QR sin costo de mantenimiento (funciones premium opcionales).",
+                  "Iniciá sesión o creá tu cuenta en SOSme.",
+                  "Escaneá el QR impreso en el producto (o ingresá el código).",
+                  "Completá los datos de emergencia y listo: el mismo QR queda activo para siempre.",
                 ].map((item, i) => (
                   <li key={item} className="flex gap-4">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-black text-violet-700">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-sm font-black text-emerald-700">
                       {i + 1}
                     </span>
                     <span className="pt-0.5">{item}</span>
                   </li>
                 ))}
               </ol>
-              <Link href="/register" className="mt-10 block">
+              <Link href="/activar" className="mt-10 block">
                 <Button
                   variant="ghost"
                   size="lg"
-                  className="w-full bg-violet-50 text-violet-700 hover:bg-violet-100"
+                  className="w-full bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
                 >
-                  Crear perfil
+                  Activar mi producto
                 </Button>
               </Link>
               <p className="mt-4 text-center text-sm text-neutral-500">
-                ¿Necesitás más de 1?{" "}
-                <Link
-                  href="/contacto"
+                ¿Todavía no tenés uno?{" "}
+                <a
+                  href="#catalogo"
                   className="font-semibold text-violet-700 hover:underline"
                 >
-                  Contactanos
-                </Link>
+                  Ver catálogo
+                </a>
               </p>
             </article>
           </div>
@@ -397,27 +398,26 @@ export default async function HomePage() {
               Protegé lo que más importa hoy
             </h2>
             <p className="relative mx-auto mt-5 max-w-2xl text-lg text-violet-100 sm:text-xl">
-              Creá tu perfil en minutos o elegí un producto físico listo
-              para activar.
+              Elegí un producto con QR o activá el que ya compraste.
             </p>
             <div className="relative mt-10 flex flex-wrap justify-center gap-4">
-              <Link href="/register">
+              <a href="#catalogo">
                 <Button
                   size="lg"
                   className="bg-white px-8 text-violet-700 shadow-xl hover:bg-violet-50"
                 >
-                  Empezar
+                  Ver productos
                 </Button>
-              </Link>
-              <a href="#catalogo">
+              </a>
+              <Link href="/activar">
                 <Button
                   size="lg"
                   variant="secondary"
                   className="border-white/30 bg-white/10 px-8 text-white hover:bg-white/20"
                 >
-                  Ver productos
+                  Activar producto
                 </Button>
-              </a>
+              </Link>
             </div>
           </div>
         </section>

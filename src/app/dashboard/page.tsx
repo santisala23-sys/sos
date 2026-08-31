@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Activity,
@@ -26,13 +25,12 @@ import {
   usePushNotifications,
 } from "@/components/dashboard/PushNotificationSetup";
 import { ObjectSavedLocationsBanner } from "@/components/dashboard/ObjectSavedLocationsBanner";
-import { ProfileLimitModal } from "@/components/dashboard/ProfileLimitModal";
+import { ActivateCodeInput } from "@/components/dashboard/ActivateCodeInput";
 import { SectionAddButton } from "@/components/dashboard/SectionAddButton";
 import type { ProfileType } from "@/lib/profile-types";
 import { sortProfileSections } from "@/lib/dashboard/profile-section-order";
 
 export default function DashboardPage() {
-  const router = useRouter();
   const [profiles, setProfiles] = useState<QrProfile[]>([]);
   const [logs, setLogs] = useState<ScanLogWithProfile[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -53,7 +51,6 @@ export default function DashboardPage() {
     canCreateMore: boolean;
   } | null>(null);
   const push = usePushNotifications();
-  const [limitModalOpen, setLimitModalOpen] = useState(false);
 
   const loadData = useCallback(async () => {
     const [profilesRes, logsRes, meRes] = await Promise.all([
@@ -95,8 +92,19 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (window.location.hash === "#activar-producto") {
+    const params = new URLSearchParams(window.location.search);
+    const shouldScan =
+      params.get("escanear") === "1" ||
+      window.location.hash === "#activar-producto";
+    if (shouldScan) {
       setPanelOpen(true);
+      if (params.get("escanear") === "1") {
+        setScannerOpen(true);
+        params.delete("escanear");
+        const nextQuery = params.toString();
+        const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
+        window.history.replaceState(null, "", nextUrl);
+      }
     }
   }, []);
 
@@ -108,7 +116,6 @@ export default function DashboardPage() {
 
   const latestUnread = logs.find((l) => !l.read_at);
   const legalBlocked = legalStatus?.needsAcceptance ?? false;
-  const atProfileLimit = planStatus != null && !planStatus.canCreateMore;
   const activeProfilesCount = loading
     ? null
     : profiles.reduce((acc, p) => (p.is_active ? acc + 1 : acc), 0);
@@ -152,7 +159,7 @@ export default function DashboardPage() {
       icon: UserCircle2,
       emptyTitle: "Todavía no tenés perfiles de persona",
       emptyBody:
-        "Creá un perfil para vos o un familiar con contactos de emergencia y alertas.",
+        "Escaneá el QR de un producto SOSme (chapita, colgante o sticker) para activar un perfil de persona.",
       accent: "rose",
     },
     object: {
@@ -163,7 +170,7 @@ export default function DashboardPage() {
       icon: Package,
       emptyTitle: "Todavía no tenés objetos",
       emptyBody:
-        "Marcá valijas, autos u otros objetos con QR para recuperarlos si se pierden.",
+        "Escaneá el QR de un producto SOSme para activar un perfil de objeto (valija, auto, etc.).",
       accent: "sky",
     },
     pet: {
@@ -173,29 +180,22 @@ export default function DashboardPage() {
         "Libreta sanitaria, vacunas, visitas veterinarias y QR de emergencia.",
       icon: PawPrint,
       emptyTitle: "Todavía no tenés mascotas",
-      emptyBody: (
-        <>
-          Creá un perfil con tipo <strong>Mascota</strong> o activá el QR de un
-          collar/chapita.
-        </>
-      ),
+      emptyBody:
+        "Escaneá el QR del collar, chapita o colgante que compraste para activar la libreta sanitaria y el perfil de emergencia.",
       accent: "teal",
     },
   };
 
   const addProfileLabels: Record<ProfileType, string> = {
-    person: "Agregar persona",
-    object: "Agregar objeto",
-    pet: "Agregar mascota",
+    person: "Activar QR de persona",
+    object: "Activar QR de objeto",
+    pet: "Activar QR de mascota",
   };
 
-  function handleAddProfile(type: ProfileType) {
+  function handleActivateProduct() {
     if (legalBlocked) return;
-    if (atProfileLimit) {
-      setLimitModalOpen(true);
-      return;
-    }
-    router.push(`/dashboard/perfiles/nuevo?tipo=${type}`);
+    setPanelOpen(true);
+    setScannerOpen(true);
   }
 
   const activatedProfile = highlightedSlug
@@ -350,6 +350,16 @@ export default function DashboardPage() {
                       </span>
                     </span>
                   </button>
+                  <div className="mt-4 max-w-md rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
+                    <p className="text-sm font-semibold text-violet-100">
+                      ¿No podés usar la cámara?
+                    </p>
+                    <ActivateCodeInput
+                      className="mt-3"
+                      buttonLabel="Activar con código"
+                      onDark
+                    />
+                  </div>
                 </div>
               )}
             </>
@@ -410,15 +420,14 @@ export default function DashboardPage() {
                 !loading && sectionProfiles.length > 0
                   ? `Tocá para ver ${sectionProfiles.length} perfil${sectionProfiles.length === 1 ? "" : "es"}.`
                   : !loading && sectionProfiles.length === 0
-                    ? "Tocá para ver u agregar perfiles."
+                    ? "Tocá para activar un producto QR."
                     : undefined
               }
               headerAction={
                 !legalBlocked ? (
                   <SectionAddButton
-                    atLimit={atProfileLimit}
                     label={addProfileLabels[sectionType]}
-                    onClick={() => handleAddProfile(sectionType)}
+                    onClick={handleActivateProduct}
                   />
                 ) : undefined
               }
@@ -433,6 +442,14 @@ export default function DashboardPage() {
                   <p className="mt-2 text-sm leading-relaxed text-neutral-600">
                     {meta.emptyBody}
                   </p>
+                  <button
+                    type="button"
+                    onClick={handleActivateProduct}
+                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-violet-700"
+                  >
+                    <QrCode className="h-4 w-4" aria-hidden />
+                    Escanear QR del producto
+                  </button>
                 </div>
               ) : sectionType === "pet" ? (
                 <div className="grid gap-5 lg:grid-cols-2">
@@ -459,11 +476,6 @@ export default function DashboardPage() {
             </DashboardSection>
           );
         })}
-
-      <ProfileLimitModal
-        open={limitModalOpen}
-        onClose={() => setLimitModalOpen(false)}
-      />
 
       {!legalBlocked && <PushDevicesSection push={push} />}
     </main>

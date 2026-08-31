@@ -165,12 +165,12 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
               {service.ctaText}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/register">
+              <Link href="/#catalogo">
                 <Button
                   size="lg"
                   className="bg-white px-8 text-neutral-900 hover:bg-white/95"
                 >
-                  Crear perfil
+                  Ver productos
                 </Button>
               </Link>
               <Link href="/#casos">

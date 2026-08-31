@@ -41,13 +41,13 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-primera-vez",
     question: "¿Qué hago la primera vez que inicio sesión?",
     answer:
-      "Creá tu cuenta o iniciá sesión en sosme.com.ar → entrá al Panel → tocá Agregar persona, Agregar mascota o Agregar objeto → completá contactos e instrucciones → Guardar. En la tarjeta del perfil tocá Ver QR y descargá PNG o PDF para imprimirlo o pegarlo. Si compraste una chapita física, usá Activar mi producto en lugar de crear uno digital nuevo.",
+      "Creá tu cuenta o iniciá sesión en sosme.com.ar → entrá al Panel → tocá el + en Mascotas, Personas u Objetos (o Activar mi producto) → escaneá el QR del producto que compraste → completá contactos e instrucciones → Guardar. Cada perfil requiere un producto SOSme con su propio QR.",
   },
   {
     id: "faq-objeto-ubicacion",
     question: "¿Cómo funciona el QR de objeto y guardar ubicación?",
     answer:
-      "Creá un perfil de tipo Objeto (valija, auto, notebook, etc.), descargá el QR e imprimilo o pegalo en el bien. Quien lo encuentre puede contactarte y guardar la ubicación del hallazgo. Vos también podés tocar Guardar ubicación en la tarjeta del objeto desde el panel (por ejemplo si estacionás el auto). Las ubicaciones se ven en el perfil del objeto y con un aviso en el panel principal.",
+      "Comprá un producto SOSme para objetos (valijas, autos, etc.), activá el QR desde el panel y completá los datos del dueño. Quien lo encuentre puede contactarte y guardar la ubicación del hallazgo. Vos también podés tocar Guardar ubicación en la tarjeta del objeto desde el panel (por ejemplo si estacionás el auto). Las ubicaciones se ven en el perfil del objeto y con un aviso en el panel principal.",
   },
   {
     id: "faq-alertas",
@@ -154,16 +154,15 @@ export const HELP_MANUAL: HelpManualChapter[] = [
       },
       {
         id: "acceso-primera-vez",
-        title: "Primera vez: crear tu QR e imprimirlo",
+        title: "Primera vez: activar tu producto",
         paragraphs: [
-          "Si acabás de registrarte y todavía no tenés perfiles, el panel te muestra secciones vacías con botones para empezar.",
+          "Si acabás de registrarte y compraste un producto SOSme, el panel te muestra secciones vacías con un botón para escanear el QR.",
         ],
         bullets: [
-          "Tocá Agregar persona, Agregar mascota o Agregar objeto según lo que necesites.",
+          "Tocá el + en Mascotas, Personas u Objetos, o Activar mi producto en el bloque violeta.",
+          "Escaneá el QR impreso en el colgante, chapita o sticker (o ingresá el código manualmente).",
           "Completá el formulario (nombre, contactos, instrucciones y, en Personas, datos de salud si querés).",
-          "Al guardar, volvés al panel. En la tarjeta del perfil tocá Ver QR.",
-          "Descargá PNG o PDF e imprimilo, o guardalo en el celular para pegarlo después.",
-          "Si compraste una chapita o collar físico, no hace falta crear un QR digital aparte: usá Activar mi producto y ese código queda vinculado a tu cuenta.",
+          "Al guardar, el mismo QR del producto queda vinculado a tu cuenta para siempre.",
         ],
       },
       {
@@ -224,8 +223,8 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         id: "panel-vacio",
         title: "Secciones vacías",
         paragraphs: [
-          "Personas y Objetos se ocultan si no tenés perfiles creados. Mascotas siempre aparece, aunque esté vacía, para que sepas dónde crear o activar una mascota.",
-          "En cada sección vacía hay un botón Agregar persona / Agregar objeto / Agregar mascota.",
+          "Personas y Objetos se ocultan si no tenés perfiles creados. Mascotas siempre aparece, aunque esté vacía, para que sepas dónde activar una mascota.",
+          "En cada sección vacía hay un botón + para escanear el QR de un producto nuevo.",
         ],
       },
     ],
@@ -245,11 +244,11 @@ export const HELP_MANUAL: HelpManualChapter[] = [
       },
       {
         id: "qr-crear",
-        title: "Crear un perfil y generar el QR",
+        title: "Activar un producto y vincular el QR",
         paragraphs: [
-          "Desde la sección correspondiente, tocá Agregar persona, Agregar objeto o Agregar mascota.",
+          "Desde la sección correspondiente, tocá el + o Activar mi producto y escaneá el QR del producto que compraste.",
           "Completá el formulario con foto, contactos e instrucciones. En Personas sumá datos de salud en texto; en Mascotas el historial clínico se carga después en la libreta sanitaria.",
-          "Al guardar, volvés al panel. En la tarjeta del perfil, tocá Ver QR para verlo, descargar PNG o imprimir PDF.",
+          "Al guardar, el QR físico queda activo. En la tarjeta del perfil podés ver el código y descargar una copia digital si la necesitás.",
         ],
       },
       {
@@ -473,7 +472,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         id: "objetos-crear",
         title: "Crear, imprimir y pegar el QR",
         paragraphs: [
-          "Panel → sección Objetos → Agregar objeto.",
+          "Panel → sección Objetos → tocá + y escaneá el QR del producto.",
           "Completá nombre o descripción, contacto e instrucciones (qué hacer si lo encuentran).",
           "Guardá, tocá Ver QR, descargá PNG o PDF e imprimilo o pegalo en el objeto.",
         ],

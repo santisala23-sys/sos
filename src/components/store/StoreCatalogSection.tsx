@@ -29,10 +29,10 @@ export async function StoreCatalogSection() {
             Sumá al carrito y contactanos por WhatsApp para coordinar pago y envío.
           </p>
           <Link
-            href="/register"
+            href="/activar"
             className="mt-4 inline-block text-sm font-semibold text-violet-700 hover:underline"
           >
-            ¿Preferís imprimir el QR vos mismo? →
+            ¿Ya compraste? Activá tu producto →
           </Link>
         </div>
 
@@ -44,14 +44,14 @@ export async function StoreCatalogSection() {
                 El catálogo se está preparando
               </p>
               <p className="mt-2 text-neutral-600">
-                Mientras tanto podés crear tu perfil digital.
+                Mientras tanto escribinos para coordinar tu pedido.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <Link href="/contacto">
                   <Button variant="secondary">Escribinos</Button>
                 </Link>
-                <Link href="/register">
-                  <Button>Crear perfil</Button>
+                <Link href="/activar">
+                  <Button>Activar producto</Button>
                 </Link>
               </div>
             </div>
