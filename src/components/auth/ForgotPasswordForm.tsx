@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -54,12 +53,6 @@ export function ForgotPasswordForm() {
             enlace para restablecer la contraseña. Revisá también spam.
           </p>
         </div>
-        <Link
-          href="/login"
-          className="inline-flex w-full items-center justify-center rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-800 transition hover:bg-violet-100"
-        >
-          Volver a iniciar sesión
-        </Link>
       </div>
     );
   }
