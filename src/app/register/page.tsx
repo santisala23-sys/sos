@@ -3,7 +3,8 @@ import { AuthPageShell } from "@/components/auth/AuthPageShell";
 
 export const metadata: Metadata = {
   title: "Crear cuenta",
-  description: "Registrate en SOSme con Google o email. Incluye 1 perfil QR.",
+  description:
+    "Registrate en SOSme con Google o email para activar tu producto con QR.",
 };
 
 export const dynamic = "force-dynamic";

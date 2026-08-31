@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Lock, Mail, User } from "lucide-react";
 import {
   GoogleSignInButton,
   startGoogleRegister,
@@ -12,12 +13,39 @@ import {
   LegalCheckbox,
 } from "@/components/auth/LegalAcceptanceModal";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils/cn";
 
 type AuthFormProps = {
   mode: "login" | "register";
   initialError?: string | null;
   redirectTo?: string | null;
 };
+
+function AuthField({
+  label,
+  icon: Icon,
+  children,
+}: {
+  label: string;
+  icon: typeof Mail;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-sm font-semibold text-neutral-800">{label}</span>
+      <div className="relative">
+        <Icon
+          className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
+          aria-hidden
+        />
+        {children}
+      </div>
+    </label>
+  );
+}
+
+const inputClass =
+  "w-full rounded-xl border border-neutral-200 bg-neutral-50/80 py-3 pl-10 pr-4 text-base text-neutral-900 shadow-sm transition placeholder:text-neutral-400 focus:border-violet-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-violet-100";
 
 export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthFormProps) {
   const router = useRouter();
@@ -34,9 +62,6 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
 
   const isRegister = mode === "register";
   const registrationReady = acceptedTerms && declaredEligible;
-
-  const inputClass =
-    "w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-base transition-colors focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -128,24 +153,27 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
 
   const googleEnabled = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
+  function renderDivider() {
+    if (!googleEnabled) return null;
+    return (
+      <div className="flex items-center gap-3 py-1">
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+        <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-neutral-400">
+          o con email
+        </span>
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+      </div>
+    );
+  }
+
   if (!isRegister) {
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         {googleEnabled && <GoogleSignInButton mode="login" disabled={loading} />}
+        {renderDivider()}
 
-        {googleEnabled && (
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-neutral-200" />
-            <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
-              o con email
-            </span>
-            <div className="h-px flex-1 bg-neutral-200" />
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-neutral-700">Email</span>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <AuthField label="Email" icon={Mail}>
             <input
               type="email"
               required
@@ -155,10 +183,9 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
               autoComplete="email"
               placeholder="tu@email.com"
             />
-          </label>
+          </AuthField>
 
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-neutral-700">Contraseña</span>
+          <AuthField label="Contraseña" icon={Lock}>
             <input
               type="password"
               required
@@ -168,19 +195,22 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
               autoComplete="current-password"
               placeholder="••••••••"
             />
-          </label>
+          </AuthField>
 
-          <div className="flex justify-center pt-1">
+          <div className="flex justify-end">
             <Link
               href="/recuperar-contrasena"
-              className="inline-flex items-center justify-center rounded-full border border-violet-200/90 bg-violet-50/80 px-4 py-2 text-sm font-semibold text-violet-800 transition hover:border-violet-300 hover:bg-violet-100"
+              className="text-sm font-semibold text-violet-700 transition hover:text-violet-900 hover:underline"
             >
               Olvidé mi contraseña
             </Link>
           </div>
 
           {error && (
-            <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+            <p
+              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+              role="alert"
+            >
               {error}
             </p>
           )}
@@ -189,9 +219,9 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
             type="submit"
             size="lg"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/20 hover:from-violet-700 hover:to-indigo-700"
           >
-            {loading ? "Procesando..." : "Iniciar sesión"}
+            {loading ? "Ingresando..." : "Iniciar sesión"}
           </Button>
         </form>
       </div>
@@ -200,7 +230,7 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
 
   return (
     <>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         {googleEnabled && (
           <GoogleSignInButton
             mode="register"
@@ -208,27 +238,15 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
             onRegisterClick={handleGoogleRegister}
           />
         )}
+        {renderDivider()}
 
-        {googleEnabled && (
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-neutral-200" />
-            <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
-              o con email
-            </span>
-            <div className="h-px flex-1 bg-neutral-200" />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="rounded-xl border border-violet-100 bg-gradient-to-r from-violet-50 to-indigo-50 px-4 py-3 text-sm text-violet-900">
+            Después del registro{" "}
+            <strong>escaneá el QR</strong> de tu producto desde el panel.
           </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <p className="rounded-lg border border-violet-100 bg-violet-50/80 px-3 py-2 text-xs text-violet-900">
-            Incluye <strong>1 perfil QR</strong>.{" "}
-            <Link href="/contacto" className="font-semibold underline-offset-2 hover:underline">
-              Más perfiles
-            </Link>
-          </p>
-
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-neutral-700">Nombre completo</span>
+          <AuthField label="Nombre completo" icon={User}>
             <input
               type="text"
               required
@@ -238,10 +256,9 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
               autoComplete="name"
               placeholder="Ej: María García"
             />
-          </label>
+          </AuthField>
 
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-neutral-700">Email</span>
+          <AuthField label="Email" icon={Mail}>
             <input
               type="email"
               required
@@ -251,10 +268,9 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
               autoComplete="email"
               placeholder="tu@email.com"
             />
-          </label>
+          </AuthField>
 
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-neutral-700">Contraseña</span>
+          <AuthField label="Contraseña" icon={Lock}>
             <input
               type="password"
               required
@@ -265,17 +281,18 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
               autoComplete="new-password"
               placeholder="Mín. 8 caracteres, letra y número"
             />
-          </label>
+          </AuthField>
 
           <fieldset
-            className={`flex flex-col gap-2 rounded-xl border bg-neutral-50/80 p-3 transition-all duration-500 ${
+            className={cn(
+              "flex flex-col gap-3 rounded-2xl border bg-neutral-50/80 p-4 transition-all duration-500",
               legalHighlight
                 ? "border-violet-400 shadow-md shadow-violet-500/10"
-                : "border-neutral-200"
-            }`}
+                : "border-neutral-200",
+            )}
           >
-            <legend className="px-1 text-xs font-semibold text-neutral-800">
-              Confirmaciones finales
+            <legend className="px-1 text-xs font-bold uppercase tracking-wide text-neutral-700">
+              Confirmaciones
             </legend>
 
             <LegalCheckbox
@@ -294,11 +311,19 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
               highlight={legalHighlight}
             >
               Acepto los{" "}
-              <Link href="/terminos" className="font-semibold text-violet-700 underline-offset-2 hover:underline" target="_blank">
+              <Link
+                href="/terminos"
+                className="font-semibold text-violet-700 underline-offset-2 hover:underline"
+                target="_blank"
+              >
                 Términos y Condiciones
               </Link>{" "}
               y la{" "}
-              <Link href="/privacidad" className="font-semibold text-violet-700 underline-offset-2 hover:underline" target="_blank">
+              <Link
+                href="/privacidad"
+                className="font-semibold text-violet-700 underline-offset-2 hover:underline"
+                target="_blank"
+              >
                 Política de Privacidad
               </Link>{" "}
               de SOSme.
@@ -306,7 +331,10 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
           </fieldset>
 
           {error && (
-            <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+            <p
+              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+              role="alert"
+            >
               {error}
             </p>
           )}
@@ -315,9 +343,9 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
             type="submit"
             size="lg"
             disabled={loading || googleLoading || !registrationReady}
-            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/20 hover:from-violet-700 hover:to-indigo-700"
           >
-            {loading ? "Procesando..." : "Crear cuenta"}
+            {loading ? "Creando cuenta..." : "Crear cuenta"}
           </Button>
         </form>
       </div>
