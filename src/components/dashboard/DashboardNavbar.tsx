@@ -12,7 +12,6 @@ import {
   Package,
   PawPrint,
   QrCode,
-  ShoppingBag,
   UserCircle2,
 } from "lucide-react";
 import type { QrProfile } from "@/types/database";
@@ -246,13 +245,6 @@ export function DashboardNavbar() {
             );
           })}
           <Link
-            href="/#catalogo"
-            className="relative inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-base font-medium text-neutral-600 transition-colors hover:bg-violet-50 hover:text-violet-800"
-          >
-            <ShoppingBag className="h-4 w-4" aria-hidden />
-            Tienda
-          </Link>
-          <Link
             href="/ayuda"
             className={cn(
               "relative inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-base font-medium transition-colors",
@@ -442,14 +434,6 @@ export function DashboardNavbar() {
               >
                 <HelpCircle className="h-5 w-5 shrink-0" aria-hidden />
                 Ayuda
-              </Link>
-              <Link
-                href="/#catalogo"
-                className={drawerLinkClass(false)}
-                onClick={() => setOpen(false)}
-              >
-                <ShoppingBag className="h-5 w-5 shrink-0" aria-hidden />
-                Tienda
               </Link>
               <Link
                 href="/dashboard/perfil"

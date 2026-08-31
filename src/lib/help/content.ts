@@ -174,8 +174,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         bullets: [
           "Panel: pantalla principal con tus perfiles agrupados por tipo.",
           "Actividad: historial de escaneos, alertas SOS y chat con quien escaneó.",
-          "Perfil: datos de tu cuenta, exportar información y solicitar baja.",
-          "Tienda: catálogo de productos físicos SOSme.",
+          "Perfil: datos de tu cuenta, plan, exportar información y solicitar baja.",
           "Ayuda: este centro de preguntas frecuentes y manual.",
         ],
       },

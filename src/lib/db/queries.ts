@@ -1732,6 +1732,42 @@ export async function getAdminStatusBreakdown(): Promise<AdminStatusBreakdown[]>
   return rows as AdminStatusBreakdown[];
 }
 
+export type UserAccountSummary = {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  google_id: string | null;
+  has_password: boolean;
+  created_at: string;
+  updated_at: string;
+  email_verified_at: string | null;
+  deletion_requested_at: string | null;
+};
+
+export async function findUserAccountById(
+  userId: string,
+): Promise<UserAccountSummary | null> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      id,
+      email,
+      full_name,
+      avatar_url,
+      google_id,
+      (password_hash IS NOT NULL) AS has_password,
+      created_at,
+      updated_at,
+      email_verified_at,
+      deletion_requested_at
+    FROM users
+    WHERE id = ${userId}
+    LIMIT 1
+  `;
+  return (rows[0] as UserAccountSummary | undefined) ?? null;
+}
+
 export async function findUserPlanById(
   userId: string,
 ): Promise<{ plan_tier: string; max_profiles: number | null } | null> {
