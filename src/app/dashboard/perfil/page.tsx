@@ -25,6 +25,7 @@ import type { PlanTier } from "@/lib/billing/plans";
 import { PLANS } from "@/lib/billing/plans";
 import { formatDateTime } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
+import { SetPasswordForm } from "@/components/dashboard/SetPasswordForm";
 
 type AuthMethod = "google" | "email" | "google_and_email";
 
@@ -538,10 +539,14 @@ export default function PerfilPage() {
           </h2>
           <div className="mt-4 space-y-3 text-sm text-neutral-600">
             {account?.user.authMethod === "google" && (
-              <p>
-                Iniciás sesión con Google. Para cambiar la contraseña de SOSme
-                no aplica; tu acceso depende de tu cuenta de Google.
-              </p>
+              <>
+                <p>
+                  Iniciás sesión con Google. Podés agregar una contraseña de SOSme
+                  para entrar también con correo y contraseña, sin dejar de usar
+                  Google.
+                </p>
+                <SetPasswordForm onSuccess={() => void loadData()} />
+              </>
             )}
             {account?.user.authMethod === "email" && (
               <p>
@@ -551,7 +556,8 @@ export default function PerfilPage() {
             )}
             {account?.user.authMethod === "google_and_email" && (
               <p>
-                Tu cuenta tiene vinculado Google y también contraseña de SOSme.
+                Tu cuenta tiene vinculado Google y contraseña de SOSme. Podés
+                entrar con cualquiera de los dos métodos.
               </p>
             )}
           </div>
@@ -564,7 +570,7 @@ export default function PerfilPage() {
                 </Button>
               </Link>
             )}
-            <Link href="/ayuda">
+            <Link href="/dashboard/ayuda">
               <Button type="button" variant="secondary" className="gap-2">
                 <HelpCircle className="h-4 w-4" aria-hidden />
                 Centro de ayuda

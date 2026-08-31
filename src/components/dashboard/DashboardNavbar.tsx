@@ -153,6 +153,8 @@ export function DashboardNavbar() {
   const isActividad =
     pathname === "/dashboard/actividad" || isLogDetail;
   const isPerfil = pathname === "/dashboard/perfil";
+  const isAyuda =
+    pathname === "/dashboard/ayuda" || pathname === "/ayuda";
 
   const petProfiles = profiles.filter((p) => p.profile_type === "pet");
   const personProfiles = profiles.filter((p) => p.profile_type === "person");
@@ -161,7 +163,7 @@ export function DashboardNavbar() {
   function isActive(id: (typeof NAV_LINKS)[number]["id"]) {
     if (id === "actividad") return isActividad;
     if (id === "perfil") return isPerfil;
-    return pathname === "/dashboard" && !isActividad && !isPerfil;
+    return pathname === "/dashboard" && !isActividad && !isPerfil && !isAyuda;
   }
 
   function isProfilePath(id: string, suffix = "") {
@@ -245,10 +247,10 @@ export function DashboardNavbar() {
             );
           })}
           <Link
-            href="/ayuda"
+            href="/dashboard/ayuda"
             className={cn(
               "relative inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-base font-medium transition-colors",
-              pathname === "/ayuda"
+              isAyuda
                 ? "bg-violet-100 text-violet-800"
                 : "text-neutral-600 hover:bg-violet-50 hover:text-violet-800",
             )}
@@ -428,8 +430,8 @@ export function DashboardNavbar() {
             <NavSectionLabel>Más</NavSectionLabel>
             <div className="flex flex-col gap-1.5">
               <Link
-                href="/ayuda"
-                className={drawerLinkClass(pathname === "/ayuda")}
+                href="/dashboard/ayuda"
+                className={drawerLinkClass(isAyuda)}
                 onClick={() => setOpen(false)}
               >
                 <HelpCircle className="h-5 w-5 shrink-0" aria-hidden />

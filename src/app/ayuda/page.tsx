@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { HelpPageContent } from "@/components/help/HelpPageContent";
 import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
-import { DashboardNavbar } from "@/components/dashboard/DashboardNavbar";
 import { getSession } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
@@ -13,13 +13,14 @@ export const metadata: Metadata = {
 
 export default async function AyudaPage() {
   const session = await getSession();
-  const loggedIn = Boolean(session);
+  if (session) {
+    redirect("/dashboard/ayuda");
+  }
 
   return (
     <MarketingBackground>
-      {loggedIn ? <DashboardNavbar /> : null}
-      <HelpPageContent loggedIn={loggedIn} />
-      {!loggedIn && <MarketingFooter />}
+      <HelpPageContent />
+      <MarketingFooter />
     </MarketingBackground>
   );
 }

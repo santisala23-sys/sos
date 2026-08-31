@@ -74,6 +74,12 @@ export const HELP_FAQ: HelpFaqItem[] = [
       "En un perfil de Persona: Panel → Personas → Editar perfil → sección Datos de salud → campo «Obra social / prepaga y N° de socio». Quien escanee el QR lo verá en la página de emergencia.",
   },
   {
+    id: "faq-google-contrasena",
+    question: "Entré con Google, ¿puedo agregar contraseña después?",
+    answer:
+      "Sí. Andá a Panel → Perfil → Seguridad y acceso → Crear contraseña. Tu cuenta sigue funcionando con Google y además podés iniciar sesión con tu correo y la contraseña que elijas. No tenés que elegir uno u otro: podés usar los dos.",
+  },
+  {
     id: "faq-activar-producto",
     question: "Compré una chapita o collar, ¿cómo la activo?",
     answer:

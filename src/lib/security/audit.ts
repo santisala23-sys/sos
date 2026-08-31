@@ -10,7 +10,8 @@ export type AuditEventType =
   | "admin_access"
   | "alert_spam_blocked"
   | "pdf_access_denied"
-  | "push_hijack_blocked";
+  | "push_hijack_blocked"
+  | "password_set";
 
 export async function logSecurityAudit(data: {
   eventType: AuditEventType;
