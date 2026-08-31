@@ -31,7 +31,7 @@ import {
   geolocationErrorMessage,
   requestGeolocation,
 } from "@/lib/utils/geolocation";
-import { describePetAge } from "@/lib/utils/pet-age";
+import { describePetAge, normalizePetBirthDateIso } from "@/lib/utils/pet-age";
 
 type EmergencyProfileViewProps = {
   profile: PublicEmergencyProfile;
@@ -73,7 +73,7 @@ export function EmergencyProfileView({
   const isPetProfile = profile.profile_type === "pet";
   const petAgeLabel =
     isPetProfile && profile.pet_birth_date
-      ? describePetAge(profile.pet_birth_date)
+      ? describePetAge(normalizePetBirthDateIso(profile.pet_birth_date) ?? profile.pet_birth_date)
       : null;
   const typeConfig = getProfileTypeConfig(profile.profile_type);
 

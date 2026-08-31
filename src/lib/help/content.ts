@@ -222,7 +222,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         id: "panel-vacio",
         title: "Secciones vacías",
         paragraphs: [
-          "Personas y Objetos se ocultan si no tenés perfiles creados. Mascotas siempre aparece, aunque esté vacía, para que sepas dónde activar una mascota.",
+          "Personas, Objetos y Mascotas siempre aparecen en el panel, aunque estén vacías.",
           "En cada sección vacía hay un botón + para escanear el QR de un producto nuevo.",
         ],
       },

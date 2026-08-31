@@ -128,10 +128,7 @@ export default function DashboardPage() {
     object: objectProfiles.length,
     pet: petProfiles.length,
   };
-  // Personas/Objetos: ocultar si vacíos. Mascotas siempre visible.
-  const orderedSections = sortProfileSections(profileCounts).filter(
-    (type) => type === "pet" || profileCounts[type] > 0,
-  );
+  const orderedSections = sortProfileSections(profileCounts);
 
   const profilesByType: Record<ProfileType, QrProfile[]> = {
     person: personProfiles,

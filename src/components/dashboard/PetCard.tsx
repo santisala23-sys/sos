@@ -16,6 +16,7 @@ import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
 import { getTutorPublicPreviewUrl } from "@/lib/utils/slug";
 import { cn } from "@/lib/utils/cn";
+import { describePetAge } from "@/lib/utils/pet-age";
 
 type PetCardProps = {
   profile: QrProfile;
@@ -30,6 +31,12 @@ export function PetCard({ profile, onRefresh }: PetCardProps) {
   const [deleting, setDeleting] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const previewUrl = getTutorPublicPreviewUrl(profile.id);
+  const petMeta = [
+    profile.pet_breed?.trim(),
+    profile.pet_birth_date ? describePetAge(profile.pet_birth_date) : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   async function handleDelete() {
     setDeleting(true);
@@ -70,6 +77,9 @@ export function PetCard({ profile, onRefresh }: PetCardProps) {
             <h3 className="truncate text-lg font-bold text-neutral-900 sm:text-xl">
               {profile.beneficiary_name}
             </h3>
+            {petMeta && (
+              <p className="mt-1 text-sm font-medium text-teal-800">{petMeta}</p>
+            )}
             <div className="mt-2 flex flex-wrap gap-2">
               <span className="inline-flex rounded-full bg-teal-100 px-2.5 py-1 text-xs font-semibold text-teal-800">
                 Mascota

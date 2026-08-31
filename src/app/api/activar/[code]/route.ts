@@ -15,6 +15,7 @@ import {
   sensitiveConsentFields,
   validateSensitiveDataConsent,
 } from "@/lib/legal/validate-sensitive";
+import { resolveProfileType } from "@/lib/profile-types";
 
 export const GET = withApi(
   { rateLimit: "api" },
@@ -99,7 +100,9 @@ export const POST = withApi(
       return NextResponse.json({ error: "Código no encontrado" }, { status: 404 });
     }
 
-    const resolvedProfileType = activation.profile_type;
+    const resolvedProfileType = resolveProfileType(
+      activation.profile_type ?? body.profile_type,
+    );
     const isPet = resolvedProfileType === "pet";
 
     if (!isPet && !instructions?.trim()) {

@@ -141,6 +141,7 @@ export async function claimActivationForUser(
           emergency_contact_name, emergency_contact_phone,
           secondary_contact_name, secondary_contact_phone,
           instructions, medical_notes, allergies, blood_type,
+          pet_breed, pet_birth_date::text AS pet_birth_date,
           clinical_pdf_filename, clinical_pdf_uploaded_at,
           sensitive_data_consent_at, sensitive_data_consent_version,
           is_active, created_at
