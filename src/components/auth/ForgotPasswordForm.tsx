@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export function ForgotPasswordForm() {
@@ -11,7 +12,7 @@ export function ForgotPasswordForm() {
   const [sent, setSent] = useState(false);
 
   const inputClass =
-    "w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-base transition-colors focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200";
+    "w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base transition-colors focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,14 +43,20 @@ export function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="flex flex-col gap-4 text-center">
-        <p className="rounded-xl bg-violet-50 px-4 py-3 text-sm leading-relaxed text-violet-900">
-          Si existe una cuenta con <strong>{email}</strong>, te enviamos un email
-          con un enlace para restablecer tu contraseña. Revisá también spam.
-        </p>
+      <div className="flex flex-col items-center gap-5 text-center">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
+          <Mail className="h-7 w-7" aria-hidden />
+        </span>
+        <div>
+          <p className="font-bold text-neutral-900">Revisá tu correo</p>
+          <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+            Si existe una cuenta con <strong>{email}</strong>, te enviamos un
+            enlace para restablecer la contraseña. Revisá también spam.
+          </p>
+        </div>
         <Link
           href="/login"
-          className="text-sm font-semibold text-violet-700 underline-offset-2 hover:underline"
+          className="inline-flex w-full items-center justify-center rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-800 transition hover:bg-violet-100"
         >
           Volver a iniciar sesión
         </Link>
@@ -58,13 +65,12 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <p className="text-sm leading-relaxed text-neutral-600">
-        Ingresá el email de tu cuenta y te mandamos un enlace para elegir una
-        contraseña nueva.
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <p className="text-center text-sm leading-relaxed text-neutral-600">
+        Usamos el mismo email que para los códigos de verificación de SOSme.
       </p>
 
-      <label className="flex flex-col gap-1">
+      <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium text-neutral-700">Email</span>
         <input
           type="email"
@@ -78,7 +84,7 @@ export function ForgotPasswordForm() {
       </label>
 
       {error && (
-        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+        <p className="rounded-xl bg-red-50 px-4 py-3 text-center text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
@@ -89,15 +95,8 @@ export function ForgotPasswordForm() {
         disabled={loading}
         className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
       >
-        {loading ? "Enviando..." : "Enviar enlace"}
+        {loading ? "Enviando..." : "Enviar enlace por email"}
       </Button>
-
-      <Link
-        href="/login"
-        className="text-center text-sm font-semibold text-violet-700 underline-offset-2 hover:underline"
-      >
-        Volver a iniciar sesión
-      </Link>
     </form>
   );
 }

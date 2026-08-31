@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { CheckCircle2, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 type ResetPasswordFormProps = {
@@ -18,7 +19,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const [done, setDone] = useState(false);
 
   const inputClass =
-    "w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-base transition-colors focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200";
+    "w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base transition-colors focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -59,13 +60,13 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
   if (!token) {
     return (
-      <div className="flex flex-col gap-4 text-center">
+      <div className="flex flex-col items-center gap-4 text-center">
         <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">
-          El enlace no es válido. Pedí uno nuevo desde iniciar sesión.
+          El enlace no es válido o expiró. Pedí uno nuevo.
         </p>
         <Link
           href="/recuperar-contrasena"
-          className="text-sm font-semibold text-violet-700 underline-offset-2 hover:underline"
+          className="inline-flex w-full items-center justify-center rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-800 transition hover:bg-violet-100"
         >
           Recuperar contraseña
         </Link>
@@ -75,27 +76,28 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
   if (done) {
     return (
-      <div className="flex flex-col gap-4 text-center">
-        <p className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-900">
-          Contraseña actualizada. Te redirigimos a iniciar sesión…
-        </p>
-        <Link
-          href="/login"
-          className="text-sm font-semibold text-violet-700 underline-offset-2 hover:underline"
-        >
-          Ir a iniciar sesión
-        </Link>
+      <div className="flex flex-col items-center gap-5 text-center">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-green-100 text-green-700">
+          <CheckCircle2 className="h-7 w-7" aria-hidden />
+        </span>
+        <div>
+          <p className="font-bold text-neutral-900">¡Listo!</p>
+          <p className="mt-2 text-sm text-neutral-600">
+            Contraseña actualizada. Te redirigimos a iniciar sesión…
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <p className="text-sm leading-relaxed text-neutral-600">
-        Elegí una contraseña nueva para tu cuenta.
-      </p>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="flex items-center justify-center gap-2 rounded-xl bg-violet-50 px-4 py-3 text-sm text-violet-900">
+        <KeyRound className="h-4 w-4 shrink-0" aria-hidden />
+        <span>Mín. 8 caracteres, con letra y número</span>
+      </div>
 
-      <label className="flex flex-col gap-1">
+      <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium text-neutral-700">
           Nueva contraseña
         </span>
@@ -107,11 +109,11 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           onChange={(e) => setPassword(e.target.value)}
           className={inputClass}
           autoComplete="new-password"
-          placeholder="Mín. 8 caracteres, letra y número"
+          placeholder="••••••••"
         />
       </label>
 
-      <label className="flex flex-col gap-1">
+      <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium text-neutral-700">
           Repetir contraseña
         </span>
@@ -128,7 +130,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       </label>
 
       {error && (
-        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+        <p className="rounded-xl bg-red-50 px-4 py-3 text-center text-sm text-red-800" role="alert">
           {error}
         </p>
       )}

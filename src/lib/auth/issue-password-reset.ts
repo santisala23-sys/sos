@@ -15,12 +15,7 @@ export async function issuePasswordReset(params: {
 }): Promise<boolean> {
   const token = generatePasswordResetToken();
   const expiresAt = new Date(Date.now() + PASSWORD_RESET_TTL_MS);
-
-  await setPasswordResetToken(
-    params.userId,
-    hashPasswordResetToken(token),
-    expiresAt,
-  );
+  const tokenHash = hashPasswordResetToken(token);
 
   const resetUrl = `${getAppUrl()}/restablecer-contrasena?token=${encodeURIComponent(token)}`;
   const { subject, html, text } = passwordResetEmail({
@@ -36,5 +31,10 @@ export async function issuePasswordReset(params: {
     text,
   });
 
-  return result.ok;
+  if (!result.ok) {
+    return false;
+  }
+
+  await setPasswordResetToken(params.userId, tokenHash, expiresAt);
+  return true;
 }

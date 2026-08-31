@@ -123,6 +123,7 @@ export type PasswordResetRecord = {
 export async function getPasswordResetRecordByEmail(
   email: string,
 ): Promise<PasswordResetRecord | null> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   const rows = await sql`
     SELECT
@@ -148,6 +149,7 @@ export async function setPasswordResetToken(
   tokenHash: string,
   expiresAt: Date,
 ): Promise<void> {
+  await ensureDeferredMigrations();
   const sql = getSql();
   await sql`
     UPDATE users
