@@ -5,6 +5,10 @@ import { getProfileLimitStatus } from "@/lib/billing/limits";
 import { isProfileType, type ProfileType } from "@/lib/profile-types";
 import { normalizeBloodType } from "@/lib/blood-types";
 import {
+  parsePetBirthDate,
+  parsePetBreed,
+} from "@/lib/pet-weight-validate";
+import {
   sensitiveConsentFields,
   validateSensitiveDataConsent,
 } from "@/lib/legal/validate-sensitive";
@@ -41,6 +45,8 @@ export async function POST(request: Request) {
       profile_type,
       sensitiveDataConsent,
       avatar,
+      pet_breed,
+      pet_birth_date,
     } = body as {
       beneficiary_name?: string;
       emergency_contact_name?: string;
@@ -55,6 +61,8 @@ export async function POST(request: Request) {
       profile_type?: string;
       sensitiveDataConsent?: boolean;
       avatar?: { mime?: string; data?: string } | null;
+      pet_breed?: string | null;
+      pet_birth_date?: string | null;
     };
 
     const resolvedProfileType: ProfileType =
@@ -88,6 +96,32 @@ export async function POST(request: Request) {
     });
     if (consentError) {
       return NextResponse.json({ error: consentError }, { status: 400 });
+    }
+
+    let resolvedPetBreed: string | null = null;
+    let resolvedPetBirthDate: string | null = null;
+    if (isPet) {
+      if (pet_breed !== undefined && pet_breed !== null && pet_breed !== "") {
+        const breed = parsePetBreed(pet_breed);
+        if (typeof breed !== "string") {
+          return NextResponse.json({ error: "Raza inválida" }, { status: 400 });
+        }
+        resolvedPetBreed = breed;
+      }
+      if (
+        pet_birth_date !== undefined &&
+        pet_birth_date !== null &&
+        pet_birth_date !== ""
+      ) {
+        const birth = parsePetBirthDate(pet_birth_date);
+        if (typeof birth !== "string") {
+          return NextResponse.json(
+            { error: "Fecha de nacimiento inválida" },
+            { status: 400 },
+          );
+        }
+        resolvedPetBirthDate = birth;
+      }
     }
 
     const [plan, profileCount] = await Promise.all([
@@ -126,6 +160,8 @@ export async function POST(request: Request) {
       health_insurance: isPet ? null : health_insurance?.trim() || null,
       profile_type: resolvedProfileType,
       ...sensitiveConsentFields(Boolean(sensitiveDataConsent)),
+      pet_breed: isPet ? resolvedPetBreed : null,
+      pet_birth_date: isPet ? resolvedPetBirthDate : null,
     });
 
     if (avatar?.data && avatar?.mime) {

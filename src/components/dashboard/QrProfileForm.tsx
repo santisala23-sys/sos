@@ -98,6 +98,10 @@ export function QrProfileForm({
   const [sensitiveDataConsent, setSensitiveDataConsent] = useState(
     Boolean(profile?.sensitive_data_consent_at),
   );
+  const [petBreed, setPetBreed] = useState(profile?.pet_breed ?? "");
+  const [petBirthDate, setPetBirthDate] = useState(
+    profile?.pet_birth_date ?? "",
+  );
 
   const typeConfig = getProfileTypeConfig(profileType);
   const needsSensitiveConsent =
@@ -154,6 +158,12 @@ export function QrProfileForm({
           : { health_insurance: null }),
       ...(needsSensitiveConsent ? { sensitiveDataConsent } : {}),
       ...(isEditing ? { is_active: isActive } : {}),
+      ...(profileType === "pet"
+        ? {
+            pet_breed: petBreed.trim() || null,
+            pet_birth_date: petBirthDate || null,
+          }
+        : {}),
       ...(avatarChange !== undefined
         ? {
             avatar:
@@ -414,6 +424,43 @@ export function QrProfileForm({
           </label>
         </div>
       </fieldset>
+
+      {profileType === "pet" && (
+        <fieldset className={sectionClass}>
+          <legend className={legendClass}>
+            <PawPrint className="h-4 w-4 text-violet-600" aria-hidden />
+            Datos de la mascota (opcional)
+          </legend>
+          <p className="mb-3 mt-1 text-xs text-neutral-500">
+            Se guardan en la ficha médica y se muestran cuando alguien escanea el QR.
+          </p>
+          <div className="flex flex-col gap-3">
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium">Raza</span>
+              <input
+                value={petBreed}
+                onChange={(e) => setPetBreed(e.target.value)}
+                className={inputClass}
+                placeholder="Ej: Golden Retriever, Mestizo..."
+                maxLength={120}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium">Fecha de nacimiento</span>
+              <input
+                type="date"
+                value={petBirthDate}
+                onChange={(e) => setPetBirthDate(e.target.value)}
+                className={inputClass}
+                max={new Date().toISOString().slice(0, 10)}
+              />
+              <span className="text-xs text-neutral-500">
+                Usamos la fecha para calcular la edad en el perfil público.
+              </span>
+            </label>
+          </div>
+        </fieldset>
+      )}
 
       <fieldset className={sectionClass}>
         <legend className={legendClass}>

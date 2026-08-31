@@ -31,6 +31,7 @@ import {
   geolocationErrorMessage,
   requestGeolocation,
 } from "@/lib/utils/geolocation";
+import { describePetAge } from "@/lib/utils/pet-age";
 
 type EmergencyProfileViewProps = {
   profile: PublicEmergencyProfile;
@@ -69,6 +70,11 @@ export function EmergencyProfileView({
 
   const locationShared = geoPhase === "granted";
   const isObjectProfile = profile.profile_type === "object";
+  const isPetProfile = profile.profile_type === "pet";
+  const petAgeLabel =
+    isPetProfile && profile.pet_birth_date
+      ? describePetAge(profile.pet_birth_date)
+      : null;
   const typeConfig = getProfileTypeConfig(profile.profile_type);
 
   const triggerScanAlert = useCallback(async () => {
@@ -348,6 +354,11 @@ export function EmergencyProfileView({
         <h1 className="mt-4 break-words text-3xl font-black leading-tight tracking-tight sm:text-4xl">
           {profile.beneficiary_name}
         </h1>
+        {isPetProfile && (profile.pet_breed?.trim() || petAgeLabel) && (
+          <p className="mt-2 text-base font-medium text-white/90 sm:text-lg">
+            {[profile.pet_breed?.trim(), petAgeLabel].filter(Boolean).join(" · ")}
+          </p>
+        )}
         {profile.avatar_b64 && (
           <div className="mt-5 flex justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}

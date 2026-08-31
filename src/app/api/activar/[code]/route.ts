@@ -8,6 +8,10 @@ import {
 } from "@/lib/db/queries-activation";
 import { normalizeBloodType } from "@/lib/blood-types";
 import {
+  parsePetBirthDate,
+  parsePetBreed,
+} from "@/lib/pet-weight-validate";
+import {
   sensitiveConsentFields,
   validateSensitiveDataConsent,
 } from "@/lib/legal/validate-sensitive";
@@ -53,6 +57,8 @@ export const POST = withApi(
       profile_type?: string;
       sensitiveDataConsent?: boolean;
       avatar?: { mime?: string; data?: string } | null;
+      pet_breed?: string | null;
+      pet_birth_date?: string | null;
     };
 
     try {
@@ -73,6 +79,8 @@ export const POST = withApi(
       blood_type,
       sensitiveDataConsent,
       avatar,
+      pet_breed,
+      pet_birth_date,
     } = body;
 
     if (
@@ -115,6 +123,32 @@ export const POST = withApi(
       return NextResponse.json({ error: consentError }, { status: 400 });
     }
 
+    let resolvedPetBreed: string | null = null;
+    let resolvedPetBirthDate: string | null = null;
+    if (isPet) {
+      if (pet_breed !== undefined && pet_breed !== null && pet_breed !== "") {
+        const breed = parsePetBreed(pet_breed);
+        if (typeof breed !== "string") {
+          return NextResponse.json({ error: "Raza inválida" }, { status: 400 });
+        }
+        resolvedPetBreed = breed;
+      }
+      if (
+        pet_birth_date !== undefined &&
+        pet_birth_date !== null &&
+        pet_birth_date !== ""
+      ) {
+        const birth = parsePetBirthDate(pet_birth_date);
+        if (typeof birth !== "string") {
+          return NextResponse.json(
+            { error: "Fecha de nacimiento inválida" },
+            { status: 400 },
+          );
+        }
+        resolvedPetBirthDate = birth;
+      }
+    }
+
     const { claimActivationForUser } = await import("@/lib/db/queries-activation");
 
     try {
@@ -130,6 +164,8 @@ export const POST = withApi(
         blood_type: resolvedBloodType,
         profile_type: resolvedProfileType,
         ...sensitiveConsentFields(Boolean(sensitiveDataConsent)),
+        pet_breed: resolvedPetBreed,
+        pet_birth_date: resolvedPetBirthDate,
       });
 
       if (avatar?.data && avatar?.mime && result.profile?.id) {

@@ -454,6 +454,8 @@ export async function createQrProfile(
     is_active?: boolean;
     sensitive_data_consent_at?: string | null;
     sensitive_data_consent_version?: string | null;
+    pet_breed?: string | null;
+    pet_birth_date?: string | null;
   },
 ): Promise<QrProfile> {
   await ensureDeferredMigrations();
@@ -463,7 +465,8 @@ export async function createQrProfile(
       tutor_id, slug, profile_type, beneficiary_name, emergency_contact_name,
       emergency_contact_phone, secondary_contact_name, secondary_contact_phone,
       instructions, medical_notes, allergies, blood_type, health_insurance, is_active,
-      sensitive_data_consent_at, sensitive_data_consent_version
+      sensitive_data_consent_at, sensitive_data_consent_version,
+      pet_breed, pet_birth_date
     )
     VALUES (
       ${data.tutor_id},
@@ -481,7 +484,9 @@ export async function createQrProfile(
       ${data.health_insurance ?? null},
       ${data.is_active ?? true},
       ${data.sensitive_data_consent_at ?? null},
-      ${data.sensitive_data_consent_version ?? null}
+      ${data.sensitive_data_consent_version ?? null},
+      ${data.pet_breed ?? null},
+      ${data.pet_birth_date ?? null}::date
     )
     RETURNING
       id, tutor_id, slug, profile_type, beneficiary_name,

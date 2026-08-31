@@ -119,6 +119,8 @@ export async function claimActivationForUser(
     blood_type?: string | null;
     sensitive_data_consent_at?: string | null;
     sensitive_data_consent_version?: string | null;
+    pet_breed?: string | null;
+    pet_birth_date?: string | null;
   },
 ): Promise<{ profile: QrProfile; activation: QrActivationRow }> {
   const code = normalizeActivationCode(rawCode);
@@ -178,6 +180,8 @@ export async function claimActivationForUser(
     sensitive_data_consent_at: profileData.sensitive_data_consent_at ?? null,
     sensitive_data_consent_version:
       profileData.sensitive_data_consent_version ?? null,
+    pet_breed: profileData.pet_breed ?? null,
+    pet_birth_date: profileData.pet_birth_date ?? null,
   });
 
   const sql = getSql();
