@@ -37,6 +37,9 @@ export async function middleware(request: NextRequest) {
   const isAdmin = pathname.startsWith("/admin");
   const isAuthPage =
     pathname === "/login" || pathname === "/register";
+  const isPasswordRecoveryPage =
+    pathname === "/recuperar-contrasena" ||
+    pathname === "/restablecer-contrasena";
   const isVerifyPage = pathname === "/verificar";
 
   const needsVerification = !!session && session.emailVerified === false;
@@ -60,7 +63,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (needsVerification && (isDashboard || isAdmin || isAuthPage)) {
+  if (
+    needsVerification &&
+    (isDashboard || isAdmin || (isAuthPage && !isPasswordRecoveryPage))
+  ) {
     return NextResponse.redirect(new URL("/verificar", request.url));
   }
 
@@ -71,7 +77,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (isAuthPage && session) {
+  if (isAuthPage && session && !isPasswordRecoveryPage) {
     const url = request.nextUrl.clone();
     const redirect = request.nextUrl.searchParams.get("redirect");
     url.pathname =
@@ -94,5 +100,7 @@ export const config = {
     "/login",
     "/register",
     "/verificar",
+    "/recuperar-contrasena",
+    "/restablecer-contrasena",
   ],
 };

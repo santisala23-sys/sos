@@ -65,6 +65,7 @@ const migrations = [
   "032_pet_profile_ficha.sql",
   "033_slug_nanoid.sql",
   "034_human_health_fields.sql",
+  "035_password_reset.sql",
 ];
 
 for (const file of migrations) {

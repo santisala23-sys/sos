@@ -170,6 +170,15 @@ export function AuthForm({ mode, initialError = null, redirectTo = null }: AuthF
             />
           </label>
 
+          <div className="text-right">
+            <Link
+              href="/recuperar-contrasena"
+              className="text-sm font-semibold text-violet-700 underline-offset-2 hover:underline"
+            >
+              Olvidé mi contraseña
+            </Link>
+          </div>
+
           {error && (
             <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
               {error}

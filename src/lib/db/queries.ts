@@ -107,6 +107,98 @@ export async function markEmailVerified(userId: string): Promise<void> {
   `;
 }
 
+export type PasswordResetRecord = {
+  id: string;
+  email: string;
+  full_name: string | null;
+  password_hash: string | null;
+  google_id: string | null;
+  deleted_at: string | null;
+  deletion_requested_at: string | null;
+  password_reset_token_hash: string | null;
+  password_reset_expires_at: string | null;
+  password_reset_sent_at: string | null;
+};
+
+export async function getPasswordResetRecordByEmail(
+  email: string,
+): Promise<PasswordResetRecord | null> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      id,
+      email,
+      full_name,
+      password_hash,
+      google_id,
+      deleted_at,
+      deletion_requested_at,
+      password_reset_token_hash,
+      password_reset_expires_at::text AS password_reset_expires_at,
+      password_reset_sent_at::text AS password_reset_sent_at
+    FROM users
+    WHERE email = ${email.toLowerCase()}
+    LIMIT 1
+  `;
+  return (rows[0] as PasswordResetRecord | undefined) ?? null;
+}
+
+export async function setPasswordResetToken(
+  userId: string,
+  tokenHash: string,
+  expiresAt: Date,
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    UPDATE users
+    SET
+      password_reset_token_hash = ${tokenHash},
+      password_reset_expires_at = ${expiresAt.toISOString()},
+      password_reset_sent_at = NOW()
+    WHERE id = ${userId}
+  `;
+}
+
+export async function findUserByPasswordResetTokenHash(
+  tokenHash: string,
+): Promise<PasswordResetRecord | null> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      id,
+      email,
+      full_name,
+      password_hash,
+      google_id,
+      deleted_at,
+      deletion_requested_at,
+      password_reset_token_hash,
+      password_reset_expires_at::text AS password_reset_expires_at,
+      password_reset_sent_at::text AS password_reset_sent_at
+    FROM users
+    WHERE password_reset_token_hash = ${tokenHash}
+    LIMIT 1
+  `;
+  return (rows[0] as PasswordResetRecord | undefined) ?? null;
+}
+
+export async function updateUserPassword(
+  userId: string,
+  passwordHash: string,
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    UPDATE users
+    SET
+      password_hash = ${passwordHash},
+      password_reset_token_hash = NULL,
+      password_reset_expires_at = NULL,
+      password_reset_sent_at = NULL,
+      updated_at = NOW()
+    WHERE id = ${userId}
+  `;
+}
+
 export async function findUserByGoogleId(
   googleId: string,
 ): Promise<UserRow | null> {
