@@ -23,6 +23,13 @@ export type ProfileCardTheme = {
   outlineBtn: string;
   outlineIconWrap: string;
   activeOutlineBtn: string;
+  pillPrimary: string;
+  pillPrimaryIcon: string;
+  pillSecondary: string;
+  pillSecondaryIcon: string;
+  pillOutline: string;
+  pillOutlineIcon: string;
+  actionsPanel: string;
 };
 
 export const PROFILE_CARD_THEMES: Record<ProfileType, ProfileCardTheme> = {
@@ -50,7 +57,17 @@ export const PROFILE_CARD_THEMES: Record<ProfileType, ProfileCardTheme> = {
       "border-rose-200/90 bg-rose-50/40 text-rose-800 hover:border-rose-300 hover:bg-rose-50",
     outlineIconWrap: "bg-rose-100/80 text-rose-700",
     activeOutlineBtn:
-      "border-rose-400 bg-rose-100 text-rose-900 ring-2 ring-rose-200",
+      "border-rose-400 bg-rose-100 text-rose-900 ring-rose-200",
+    pillPrimary:
+      "border-rose-300 bg-gradient-to-r from-rose-600 to-pink-600 text-white hover:border-rose-400 hover:from-rose-700 hover:to-pink-700",
+    pillPrimaryIcon: "bg-white/20 text-white",
+    pillSecondary:
+      "border-rose-200 bg-white text-rose-900 hover:border-rose-300 hover:bg-rose-50",
+    pillSecondaryIcon: "bg-rose-100 text-rose-700",
+    pillOutline:
+      "border-rose-200 bg-rose-50/70 text-rose-900 hover:border-rose-300 hover:bg-rose-100",
+    pillOutlineIcon: "bg-rose-100 text-rose-700",
+    actionsPanel: "border-rose-100/80 bg-rose-50/35",
   },
   object: {
     type: "object",
@@ -76,7 +93,17 @@ export const PROFILE_CARD_THEMES: Record<ProfileType, ProfileCardTheme> = {
       "border-sky-200/90 bg-sky-50/40 text-sky-800 hover:border-sky-300 hover:bg-sky-50",
     outlineIconWrap: "bg-sky-100/80 text-sky-700",
     activeOutlineBtn:
-      "border-sky-400 bg-sky-100 text-sky-900 ring-2 ring-sky-200",
+      "border-sky-400 bg-sky-100 text-sky-900 ring-sky-200",
+    pillPrimary:
+      "border-sky-300 bg-gradient-to-r from-sky-600 to-blue-600 text-white hover:border-sky-400 hover:from-sky-700 hover:to-blue-700",
+    pillPrimaryIcon: "bg-white/20 text-white",
+    pillSecondary:
+      "border-sky-200 bg-white text-sky-900 hover:border-sky-300 hover:bg-sky-50",
+    pillSecondaryIcon: "bg-sky-100 text-sky-700",
+    pillOutline:
+      "border-sky-200 bg-sky-50/70 text-sky-900 hover:border-sky-300 hover:bg-sky-100",
+    pillOutlineIcon: "bg-sky-100 text-sky-700",
+    actionsPanel: "border-sky-100/80 bg-sky-50/35",
   },
   pet: {
     type: "pet",
@@ -102,7 +129,17 @@ export const PROFILE_CARD_THEMES: Record<ProfileType, ProfileCardTheme> = {
       "border-teal-200/90 bg-teal-50/40 text-teal-800 hover:border-teal-300 hover:bg-teal-50",
     outlineIconWrap: "bg-teal-100/80 text-teal-700",
     activeOutlineBtn:
-      "border-teal-400 bg-teal-100 text-teal-900 ring-2 ring-teal-200",
+      "border-teal-400 bg-teal-100 text-teal-900 ring-teal-200",
+    pillPrimary:
+      "border-teal-300 bg-gradient-to-r from-teal-600 to-emerald-600 text-white hover:border-teal-400 hover:from-teal-700 hover:to-emerald-700",
+    pillPrimaryIcon: "bg-white/20 text-white",
+    pillSecondary:
+      "border-teal-200 bg-white text-teal-900 hover:border-teal-300 hover:bg-teal-50",
+    pillSecondaryIcon: "bg-teal-100 text-teal-700",
+    pillOutline:
+      "border-teal-200 bg-teal-50/70 text-teal-900 hover:border-teal-300 hover:bg-teal-100",
+    pillOutlineIcon: "bg-teal-100 text-teal-700",
+    actionsPanel: "border-teal-100/80 bg-teal-50/35",
   },
 };
 

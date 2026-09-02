@@ -1,8 +1,12 @@
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
-type CardActionProps = {
+const pillBase =
+  "group/btn inline-flex items-center gap-2 rounded-xl border-2 px-3.5 py-2.5 text-sm font-bold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
+
+type CardActionPillProps = {
   href?: string;
   onClick?: () => void;
   icon: LucideIcon;
@@ -11,22 +15,24 @@ type CardActionProps = {
   iconWrapClassName?: string;
   external?: boolean;
   disabled?: boolean;
+  active?: boolean;
 };
 
-export function CardAction({
+export function CardActionPill({
   href,
   onClick,
   icon: Icon,
   label,
   className,
-  iconWrapClassName = "bg-white/20 text-white",
+  iconWrapClassName,
   external = false,
   disabled = false,
-}: CardActionProps) {
+  active = false,
+}: CardActionPillProps) {
   const baseClass = cn(
-    "group/btn inline-flex min-h-[3rem] w-full items-center justify-center gap-2.5 rounded-2xl px-4 py-2.5 text-sm font-bold transition-all duration-200",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-    "disabled:cursor-not-allowed disabled:opacity-60",
+    pillBase,
+    active && "ring-2 ring-offset-1",
+    disabled && "pointer-events-none opacity-60",
     className,
   );
 
@@ -34,13 +40,13 @@ export function CardAction({
     <>
       <span
         className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-transform group-hover/btn:scale-105",
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-transform group-hover/btn:scale-105",
           iconWrapClassName,
         )}
       >
         <Icon className="h-4 w-4" aria-hidden />
       </span>
-      <span className="truncate">{label}</span>
+      <span className="whitespace-nowrap">{label}</span>
     </>
   );
 
@@ -52,6 +58,7 @@ export function CardAction({
           target="_blank"
           rel="noopener noreferrer"
           className={baseClass}
+          aria-label={label}
         >
           {content}
         </a>
@@ -59,85 +66,44 @@ export function CardAction({
     }
 
     return (
-      <Link href={href} className={baseClass}>
+      <Link href={href} className={baseClass} aria-label={label}>
         {content}
       </Link>
     );
   }
 
   return (
-    <button type="button" onClick={onClick} disabled={disabled} className={baseClass}>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={baseClass}
+      aria-label={label}
+      aria-pressed={active}
+    >
       {content}
     </button>
   );
 }
 
-type CardActionCompactProps = {
-  href?: string;
-  onClick?: () => void;
-  icon: LucideIcon;
-  label: string;
+type CardScanAddButtonProps = {
+  onClick: () => void;
   className?: string;
-  iconWrapClassName?: string;
-  external?: boolean;
-  disabled?: boolean;
 };
 
-export function CardActionCompact({
-  href,
-  onClick,
-  icon: Icon,
-  label,
-  className,
-  iconWrapClassName = "bg-current/10",
-  external = false,
-  disabled = false,
-}: CardActionCompactProps) {
-  const baseClass = cn(
-    "group/btn inline-flex min-h-[3.25rem] flex-col items-center justify-center gap-1.5 rounded-2xl border px-3 py-3 text-center text-xs font-bold leading-tight transition-all duration-200 sm:text-sm",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-    "disabled:cursor-not-allowed disabled:opacity-60",
-    className,
-  );
-
-  const content = (
-    <>
-      <span
-        className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-xl transition-transform group-hover/btn:scale-105",
-          iconWrapClassName,
-        )}
-      >
-        <Icon className="h-[1.125rem] w-[1.125rem]" aria-hidden />
-      </span>
-      <span>{label}</span>
-    </>
-  );
-
-  if (href) {
-    if (external) {
-      return (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={baseClass}
-        >
-          {content}
-        </a>
-      );
-    }
-
-    return (
-      <Link href={href} className={baseClass}>
-        {content}
-      </Link>
-    );
-  }
-
+export function CardScanAddButton({ onClick, className }: CardScanAddButtonProps) {
   return (
-    <button type="button" onClick={onClick} disabled={disabled} className={baseClass}>
-      {content}
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Escanear QR para agregar producto"
+      title="Escanear QR"
+      className={cn(
+        "group/add inline-flex h-[3.25rem] w-[3.25rem] shrink-0 items-center justify-center rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md shadow-amber-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:from-amber-500 hover:to-orange-600 hover:shadow-lg hover:shadow-amber-500/40 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2",
+        className,
+      )}
+    >
+      <Plus className="h-6 w-6 transition-transform group-hover/add:scale-110" aria-hidden />
     </button>
   );
 }

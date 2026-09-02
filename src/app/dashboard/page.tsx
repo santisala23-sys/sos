@@ -320,6 +320,7 @@ export default function DashboardPage() {
                 profile={profile}
                 onRefresh={loadData}
                 defaultShowQr={profile.slug === highlightedSlug}
+                onScanNew={legalBlocked ? undefined : () => setScannerOpen(true)}
               />
             ))}
           </div>

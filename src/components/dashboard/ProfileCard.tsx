@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import type { QrProfile } from "@/types/database";
-import { CardAction, CardActionCompact } from "@/components/dashboard/ProfileCardActions";
+import { CardActionPill, CardScanAddButton } from "@/components/dashboard/ProfileCardActions";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
 import { getProfileCardTheme } from "@/lib/dashboard/profile-card-theme";
@@ -28,11 +28,17 @@ type ProfileCardProps = {
   profile: QrProfile;
   onRefresh: () => void;
   defaultShowQr?: boolean;
+  onScanNew?: () => void;
 };
 
 type SaveLocationPhase = "idle" | "loading" | "success" | "error";
 
-export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: ProfileCardProps) {
+export function ProfileCard({
+  profile,
+  onRefresh,
+  defaultShowQr = false,
+  onScanNew,
+}: ProfileCardProps) {
   const [showQr, setShowQr] = useState(defaultShowQr);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -216,106 +222,99 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
           )}
         </dl>
 
-        <div className="mt-5 space-y-2.5">
-          {isPet && (
-            <CardAction
-              href={`/dashboard/perfiles/${profile.id}/libreta`}
-              icon={ClipboardList}
-              label="Abrir libreta sanitaria"
-              className={theme.primaryBtn}
-              iconWrapClassName={theme.primaryIconWrap}
-            />
+        <div
+          className={cn(
+            "mt-5 rounded-2xl border p-3.5 sm:p-4",
+            theme.actionsPanel,
           )}
+        >
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-neutral-500">
+            Acciones
+          </p>
+          <div className="flex items-start gap-2.5">
+            <div className="flex min-w-0 flex-1 flex-wrap gap-2">
+              {isPet && (
+                <CardActionPill
+                  href={`/dashboard/perfiles/${profile.id}/libreta`}
+                  icon={ClipboardList}
+                  label="Libreta sanitaria"
+                  className={theme.pillPrimary}
+                  iconWrapClassName={theme.pillPrimaryIcon}
+                />
+              )}
 
-          {!isPet && (
-            <div className="grid grid-cols-2 gap-2.5">
-              <CardActionCompact
-                href={`/dashboard/perfiles/${profile.id}`}
-                icon={Eye}
-                label="Ver perfil"
-                className={theme.primaryBtn}
-                iconWrapClassName={theme.primaryIconWrap}
-              />
-              <CardActionCompact
+              {!isPet && (
+                <CardActionPill
+                  href={`/dashboard/perfiles/${profile.id}`}
+                  icon={Eye}
+                  label="Ver perfil"
+                  className={theme.pillPrimary}
+                  iconWrapClassName={theme.pillPrimaryIcon}
+                />
+              )}
+
+              <CardActionPill
                 href={editHref}
                 icon={Pencil}
                 label="Editar perfil"
-                className={theme.secondaryBtn}
-                iconWrapClassName={theme.secondaryIconWrap}
+                className={theme.pillSecondary}
+                iconWrapClassName={theme.pillSecondaryIcon}
               />
-            </div>
-          )}
 
-          {isPet && (
-            <div className="grid grid-cols-2 gap-2.5">
-              <CardActionCompact
+              <CardActionPill
                 href={previewUrl}
                 icon={ExternalLink}
                 label="Ver perfil público"
-                className={theme.secondaryBtn}
-                iconWrapClassName={theme.secondaryIconWrap}
+                className={theme.pillSecondary}
+                iconWrapClassName={theme.pillSecondaryIcon}
                 external
               />
-              <CardActionCompact
-                href={editHref}
-                icon={Pencil}
-                label="Editar perfil"
-                className={theme.secondaryBtn}
-                iconWrapClassName={theme.secondaryIconWrap}
+
+              {isObject && (
+                <CardActionPill
+                  onClick={handleSaveLocation}
+                  icon={MapPin}
+                  label={
+                    savePhase === "loading"
+                      ? "Guardando..."
+                      : savePhase === "success"
+                        ? "Ubicación guardada"
+                        : "Guardar ubicación"
+                  }
+                  disabled={savePhase === "loading"}
+                  className={cn(
+                    theme.pillOutline,
+                    savePhase === "success" &&
+                      "border-emerald-300 bg-emerald-50 text-emerald-900",
+                  )}
+                  iconWrapClassName={
+                    savePhase === "success"
+                      ? "bg-emerald-100 text-emerald-700"
+                      : theme.pillOutlineIcon
+                  }
+                />
+              )}
+
+              <CardActionPill
+                onClick={() => setShowQr((value) => !value)}
+                icon={QrCode}
+                label={showQr ? "Ocultar QR" : "Ver QR"}
+                active={showQr}
+                className={showQr ? theme.activeOutlineBtn : theme.pillOutline}
+                iconWrapClassName={theme.pillOutlineIcon}
               />
             </div>
-          )}
 
-          {!isPet && (
-            <CardAction
-              href={previewUrl}
-              icon={ExternalLink}
-              label="Ver perfil público"
-              className={theme.secondaryBtn}
-              iconWrapClassName={theme.secondaryIconWrap}
-              external
-            />
-          )}
+            {onScanNew && (
+              <CardScanAddButton onClick={onScanNew} />
+            )}
+          </div>
 
-          {isObject && (
-            <>
-              <CardAction
-                onClick={handleSaveLocation}
-                icon={MapPin}
-                label={
-                  savePhase === "loading"
-                    ? "Guardando ubicación..."
-                    : savePhase === "success"
-                      ? "Ubicación guardada"
-                      : "Guardar ubicación"
-                }
-                disabled={savePhase === "loading"}
-                className={cn(
-                  theme.outlineBtn,
-                  savePhase === "success" &&
-                    "border-emerald-300 bg-emerald-50 text-emerald-800",
-                )}
-                iconWrapClassName={
-                  savePhase === "success"
-                    ? "bg-emerald-100 text-emerald-700"
-                    : theme.outlineIconWrap
-                }
-              />
-              {saveError && (
-                <p className="text-xs text-red-600" role="alert">
-                  {saveError}
-                </p>
-              )}
-            </>
+          {saveError && (
+            <p className="mt-2 text-xs text-red-600" role="alert">
+              {saveError}
+            </p>
           )}
-
-          <CardAction
-            onClick={() => setShowQr((value) => !value)}
-            icon={QrCode}
-            label={showQr ? "Ocultar QR" : "Ver QR"}
-            className={showQr ? theme.activeOutlineBtn : theme.outlineBtn}
-            iconWrapClassName={theme.outlineIconWrap}
-          />
         </div>
       </div>
 
