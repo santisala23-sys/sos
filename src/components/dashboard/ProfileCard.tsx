@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import type { QrProfile } from "@/types/database";
-import { CardActionPill, CardScanAddButton } from "@/components/dashboard/ProfileCardActions";
+import { CardActionPill } from "@/components/dashboard/ProfileCardActions";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
 import { getProfileCardTheme } from "@/lib/dashboard/profile-card-theme";
@@ -28,7 +28,6 @@ type ProfileCardProps = {
   profile: QrProfile;
   onRefresh: () => void;
   defaultShowQr?: boolean;
-  onScanNew?: () => void;
 };
 
 type SaveLocationPhase = "idle" | "loading" | "success" | "error";
@@ -37,7 +36,6 @@ export function ProfileCard({
   profile,
   onRefresh,
   defaultShowQr = false,
-  onScanNew,
 }: ProfileCardProps) {
   const [showQr, setShowQr] = useState(defaultShowQr);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -231,8 +229,7 @@ export function ProfileCard({
           <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-neutral-500">
             Acciones
           </p>
-          <div className="flex items-start gap-2.5">
-            <div className="flex min-w-0 flex-1 flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
               {isPet && (
                 <CardActionPill
                   href={`/dashboard/perfiles/${profile.id}/libreta`}
@@ -304,11 +301,6 @@ export function ProfileCard({
                 iconWrapClassName={theme.pillOutlineIcon}
               />
             </div>
-
-            {onScanNew && (
-              <CardScanAddButton onClick={onScanNew} />
-            )}
-          </div>
 
           {saveError && (
             <p className="mt-2 text-xs text-red-600" role="alert">

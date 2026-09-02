@@ -13,6 +13,7 @@ import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { QrActivationScanner } from "@/components/dashboard/QrActivationScanner";
 import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBanner";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
+import { CardScanAddButton } from "@/components/dashboard/ProfileCardActions";
 import {
   PushDevicesSection,
   PushNotificationPanel,
@@ -274,12 +275,17 @@ export default function DashboardPage() {
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-600">
             Tus productos activados
           </p>
-          <h2
-            id="profiles-heading"
-            className="mt-2 text-2xl font-black tracking-tight text-neutral-900 sm:text-3xl"
-          >
-            Mis perfiles de QRs
-          </h2>
+          <div className="mt-2 flex items-center justify-between gap-4">
+            <h2
+              id="profiles-heading"
+              className="text-2xl font-black tracking-tight text-neutral-900 sm:text-3xl"
+            >
+              Mis perfiles de QRs
+            </h2>
+            {!legalBlocked && (
+              <CardScanAddButton onClick={() => setScannerOpen(true)} />
+            )}
+          </div>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-600 sm:text-base">
             Personas, mascotas y objetos en una sola vista. Cada tarjeta muestra
             el tipo de perfil con su color.
@@ -320,7 +326,6 @@ export default function DashboardPage() {
                 profile={profile}
                 onRefresh={loadData}
                 defaultShowQr={profile.slug === highlightedSlug}
-                onScanNew={legalBlocked ? undefined : () => setScannerOpen(true)}
               />
             ))}
           </div>
