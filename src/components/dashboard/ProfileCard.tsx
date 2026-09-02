@@ -15,7 +15,6 @@ import type { QrProfile } from "@/types/database";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
 import { PROFILE_TYPES } from "@/lib/profile-types";
-import { dashboardHashForProfileType } from "@/lib/dashboard/profile-section-order";
 import { getTutorPublicPreviewUrl } from "@/lib/utils/slug";
 import {
   geolocationErrorMessage,
@@ -173,7 +172,7 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
               Ver perfil
             </Link>
             <Link
-              href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent(`/dashboard${dashboardHashForProfileType(profile.profile_type)}`)}`}
+              href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent("/dashboard")}`}
               className={actionClass}
             >
               <Pencil className="h-4 w-4" aria-hidden />

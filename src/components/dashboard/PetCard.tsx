@@ -121,7 +121,7 @@ export function PetCard({ profile, onRefresh }: PetCardProps) {
               Ver perfil público
             </a>
             <Link
-              href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent("/dashboard#mascotas")}`}
+              href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent("/dashboard")}`}
               className={actionClass}
             >
               <Pencil className="h-4 w-4" aria-hidden />
