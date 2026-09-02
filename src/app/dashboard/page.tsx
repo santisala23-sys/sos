@@ -12,7 +12,6 @@ import type { QrProfile, ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { QrActivationScanner } from "@/components/dashboard/QrActivationScanner";
 import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBanner";
-import { PetCard } from "@/components/dashboard/PetCard";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import {
   PushDevicesSection,
@@ -271,28 +270,32 @@ export default function DashboardPage() {
       )}
 
       <section aria-labelledby="profiles-heading">
-        <div className="mb-6">
+        <div className="mb-8">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-600">
+            Tus productos activados
+          </p>
           <h2
             id="profiles-heading"
-            className="text-2xl font-black tracking-tight text-neutral-900 sm:text-3xl"
+            className="mt-2 text-2xl font-black tracking-tight text-neutral-900 sm:text-3xl"
           >
-            Mis perfiles
+            Mis perfiles de QRs
           </h2>
-          <p className="mt-1 text-sm text-neutral-600 sm:text-base">
-            Todos tus QRs activos en un solo lugar.
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-600 sm:text-base">
+            Personas, mascotas y objetos en una sola vista. Cada tarjeta muestra
+            el tipo de perfil con su color.
           </p>
         </div>
 
         {loading ? (
-          <div className="grid gap-5 lg:grid-cols-2">
-            <div className="h-48 animate-pulse rounded-2xl bg-violet-50" />
-            <div className="h-48 animate-pulse rounded-2xl bg-violet-50" />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="h-56 animate-pulse rounded-[1.35rem] bg-violet-50" />
+            <div className="h-56 animate-pulse rounded-[1.35rem] bg-violet-50" />
           </div>
         ) : profiles.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-8 text-center sm:p-10">
-            <h2 className="text-lg font-bold text-neutral-900">
-              Todavía no tenés perfiles activos
-            </h2>
+          <div className="rounded-[1.35rem] border border-dashed border-neutral-200 bg-gradient-to-br from-neutral-50 to-white px-4 py-10 text-center sm:p-12">
+            <h3 className="text-lg font-bold text-neutral-900">
+              Todavía no tenés perfiles de QR
+            </h3>
             <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-neutral-600">
               Escaneá el QR del colgante, chapita o sticker que te entregaron para
               vincularlo a tu cuenta.
@@ -310,23 +313,15 @@ export default function DashboardPage() {
             )}
           </div>
         ) : (
-          <div className="grid gap-5 lg:grid-cols-2">
-            {profiles.map((profile) =>
-              profile.profile_type === "pet" ? (
-                <PetCard
-                  key={profile.id}
-                  profile={profile}
-                  onRefresh={loadData}
-                />
-              ) : (
-                <ProfileCard
-                  key={profile.id}
-                  profile={profile}
-                  onRefresh={loadData}
-                  defaultShowQr={profile.slug === highlightedSlug}
-                />
-              ),
-            )}
+          <div className="grid gap-6 lg:grid-cols-2">
+            {profiles.map((profile) => (
+              <ProfileCard
+                key={profile.id}
+                profile={profile}
+                onRefresh={loadData}
+                defaultShowQr={profile.slug === highlightedSlug}
+              />
+            ))}
           </div>
         )}
       </section>

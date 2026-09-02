@@ -1,25 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import {
-  Eye,
+  ClipboardList,
   ExternalLink,
+  Eye,
   MapPin,
   Pencil,
-  Trash2,
   QrCode,
+  Trash2,
   X,
 } from "lucide-react";
 import type { QrProfile } from "@/types/database";
+import { CardAction, CardActionCompact } from "@/components/dashboard/ProfileCardActions";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
-import { PROFILE_TYPES } from "@/lib/profile-types";
+import { getProfileCardTheme } from "@/lib/dashboard/profile-card-theme";
 import { getTutorPublicPreviewUrl } from "@/lib/utils/slug";
 import {
   geolocationErrorMessage,
   requestGeolocation,
 } from "@/lib/utils/geolocation";
+import { describePetAge } from "@/lib/utils/pet-age";
 import { cn } from "@/lib/utils/cn";
 
 type ProfileCardProps = {
@@ -30,20 +32,26 @@ type ProfileCardProps = {
 
 type SaveLocationPhase = "idle" | "loading" | "success" | "error";
 
-const actionClass =
-  "inline-flex items-center justify-center gap-1.5 rounded-lg border border-neutral-300 bg-neutral-100 px-3 py-2 text-sm font-semibold text-neutral-900 transition-colors hover:bg-neutral-200";
-
 export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: ProfileCardProps) {
   const [showQr, setShowQr] = useState(defaultShowQr);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [savePhase, setSavePhase] = useState<SaveLocationPhase>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
-  const typeLabel =
-    PROFILE_TYPES.find((t) => t.value === profile.profile_type)?.label ??
-    "Persona";
+
+  const theme = getProfileCardTheme(profile.profile_type);
+  const TypeIcon = theme.icon;
   const previewUrl = getTutorPublicPreviewUrl(profile.id);
+  const isPet = profile.profile_type === "pet";
   const isObject = profile.profile_type === "object";
+  const editHref = `/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent("/dashboard")}`;
+
+  const petMeta = [
+    profile.pet_breed?.trim(),
+    profile.pet_birth_date ? describePetAge(profile.pet_birth_date) : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   async function handleDelete() {
     setDeleting(true);
@@ -100,114 +108,199 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
   }
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-violet-100/80 bg-white shadow-lg shadow-violet-500/8 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/15">
-      <div className="h-1 bg-gradient-to-r from-violet-500 via-indigo-500 to-violet-600" />
+    <article
+      className={cn(
+        "group relative flex flex-col overflow-hidden rounded-[1.35rem] border bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
+        theme.card,
+      )}
+    >
+      <div className={cn("h-1.5", theme.topBar)} />
 
-      <button
-        type="button"
-        onClick={() => setConfirmDelete(true)}
-        aria-label="Eliminar perfil"
-        className="absolute right-3 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-red-200 bg-red-50 text-red-600 shadow-sm backdrop-blur-sm transition-colors hover:border-red-300 hover:bg-red-100 hover:text-red-700"
+      <div
+        className={cn(
+          "relative border-b bg-gradient-to-br px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6",
+          theme.headerGlow,
+        )}
       >
-        <Trash2 className="h-4 w-4" aria-hidden />
-      </button>
+        <button
+          type="button"
+          onClick={() => setConfirmDelete(true)}
+          aria-label={isPet ? "Eliminar mascota" : "Eliminar perfil"}
+          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-red-200/80 bg-white/90 text-red-600 shadow-sm backdrop-blur-sm transition hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+        >
+          <Trash2 className="h-4 w-4" aria-hidden />
+        </button>
 
-      <div className="p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-3 pr-10">
-          {profile.avatar_b64 && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className={cn("inline-flex items-center gap-2 rounded-full py-1 pl-1.5 pr-3.5 text-xs font-bold uppercase tracking-wide", theme.badge)}>
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
+              <TypeIcon className="h-3.5 w-3.5" aria-hidden />
+            </span>
+            {theme.label}
+          </span>
+          {!profile.is_active && (
+            <span className="rounded-full bg-neutral-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-neutral-600">
+              Inactivo
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-start gap-4 pr-8">
+          {profile.avatar_b64 ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={`data:${profile.avatar_mime ?? "image/jpeg"};base64,${profile.avatar_b64}`}
               alt={profile.beneficiary_name}
-              className="h-14 w-14 shrink-0 rounded-full border-2 border-violet-100 object-cover shadow-sm"
+              className={cn(
+                "h-16 w-16 shrink-0 object-cover shadow-md ring-4",
+                isPet ? "rounded-2xl" : isObject ? "rounded-xl" : "rounded-full",
+                theme.avatarRing,
+              )}
             />
+          ) : (
+            <div
+              className={cn(
+                "flex h-16 w-16 shrink-0 items-center justify-center shadow-inner",
+                isPet ? "rounded-2xl" : isObject ? "rounded-xl" : "rounded-full",
+                theme.avatarFallback,
+              )}
+            >
+              <TypeIcon className="h-8 w-8" aria-hidden />
+            </div>
           )}
-          <div className="min-w-0 flex-1">
-            <h3 className="truncate text-lg font-bold text-neutral-900 sm:text-xl">
+
+          <div className="min-w-0 flex-1 pt-0.5">
+            <p className={cn("text-[11px] font-bold uppercase tracking-[0.14em]", theme.contactLabel)}>
+              {theme.shortLabel}
+            </p>
+            <h3 className="mt-1 truncate text-xl font-black tracking-tight text-neutral-900 sm:text-2xl">
               {profile.beneficiary_name}
             </h3>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <span className="inline-flex rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-800">
-                {typeLabel}
-              </span>
-              {!profile.is_active && (
-                <span className="inline-flex rounded-full bg-neutral-200 px-2.5 py-1 text-xs font-semibold text-neutral-600">
-                  Inactivo
-                </span>
-              )}
-            </div>
+            {isPet && petMeta && (
+              <p className="mt-1 text-sm font-semibold text-teal-800">{petMeta}</p>
+            )}
+            {isPet && (
+              <p className="mt-2 text-sm leading-snug text-neutral-500">
+                Vacunas, visitas veterinarias y QR de emergencia.
+              </p>
+            )}
           </div>
         </div>
+      </div>
 
-        <dl className="mt-4 space-y-2 rounded-xl bg-neutral-50/80 px-4 py-3 text-sm text-neutral-600">
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
+        <dl
+          className={cn(
+            "rounded-2xl border px-4 py-3.5 text-sm text-neutral-600",
+            theme.contactBox,
+          )}
+        >
           <div>
-            <dt className="sr-only">Contacto</dt>
-            <dd className="font-medium text-neutral-800">
+            <dt className={cn("text-[11px] font-bold uppercase tracking-wide", theme.contactLabel)}>
+              Contacto de emergencia
+            </dt>
+            <dd className="mt-1 font-semibold text-neutral-900">
               {profile.emergency_contact_name}
             </dd>
-            <dd>{profile.emergency_contact_phone}</dd>
+            <dd className="mt-0.5 text-neutral-700">{profile.emergency_contact_phone}</dd>
           </div>
           {profile.secondary_contact_name && profile.secondary_contact_phone && (
-            <div className="border-t border-neutral-200/80 pt-2">
-              <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                Secundario
+            <div className="mt-3 border-t border-current/10 pt-3">
+              <dt className="text-[11px] font-bold uppercase tracking-wide text-neutral-400">
+                Contacto secundario
               </dt>
-              <dd className="mt-0.5">
+              <dd className="mt-1 text-neutral-800">
                 {profile.secondary_contact_name} · {profile.secondary_contact_phone}
               </dd>
             </div>
           )}
         </dl>
 
-        <div className="mt-5 space-y-2">
-          <div className="grid grid-cols-2 gap-2">
-            <Link
-              href={`/dashboard/perfiles/${profile.id}`}
-              className={cn(
-                actionClass,
-                "border-violet-100 bg-violet-50/60 text-violet-800 hover:bg-violet-100",
-              )}
-            >
-              <Eye className="h-4 w-4" aria-hidden />
-              Ver perfil
-            </Link>
-            <Link
-              href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent("/dashboard")}`}
-              className={actionClass}
-            >
-              <Pencil className="h-4 w-4" aria-hidden />
-              Editar perfil
-            </Link>
-          </div>
-          <a
-            href={previewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(actionClass, "w-full")}
-          >
-            <ExternalLink className="h-4 w-4" aria-hidden />
-            Ver perfil público
-          </a>
+        <div className="mt-5 space-y-2.5">
+          {isPet && (
+            <CardAction
+              href={`/dashboard/perfiles/${profile.id}/libreta`}
+              icon={ClipboardList}
+              label="Abrir libreta sanitaria"
+              className={theme.primaryBtn}
+              iconWrapClassName={theme.primaryIconWrap}
+            />
+          )}
+
+          {!isPet && (
+            <div className="grid grid-cols-2 gap-2.5">
+              <CardActionCompact
+                href={`/dashboard/perfiles/${profile.id}`}
+                icon={Eye}
+                label="Ver perfil"
+                className={theme.primaryBtn}
+                iconWrapClassName={theme.primaryIconWrap}
+              />
+              <CardActionCompact
+                href={editHref}
+                icon={Pencil}
+                label="Editar perfil"
+                className={theme.secondaryBtn}
+                iconWrapClassName={theme.secondaryIconWrap}
+              />
+            </div>
+          )}
+
+          {isPet && (
+            <div className="grid grid-cols-2 gap-2.5">
+              <CardActionCompact
+                href={previewUrl}
+                icon={ExternalLink}
+                label="Ver perfil público"
+                className={theme.secondaryBtn}
+                iconWrapClassName={theme.secondaryIconWrap}
+                external
+              />
+              <CardActionCompact
+                href={editHref}
+                icon={Pencil}
+                label="Editar perfil"
+                className={theme.secondaryBtn}
+                iconWrapClassName={theme.secondaryIconWrap}
+              />
+            </div>
+          )}
+
+          {!isPet && (
+            <CardAction
+              href={previewUrl}
+              icon={ExternalLink}
+              label="Ver perfil público"
+              className={theme.secondaryBtn}
+              iconWrapClassName={theme.secondaryIconWrap}
+              external
+            />
+          )}
+
           {isObject && (
             <>
-              <button
-                type="button"
+              <CardAction
                 onClick={handleSaveLocation}
+                icon={MapPin}
+                label={
+                  savePhase === "loading"
+                    ? "Guardando ubicación..."
+                    : savePhase === "success"
+                      ? "Ubicación guardada"
+                      : "Guardar ubicación"
+                }
                 disabled={savePhase === "loading"}
                 className={cn(
-                  actionClass,
-                  "w-full border-sky-200 bg-sky-50 text-sky-900 hover:bg-sky-100 disabled:cursor-wait disabled:opacity-70",
+                  theme.outlineBtn,
                   savePhase === "success" &&
-                    "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-50",
+                    "border-emerald-300 bg-emerald-50 text-emerald-800",
                 )}
-              >
-                <MapPin className="h-4 w-4" aria-hidden />
-                {savePhase === "loading"
-                  ? "Guardando ubicación..."
-                  : savePhase === "success"
-                    ? "Ubicación guardada"
-                    : "Guardar ubicación"}
-              </button>
+                iconWrapClassName={
+                  savePhase === "success"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : theme.outlineIconWrap
+                }
+              />
               {saveError && (
                 <p className="text-xs text-red-600" role="alert">
                   {saveError}
@@ -215,23 +308,20 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
               )}
             </>
           )}
-          <button
-            type="button"
-            onClick={() => setShowQr(!showQr)}
-            className={cn(actionClass, "w-full")}
-          >
-            <QrCode className="h-4 w-4" aria-hidden />
-            {showQr ? "Ocultar QR" : "Ver QR"}
-          </button>
+
+          <CardAction
+            onClick={() => setShowQr((value) => !value)}
+            icon={QrCode}
+            label={showQr ? "Ocultar QR" : "Ver QR"}
+            className={showQr ? theme.activeOutlineBtn : theme.outlineBtn}
+            iconWrapClassName={theme.outlineIconWrap}
+          />
         </div>
       </div>
 
       {showQr && (
-        <div className="mt-auto border-t border-violet-100 bg-violet-50/30 px-5 py-5 sm:px-6">
-          <QrCodeDisplay
-            slug={profile.slug}
-            beneficiaryName={profile.beneficiary_name}
-          />
+        <div className={cn("border-t px-5 py-5 sm:px-6", theme.qrPanel)}>
+          <QrCodeDisplay slug={profile.slug} beneficiaryName={profile.beneficiary_name} />
         </div>
       )}
 
@@ -257,11 +347,14 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
               </button>
             </div>
             <h4 className="mt-3 text-lg font-black text-neutral-900">
-              ¿Estás seguro que querés eliminar este perfil?
+              {isPet
+                ? "¿Estás seguro que querés eliminar esta mascota?"
+                : "¿Estás seguro que querés eliminar este perfil?"}
             </h4>
             <p className="mt-1 text-sm text-neutral-600">
-              Se eliminará <strong>{profile.beneficiary_name}</strong> y su QR
-              dejará de funcionar. Esta acción no se puede deshacer.
+              Se eliminará <strong>{profile.beneficiary_name}</strong>
+              {isPet ? ", su QR y la libreta sanitaria" : " y su QR dejará de funcionar"}.
+              Esta acción no se puede deshacer.
             </p>
             <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button
@@ -280,7 +373,7 @@ export function ProfileCard({ profile, onRefresh, defaultShowQr = false }: Profi
                 className="gap-1.5"
               >
                 <Trash2 className="h-4 w-4" aria-hidden />
-                {deleting ? "Eliminando..." : "Eliminar perfil"}
+                {deleting ? "Eliminando..." : isPet ? "Eliminar mascota" : "Eliminar perfil"}
               </Button>
             </div>
           </div>
