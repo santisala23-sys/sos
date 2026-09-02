@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Activity,
+  Bell,
   CheckCircle2,
   QrCode,
 } from "lucide-react";
@@ -33,6 +34,13 @@ export default function DashboardPage() {
     currentVersion: string;
     userVersion: string | null;
   } | null>(null);
+  const [planStatus, setPlanStatus] = useState<{
+    planName: string;
+    maxProfiles: number;
+    currentCount: number;
+    activeCount?: number;
+    canCreateMore: boolean;
+  } | null>(null);
   const push = usePushNotifications();
 
   const loadData = useCallback(async () => {
@@ -56,6 +64,7 @@ export default function DashboardPage() {
     if (meRes.ok) {
       const data = await meRes.json();
       if (data?.legal) setLegalStatus(data.legal);
+      if (data?.plan) setPlanStatus(data.plan);
     }
 
     setLoading(false);
@@ -97,6 +106,9 @@ export default function DashboardPage() {
 
   const latestUnread = logs.find((l) => !l.read_at);
   const legalBlocked = legalStatus?.needsAcceptance ?? false;
+  const activeProfilesCount = loading
+    ? null
+    : profiles.reduce((acc, p) => (p.is_active ? acc + 1 : acc), 0);
 
   const activatedProfile = highlightedSlug
     ? profiles.find((p) => p.slug === highlightedSlug)
@@ -137,6 +149,101 @@ export default function DashboardPage() {
         <AlertBanner unreadCount={unreadCount} latestLogId={latestUnread?.id} />
       )}
 
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/90 bg-gradient-to-br from-violet-600 via-violet-700 to-indigo-800 p-6 text-white shadow-2xl shadow-violet-600/30 sm:p-8">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-20"
+          aria-hidden
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.35) 1px, transparent 0)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+        <div className="relative">
+          <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+            Hola, este es tu panel
+          </h1>
+          <p className="mt-2 max-w-xl text-base text-violet-100 sm:text-lg">
+            Gestioná perfiles QR de emergencia, la libreta de tus mascotas y las
+            alertas de escaneo.
+          </p>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-violet-200">
+                <QrCode className="h-4 w-4" aria-hidden />
+                <span className="text-xs font-semibold uppercase tracking-wide">
+                  QRs activos
+                </span>
+              </div>
+              <p className="mt-2 text-2xl font-black">
+                {loading
+                  ? "—"
+                  : (planStatus?.activeCount ?? activeProfilesCount ?? 0)}
+                {planStatus && (
+                  <span className="text-lg font-semibold text-violet-200">
+                    /{planStatus.currentCount}
+                  </span>
+                )}
+              </p>
+            </div>
+            <div
+              className={`rounded-2xl border px-4 py-4 backdrop-blur-sm ${
+                !loading && unreadCount > 0
+                  ? "border-red-300/70 bg-red-500/15"
+                  : "border-white/20 bg-white/10"
+              }`}
+            >
+              <div
+                className={`flex items-center gap-2 ${
+                  !loading && unreadCount > 0 ? "text-red-100" : "text-violet-200"
+                }`}
+              >
+                <Bell className="h-4 w-4" aria-hidden />
+                <span className="text-xs font-semibold uppercase tracking-wide">
+                  Alertas
+                </span>
+              </div>
+              <p
+                className={`mt-2 text-2xl font-black ${
+                  !loading && unreadCount > 0 ? "text-white" : ""
+                }`}
+              >
+                {loading ? "—" : unreadCount}
+              </p>
+              {!loading && unreadCount > 0 && (
+                <Link
+                  href="/dashboard/actividad"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm font-bold text-red-700 shadow-sm transition hover:bg-red-50"
+                >
+                  Ver alerta
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {!legalBlocked && (
+            <div className="mt-6" id="activar-producto">
+              <button
+                type="button"
+                onClick={() => setScannerOpen(true)}
+                className="flex w-full items-center gap-3 rounded-2xl border border-white/30 bg-white/15 px-5 py-4 text-left text-white backdrop-blur-sm transition hover:bg-white/25 sm:max-w-md"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-amber-950">
+                  <QrCode className="h-5 w-5" aria-hidden />
+                </span>
+                <span>
+                  <span className="block text-base font-black">Activar mi producto</span>
+                  <span className="mt-0.5 block text-sm text-violet-100">
+                    Escaneá el QR del colgante o sticker
+                  </span>
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
       {!loading && activatedProfile && !legalBlocked && (
         <div className="flex items-start gap-4 rounded-2xl border border-green-200/80 bg-gradient-to-r from-green-50 to-emerald-50 p-5 shadow-lg shadow-green-500/10">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-600 text-white shadow-md">
@@ -164,29 +271,16 @@ export default function DashboardPage() {
       )}
 
       <section aria-labelledby="profiles-heading">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1
-              id="profiles-heading"
-              className="text-2xl font-black tracking-tight text-neutral-900 sm:text-3xl"
-            >
-              Mis perfiles
-            </h1>
-            <p className="mt-1 text-sm text-neutral-600 sm:text-base">
-              Todos tus QRs activos en un solo lugar.
-            </p>
-          </div>
-          {!legalBlocked && (
-            <Button
-              type="button"
-              size="lg"
-              className="gap-2 self-start sm:self-auto"
-              onClick={() => setScannerOpen(true)}
-            >
-              <QrCode className="h-5 w-5" aria-hidden />
-              Escanear QR
-            </Button>
-          )}
+        <div className="mb-6">
+          <h2
+            id="profiles-heading"
+            className="text-2xl font-black tracking-tight text-neutral-900 sm:text-3xl"
+          >
+            Mis perfiles
+          </h2>
+          <p className="mt-1 text-sm text-neutral-600 sm:text-base">
+            Todos tus QRs activos en un solo lugar.
+          </p>
         </div>
 
         {loading ? (
