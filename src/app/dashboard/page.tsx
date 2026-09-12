@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import type { QrProfile, ScanLogWithProfile } from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
-import { QrActivationScanner } from "@/components/dashboard/QrActivationScanner";
+import { ActivateProductDialog } from "@/components/activation/ActivateProductDialog";
 import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBanner";
 import { ProfileCard } from "@/components/dashboard/ProfileCard";
 import { CardScanAddButton } from "@/components/dashboard/ProfileCardActions";
@@ -27,7 +27,7 @@ export default function DashboardPage() {
   const [logs, setLogs] = useState<ScanLogWithProfile[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [scannerOpen, setScannerOpen] = useState(false);
+  const [hintOpen, setHintOpen] = useState(false);
   const [highlightedSlug, setHighlightedSlug] = useState<string | null>(null);
   const [legalStatus, setLegalStatus] = useState<{
     needsAcceptance: boolean;
@@ -88,7 +88,7 @@ export default function DashboardPage() {
       params.get("escanear") === "1" ||
       window.location.hash === "#activar-producto";
     if (shouldScan) {
-      setScannerOpen(true);
+      setHintOpen(true);
       if (params.get("escanear") === "1") {
         params.delete("escanear");
         const nextQuery = params.toString();
@@ -226,7 +226,7 @@ export default function DashboardPage() {
             <div className="mt-6" id="activar-producto">
               <button
                 type="button"
-                onClick={() => setScannerOpen(true)}
+                onClick={() => setHintOpen(true)}
                 className="flex w-full items-center gap-3 rounded-2xl border border-white/30 bg-white/15 px-5 py-4 text-left text-white backdrop-blur-sm transition hover:bg-white/25 sm:max-w-md"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-amber-950">
@@ -235,7 +235,7 @@ export default function DashboardPage() {
                 <span>
                   <span className="block text-base font-black">Activar mi producto</span>
                   <span className="mt-0.5 block text-sm text-violet-100">
-                    Escaneá el QR del colgante o sticker
+                    Usá la cámara del celular en el QR del producto
                   </span>
                 </span>
               </button>
@@ -262,8 +262,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {scannerOpen && (
-        <QrActivationScanner onClose={() => setScannerOpen(false)} />
+      {hintOpen && (
+        <ActivateProductDialog onClose={() => setHintOpen(false)} />
       )}
 
       {!loading && !legalBlocked && (
@@ -283,7 +283,7 @@ export default function DashboardPage() {
               Mis perfiles de QRs
             </h2>
             {!legalBlocked && (
-              <CardScanAddButton onClick={() => setScannerOpen(true)} />
+              <CardScanAddButton onClick={() => setHintOpen(true)} />
             )}
           </div>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-600 sm:text-base">
@@ -303,18 +303,18 @@ export default function DashboardPage() {
               Todavía no tenés perfiles de QR
             </h3>
             <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-neutral-600">
-              Escaneá el QR del colgante, chapita o sticker que te entregaron para
-              vincularlo a tu cuenta.
+              Escaneá el QR del colgante, chapita o sticker con la cámara de tu
+              celular para vincularlo a tu cuenta.
             </p>
             {!legalBlocked && (
               <Button
                 type="button"
                 size="lg"
                 className="mt-5 gap-2"
-                onClick={() => setScannerOpen(true)}
+                onClick={() => setHintOpen(true)}
               >
                 <QrCode className="h-5 w-5" aria-hidden />
-                Escanear QR del producto
+                Cómo activar el producto
               </Button>
             )}
           </div>

@@ -171,7 +171,7 @@ export async function MarketingFooter({ className = "" }: MarketingFooterProps) 
                     href={activateHref}
                     className="text-sm text-neutral-400 transition-colors hover:text-violet-300"
                   >
-                    Activar código
+                    Activar producto
                   </Link>
                 </li>
               </ul>
@@ -222,7 +222,7 @@ export async function MarketingFooter({ className = "" }: MarketingFooterProps) 
                 className="gap-2 border-white/20 bg-white/10 text-white hover:bg-white/15"
               >
                 <QrCode className="h-4 w-4" aria-hidden />
-                Activar código
+                Activar producto
               </Button>
             </Link>
           </div>

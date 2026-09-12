@@ -39,7 +39,7 @@ const DASHBOARD_QUICK_LINKS = [
     accent: "violet",
   },
   {
-    href: "/dashboard?escanear=1#activar-producto",
+    href: "/activar",
     label: "Activar QR",
     description: "Vincular un producto nuevo",
     icon: QrCode,

@@ -41,7 +41,7 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-primera-vez",
     question: "¿Qué hago la primera vez que inicio sesión?",
     answer:
-      "Creá tu cuenta o iniciá sesión en sosme.com.ar → entrá al Panel → tocá el + en Mascotas, Personas u Objetos (o Activar mi producto) → escaneá el QR del producto que compraste → completá contactos e instrucciones → Guardar. Cada perfil requiere un producto SOSme con su propio QR.",
+      "Creá tu cuenta o iniciá sesión en sosme.com.ar. Después, con la cámara del celular, escaneá el QR del producto que compraste. Completá contactos e instrucciones — o vinculá un perfil que ya tengas. Cada producto SOSme tiene su propio QR; no se crea uno paralelo.",
   },
   {
     id: "faq-objeto-ubicacion",
@@ -83,7 +83,7 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-activar-producto",
     question: "Compré una chapita o collar, ¿cómo la activo?",
     answer:
-      "En el panel, expandí el bloque «Hola, este es tu panel» y tocá Activar mi producto. Escaneá el QR del producto o ingresá el código manual. Completá los datos del perfil y quedará vinculado a tu cuenta, sin costo de mantenimiento.",
+      "Escaneá el QR del collar, chapita o sticker con la cámara de tu celular (no hace falta una app). Entrá al enlace, iniciá sesión si te lo pide y completá el perfil — o vinculalo a uno que ya tengas. El mismo QR del producto queda activo, sin costo de mantenimiento.",
   },
   {
     id: "faq-qr-descargar",
@@ -162,13 +162,13 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         id: "acceso-primera-vez",
         title: "Primera vez: activar tu producto",
         paragraphs: [
-          "Si acabás de registrarte y compraste un producto SOSme, el panel te muestra secciones vacías con un botón para escanear el QR.",
+          "Si acabás de registrarte y compraste un producto SOSme, no busques una cámara dentro del panel.",
         ],
         bullets: [
-          "Tocá el + en Mascotas, Personas u Objetos, o Activar mi producto en el bloque violeta.",
-          "Escaneá el QR impreso en el colgante, chapita o sticker (o ingresá el código manualmente).",
-          "Completá el formulario (nombre, contactos, instrucciones y, en Personas, datos de salud si querés).",
-          "Al guardar, el mismo QR del producto queda vinculado a tu cuenta para siempre.",
+          "Abrí la cámara del celular y apuntá al QR impreso en el colgante, chapita o sticker.",
+          "Entrá al enlace. Si ya tenés cuenta, iniciá sesión. Si ya cargaste un perfil (por ejemplo tu mascota), vas a poder vincularlo a este producto.",
+          "Si es un perfil nuevo, completá el formulario (nombre, contactos, instrucciones y, en Personas, datos de salud si querés).",
+          "Al guardar, el mismo QR del producto queda vinculado a tu cuenta. No se crea un código paralelo.",
         ],
       },
       {
@@ -200,7 +200,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         bullets: [
           "QRs activos: cuántos perfiles tenés activos respecto a tu plan.",
           "Alertas: cuántos eventos de escaneo o SOS tenés sin leer.",
-          "Activar mi producto: abre el escáner para vincular una chapita o collar comprado.",
+          "Activar mi producto: te explica cómo vincular una chapita o collar con la cámara del celular.",
         ],
       },
       {
@@ -229,7 +229,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         title: "Secciones vacías",
         paragraphs: [
           "Personas, Objetos y Mascotas siempre aparecen en el panel, aunque estén vacías.",
-          "En cada sección vacía hay un botón + para escanear el QR de un producto nuevo.",
+          "En cada sección vacía hay un botón + que te recuerda activar un producto nuevo con la cámara del celular.",
         ],
       },
     ],
@@ -251,8 +251,9 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         id: "qr-crear",
         title: "Activar un producto y vincular el QR",
         paragraphs: [
-          "Desde la sección correspondiente, tocá el + o Activar mi producto y escaneá el QR del producto que compraste.",
-          "Completá el formulario con foto, contactos e instrucciones. En Personas sumá datos de salud en texto; en Mascotas el historial clínico se carga después en la libreta sanitaria.",
+          "Escaneá el QR del producto con la cámara de tu celular (Cámara en iPhone, cámara o Google Lens en Android).",
+          "Si ya tenés un perfil del mismo tipo sin producto, vas a poder vincularlo. Si no, completá el formulario con foto, contactos e instrucciones.",
+          "En Personas sumá datos de salud en texto; en Mascotas el historial clínico se carga después en la libreta sanitaria.",
           "Al guardar, el QR físico queda activo. En la tarjeta del perfil podés ver el código y descargar una copia digital si la necesitás.",
         ],
       },
@@ -540,10 +541,10 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         id: "activar-pasos",
         title: "Pasos",
         paragraphs: [
-          "Expandí «Hola, este es tu panel» → Activar mi producto.",
-          "Escaneá el QR del producto con la cámara o ingresá el código impreso.",
-          "Completá el formulario de perfil. Si el producto es de mascota, el tipo puede venir bloqueado.",
-          "Al terminar, volvés al panel con un mensaje de éxito y el QR ya queda vinculado.",
+          "Escaneá el QR del producto con la cámara del celular. No hace falta tipear ningún código.",
+          "Entrá al enlace. Si ya tenés cuenta, iniciá sesión. Si ya cargaste el perfil, vinculalo; si no, completá el formulario.",
+          "Si el producto es de mascota, el tipo viene bloqueado.",
+          "Al terminar, volvés al panel con un mensaje de éxito y el QR del producto ya queda vinculado.",
         ],
       },
       {

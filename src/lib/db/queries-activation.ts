@@ -9,7 +9,11 @@ import {
   resolveProfileType,
   type ProfileType,
 } from "@/lib/profile-types";
-import { createQrProfile, generateUniqueProfileSlug } from "@/lib/db/queries";
+import {
+  createQrProfile,
+  findQrProfileById,
+  generateUniqueProfileSlug,
+} from "@/lib/db/queries";
 
 export type QrProductBatchRow = {
   id: string;
@@ -55,12 +59,26 @@ export type ActivationPublicView = {
 export class ActivationError extends Error {
   constructor(
     message: string,
-    public code: "NOT_FOUND" | "DISABLED" | "ALREADY_CLAIMED" | "RACE" | "INTERNAL",
+    public code:
+      | "NOT_FOUND"
+      | "DISABLED"
+      | "ALREADY_CLAIMED"
+      | "ALREADY_LINKED"
+      | "TYPE_MISMATCH"
+      | "RACE"
+      | "INTERNAL",
   ) {
     super(message);
     this.name = "ActivationError";
   }
 }
+
+export type UnlinkedProfileOption = {
+  id: string;
+  slug: string;
+  beneficiary_name: string;
+  profile_type: ProfileType;
+};
 
 export async function findActivationByCode(
   rawCode: string,
@@ -212,6 +230,124 @@ export async function claimActivationForUser(
 
   return { profile, activation: refreshed };
 }
+
+export async function listUnlinkedProfilesForUser(
+  userId: string,
+  profileType: ProfileType,
+): Promise<UnlinkedProfileOption[]> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      qp.id, qp.slug, qp.beneficiary_name, qp.profile_type
+    FROM qr_profiles qp
+    WHERE qp.tutor_id = ${userId}
+      AND qp.profile_type = ${profileType}
+      AND NOT EXISTS (
+        SELECT 1
+        FROM qr_activations qa
+        WHERE qa.profile_id = qp.id AND qa.status = 'claimed'
+      )
+    ORDER BY qp.created_at DESC
+  `;
+  return (rows as UnlinkedProfileOption[]).map((row) => ({
+    ...row,
+    profile_type: resolveProfileType(row.profile_type),
+  }));
+}
+
+export async function linkActivationToExistingProfile(
+  rawCode: string,
+  userId: string,
+  profileId: string,
+): Promise<{ profile: QrProfile; activation: QrActivationRow }> {
+  const code = normalizeActivationCode(rawCode);
+  const activation = await findActivationByCode(code);
+
+  if (!activation) {
+    throw new ActivationError("Código no encontrado", "NOT_FOUND");
+  }
+  if (activation.status === "disabled") {
+    throw new ActivationError("Este código fue deshabilitado", "DISABLED");
+  }
+  if (activation.status === "claimed") {
+    throw new ActivationError(
+      activation.claimed_by_user_id === userId
+        ? "Este código ya fue activado"
+        : "Este código ya fue activado por otra cuenta",
+      "ALREADY_CLAIMED",
+    );
+  }
+
+  const profile = await findQrProfileById(profileId);
+  if (!profile || profile.tutor_id !== userId) {
+    throw new ActivationError(
+      "No encontramos ese perfil en tu cuenta",
+      "NOT_FOUND",
+    );
+  }
+
+  if (
+    resolveProfileType(profile.profile_type) !==
+    resolveProfileType(activation.profile_type)
+  ) {
+    throw new ActivationError(
+      "Ese perfil no coincide con este producto",
+      "TYPE_MISMATCH",
+    );
+  }
+
+  const sql = getSql();
+  const alreadyLinked = await sql`
+    SELECT id
+    FROM qr_activations
+    WHERE profile_id = ${profile.id} AND status = 'claimed'
+    LIMIT 1
+  `;
+  if (alreadyLinked[0]) {
+    throw new ActivationError(
+      "Ese perfil ya tiene un producto vinculado",
+      "ALREADY_LINKED",
+    );
+  }
+
+  const updated = await sql`
+    UPDATE qr_activations
+    SET
+      status = 'claimed',
+      claimed_at = NOW(),
+      claimed_by_user_id = ${userId},
+      profile_id = ${profile.id},
+      public_slug = ${profile.slug}
+    WHERE id = ${activation.id} AND status = 'unclaimed'
+    RETURNING id
+  `;
+
+  if (!updated[0]) {
+    throw new ActivationError(
+      "El código fue activado por otra persona. Probá de nuevo.",
+      "RACE",
+    );
+  }
+
+  const refreshed = await findActivationByCode(code);
+  if (!refreshed) {
+    throw new ActivationError("Error al confirmar activación", "INTERNAL");
+  }
+
+  return { profile, activation: refreshed };
+}
+
+function activationErrorStatus(code: ActivationError["code"]): number {
+  if (code === "NOT_FOUND") return 404;
+  if (code === "ALREADY_CLAIMED" || code === "RACE" || code === "ALREADY_LINKED") {
+    return 409;
+  }
+  if (code === "TYPE_MISMATCH") return 400;
+  if (code === "DISABLED") return 410;
+  return 500;
+}
+
+export { activationErrorStatus };
 
 export type ActivationStats = {
   batch_count: number;

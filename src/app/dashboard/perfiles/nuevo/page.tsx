@@ -7,7 +7,7 @@ export default function NewProfilePage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/dashboard?escanear=1#activar-producto");
+    router.replace("/activar");
   }, [router]);
 
   return (

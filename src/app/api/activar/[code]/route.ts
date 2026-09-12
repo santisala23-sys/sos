@@ -3,7 +3,9 @@ import { getSession } from "@/lib/auth/session";
 import { withApi } from "@/lib/api/with-api";
 import {
   ActivationError,
+  activationErrorStatus,
   findActivationByCode,
+  linkActivationToExistingProfile,
   toActivationPublicView,
 } from "@/lib/db/queries-activation";
 import { normalizeBloodType } from "@/lib/blood-types";
@@ -46,6 +48,7 @@ export const POST = withApi(
     const code = params?.code ?? "";
 
     let body: {
+      link_profile_id?: string;
       beneficiary_name?: string;
       emergency_contact_name?: string;
       emergency_contact_phone?: string;
@@ -69,6 +72,7 @@ export const POST = withApi(
     }
 
     const {
+      link_profile_id,
       beneficiary_name,
       emergency_contact_name,
       emergency_contact_phone,
@@ -83,6 +87,29 @@ export const POST = withApi(
       pet_breed,
       pet_birth_date,
     } = body;
+
+    if (link_profile_id?.trim()) {
+      try {
+        const result = await linkActivationToExistingProfile(
+          code,
+          meta.userId,
+          link_profile_id.trim(),
+        );
+        return NextResponse.json({
+          profile: result.profile,
+          activation: toActivationPublicView(result.activation, meta.userId),
+        });
+      } catch (error) {
+        if (error instanceof ActivationError) {
+          return NextResponse.json(
+            { error: error.message, code: error.code },
+            { status: activationErrorStatus(error.code) },
+          );
+        }
+        console.error("[activar POST] link", error);
+        return NextResponse.json({ error: "Error interno" }, { status: 500 });
+      }
+    }
 
     if (
       !beneficiary_name?.trim() ||
@@ -191,15 +218,10 @@ export const POST = withApi(
       });
     } catch (error) {
       if (error instanceof ActivationError) {
-        const status =
-          error.code === "NOT_FOUND"
-            ? 404
-            : error.code === "ALREADY_CLAIMED" || error.code === "RACE"
-              ? 409
-              : error.code === "DISABLED"
-                ? 410
-                : 500;
-        return NextResponse.json({ error: error.message, code: error.code }, { status });
+        return NextResponse.json(
+          { error: error.message, code: error.code },
+          { status: activationErrorStatus(error.code) },
+        );
       }
       console.error("[activar POST]", error);
       return NextResponse.json({ error: "Error interno" }, { status: 500 });

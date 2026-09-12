@@ -302,7 +302,7 @@ export default function PerfilPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link href="/dashboard?escanear=1#activar-producto">
+            <Link href="/activar">
               <Button
                 type="button"
                 className="gap-2 bg-white text-violet-800 hover:bg-violet-50"
@@ -461,10 +461,10 @@ export default function PerfilPage() {
             <p className="mt-4 text-sm text-neutral-600">
               Todavía no activaste ningún producto.{" "}
               <Link
-                href="/dashboard?escanear=1#activar-producto"
+                href="/activar"
                 className="font-semibold text-violet-700 hover:underline"
               >
-                Escanear QR
+                Cómo activar el producto
               </Link>
             </p>
           )}

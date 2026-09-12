@@ -8,6 +8,7 @@ import { ActivationClaimView } from "@/components/activation/ActivationClaimView
 import { getSession } from "@/lib/auth/session";
 import {
   findActivationByCode,
+  listUnlinkedProfilesForUser,
   toActivationPublicView,
 } from "@/lib/db/queries-activation";
 import { normalizeActivationCode } from "@/lib/activation/codes";
@@ -38,6 +39,10 @@ export default async function ActivarPage({ params }: ActivarPageProps) {
   const session = await getSession();
   const activation = toActivationPublicView(activationRow, session?.userId);
   const redirectPath = `/activar/${code}`;
+  const linkableProfiles =
+    session && activation.status === "unclaimed"
+      ? await listUnlinkedProfilesForUser(session.userId, activation.profileType)
+      : [];
   const copy = getActivationTypeCopy(activation.profileType);
   const HeaderIcon =
     activation.profileType === "pet"
@@ -89,6 +94,7 @@ export default async function ActivarPage({ params }: ActivarPageProps) {
             activation={activation}
             isLoggedIn={Boolean(session)}
             redirectPath={redirectPath}
+            linkableProfiles={linkableProfiles}
           />
         </div>
       </main>

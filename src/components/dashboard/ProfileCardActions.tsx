@@ -96,8 +96,8 @@ export function CardScanAddButton({ onClick, className }: CardScanAddButtonProps
     <button
       type="button"
       onClick={onClick}
-      aria-label="Escanear QR para agregar producto"
-      title="Escanear QR"
+      aria-label="Cómo activar un producto QR"
+      title="Activar producto"
       className={cn(
         "group/add inline-flex h-[3.25rem] w-[3.25rem] shrink-0 items-center justify-center rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md shadow-amber-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:from-amber-500 hover:to-orange-600 hover:shadow-lg hover:shadow-amber-500/40 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2",
         className,

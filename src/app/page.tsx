@@ -327,7 +327,7 @@ export default async function HomePage() {
                   href="/activar"
                   className="font-semibold text-violet-700 hover:underline"
                 >
-                  Activar código
+                  Activar producto
                 </Link>
               </p>
             </article>
@@ -346,9 +346,9 @@ export default async function HomePage() {
               </p>
               <ol className="mt-8 flex-1 space-y-5 text-neutral-700">
                 {[
-                  "Iniciá sesión o creá tu cuenta en SOSme.",
-                  "Escaneá el QR impreso en el producto (o ingresá el código).",
-                  "Completá los datos de emergencia y listo: el mismo QR queda activo para siempre.",
+                  "Escaneá el QR del producto con la cámara del celular.",
+                  "Si te pide cuenta, iniciá sesión o registrate.",
+                  "Completá los datos o vinculá un perfil que ya tengas. El mismo QR queda activo.",
                 ].map((item, i) => (
                   <li key={item} className="flex gap-4">
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-sm font-black text-emerald-700">

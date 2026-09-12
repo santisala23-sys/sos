@@ -148,9 +148,9 @@ export function getActivationTypeCopy(
       subtitle: "Este código es para una chapita o collar.",
       formTitle: "Datos de tu mascota",
       formHint: "Foto, contactos e instrucciones si alguien encuentra a tu mascota.",
-      loginTitle: "Activá la chapita de tu mascota",
+      loginTitle: "Vinculá la chapita de tu mascota",
       loginBody:
-        "Creá una cuenta o ingresá para vincular este QR a tu mascota. Después, quien la encuentre ve cómo avisarte.",
+        "Iniciá sesión o creá una cuenta para vincular este QR. Si ya cargaste a tu mascota, vas a poder usarla: no hace falta crear otro perfil.",
     };
   }
   if (resolved === "object") {
@@ -161,7 +161,7 @@ export function getActivationTypeCopy(
       formHint: "Completá cómo contactarte si lo encuentran.",
       loginTitle: "Activá el QR de tu objeto",
       loginBody:
-        "Creá una cuenta o ingresá para vincular este QR a tu objeto. Quien lo encuentre va a poder avisarte.",
+        "Iniciá sesión o creá una cuenta para vincular este QR. Si ya cargaste el objeto, vas a poder usarlo: no hace falta crear otro perfil.",
     };
   }
   return {
@@ -170,7 +170,7 @@ export function getActivationTypeCopy(
     formTitle: "Datos de emergencia",
     formHint: "Completá los datos que verán quienes escaneen el QR.",
     loginTitle: "Activá tu producto una sola vez",
-    loginBody:
-      "Creá una cuenta o ingresá para vincular este QR a tu perfil. Después, quien escanee ve tus datos de contacto — sin instalar apps.",
+      loginBody:
+        "Iniciá sesión o creá una cuenta para vincular este QR. Si ya tenés un perfil, vas a poder usarlo: no hace falta crear otro.",
   };
 }
