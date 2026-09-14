@@ -1,8 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth/session";
-import { findQrProfileById } from "@/lib/db/queries";
+import { getProfileAccessForUser } from "@/lib/db/queries-profile-shares";
 import { findPublicProfileBySlug } from "@/lib/db/public-queries";
+import { canViewProfile } from "@/lib/profile-access";
 import { EmergencyProfileView } from "@/components/public/EmergencyProfileView";
 
 type PageProps = {
@@ -11,11 +12,14 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const profile = await findQrProfileById(id);
+  const session = await getSession();
+  const access = session
+    ? await getProfileAccessForUser(id, session.userId)
+    : null;
 
   return {
-    title: profile
-      ? `Vista previa — ${profile.beneficiary_name}`
+    title: access
+      ? `Vista previa — ${access.profile.beneficiary_name}`
       : "Vista previa",
     robots: { index: false, follow: false },
   };
@@ -28,12 +32,12 @@ export default async function TutorPublicPreviewPage({ params }: PageProps) {
   }
 
   const { id } = await params;
-  const owned = await findQrProfileById(id);
-  if (!owned || owned.tutor_id !== session.userId) {
+  const access = await getProfileAccessForUser(id, session.userId);
+  if (!access || !canViewProfile(access)) {
     notFound();
   }
 
-  const profile = await findPublicProfileBySlug(owned.slug, false);
+  const profile = await findPublicProfileBySlug(access.profile.slug, false);
   if (!profile) {
     notFound();
   }

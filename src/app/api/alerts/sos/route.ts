@@ -40,17 +40,21 @@ export const POST = withApi(
       slug: profile.slug,
     });
 
-    await notifyTutor({
-      profileId: profile.id,
-      type: "sos",
-      beneficiaryName: profile.beneficiary_name,
-      emergencyContactName: profile.emergency_contact_name,
-      emergencyContactPhone: profile.emergency_contact_phone,
-      scannedAt: scanLog.scanned_at,
-      scanLogId: scanLog.id,
-      latitude,
-      longitude,
-    });
+    try {
+      await notifyTutor({
+        profileId: profile.id,
+        type: "sos",
+        beneficiaryName: profile.beneficiary_name,
+        emergencyContactName: profile.emergency_contact_name,
+        emergencyContactPhone: profile.emergency_contact_phone,
+        scannedAt: scanLog.scanned_at,
+        scanLogId: scanLog.id,
+        latitude,
+        longitude,
+      });
+    } catch (error) {
+      console.error("[alerts/sos] notifyTutor failed", error);
+    }
 
     return NextResponse.json({ scanLogId: scanLog.id, scanToken });
   },

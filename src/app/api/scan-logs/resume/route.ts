@@ -31,6 +31,10 @@ export const GET = withApi(
       return NextResponse.json({ valid: false });
     }
 
+    if (log.read_at) {
+      return NextResponse.json({ valid: false, reason: "closed" });
+    }
+
     const ageMs = Date.now() - new Date(log.scanned_at).getTime();
     if (ageMs > SCAN_SESSION_TTL_MS) {
       return NextResponse.json({ valid: false, reason: "expired" });

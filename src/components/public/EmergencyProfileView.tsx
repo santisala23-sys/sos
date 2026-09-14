@@ -101,6 +101,8 @@ export function EmergencyProfileView({
           scanLogId: data.scanLogId,
           geoPhase: "skipped",
         });
+      } else {
+        scanTriggered.current = false;
       }
     } catch {
       scanTriggered.current = false;
@@ -116,6 +118,7 @@ export function EmergencyProfileView({
 
       const stored = getStoredScanSession(profile.slug);
       if (stored?.scanToken) {
+        let resumeHandled = false;
         try {
           const res = await fetch(
             `/api/scan-logs/resume?scanToken=${encodeURIComponent(stored.scanToken)}`,
@@ -149,12 +152,15 @@ export function EmergencyProfileView({
               setSessionRestored(true);
               touchScanSession(profile.slug);
               setSessionReady(true);
-              return;
+              resumeHandled = true;
             }
           }
         } catch {
           /* fall through */
         }
+
+        if (resumeHandled) return;
+
         clearStoredScanSession(profile.slug);
       }
 

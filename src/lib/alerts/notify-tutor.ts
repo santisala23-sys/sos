@@ -46,33 +46,44 @@ export async function notifyTutor(params: NotifyTutorParams): Promise<void> {
     locationArea: params.locationArea,
   });
 
-  const recipientIds = await listAlertRecipientUserIds(params.profileId);
+  let recipientIds: string[] = [];
+  try {
+    recipientIds = await listAlertRecipientUserIds(params.profileId);
+  } catch (error) {
+    console.error("[notify-tutor] Failed to list alert recipients", error);
+    return;
+  }
+
   const uniqueRecipients = [...new Set(recipientIds)];
 
   await Promise.all(
     uniqueRecipients.map(async (userId) => {
-      const subscriptions = await listPushSubscriptionsByUser(userId);
-      if (subscriptions.length === 0) {
-        console.warn("[notify-tutor] No push subscriptions for user", userId);
-        return;
-      }
+      try {
+        const subscriptions = await listPushSubscriptionsByUser(userId);
+        if (subscriptions.length === 0) {
+          console.warn("[notify-tutor] No push subscriptions for user", userId);
+          return;
+        }
 
-      const pushResult = await sendWebPushToUser(
-        subscriptions,
-        {
-          title: push.title,
-          body: push.body,
-          url: dashboardUrl,
-        },
-        (endpoint) => deletePushSubscription(userId, endpoint),
-      );
+        const pushResult = await sendWebPushToUser(
+          subscriptions,
+          {
+            title: push.title,
+            body: push.body,
+            url: dashboardUrl,
+          },
+          (endpoint) => deletePushSubscription(userId, endpoint),
+        );
 
-      if (pushResult.sent === 0) {
-        console.error("[notify-tutor] Push delivery failed", {
-          userId,
-          scanLogId: params.scanLogId,
-          ...pushResult,
-        });
+        if (pushResult.sent === 0) {
+          console.error("[notify-tutor] Push delivery failed", {
+            userId,
+            scanLogId: params.scanLogId,
+            ...pushResult,
+          });
+        }
+      } catch (error) {
+        console.error("[notify-tutor] Push error for user", userId, error);
       }
     }),
   );
