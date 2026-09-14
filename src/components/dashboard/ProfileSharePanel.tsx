@@ -320,7 +320,7 @@ export function ProfileSharePanel({
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
         <section className="min-w-0 flex-1 rounded-2xl border border-violet-100 bg-violet-50/40 p-5 sm:p-6">
-        <div className="mb-5 flex items-start gap-3">
+          <div className="mb-5 flex items-start gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white">
             <Share2 className="h-5 w-5" aria-hidden />
           </span>
@@ -331,9 +331,9 @@ export function ProfileSharePanel({
               persona necesita cuenta SOSme (gratis) para aceptar.
             </p>
           </div>
-        </div>
+          </div>
 
-        <div className="space-y-5">
+          <div className="space-y-5">
           <PermissionPicker
             permissions={invitePermissions}
             options={permissionOptions}
@@ -360,10 +360,10 @@ export function ProfileSharePanel({
             </p>
           )}
 
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid min-w-0 gap-4">
             <form
               onSubmit={handleInvite}
-              className="space-y-4 rounded-2xl border border-neutral-200 bg-white p-4"
+              className="min-w-0 space-y-4 rounded-2xl border border-neutral-200 bg-white p-4"
             >
               <div>
                 <h3 className="text-sm font-bold text-neutral-900">Por email</h3>
@@ -393,10 +393,10 @@ export function ProfileSharePanel({
               </Button>
             </form>
 
-            <div className="space-y-4 rounded-2xl border border-green-200 bg-green-50/50 p-4">
+            <div className="min-w-0 space-y-4 rounded-2xl border border-green-200 bg-green-50/50 p-4">
               <div>
                 <h3 className="text-sm font-bold text-neutral-900">Por WhatsApp</h3>
-                <p className="mt-1 text-xs text-neutral-600">
+                <p className="mt-1 text-xs leading-relaxed text-neutral-600">
                   Ideal para familiares. Generás un link, se lo mandás por WhatsApp y
                   cuando lo abren crean cuenta o inician sesión.
                 </p>
@@ -407,7 +407,7 @@ export function ProfileSharePanel({
                 onClick={() => void handleGenerateInviteLink()}
                 className="w-full gap-2 bg-[#25D366] hover:bg-[#1ebe57] focus-visible:ring-[#25D366]"
               >
-                <MessageCircle className="h-4 w-4" />
+                <MessageCircle className="h-4 w-4 shrink-0" />
                 {generatingLink ? "Generando link..." : "Generar link para WhatsApp"}
               </Button>
               <p className="text-xs text-neutral-500">
@@ -415,20 +415,22 @@ export function ProfileSharePanel({
               </p>
 
               {inviteLinkUrl && (
-                <div className="space-y-3 rounded-xl border border-green-200 bg-white p-3">
+                <div className="min-w-0 space-y-3 rounded-xl border border-green-200 bg-white p-3 sm:p-4">
                   <p className="text-xs font-semibold text-neutral-700">Link de invitación</p>
-                  <p className="break-all rounded-lg bg-neutral-50 px-3 py-2 text-xs text-neutral-800">
-                    {inviteLinkUrl}
-                  </p>
-                  <div className="flex flex-col gap-2 sm:flex-row">
+                  <div className="min-w-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50">
+                    <p className="break-all px-3 py-2.5 text-xs leading-relaxed text-neutral-800">
+                      {inviteLinkUrl}
+                    </p>
+                  </div>
+                  <div className="grid gap-2">
                     <Button
                       type="button"
                       variant="secondary"
                       size="sm"
-                      className="gap-2"
+                      className="w-full gap-2"
                       onClick={() => void handleCopyInviteLink()}
                     >
-                      <Copy className="h-4 w-4" />
+                      <Copy className="h-4 w-4 shrink-0" />
                       {copiedLink ? "Copiado" : "Copiar link"}
                     </Button>
                     {whatsappUrl && (
@@ -436,9 +438,9 @@ export function ProfileSharePanel({
                         href={whatsappUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#1ebe57]"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#1ebe57]"
                       >
-                        <MessageCircle className="h-4 w-4" />
+                        <MessageCircle className="h-4 w-4 shrink-0" />
                         Abrir WhatsApp
                       </a>
                     )}
@@ -447,7 +449,7 @@ export function ProfileSharePanel({
               )}
             </div>
           </div>
-        </div>
+          </div>
         </section>
 
         <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:w-80 xl:w-[22rem]">
