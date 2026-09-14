@@ -28,41 +28,7 @@ type BotReply = {
 };
 
 const WELCOME =
-  "Hola, soy HELPme. Preguntame sobre el panel, los QRs, la libreta sanitaria, co-tutoría o los planes. Respondo con la info de Ayuda.";
-
-function HelpmeBrand({
-  compact = false,
-  size = "default",
-  tone = "dark",
-}: {
-  compact?: boolean;
-  size?: "default" | "teaser";
-  tone?: "dark" | "light";
-}) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-baseline font-black leading-none tracking-tight",
-        size === "teaser"
-          ? "text-lg sm:text-xl"
-          : compact
-            ? "text-[11px]"
-            : "text-sm",
-        tone === "dark" ? "text-white" : "text-violet-900",
-      )}
-    >
-      <span>HELP</span>
-      <span
-        className={cn(
-          "font-bold",
-          tone === "dark" ? "text-violet-200" : "text-violet-600",
-        )}
-      >
-        me
-      </span>
-    </span>
-  );
-}
+  "Preguntame sobre el panel, los QRs, la libreta sanitaria, co-tutoría o los planes. Respondo con la info de Ayuda.";
 
 const TEASER_STORAGE_KEY = "sos_helpme_teaser_dismissed";
 
@@ -186,18 +152,16 @@ export function HelpChatbot() {
         <div
           className="flex w-[min(22rem,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-[1.75rem] border border-violet-200/80 bg-white shadow-2xl shadow-violet-500/20"
           role="dialog"
-          aria-label="HELPme, asistente de ayuda SOSme"
+          aria-label="Asistente de ayuda SOSme"
         >
           <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-violet-600 via-violet-700 to-indigo-800 px-4 py-3.5 text-white">
             <div className="flex min-w-0 items-center gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
-                <HelpmeBrand compact tone="dark" />
+                <MessageCircleQuestion className="h-5 w-5" aria-hidden />
               </span>
               <div className="min-w-0">
-                <p className="truncate">
-                  <HelpmeBrand tone="dark" />
-                </p>
-                <p className="text-xs text-violet-100">Asistente de ayuda SOSme</p>
+                <p className="truncate text-sm font-black">Asistente SOSme</p>
+                <p className="text-xs text-violet-100">¿En qué puedo ayudarte?</p>
               </div>
             </div>
             <button
@@ -323,7 +287,7 @@ export function HelpChatbot() {
                 <X className="h-3 w-3" />
               </button>
               <p className="px-1 text-center text-sm font-semibold leading-relaxed text-violet-900 sm:text-base">
-                Hola, ¿en qué puedo ayudarte mejor?
+                Hola, ¿en qué puedo ayudarte?
               </p>
             </div>
             <span
@@ -343,7 +307,7 @@ export function HelpChatbot() {
               : "bg-gradient-to-br from-violet-500 via-violet-600 to-indigo-700 shadow-violet-500/35",
             !open && showTeaser && "animate-[helpme-pulse_2.4s_ease-in-out_infinite]",
           )}
-          aria-label={open ? "Cerrar HELPme" : "Abrir HELPme"}
+          aria-label={open ? "Cerrar asistente" : "Abrir asistente de ayuda"}
           aria-expanded={open}
         >
           {!open && (
