@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bot, MessageCircle, Send, Sparkles, X } from "lucide-react";
+import { MessageCircle, MessageCircleQuestion, Send, X } from "lucide-react";
 import {
   HELP_SUGGESTED_QUESTIONS,
   bestHelpAnswer,
@@ -17,7 +17,9 @@ type ChatMessage = {
 };
 
 const WELCOME =
-  "Hola, soy el asistente de SOSme. Preguntame sobre el panel, los QRs, la libreta sanitaria, co-tutoría o los planes. Respondo con la info de Ayuda.";
+  "Hola, soy Helpme. Preguntame sobre el panel, los QRs, la libreta sanitaria, co-tutoría o los planes. Respondo con la info de Ayuda.";
+
+const TEASER_STORAGE_KEY = "sos_helpme_teaser_dismissed";
 
 function buildBotReply(query: string): string {
   const match = bestHelpAnswer(query);
@@ -36,8 +38,17 @@ export function HelpChatbot() {
     { id: "welcome", role: "bot", text: WELCOME },
   ]);
   const [typing, setTyping] = useState(false);
+  const [showTeaser, setShowTeaser] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    try {
+      setShowTeaser(sessionStorage.getItem(TEASER_STORAGE_KEY) !== "1");
+    } catch {
+      setShowTeaser(true);
+    }
+  }, []);
 
   const showOnHome = pathname === "/";
   const hideOnPublicProfile = pathname.startsWith("/p/");
@@ -90,27 +101,45 @@ export function HelpChatbot() {
     ask(input);
   }
 
+  function dismissTeaser() {
+    setShowTeaser(false);
+    try {
+      sessionStorage.setItem(TEASER_STORAGE_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function openChat() {
+    dismissTeaser();
+    setOpen(true);
+  }
+
+  function closeChat() {
+    setOpen(false);
+  }
+
   return (
     <div className="fixed bottom-24 right-5 z-50 flex flex-col items-end gap-3">
       {open && (
         <div
           className="flex w-[min(22rem,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-[1.75rem] border border-violet-200/80 bg-white shadow-2xl shadow-violet-500/20"
           role="dialog"
-          aria-label="Asistente de ayuda SOSme"
+          aria-label="Helpme, asistente de ayuda SOSme"
         >
           <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-violet-600 via-violet-700 to-indigo-800 px-4 py-3.5 text-white">
             <div className="flex min-w-0 items-center gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
-                <Sparkles className="h-5 w-5" aria-hidden />
+                <MessageCircleQuestion className="h-5 w-5" aria-hidden />
               </span>
               <div className="min-w-0">
-                <p className="truncate text-sm font-black">Asistente SOSme</p>
-                <p className="text-xs text-violet-100">Basado en Ayuda</p>
+                <p className="truncate text-sm font-black">Helpme</p>
+                <p className="text-xs text-violet-100">Asistente de ayuda SOSme</p>
               </div>
             </div>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={closeChat}
               className="rounded-xl p-2 text-white/90 transition hover:bg-white/10"
               aria-label="Cerrar asistente"
             >
@@ -205,20 +234,57 @@ export function HelpChatbot() {
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        className={cn(
-          "inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-2xl transition-transform hover:scale-[1.03] active:scale-[0.98]",
-          open
-            ? "bg-neutral-800 shadow-neutral-900/25"
-            : "bg-gradient-to-br from-violet-600 to-indigo-700 shadow-violet-500/30",
+      <div className="flex items-end gap-3">
+        {!open && showTeaser && (
+          <div className="relative max-w-[13.5rem] animate-[helpme-teaser-in_0.45s_ease-out] sm:max-w-[15rem]">
+            <div className="relative rounded-2xl rounded-br-md border border-violet-100 bg-white px-4 py-3 shadow-xl shadow-violet-500/15 ring-1 ring-violet-100/80">
+              <button
+                type="button"
+                onClick={dismissTeaser}
+                className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full border border-violet-100 bg-white text-neutral-400 shadow-sm transition hover:text-neutral-700"
+                aria-label="Cerrar mensaje"
+              >
+                <X className="h-3 w-3" />
+              </button>
+              <p className="pr-3 text-sm font-black leading-snug text-violet-900">
+                ¡Hola! Soy Helpme
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-neutral-600">
+                ¿En qué puedo ayudarte?
+              </p>
+            </div>
+            <span
+              className="absolute -bottom-1.5 right-3 h-3 w-3 rotate-45 border-b border-r border-violet-100 bg-white"
+              aria-hidden
+            />
+          </div>
         )}
-        aria-label={open ? "Cerrar asistente de ayuda" : "Abrir asistente de ayuda"}
-        aria-expanded={open}
-      >
-        {open ? <X className="h-6 w-6" /> : <Bot className="h-7 w-7" />}
-      </button>
+
+        <button
+          type="button"
+          onClick={() => (open ? closeChat() : openChat())}
+          className={cn(
+            "relative inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-2xl transition-transform hover:scale-[1.03] active:scale-[0.98]",
+            open
+              ? "bg-neutral-800 shadow-neutral-900/25"
+              : "bg-gradient-to-br from-violet-500 via-violet-600 to-indigo-700 shadow-violet-500/35",
+            !open && showTeaser && "animate-[helpme-pulse_2.4s_ease-in-out_infinite]",
+          )}
+          aria-label={open ? "Cerrar Helpme" : "Abrir Helpme"}
+          aria-expanded={open}
+        >
+          {!open && (
+            <span className="absolute inset-0 rounded-full bg-violet-400/30 blur-md" aria-hidden />
+          )}
+          {open ? (
+            <X className="relative h-6 w-6" />
+          ) : (
+            <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/15 ring-2 ring-white/25">
+              <MessageCircleQuestion className="h-6 w-6" strokeWidth={2.25} />
+            </span>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
