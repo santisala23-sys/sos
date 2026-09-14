@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MessageCircle, Send, X } from "lucide-react";
+import { MessageCircle, MessageCircleQuestion, Send, X } from "lucide-react";
 import {
   HELP_SUGGESTED_QUESTIONS,
   bestHelpAnswer,
@@ -32,16 +32,22 @@ const WELCOME =
 
 function HelpmeBrand({
   compact = false,
+  size = "default",
   tone = "dark",
 }: {
   compact?: boolean;
+  size?: "default" | "teaser";
   tone?: "dark" | "light";
 }) {
   return (
     <span
       className={cn(
         "inline-flex items-baseline font-black leading-none tracking-tight",
-        compact ? "text-[11px]" : "text-sm",
+        size === "teaser"
+          ? "text-lg sm:text-xl"
+          : compact
+            ? "text-[11px]"
+            : "text-sm",
         tone === "dark" ? "text-white" : "text-violet-900",
       )}
     >
@@ -304,10 +310,10 @@ export function HelpChatbot() {
         </div>
       )}
 
-      <div className="relative flex flex-col items-center">
+      <div className="relative flex flex-col items-end">
         {!open && showTeaser && (
-          <div className="pointer-events-none absolute bottom-[calc(100%+0.35rem)] left-1/2 z-10 w-[min(15rem,calc(100vw-4.5rem))] -translate-x-1/2 animate-[helpme-teaser-in_0.45s_ease-out]">
-            <div className="pointer-events-auto relative rounded-2xl border border-violet-100 bg-white px-4 py-3 shadow-xl shadow-violet-500/15 ring-1 ring-violet-100/80">
+          <div className="pointer-events-none absolute bottom-[calc(100%+0.35rem)] right-0 z-10 w-[min(17rem,calc(100vw-5.5rem))] animate-[helpme-teaser-in_0.45s_ease-out] sm:-translate-x-3">
+            <div className="pointer-events-auto relative rounded-2xl border border-violet-100 bg-white px-4 py-3.5 shadow-xl shadow-violet-500/15 ring-1 ring-violet-100/80">
               <button
                 type="button"
                 onClick={dismissTeaser}
@@ -316,16 +322,18 @@ export function HelpChatbot() {
               >
                 <X className="h-3 w-3" />
               </button>
-              <p className="pr-3 text-sm leading-snug text-violet-900">
-                <span className="font-black">¡Hola! Soy </span>
-                <HelpmeBrand compact tone="light" />
+              <p className="pr-3 text-sm font-black leading-snug text-violet-900">
+                ¡Hola! Soy
               </p>
-              <p className="mt-1 text-xs leading-relaxed text-neutral-600">
+              <p className="mt-1">
+                <HelpmeBrand size="teaser" tone="light" />
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-600">
                 ¿En qué puedo ayudarte?
               </p>
             </div>
             <span
-              className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-b border-r border-violet-100 bg-white"
+              className="absolute -bottom-1.5 right-5 h-3 w-3 rotate-45 border-b border-r border-violet-100 bg-white"
               aria-hidden
             />
           </div>
@@ -335,9 +343,9 @@ export function HelpChatbot() {
           type="button"
           onClick={() => (open ? closeChat() : openChat())}
           className={cn(
-            "relative inline-flex h-14 min-w-14 items-center justify-center rounded-full px-3 text-white shadow-2xl transition-transform hover:scale-[1.03] active:scale-[0.98]",
+            "relative inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-2xl transition-transform hover:scale-[1.03] active:scale-[0.98]",
             open
-              ? "w-14 bg-neutral-800 px-0 shadow-neutral-900/25"
+              ? "bg-neutral-800 shadow-neutral-900/25"
               : "bg-gradient-to-br from-violet-500 via-violet-600 to-indigo-700 shadow-violet-500/35",
             !open && showTeaser && "animate-[helpme-pulse_2.4s_ease-in-out_infinite]",
           )}
@@ -350,8 +358,8 @@ export function HelpChatbot() {
           {open ? (
             <X className="relative h-6 w-6" />
           ) : (
-            <span className="relative">
-              <HelpmeBrand compact tone="dark" />
+            <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/15 ring-2 ring-white/25">
+              <MessageCircleQuestion className="h-6 w-6" strokeWidth={2.25} />
             </span>
           )}
         </button>
