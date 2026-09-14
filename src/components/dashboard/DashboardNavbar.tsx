@@ -43,6 +43,68 @@ type ProfileLimitStatus = {
   activeCount?: number;
 };
 
+type TutorAccount = {
+  fullName: string | null;
+  email: string;
+  avatarUrl: string | null;
+};
+
+function tutorInitials(account: TutorAccount | null): string {
+  if (!account) return "?";
+  const name = account.fullName?.trim();
+  if (name) {
+    return name
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part[0] ?? "")
+      .join("")
+      .toUpperCase();
+  }
+  return account.email[0]?.toUpperCase() ?? "?";
+}
+
+function TutorAvatar({
+  account,
+  size = "md",
+  className,
+}: {
+  account: TutorAccount | null;
+  size?: "sm" | "md";
+  className?: string;
+}) {
+  const dimension = size === "sm" ? "h-9 w-9" : "h-10 w-10";
+  const textSize = size === "sm" ? "text-xs" : "text-sm";
+
+  if (account?.avatarUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={account.avatarUrl}
+        alt=""
+        className={cn(
+          dimension,
+          "shrink-0 rounded-xl object-cover ring-2 ring-violet-100",
+          className,
+        )}
+      />
+    );
+  }
+
+  return (
+    <span
+      className={cn(
+        dimension,
+        "flex shrink-0 items-center justify-center rounded-xl bg-violet-100 font-bold text-violet-700 ring-2 ring-violet-50",
+        textSize,
+        className,
+      )}
+      aria-hidden
+    >
+      {tutorInitials(account)}
+    </span>
+  );
+}
+
 function NavSectionLabel({ children }: { children: string }) {
   return (
     <p className="mb-1.5 mt-4 px-2 text-[11px] font-bold uppercase tracking-[0.16em] text-violet-600 first:mt-0">
@@ -75,6 +137,7 @@ export function DashboardNavbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [profileLimit, setProfileLimit] = useState<ProfileLimitStatus | null>(null);
+  const [tutorAccount, setTutorAccount] = useState<TutorAccount | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [profiles, setProfiles] = useState<QrProfile[]>([]);
 
@@ -101,8 +164,18 @@ export function DashboardNavbar() {
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (d?.plan) setProfileLimit(d.plan);
+        if (d?.user) {
+          setTutorAccount({
+            fullName: d.user.fullName ?? null,
+            email: d.user.email,
+            avatarUrl: d.user.avatarUrl ?? null,
+          });
+        }
       })
-      .catch(() => setProfileLimit(null));
+      .catch(() => {
+        setProfileLimit(null);
+        setTutorAccount(null);
+      });
   }, []);
 
   useEffect(() => {
@@ -210,15 +283,29 @@ export function DashboardNavbar() {
       >
         <div className="flex min-w-0 items-center gap-4 lg:gap-5">
           <BrandLogo size="lg" showMark />
-          <span className="hidden border-l border-neutral-200 pl-5 text-sm leading-snug text-neutral-500 lg:block">
-            Panel del tutor
-            <br />
-            <span className="font-semibold text-violet-700">
-              {profileLimit
-                ? `${profileLimit.activeCount ?? profileLimit.currentCount}/${profileLimit.maxProfiles} QR activos`
-                : "Gestioná tus perfiles y alertas"}
+          <Link
+            href="/dashboard/perfil"
+            className="hidden min-w-0 items-center gap-3 border-l border-neutral-200 pl-5 transition-opacity hover:opacity-90 lg:flex"
+          >
+            <TutorAvatar account={tutorAccount} />
+            <span className="min-w-0 text-sm leading-snug text-neutral-500">
+              Panel del tutor
+              <br />
+              <span className="font-semibold text-violet-700">
+                {tutorAccount?.fullName?.trim() ||
+                  tutorAccount?.email ||
+                  (profileLimit
+                    ? `${profileLimit.activeCount ?? profileLimit.currentCount}/${profileLimit.maxProfiles} QR activos`
+                    : "Gestioná tus perfiles y alertas")}
+              </span>
+              {tutorAccount && profileLimit && (
+                <span className="mt-0.5 block text-xs font-medium text-neutral-400">
+                  {profileLimit.activeCount ?? profileLimit.currentCount}/
+                  {profileLimit.maxProfiles} QR activos
+                </span>
+              )}
             </span>
-          </span>
+          </Link>
         </div>
 
         <nav
@@ -288,12 +375,24 @@ export function DashboardNavbar() {
         title="Panel"
         hiddenFrom="lg"
       >
-        {profileLimit && (
-          <p className="mb-4 rounded-2xl bg-violet-50 px-4 py-3 text-sm text-violet-800">
-            {(profileLimit.activeCount ?? profileLimit.currentCount)}/
-            {profileLimit.maxProfiles} QR activos
-          </p>
-        )}
+        <Link
+          href="/dashboard/perfil"
+          className="mb-4 flex items-center gap-3 rounded-2xl bg-violet-50 px-4 py-3 transition-colors hover:bg-violet-100"
+          onClick={() => setOpen(false)}
+        >
+          <TutorAvatar account={tutorAccount} size="sm" />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold text-violet-950">
+              {tutorAccount?.fullName?.trim() || "Panel del tutor"}
+            </p>
+            {profileLimit && (
+              <p className="text-xs text-violet-700">
+                {(profileLimit.activeCount ?? profileLimit.currentCount)}/
+                {profileLimit.maxProfiles} QR activos
+              </p>
+            )}
+          </div>
+        </Link>
 
         <nav className="flex flex-col gap-1.5" aria-label="Navegación móvil del panel">
           {NAV_LINKS.filter((l) => l.id !== "perfil").map(
