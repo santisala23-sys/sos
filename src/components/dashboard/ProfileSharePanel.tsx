@@ -318,137 +318,8 @@ export function ProfileSharePanel({
         </p>
       )}
 
-      <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
-        <div className="mb-5 flex items-start gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
-            <Users className="h-5 w-5" aria-hidden />
-          </span>
-          <div>
-            <h2 className="text-lg font-black text-neutral-900">
-              Personas con acceso
-            </h2>
-            <p className="mt-1 text-sm text-neutral-600">
-              {shares.length} de {MAX_PROFILE_SHARES} cuentas compartidas con{" "}
-              <strong>{profileName}</strong>.
-            </p>
-          </div>
-        </div>
-
-        {loading ? (
-          <p className="text-sm text-neutral-500">Cargando...</p>
-        ) : shares.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-8 text-center text-sm text-neutral-600">
-            Todavía no compartiste este perfil con nadie. Invitá a alguien con el
-            formulario de abajo.
-          </p>
-        ) : (
-          <ul className="space-y-4">
-            {shares.map((share) => {
-              const isEditing = editingId === share.id;
-              const badges = activePermissionLabels(share, profileType);
-
-              return (
-                <li
-                  key={share.id}
-                  className="rounded-2xl border border-neutral-200 bg-neutral-50/80 p-4 sm:p-5"
-                >
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0">
-                      <p className="font-bold text-neutral-900">
-                        {formatShareName(share)}
-                      </p>
-                      <p className="text-sm text-neutral-500">{share.shared_with_email}</p>
-                      <p className="mt-2 text-sm text-neutral-600">
-                        {share.expires_at
-                          ? `Vence el ${new Date(share.expires_at).toLocaleDateString("es-AR")}`
-                          : "Acceso permanente"}
-                      </p>
-                      {!isEditing && badges.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {badges.map((label) => (
-                            <span
-                              key={label}
-                              className="rounded-full bg-violet-100 px-2.5 py-1 text-[11px] font-semibold text-violet-800"
-                            >
-                              {label}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {!isEditing && (
-                      <div className="flex shrink-0 gap-2">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => startEdit(share)}
-                        >
-                          Editar permisos
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-700 hover:bg-red-50"
-                          disabled={saving}
-                          onClick={() => void handleRevoke(share.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-
-                  {isEditing && (
-                    <div className="mt-5 space-y-4 border-t border-neutral-200 pt-5">
-                      <PermissionPicker
-                        permissions={editPermissions}
-                        options={permissionOptions}
-                        onToggle={(key) =>
-                          setEditPermissions((current) => ({
-                            ...current,
-                            [key]: !current[key],
-                          }))
-                        }
-                      />
-                      <ShareExpiryField
-                        idPrefix={`edit-${share.id}`}
-                        mode={editExpiryMode}
-                        dateValue={editExpiresAt}
-                        onModeChange={setEditExpiryMode}
-                        onDateChange={setEditExpiresAt}
-                      />
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          disabled={saving}
-                          onClick={() => void handleUpdateShare(share.id)}
-                        >
-                          {saving ? "Guardando..." : "Guardar cambios"}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          disabled={saving}
-                          onClick={cancelEdit}
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
-
-      <section className="rounded-2xl border border-violet-100 bg-violet-50/40 p-5 sm:p-6">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <section className="min-w-0 flex-1 rounded-2xl border border-violet-100 bg-violet-50/40 p-5 sm:p-6">
         <div className="mb-5 flex items-start gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white">
             <Share2 className="h-5 w-5" aria-hidden />
@@ -577,7 +448,147 @@ export function ProfileSharePanel({
             </div>
           </div>
         </div>
-      </section>
+        </section>
+
+        <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:w-80 xl:w-[22rem]">
+          <section className="rounded-2xl border border-neutral-200 bg-neutral-50/80 p-4 shadow-sm sm:p-5">
+            <div className="mb-4 flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+                <Users className="h-4 w-4" aria-hidden />
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-base font-black text-neutral-900">
+                  Personas con acceso
+                </h2>
+                <p className="mt-0.5 text-xs leading-relaxed text-neutral-600">
+                  {shares.length} de {MAX_PROFILE_SHARES} cuentas compartidas con{" "}
+                  <strong className="font-semibold text-neutral-800">{profileName}</strong>.
+                </p>
+              </div>
+            </div>
+
+            {loading ? (
+              <p className="text-sm text-neutral-500">Cargando...</p>
+            ) : shares.length === 0 ? (
+              <p className="rounded-xl border border-dashed border-neutral-200 bg-white px-3 py-6 text-center text-xs text-neutral-600">
+                Todavía no compartiste este perfil con nadie.
+              </p>
+            ) : (
+              <ul className="space-y-3">
+                {shares.map((share) => {
+                  const isEditing = editingId === share.id;
+                  const badges = activePermissionLabels(share, profileType);
+
+                  return (
+                    <li
+                      key={share.id}
+                      className="rounded-xl border border-neutral-200 bg-white p-3.5"
+                    >
+                      <div className="space-y-2">
+                        <div className="min-w-0">
+                          <p className="truncate font-bold text-sm text-neutral-900">
+                            {formatShareName(share)}
+                          </p>
+                          <p className="truncate text-xs text-neutral-500">
+                            {share.shared_with_email}
+                          </p>
+                          <p className="mt-1.5 text-xs text-neutral-600">
+                            {share.expires_at
+                              ? `Vence el ${new Date(share.expires_at).toLocaleDateString("es-AR")}`
+                              : "Acceso permanente"}
+                          </p>
+                        </div>
+
+                        {!isEditing && badges.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {badges.map((label) => (
+                              <span
+                                key={label}
+                                className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-800"
+                              >
+                                {label}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {!isEditing && (
+                          <div className="flex gap-1.5 pt-0.5">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              className="h-8 flex-1 px-2 text-xs"
+                              onClick={() => startEdit(share)}
+                            >
+                              Editar permisos
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 shrink-0 px-0 text-red-700 hover:bg-red-50"
+                              disabled={saving}
+                              onClick={() => void handleRevoke(share.id)}
+                              aria-label="Quitar acceso"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+
+                      {isEditing && (
+                        <div className="mt-3 space-y-3 border-t border-neutral-200 pt-3">
+                          <PermissionPicker
+                            compact
+                            permissions={editPermissions}
+                            options={permissionOptions}
+                            onToggle={(key) =>
+                              setEditPermissions((current) => ({
+                                ...current,
+                                [key]: !current[key],
+                              }))
+                            }
+                          />
+                          <ShareExpiryField
+                            idPrefix={`edit-${share.id}`}
+                            mode={editExpiryMode}
+                            dateValue={editExpiresAt}
+                            onModeChange={setEditExpiryMode}
+                            onDateChange={setEditExpiresAt}
+                          />
+                          <div className="flex flex-col gap-1.5">
+                            <Button
+                              type="button"
+                              size="sm"
+                              className="w-full"
+                              disabled={saving}
+                              onClick={() => void handleUpdateShare(share.id)}
+                            >
+                              {saving ? "Guardando..." : "Guardar cambios"}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              className="w-full"
+                              disabled={saving}
+                              onClick={cancelEdit}
+                            >
+                              Cancelar
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+        </aside>
+      </div>
     </div>
   );
 }
@@ -586,19 +597,29 @@ function PermissionPicker({
   permissions,
   options,
   onToggle,
+  compact = false,
 }: {
   permissions: ProfileSharePermissions;
   options: typeof PERMISSION_LABELS;
   onToggle: (key: keyof ProfileSharePermissions) => void;
+  compact?: boolean;
 }) {
   return (
     <fieldset className="space-y-2">
-      <legend className="text-sm font-semibold text-neutral-800">Permisos</legend>
+      <legend
+        className={cn(
+          "font-semibold text-neutral-800",
+          compact ? "text-xs" : "text-sm",
+        )}
+      >
+        Permisos
+      </legend>
       {options.map(({ key, label, description }) => (
         <label
           key={key}
           className={cn(
-            "flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-2.5 transition",
+            "flex cursor-pointer items-start gap-2.5 rounded-xl border transition",
+            compact ? "px-2.5 py-2" : "gap-3 px-3 py-2.5",
             permissions[key]
               ? "border-violet-200 bg-white"
               : "border-neutral-200 bg-white/70",
@@ -608,11 +629,20 @@ function PermissionPicker({
             type="checkbox"
             checked={permissions[key]}
             onChange={() => onToggle(key)}
-            className="mt-1"
+            className="mt-0.5"
           />
           <span>
-            <span className="block text-sm font-semibold text-neutral-900">{label}</span>
-            <span className="block text-xs text-neutral-500">{description}</span>
+            <span
+              className={cn(
+                "block font-semibold text-neutral-900",
+                compact ? "text-xs" : "text-sm",
+              )}
+            >
+              {label}
+            </span>
+            {!compact && (
+              <span className="block text-xs text-neutral-500">{description}</span>
+            )}
           </span>
         </label>
       ))}

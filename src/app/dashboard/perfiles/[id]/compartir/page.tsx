@@ -57,7 +57,7 @@ export default function ProfileSharePage() {
   const TypeIcon = TYPE_ICON[profile.profile_type];
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
+    <main className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
       <Link
         href="/dashboard"
         className="inline-flex items-center gap-2 rounded-full border border-violet-100 bg-white px-3.5 py-2 text-sm font-semibold text-violet-700 shadow-sm transition-colors hover:bg-violet-50"
