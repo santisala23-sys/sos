@@ -17,6 +17,7 @@ import {
   Sparkles,
   UserCircle2,
 } from "lucide-react";
+import { DashboardNavbar } from "@/components/dashboard/DashboardNavbar";
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { Button } from "@/components/ui/Button";
 import { HELP_FAQ, HELP_MANUAL } from "@/lib/help/content";
@@ -485,7 +486,11 @@ export function HelpPageContent({
 
   return (
     <>
-      {!loggedIn && <MarketingNavbar variant="subpage" />}
+      {dashboard ? null : loggedIn ? (
+        <DashboardNavbar />
+      ) : (
+        <MarketingNavbar variant="subpage" />
+      )}
 
       <main className="mx-auto max-w-[88rem] px-4 pb-24 pt-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
@@ -643,7 +648,7 @@ export function HelpPageContent({
                 </Button>
               </Link>
             ) : (
-              <Link href="/login">
+              <Link href="/login?redirect=%2Fayuda">
                 <Button
                   size="lg"
                   variant="secondary"

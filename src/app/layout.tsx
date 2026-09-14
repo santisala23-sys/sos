@@ -3,6 +3,7 @@ import "./globals.css";
 import { GoogleTagManager } from "@/components/analytics/GoogleTagManager";
 import { getAppUrl } from "@/lib/utils/app-url";
 import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
+import { HelpChatbot } from "@/components/marketing/HelpChatbot";
 import { FloatingWhatsAppButton } from "@/components/shared/FloatingWhatsAppButton";
 import { MobileNavigationLoading } from "@/components/shared/MobileNavigationLoading";
 
@@ -65,6 +66,7 @@ export default function RootLayout({
         <GoogleTagManager />
         {children}
         <MobileNavigationLoading />
+        <HelpChatbot />
         <FloatingWhatsAppButton />
         <CookieConsentBanner />
       </body>

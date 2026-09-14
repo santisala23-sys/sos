@@ -217,6 +217,15 @@ export function MarketingNavbar({
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
+  const authRedirect =
+    pathname === "/ayuda"
+      ? `/login?redirect=${encodeURIComponent("/ayuda")}`
+      : "/login";
+  const registerRedirect =
+    pathname === "/ayuda"
+      ? `/register?redirect=${encodeURIComponent("/ayuda")}`
+      : "/register";
+
   return (
     <header
       className={cn(
@@ -280,12 +289,12 @@ export function MarketingNavbar({
         </nav>
 
         <div className="hidden items-center gap-3 xl:flex">
-          <Link href="/login">
+          <Link href={authRedirect}>
             <Button variant="ghost" size="md" className="px-5 text-base">
               Ingresar
             </Button>
           </Link>
-          <Link href="/register">
+          <Link href={registerRedirect}>
             <Button
               size="md"
               className="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 text-base shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
@@ -352,12 +361,12 @@ export function MarketingNavbar({
         </nav>
 
         <div className="mt-6 flex flex-col gap-2.5 border-t border-neutral-100 pt-6">
-          <Link href="/login" onClick={() => setOpen(false)}>
+          <Link href={authRedirect} onClick={() => setOpen(false)}>
             <Button variant="secondary" size="lg" className="w-full">
               Ingresar
             </Button>
           </Link>
-          <Link href="/register" onClick={() => setOpen(false)}>
+          <Link href={registerRedirect} onClick={() => setOpen(false)}>
             <Button
               size="lg"
               className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"

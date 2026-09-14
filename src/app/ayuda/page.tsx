@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { HelpPageContent } from "@/components/help/HelpPageContent";
 import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
@@ -13,13 +12,10 @@ export const metadata: Metadata = {
 
 export default async function AyudaPage() {
   const session = await getSession();
-  if (session) {
-    redirect("/dashboard/ayuda");
-  }
 
   return (
     <MarketingBackground>
-      <HelpPageContent />
+      <HelpPageContent loggedIn={Boolean(session)} />
       <MarketingFooter />
     </MarketingBackground>
   );
