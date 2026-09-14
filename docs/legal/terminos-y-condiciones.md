@@ -1,8 +1,8 @@
 # Términos y Condiciones de Uso — SOSme
 
-**Versión:** 1.2  
-**Fecha de vigencia:** 20 de agosto de 2026  
-**Última actualización:** 20 de agosto de 2026
+**Versión:** 1.3  
+**Fecha de vigencia:** 14 de septiembre de 2026  
+**Última actualización:** 14 de septiembre de 2026
 
 ## Índice
 
@@ -11,19 +11,21 @@
 3. [Descripción del servicio](#3-descripción-del-servicio)
 4. [Naturaleza del servicio: no es emergencia oficial](#4-naturaleza-del-servicio-no-es-emergencia-oficial)
 5. [Elegibilidad y cuentas de Tutor](#5-elegibilidad-y-cuentas-de-tutor)
-6. [Perfiles QR y exposición de datos](#6-perfiles-qr-y-exposición-de-datos)
-7. [Datos de terceros, menores y legitimación](#7-datos-de-terceros-menores-y-legitimación)
-8. [Datos sensibles de salud](#8-datos-sensibles-de-salud)
-9. [Escaneo público, ubicación y chat](#9-escaneo-público-ubicación-y-chat)
-10. [Notificaciones, push y webhooks](#10-notificaciones-push-y-webhooks)
-11. [Uso permitido y prohibido](#11-uso-permitido-y-prohibido)
-12. [Propiedad intelectual](#12-propiedad-intelectual)
-13. [Disponibilidad, limitaciones técnicas y responsabilidad](#13-disponibilidad-limitaciones-técnicas-y-responsabilidad)
-14. [Suspensión y terminación](#14-suspensión-y-terminación)
-15. [Modificaciones y cese del servicio](#15-modificaciones-y-cese-del-servicio)
-16. [Ley aplicable y jurisdicción](#16-ley-aplicable-y-jurisdicción)
-17. [Contacto](#17-contacto)
-18. [No constituye asesoramiento legal](#18-no-constituye-asesoramiento-legal)
+6. [Co-tutoría y perfiles compartidos](#6-co-tutoría-y-perfiles-compartidos)
+7. [Perfiles QR y exposición de datos](#7-perfiles-qr-y-exposición-de-datos)
+8. [Datos de terceros, menores y legitimación](#8-datos-de-terceros-menores-y-legitimación)
+9. [Datos sensibles de salud](#9-datos-sensibles-de-salud)
+10. [Escaneo público, ubicación y chat](#10-escaneo-público-ubicación-y-chat)
+11. [Notificaciones, push y webhooks](#11-notificaciones-push-y-webhooks)
+12. [Planes Base, Plan Pro y suscripción](#12-planes-base-plan-pro-y-suscripción)
+13. [Uso permitido y prohibido](#13-uso-permitido-y-prohibido)
+14. [Propiedad intelectual](#14-propiedad-intelectual)
+15. [Disponibilidad, limitaciones técnicas y responsabilidad](#15-disponibilidad-limitaciones-técnicas-y-responsabilidad)
+16. [Suspensión y terminación](#16-suspensión-y-terminación)
+17. [Modificaciones y cese del servicio](#17-modificaciones-y-cese-del-servicio)
+18. [Ley aplicable y jurisdicción](#18-ley-aplicable-y-jurisdicción)
+19. [Contacto](#19-contacto)
+20. [No constituye asesoramiento legal](#20-no-constituye-asesoramiento-legal)
 
 ---
 
@@ -62,6 +64,8 @@ Funcionalidades principales:
 - Notificaciones push (Web Push) al Tutor y, opcionalmente, al escáner
 - Webhook configurable por el Operador para integraciones externas (n8n, Make, etc.)
 - Panel de administración interno restringido a emails autorizados
+- **Co-tutoría:** compartir perfiles QR con otras cuentas de Tutor, con permisos configurables
+- **Plan Pro:** funciones ampliadas (co-tutoría, libreta sanitaria y otras según el producto), bonificado al activar productos físicos
 
 ## 4. Naturaleza del servicio: no es emergencia oficial
 
@@ -90,7 +94,31 @@ El Operador puede suspender o cancelar cuentas que incumplan estos Términos o q
 
 **Eliminación de cuenta:** el usuario puede solicitar la eliminación definitiva de su cuenta y el borrado de sus datos en cualquier momento, utilizando la opción correspondiente dentro de su panel de control. El procedimiento y los plazos se detallan en la [Política de Retención y Eliminación de Datos](/retencion-datos). También podés escribir a **somososme@gmail.com** si necesitás asistencia.
 
-## 6. Perfiles QR y exposición de datos
+## 6. Co-tutoría y perfiles compartidos
+
+El Tutor titular de un perfil QR puede **compartirlo** con otras cuentas registradas en SOSme (**Co-tutores**), hasta el límite técnico vigente por perfil (actualmente cuatro cuentas).
+
+### Invitación y aceptación
+
+- La invitación puede realizarse por **correo electrónico** (cuando el destinatario ya tiene cuenta) o mediante un **enlace temporal** (por ejemplo, compartido por WhatsApp).
+- El destinatario debe **crear una cuenta gratuita** o **iniciar sesión** y **aceptar** la invitación para acceder al perfil compartido.
+- Los enlaces de invitación tienen **vencimiento** si no son utilizados dentro del plazo indicado en la interfaz.
+
+### Permisos
+
+El Tutor titular define, para cada Co-tutor, permisos como: recibir alertas, ver el perfil, editar datos, consultar libreta sanitaria (mascotas) o guardar ubicación (objetos). El titular puede **modificar o revocar** esos permisos en cualquier momento.
+
+### Responsabilidades
+
+- El **Tutor titular** sigue siendo responsable del perfil, de los datos cargados y de decidir con quién compartirlo.
+- El **Co-tutor** solo puede actuar dentro de los permisos otorgados y debe usar el Servicio de buena fe.
+- Compartir un perfil implica que el Co-tutor accederá a la información del beneficiario según los permisos concedidos; el titular declara contar con legitimación para compartir esos datos.
+
+### Disponibilidad según plan
+
+La co-tutoría es una funcionalidad del **Plan Pro** (ver sección 12). Si el Plan Pro no está activo, pueden aplicarse restricciones para invitar nuevos Co-tutores, sin perjuicio de los accesos ya otorgados según la configuración vigente al momento del cambio de plan.
+
+## 7. Perfiles QR y exposición de datos
 
 Al crear un perfil QR, entendés y aceptás que:
 
@@ -102,7 +130,7 @@ Al crear un perfil QR, entendés y aceptás que:
 
 Sos responsable de decidir qué datos incluir en cada perfil y de la colocación física del QR (collar, pulsera, equipaje, etc.).
 
-## 7. Datos de terceros, menores y legitimación
+## 8. Datos de terceros, menores y legitimación
 
 Como Tutor, podés cargar datos de **beneficiarios terceros** (familiares, menores, mascotas u objetos de terceros).
 
@@ -114,7 +142,7 @@ Declarás y garantizás que:
 
 Para perfiles de **menores de edad**, solo podés crearlos si sos su padre, madre o tutor legal, o tenés autorización expresa del responsable legal.
 
-## 8. Datos sensibles de salud
+## 9. Datos sensibles de salud
 
 Los perfiles de tipo persona pueden incluir **datos sensibles** según la Ley 25.326 de Protección de Datos Personales de Argentina: alergias, notas médicas / condiciones y medicación, tipo de sangre y obra social / prepaga. El QR de emergencia de mascota no incluye archivo clínico adjunto; el historial veterinario se gestiona en la libreta sanitaria privada del Tutor.
 
@@ -122,7 +150,7 @@ Al cargar estos datos, declarás contar con **consentimiento expreso** del titul
 
 El Operador trata estos datos únicamente para las finalidades descritas en la Política de Privacidad y no los utiliza para fines publicitarios ni de perfilado comercial.
 
-## 9. Escaneo público, ubicación y chat
+## 10. Escaneo público, ubicación y chat
 
 Quien escanee un QR (**Escáner**) sin crear cuenta:
 
@@ -135,7 +163,7 @@ El Escáner debe usar el Servicio de buena fe, sin acoso, spam ni suplantación.
 
 Consultá el [Aviso para Escáneres Públicos](/aviso-escaneadores-publicos) (también visible en la vista de perfil).
 
-## 10. Notificaciones, push y webhooks
+## 11. Notificaciones, push y webhooks
 
 ### Web Push
 
@@ -145,7 +173,41 @@ El Tutor puede suscribirse a notificaciones push del navegador. El Escáner pued
 
 Si el Operador configura `ALERT_WEBHOOK_URL`, ciertos eventos (escaneo, SOS, ubicación, mensajes) pueden enviarse a un servicio externo elegido por el Operador (n8n, Make, etc.). El Tutor que configure integraciones propias en el futuro será responsable de la legalidad del destino y del tratamiento posterior.
 
-## 11. Uso permitido y prohibido
+Los **Co-tutores** con permiso de alertas pueden recibir notificaciones push vinculadas al perfil compartido, en las mismas condiciones técnicas de entrega descritas arriba.
+
+## 12. Planes Base, Plan Pro y suscripción
+
+SOSme ofrece dos niveles de servicio digital:
+
+### Plan Base (Inicial)
+
+Incluye, como mínimo, las funciones esenciales de **emergencia y contacto** asociadas al perfil QR activado: vista pública del perfil, alertas de escaneo, chat por evento, geolocalización opcional del escáner y gestión básica del perfil en el panel del Tutor.
+
+El **Plan Base no tiene costo de mantenimiento mensual** y **permanece disponible** mientras el Servicio esté operativo, aun cuando el Tutor no renueve funciones ampliadas. **El QR de emergencia y las funciones esenciales del Base no se suspenden** por el solo vencimiento del Plan Pro.
+
+### Plan Pro
+
+Incluye las funcionalidades del Plan Base más capacidades ampliadas, entre ellas —según el tipo de producto y la versión del Servicio— **co-tutoría**, **libreta sanitaria** (mascotas) y otras funciones indicadas en el sitio o en la activación del producto.
+
+### Bonificación de seis (6) meses
+
+La compra y activación de un **producto físico SOSme** (chapita, collar, sticker u otro identificado por el Operador) incluye **seis (6) meses de Plan Pro sin cargo adicional**, contados desde la activación del producto en la cuenta del Tutor, salvo que en la compra o promoción se indique otro plazo.
+
+### Fin del período bonificado y renovación
+
+Al finalizar el período bonificado de Plan Pro, la cuenta **continúa en Plan Base** de forma automática. Las funciones esenciales de emergencia siguen operativas.
+
+La **renovación del Plan Pro** es **opcional**. El Operador podrá ofrecerla al Tutor mediante el panel, correo electrónico u otros medios razonables, con precio, plazo y condiciones informados **antes** de la contratación. Si el Tutor **no renueva**, pierde acceso a las funciones exclusivas del Plan Pro, **sin** que ello implique la desactivación del QR ni de las funciones del Plan Base.
+
+### Producto físico vs servicio digital
+
+El pago inicial por el producto físico corresponde a la adquisición del bien material (chapita, credencial, sticker, etc.). El acceso al Plan Base se bonifica sin costo de mantenimiento. El Plan Pro bonificado por seis meses es un beneficio digital adicional; su vencimiento no genera obligación de pago ni afecta el funcionamiento del Plan Base.
+
+### Planes pagos adicionales
+
+Planes distintos del Base y del Pro bonificado (por ejemplo, **Ampliado** u otros con cobro periódico) se regirán por las condiciones, precios y plazos informados al momento de la contratación. En caso de cese del Servicio, aplicará lo dispuesto en la sección 17 sobre reembolsos proporcionales de planes pagos activos.
+
+## 13. Uso permitido y prohibido
 
 ### Uso permitido
 
@@ -166,13 +228,13 @@ Queda expresamente prohibido:
 
 El Operador puede investigar abusos mediante logs de seguridad (IP hasheada, auditoría de eventos) y tomar medidas correctivas.
 
-## 12. Propiedad intelectual
+## 14. Propiedad intelectual
 
 El software, diseño, marca **SOSme**, textos del sitio y documentación son propiedad del Operador o de sus licenciantes. No adquirís derechos de propiedad sobre el Servicio por usarlo.
 
 Conservás la titularidad de los datos que cargues. Nos otorgás una licencia limitada para alojar, procesar y mostrar esos datos según la funcionalidad del Servicio y la Política de Privacidad.
 
-## 13. Disponibilidad, limitaciones técnicas y responsabilidad
+## 15. Disponibilidad, limitaciones técnicas y responsabilidad
 
 El Servicio se ofrece **"tal cual"** y **"según disponibilidad"**, dentro de los límites de la legislación aplicable.
 
@@ -187,13 +249,13 @@ No garantizamos:
 
 Nada en estos Términos limita derechos irrenunciables del consumidor conforme a la Ley 24.240 de Defensa del Consumidor, cuando resulte aplicable.
 
-## 14. Suspensión y terminación
+## 16. Suspensión y terminación
 
 Podemos suspender o terminar tu acceso si incumplís estos Términos, si hay riesgo de seguridad, o por requerimiento legal.
 
 Podés dejar de usar el Servicio en cualquier momento. La eliminación de datos se rige por la [Política de Retención y Eliminación](/retencion-datos).
 
-## 15. Modificaciones y cese del servicio
+## 17. Modificaciones y cese del servicio
 
 SOSme se reserva el derecho de modificar, actualizar, suspender o discontinuar la plataforma digital y sus funcionalidades (total o parcialmente) en cualquier momento, con el fin de mejorar el sistema o por motivos operativos.
 
@@ -207,11 +269,11 @@ En el caso excepcional de un cierre definitivo de la plataforma, SOSme se compro
 
 **Recuperación de datos:** Durante dicho período de gracia de 60 días, los usuarios tendrán garantizado el acceso a su panel para descargar y respaldar cualquier información, historial o archivo que hayan cargado en el sistema.
 
-**Plan Inicial y Hardware:** El pago inicial realizado por el usuario corresponde exclusivamente a la compra del producto físico (chapita, credencial, sticker, etc.). El acceso al plan **"Inicial"** (plan gratuito de la plataforma) se bonifica sin costo de mantenimiento mensual. Por lo tanto, el cierre definitivo del servicio digital no generará derecho a reclamos, devoluciones ni resarcimientos económicos por el producto físico ni por la interrupción de las funciones gratuitas.
+**Plan Base y hardware:** El pago inicial realizado por el usuario corresponde exclusivamente a la compra del producto físico (chapita, credencial, sticker, etc.). El acceso al **Plan Base** se bonifica sin costo de mantenimiento mensual. Por lo tanto, el cierre definitivo del servicio digital no generará derecho a reclamos, devoluciones ni resarcimientos económicos por el producto físico ni por la interrupción de las funciones del Plan Base.
 
-**Planes pagos:** Si al momento de efectuarse el cierre de la plataforma un usuario contara con un plan pago activo (por ejemplo, **"Ampliado"** u otro plan con cobro periódico), la empresa procederá a reembolsar el importe equivalente de manera estrictamente proporcional a los meses no utilizados de dicho período de facturación.
+**Plan Pro y otros planes pagos:** Si al momento de efectuarse el cierre de la plataforma un usuario contara con un **Plan Pro renovado** u otro plan pago activo (por ejemplo, **"Ampliado"** u otro plan con cobro periódico), la empresa procederá a reembolsar el importe equivalente de manera estrictamente proporcional a los meses no utilizados de dicho período de facturación.
 
-## 16. Ley aplicable y jurisdicción
+## 18. Ley aplicable y jurisdicción
 
 Estos Términos se rigen por las leyes de la **República Argentina**, incluyendo la Ley 25.326 de Protección de Datos Personales, el Decreto Reglamentario 1558/2001 y normativa de la Agencia de Acceso a la Información Pública (AAIP).
 
@@ -219,12 +281,12 @@ Para controversias, las partes se someten a los tribunales ordinarios de **{{jur
 
 Si tenés domicilio en la Ciudad Autónoma de Buenos Aires o en otra jurisdicción con normativa de defensa del consumidor, conservás los derechos que no puedan ser limitados por acuerdo.
 
-## 17. Contacto
+## 19. Contacto
 
 Consultas sobre estos Términos: **somososme@gmail.com**
 
 Ejercicio de derechos de protección de datos (ARCO): ver [Política de Privacidad](/privacidad) y [Política de Retención y Eliminación](/retencion-datos).
 
-## 18. No constituye asesoramiento legal
+## 20. No constituye asesoramiento legal
 
 Este documento es un borrador orientativo redactado para el producto SOSme. **No constituye asesoramiento legal.** Recomendamos su revisión por un abogado matriculado en Argentina antes de su publicación definitiva.

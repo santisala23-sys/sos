@@ -115,6 +115,30 @@ export const HELP_FAQ: HelpFaqItem[] = [
     answer:
       "No desde el panel: podés editar contactos, instrucciones y el resto de la información, pero no el nombre ni el tipo (Persona, Mascota u Objeto). Si te equivocaste al crearlos, escribinos por los canales de contacto indicando la razón del cambio y a qué valor querés pasar el nombre o el tipo.",
   },
+  {
+    id: "faq-co-tutoria",
+    question: "¿Qué es la co-tutoría?",
+    answer:
+      "Es compartir un perfil QR con otra cuenta SOSme (hasta 4 por perfil). La otra persona puede recibir alertas cuando escanean el QR, ver o editar el perfil, consultar la libreta sanitaria (mascotas) o guardar ubicación (objetos), según los permisos que vos elijas. Los perfiles compartidos aparecen en su panel en «Compartidos conmigo».",
+  },
+  {
+    id: "faq-co-tutoria-invitar",
+    question: "¿Cómo invito a un co-tutor?",
+    answer:
+      "Panel → tarjeta del perfil → Compartir perfil. Elegí permisos y duración del acceso. Podés invitar por email (si ya tiene cuenta SOSme) o generar un link para mandar por WhatsApp: la persona abre el link, crea cuenta o inicia sesión y acepta. Los links de WhatsApp vencen a los 7 días si no los usan.",
+  },
+  {
+    id: "faq-plan-pro",
+    question: "¿Qué es el Plan Pro y qué pasa después de los 6 meses?",
+    answer:
+      "Al activar un producto SOSme incluís 6 meses de Plan Pro sin cargo. El Pro suma funciones como co-tutoría y libreta sanitaria completa. Pasados esos 6 meses, el Plan Base sigue activo para siempre: tu QR de emergencia, alertas, ubicación y chat no se cortan. Si querés mantener las funciones Pro, podés renovarlo cuando te lo ofrezcamos desde el panel o por contacto.",
+  },
+  {
+    id: "faq-plan-base-siempre",
+    question: "Si no renuevo el Pro, ¿deja de funcionar mi QR?",
+    answer:
+      "No. El Plan Base (emergencia) sigue funcionando siempre: el perfil público, las alertas de escaneo, la ubicación y el chat. Solo dejan de estar disponibles las funciones exclusivas del Plan Pro, como invitar co-tutores o usar la libreta sanitaria, hasta que renueves si lo deseás.",
+  },
 ];
 
 export const HELP_MANUAL: HelpManualChapter[] = [
@@ -576,6 +600,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         paragraphs: [
           "El contador X/Y QR activos en el menú indica cuántos perfiles tenés respecto al plan.",
           "Si intentás crear más y llegaste al tope, aparece un aviso con enlace a contacto para ampliar.",
+          "Con el Plan Base tenés las funciones esenciales de emergencia. El Plan Pro amplía capacidades (ver capítulo 14).",
         ],
       },
       {
@@ -584,6 +609,108 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         paragraphs: [
           "Escribinos desde la página de contacto si algo no quedó claro o necesitás ayuda con tu cuenta.",
           "Si necesitás cambiar el nombre o el tipo de un QR porque te equivocaste al crearlo, usá esos mismos canales e indicá la razón y a qué valor querés cambiarlo.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "co-tutoria",
+    title: "13. Co-tutoría",
+    summary: "Compartí un perfil con familiares u otras cuentas SOSme.",
+    subsections: [
+      {
+        id: "co-tutoria-que-es",
+        title: "Qué es y para qué sirve",
+        paragraphs: [
+          "La co-tutoría permite que otra persona con cuenta SOSme te ayude a cuidar un perfil QR: recibir alertas, revisar actividad, editar datos o consultar la libreta sanitaria.",
+          "Vos seguís siendo el dueño del perfil. Podés cambiar permisos o quitar el acceso cuando quieras.",
+        ],
+      },
+      {
+        id: "co-tutoria-como-invitar",
+        title: "Cómo invitar a alguien",
+        paragraphs: [
+          "Desde la tarjeta del perfil, tocá Compartir perfil. Ahí configurás permisos, duración del acceso e invitás de dos formas:",
+        ],
+        bullets: [
+          "Por email: si la persona ya tiene cuenta SOSme con ese correo, recibe un aviso y el perfil aparece en Compartidos conmigo.",
+          "Por WhatsApp: generás un link, se lo mandás por mensaje y cuando lo abre crea cuenta o inicia sesión para aceptar.",
+          "El link de WhatsApp vence a los 7 días si no lo usan. El acceso compartido puede ser permanente o hasta una fecha que vos elijas.",
+        ],
+      },
+      {
+        id: "co-tutoria-permisos",
+        title: "Permisos que podés dar",
+        paragraphs: [
+          "Al invitar elegís qué puede hacer cada co-tutor:",
+        ],
+        bullets: [
+          "Recibir alertas: push cuando escanean el QR o hay actividad (viene activado por defecto).",
+          "Ver perfil: acceder al detalle y actividad del perfil en el panel.",
+          "Editar perfil: modificar contactos, instrucciones y foto.",
+          "Ver libreta sanitaria: solo en perfiles de Mascota.",
+          "Guardar ubicación: solo en perfiles de Objeto.",
+        ],
+      },
+      {
+        id: "co-tutoria-receptor",
+        title: "Qué ve el co-tutor invitado",
+        paragraphs: [
+          "La persona invitada encuentra el perfil en Panel → Compartidos conmigo.",
+          "Las acciones disponibles dependen de los permisos que le diste. No puede eliminar el perfil ni invitar a otros en tu lugar.",
+          "Si el acceso vence o lo revocás, deja de ver el perfil al instante.",
+        ],
+      },
+      {
+        id: "co-tutoria-limites",
+        title: "Límites",
+        paragraphs: [
+          "Podés compartir cada perfil con hasta 4 cuentas distintas.",
+          "La co-tutoría forma parte del Plan Pro. Si tu Pro venció, no podés invitar co-tutores nuevos hasta renovar, pero los accesos ya otorgados pueden seguir vigentes según lo acordado en tu panel.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "planes",
+    title: "14. Plan Base y Plan Pro",
+    summary: "Qué incluye cada plan y qué pasa al terminar los 6 meses de Pro bonificado.",
+    subsections: [
+      {
+        id: "planes-resumen",
+        title: "Dos niveles de servicio",
+        paragraphs: [
+          "SOSme combina un Plan Base (emergencia) con un Plan Pro opcional (funciones ampliadas).",
+        ],
+        bullets: [
+          "Plan Base: perfil QR de emergencia, alertas de escaneo, ubicación, chat, contactos e instrucciones. Sigue activo siempre, sin costo de mantenimiento.",
+          "Plan Pro: incluye las funciones del Base más co-tutoría, libreta sanitaria (mascotas) y otras capacidades ampliadas según tu producto.",
+        ],
+      },
+      {
+        id: "planes-seis-meses",
+        title: "6 meses de Pro incluidos",
+        paragraphs: [
+          "Al activar un producto físico SOSme (chapita, collar, sticker, etc.), recibís 6 meses de Plan Pro sin cargo adicional.",
+          "El contador empieza cuando activás el producto en tu cuenta. Durante ese período tenés acceso a todas las funciones Pro.",
+        ],
+      },
+      {
+        id: "planes-despues-pro",
+        title: "Después de los 6 meses",
+        paragraphs: [
+          "Cuando termina el período bonificado de Pro, tu cuenta pasa automáticamente al Plan Base.",
+          "Lo esencial de emergencia no se interrumpe: el QR sigue funcionando, recibís alertas y podés usar el chat.",
+          "Si querés seguir usando co-tutoría, libreta sanitaria u otras funciones Pro, te vamos a ofrecer renovar el plan desde el panel o por los canales de contacto. La renovación es opcional.",
+        ],
+      },
+      {
+        id: "planes-sin-renovar",
+        title: "Si elegís no renovar el Pro",
+        paragraphs: [
+          "No perdés el acceso de emergencia ni tus datos cargados en el perfil QR.",
+          "Dejan de estar disponibles las funciones exclusivas del Pro hasta que renueves, si lo deseás.",
+          "Podés volver a contratar Pro cuando quieras; el Base no tiene fecha de vencimiento.",
         ],
       },
     ],
