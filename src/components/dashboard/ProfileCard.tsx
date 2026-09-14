@@ -19,7 +19,6 @@ import type {
   QrProfile,
 } from "@/types/database";
 import { CardActionPill } from "@/components/dashboard/ProfileCardActions";
-import { ProfileShareManager } from "@/components/dashboard/ProfileShareManager";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
 import { getProfileCardTheme } from "@/lib/dashboard/profile-card-theme";
@@ -72,7 +71,6 @@ export function ProfileCard({
 }: ProfileCardProps) {
   const [showQr, setShowQr] = useState(defaultShowQr);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [savePhase, setSavePhase] = useState<SaveLocationPhase>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -169,8 +167,7 @@ export function ProfileCard({
     (canView && !isPet);
 
   return (
-    <>
-      <article
+    <article
         className={cn(
           "group relative flex flex-col overflow-hidden rounded-[1.35rem] border bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
           theme.card,
@@ -337,7 +334,7 @@ export function ProfileCard({
               <div className="flex flex-wrap gap-2">
                 {isOwner && (
                   <CardActionPill
-                    onClick={() => setShareOpen(true)}
+                    href={`/dashboard/perfiles/${profile.id}/compartir`}
                     icon={Share2}
                     label={shares.length > 0 ? "Gestionar accesos" : "Compartir perfil"}
                     className={theme.pillSecondary}
@@ -492,17 +489,6 @@ export function ProfileCard({
             </div>
           </div>
         )}
-      </article>
-
-      {isOwner && (
-        <ProfileShareManager
-          profileId={profile.id}
-          profileName={profile.beneficiary_name}
-          open={shareOpen}
-          onClose={() => setShareOpen(false)}
-          onUpdated={onRefresh}
-        />
-      )}
-    </>
+    </article>
   );
 }
