@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MessageCircle, MessageCircleQuestion, Send, X } from "lucide-react";
+import { MessageCircle, Send, X } from "lucide-react";
 import {
   HELP_SUGGESTED_QUESTIONS,
   bestHelpAnswer,
@@ -17,7 +17,35 @@ type ChatMessage = {
 };
 
 const WELCOME =
-  "Hola, soy Helpme. Preguntame sobre el panel, los QRs, la libreta sanitaria, co-tutoría o los planes. Respondo con la info de Ayuda.";
+  "Hola, soy HELPme. Preguntame sobre el panel, los QRs, la libreta sanitaria, co-tutoría o los planes. Respondo con la info de Ayuda.";
+
+function HelpmeBrand({
+  compact = false,
+  tone = "dark",
+}: {
+  compact?: boolean;
+  tone?: "dark" | "light";
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-baseline font-black leading-none tracking-tight",
+        compact ? "text-[11px]" : "text-sm",
+        tone === "dark" ? "text-white" : "text-violet-900",
+      )}
+    >
+      <span>HELP</span>
+      <span
+        className={cn(
+          "font-bold",
+          tone === "dark" ? "text-violet-200" : "text-violet-600",
+        )}
+      >
+        me
+      </span>
+    </span>
+  );
+}
 
 const TEASER_STORAGE_KEY = "sos_helpme_teaser_dismissed";
 
@@ -125,15 +153,17 @@ export function HelpChatbot() {
         <div
           className="flex w-[min(22rem,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-[1.75rem] border border-violet-200/80 bg-white shadow-2xl shadow-violet-500/20"
           role="dialog"
-          aria-label="Helpme, asistente de ayuda SOSme"
+          aria-label="HELPme, asistente de ayuda SOSme"
         >
           <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-violet-600 via-violet-700 to-indigo-800 px-4 py-3.5 text-white">
             <div className="flex min-w-0 items-center gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
-                <MessageCircleQuestion className="h-5 w-5" aria-hidden />
+                <HelpmeBrand compact tone="dark" />
               </span>
               <div className="min-w-0">
-                <p className="truncate text-sm font-black">Helpme</p>
+                <p className="truncate">
+                  <HelpmeBrand tone="dark" />
+                </p>
                 <p className="text-xs text-violet-100">Asistente de ayuda SOSme</p>
               </div>
             </div>
@@ -234,10 +264,10 @@ export function HelpChatbot() {
         </div>
       )}
 
-      <div className="flex items-end gap-3">
+      <div className="relative flex flex-col items-center">
         {!open && showTeaser && (
-          <div className="relative max-w-[13.5rem] animate-[helpme-teaser-in_0.45s_ease-out] sm:max-w-[15rem]">
-            <div className="relative rounded-2xl rounded-br-md border border-violet-100 bg-white px-4 py-3 shadow-xl shadow-violet-500/15 ring-1 ring-violet-100/80">
+          <div className="pointer-events-none absolute bottom-[calc(100%+0.35rem)] left-1/2 z-10 w-[min(15rem,calc(100vw-4.5rem))] -translate-x-1/2 animate-[helpme-teaser-in_0.45s_ease-out]">
+            <div className="pointer-events-auto relative rounded-2xl border border-violet-100 bg-white px-4 py-3 shadow-xl shadow-violet-500/15 ring-1 ring-violet-100/80">
               <button
                 type="button"
                 onClick={dismissTeaser}
@@ -246,15 +276,16 @@ export function HelpChatbot() {
               >
                 <X className="h-3 w-3" />
               </button>
-              <p className="pr-3 text-sm font-black leading-snug text-violet-900">
-                ¡Hola! Soy Helpme
+              <p className="pr-3 text-sm leading-snug text-violet-900">
+                <span className="font-black">¡Hola! Soy </span>
+                <HelpmeBrand compact tone="light" />
               </p>
               <p className="mt-1 text-xs leading-relaxed text-neutral-600">
                 ¿En qué puedo ayudarte?
               </p>
             </div>
             <span
-              className="absolute -bottom-1.5 right-3 h-3 w-3 rotate-45 border-b border-r border-violet-100 bg-white"
+              className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-b border-r border-violet-100 bg-white"
               aria-hidden
             />
           </div>
@@ -264,13 +295,13 @@ export function HelpChatbot() {
           type="button"
           onClick={() => (open ? closeChat() : openChat())}
           className={cn(
-            "relative inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-2xl transition-transform hover:scale-[1.03] active:scale-[0.98]",
+            "relative inline-flex h-14 min-w-14 items-center justify-center rounded-full px-3 text-white shadow-2xl transition-transform hover:scale-[1.03] active:scale-[0.98]",
             open
-              ? "bg-neutral-800 shadow-neutral-900/25"
+              ? "w-14 bg-neutral-800 px-0 shadow-neutral-900/25"
               : "bg-gradient-to-br from-violet-500 via-violet-600 to-indigo-700 shadow-violet-500/35",
             !open && showTeaser && "animate-[helpme-pulse_2.4s_ease-in-out_infinite]",
           )}
-          aria-label={open ? "Cerrar Helpme" : "Abrir Helpme"}
+          aria-label={open ? "Cerrar HELPme" : "Abrir HELPme"}
           aria-expanded={open}
         >
           {!open && (
@@ -279,8 +310,8 @@ export function HelpChatbot() {
           {open ? (
             <X className="relative h-6 w-6" />
           ) : (
-            <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/15 ring-2 ring-white/25">
-              <MessageCircleQuestion className="h-6 w-6" strokeWidth={2.25} />
+            <span className="relative">
+              <HelpmeBrand compact tone="dark" />
             </span>
           )}
         </button>
