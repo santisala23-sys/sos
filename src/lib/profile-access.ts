@@ -2,6 +2,9 @@ import type { ProfileShare, QrProfile } from "@/types/database";
 
 export const MAX_PROFILE_SHARES = 4;
 
+/** Validez del link de invitación por WhatsApp (7 días). */
+export const PROFILE_SHARE_INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
 export type ProfileAccess =
   | { kind: "owner"; profile: QrProfile }
   | { kind: "shared"; profile: QrProfile; share: ProfileShare };

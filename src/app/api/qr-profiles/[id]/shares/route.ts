@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import { accessDenied, requireProfileAccess } from "@/lib/api/profile-access";
 import { findUserByEmail } from "@/lib/db/queries";
+import { countUsedProfileShareSlots } from "@/lib/db/queries-profile-share-invites";
 import {
-  countActiveProfileShares,
   listProfileSharesForOwner,
   upsertProfileShare,
 } from "@/lib/db/queries-profile-shares";
@@ -77,10 +77,10 @@ export async function POST(request: Request, { params }: RouteContext) {
       );
     }
 
-    const activeCount = await countActiveProfileShares(id);
+    const usedSlots = await countUsedProfileShareSlots(id);
     const existingShares = await listProfileSharesForOwner(id, session.userId);
     const alreadyShared = existingShares.some((s) => s.shared_with_user_id === targetUser.id);
-    if (!alreadyShared && activeCount >= MAX_PROFILE_SHARES) {
+    if (!alreadyShared && usedSlots >= MAX_PROFILE_SHARES) {
       return NextResponse.json(
         { error: `Podés compartir este perfil con hasta ${MAX_PROFILE_SHARES} cuentas` },
         { status: 400 },

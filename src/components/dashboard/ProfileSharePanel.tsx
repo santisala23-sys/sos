@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Share2, Trash2, Users } from "lucide-react";
+import { Copy, MessageCircle, Share2, Trash2, Users } from "lucide-react";
 import type {
   ProfileSharePermissions,
   ProfileShareWithUser,
@@ -14,7 +14,11 @@ import {
   modeFromExpiry,
   type ShareExpiryMode,
 } from "@/components/dashboard/ShareExpiryField";
-import { DEFAULT_SHARE_PERMISSIONS, MAX_PROFILE_SHARES } from "@/lib/profile-access";
+import {
+  DEFAULT_SHARE_PERMISSIONS,
+  MAX_PROFILE_SHARES,
+  PROFILE_SHARE_INVITE_TTL_MS,
+} from "@/lib/profile-access";
 import { cn } from "@/lib/utils/cn";
 
 type ProfileSharePanelProps = {
@@ -109,6 +113,12 @@ export function ProfileSharePanel({
   });
   const [editExpiryMode, setEditExpiryMode] = useState<ShareExpiryMode>("permanent");
   const [editExpiresAt, setEditExpiresAt] = useState("");
+  const [inviteLinkUrl, setInviteLinkUrl] = useState<string | null>(null);
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
+  const [generatingLink, setGeneratingLink] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const inviteLinkTtlDays = Math.round(PROFILE_SHARE_INVITE_TTL_MS / (24 * 60 * 60 * 1000));
 
   const permissionOptions = PERMISSION_LABELS.filter(
     ({ profileTypes }) => !profileTypes || profileTypes.includes(profileType),
@@ -138,6 +148,51 @@ export function ProfileSharePanel({
   function showSuccess(message: string) {
     setSuccess(message);
     window.setTimeout(() => setSuccess(null), 4000);
+  }
+
+  async function handleGenerateInviteLink() {
+    const expiryError = validateExpiry(inviteExpiryMode, inviteExpiresAt);
+    if (expiryError) {
+      setError(expiryError);
+      return;
+    }
+
+    setGeneratingLink(true);
+    setError(null);
+    setCopiedLink(false);
+    try {
+      const res = await fetch(`/api/qr-profiles/${profileId}/shares/invite-link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          permissions: invitePermissions,
+          expiresAt: expiryFromMode(inviteExpiryMode, inviteExpiresAt),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "No se pudo crear el link");
+        return;
+      }
+      setInviteLinkUrl(data.inviteUrl ?? null);
+      setWhatsappUrl(data.whatsappUrl ?? null);
+      showSuccess("Link listo. Mandalo por WhatsApp o copialo.");
+    } catch {
+      setError("Error de conexión");
+    } finally {
+      setGeneratingLink(false);
+    }
+  }
+
+  async function handleCopyInviteLink() {
+    if (!inviteLinkUrl) return;
+    try {
+      await navigator.clipboard.writeText(inviteLinkUrl);
+      setCopiedLink(true);
+      window.setTimeout(() => setCopiedLink(false), 2500);
+    } catch {
+      setError("No se pudo copiar el link");
+    }
   }
 
   async function handleInvite(e: React.FormEvent) {
@@ -401,24 +456,13 @@ export function ProfileSharePanel({
           <div>
             <h2 className="text-lg font-black text-neutral-900">Invitar co-tutor</h2>
             <p className="mt-1 text-sm text-neutral-600">
-              La persona tiene que tener cuenta SOSme. Por defecto solo recibe alertas.
+              Elegí permisos y compartí por email o mandá un link por WhatsApp. La
+              persona necesita cuenta SOSme (gratis) para aceptar.
             </p>
           </div>
         </div>
 
-        <form onSubmit={handleInvite} className="space-y-4">
-          <label className="block text-sm font-semibold text-neutral-800">
-            Email de la otra cuenta
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="alan@email.com"
-              className="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-base"
-            />
-          </label>
-
+        <div className="space-y-5">
           <PermissionPicker
             permissions={invitePermissions}
             options={permissionOptions}
@@ -438,21 +482,101 @@ export function ProfileSharePanel({
             onDateChange={setInviteExpiresAt}
           />
 
-          <Button
-            type="submit"
-            disabled={saving || shares.length >= MAX_PROFILE_SHARES}
-            className="gap-2"
-          >
-            <Share2 className="h-4 w-4" />
-            {saving ? "Guardando..." : "Compartir perfil"}
-          </Button>
           {shares.length >= MAX_PROFILE_SHARES && (
             <p className="text-sm text-amber-800">
               Llegaste al máximo de {MAX_PROFILE_SHARES} cuentas. Editá o revocá un
               acceso existente para invitar a alguien nuevo.
             </p>
           )}
-        </form>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <form
+              onSubmit={handleInvite}
+              className="space-y-4 rounded-2xl border border-neutral-200 bg-white p-4"
+            >
+              <div>
+                <h3 className="text-sm font-bold text-neutral-900">Por email</h3>
+                <p className="mt-1 text-xs text-neutral-500">
+                  Si ya tiene cuenta SOSme con ese correo.
+                </p>
+              </div>
+              <label className="block text-sm font-semibold text-neutral-800">
+                Email de la otra cuenta
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="alan@email.com"
+                  className="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-base"
+                />
+              </label>
+              <Button
+                type="submit"
+                disabled={saving || shares.length >= MAX_PROFILE_SHARES}
+                className="w-full gap-2"
+                variant="secondary"
+              >
+                <Share2 className="h-4 w-4" />
+                {saving ? "Enviando..." : "Invitar por email"}
+              </Button>
+            </form>
+
+            <div className="space-y-4 rounded-2xl border border-green-200 bg-green-50/50 p-4">
+              <div>
+                <h3 className="text-sm font-bold text-neutral-900">Por WhatsApp</h3>
+                <p className="mt-1 text-xs text-neutral-600">
+                  Ideal para familiares. Generás un link, se lo mandás por WhatsApp y
+                  cuando lo abren crean cuenta o inician sesión.
+                </p>
+              </div>
+              <Button
+                type="button"
+                disabled={generatingLink || shares.length >= MAX_PROFILE_SHARES}
+                onClick={() => void handleGenerateInviteLink()}
+                className="w-full gap-2 bg-[#25D366] hover:bg-[#1ebe57] focus-visible:ring-[#25D366]"
+              >
+                <MessageCircle className="h-4 w-4" />
+                {generatingLink ? "Generando link..." : "Generar link para WhatsApp"}
+              </Button>
+              <p className="text-xs text-neutral-500">
+                El link de invitación vence en {inviteLinkTtlDays} días si no lo usan.
+              </p>
+
+              {inviteLinkUrl && (
+                <div className="space-y-3 rounded-xl border border-green-200 bg-white p-3">
+                  <p className="text-xs font-semibold text-neutral-700">Link de invitación</p>
+                  <p className="break-all rounded-lg bg-neutral-50 px-3 py-2 text-xs text-neutral-800">
+                    {inviteLinkUrl}
+                  </p>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => void handleCopyInviteLink()}
+                    >
+                      <Copy className="h-4 w-4" />
+                      {copiedLink ? "Copiado" : "Copiar link"}
+                    </Button>
+                    {whatsappUrl && (
+                      <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#1ebe57]"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        Abrir WhatsApp
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   );
