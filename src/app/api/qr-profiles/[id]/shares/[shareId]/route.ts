@@ -6,6 +6,7 @@ import {
   revokeProfileShare,
   updateProfileShare,
 } from "@/lib/db/queries-profile-shares";
+import { notifyProfileShare } from "@/lib/email/notify-profile-share";
 import {
   canManageShares,
   hasAnySharePermission,
@@ -64,6 +65,19 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     if (!share) {
       return NextResponse.json({ error: "Compartido no encontrado" }, { status: 404 });
     }
+
+    void notifyProfileShare({
+      ownerUserId: session.userId,
+      recipientUserId: existing.shared_with_user_id,
+      recipientEmail: existing.shared_with_email,
+      profileName: access.profile.beneficiary_name,
+      profileType: access.profile.profile_type,
+      permissions,
+      expiresAt,
+      isUpdate: true,
+    }).catch((error) => {
+      console.error("[profile-shares PATCH] email", error);
+    });
 
     const shares = await listProfileSharesForOwner(id, session.userId);
     return NextResponse.json({ share, shares });

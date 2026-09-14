@@ -7,6 +7,7 @@ import {
   listProfileSharesForOwner,
   upsertProfileShare,
 } from "@/lib/db/queries-profile-shares";
+import { notifyProfileShare } from "@/lib/email/notify-profile-share";
 import {
   canManageShares,
   hasAnySharePermission,
@@ -106,6 +107,19 @@ export async function POST(request: Request, { params }: RouteContext) {
     if (!share) {
       return NextResponse.json({ error: "No se pudo compartir el perfil" }, { status: 500 });
     }
+
+    void notifyProfileShare({
+      ownerUserId: session.userId,
+      recipientUserId: targetUser.id,
+      recipientEmail: targetUser.email,
+      profileName: access.profile.beneficiary_name,
+      profileType: access.profile.profile_type,
+      permissions,
+      expiresAt,
+      isUpdate: alreadyShared,
+    }).catch((error) => {
+      console.error("[profile-shares POST] email", error);
+    });
 
     const shares = await listProfileSharesForOwner(id, session.userId);
     return NextResponse.json({ share, shares });
