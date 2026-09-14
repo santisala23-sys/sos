@@ -57,7 +57,7 @@ export const PATCH = withApi(
     }
 
     await notifyTutor({
-      tutorId: profile.tutor_id,
+      profileId: profile.id,
       type: "location",
       beneficiaryName: result.beneficiary_name,
       emergencyContactName: result.emergency_contact_name,

@@ -11,13 +11,14 @@ export default function PetHealthBookPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [profile, setProfile] = useState<QrProfile | null>(null);
+  const [canEdit, setCanEdit] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       const res = await fetch(`/api/qr-profiles/${params.id}`);
       if (!res.ok) {
-        router.push("/dashboard#mascotas");
+        router.push("/dashboard");
         return;
       }
       const data = await res.json();
@@ -26,6 +27,8 @@ export default function PetHealthBookPage() {
         router.push(`/dashboard/perfiles/${params.id}`);
         return;
       }
+      const share = data.share as { can_edit_profile?: boolean } | null;
+      setCanEdit(data.access === "owner" || Boolean(share?.can_edit_profile));
       setProfile(loaded);
       setLoading(false);
     }
@@ -49,19 +52,21 @@ export default function PetHealthBookPage() {
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
-          href="/dashboard#mascotas"
+          href="/dashboard"
           className="inline-flex items-center gap-2 text-sm font-semibold text-teal-700 hover:underline"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
-          Volver a mascotas
+          Volver al panel
         </Link>
-        <Link
-          href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent(`/dashboard/perfiles/${profile.id}/libreta`)}`}
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-4 py-2 text-base font-semibold text-teal-900 transition-colors hover:bg-teal-100"
-        >
-          <Pencil className="h-4 w-4" aria-hidden />
-          Editar datos
-        </Link>
+        {canEdit && (
+          <Link
+            href={`/dashboard/perfiles/${profile.id}/editar?from=${encodeURIComponent(`/dashboard/perfiles/${profile.id}/libreta`)}`}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-4 py-2 text-base font-semibold text-teal-900 transition-colors hover:bg-teal-100"
+          >
+            <Pencil className="h-4 w-4" aria-hidden />
+            Editar datos
+          </Link>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-xl shadow-teal-500/10">

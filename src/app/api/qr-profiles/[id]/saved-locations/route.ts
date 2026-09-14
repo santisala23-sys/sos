@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
-import {
-  findQrProfileById,
-  listObjectSavedLocations,
-  saveObjectProfileLocation,
-} from "@/lib/db/queries";
-import type { QrProfile } from "@/types/database";
+import { accessDenied, requireProfileAccess } from "@/lib/api/profile-access";
+import { listObjectSavedLocations, saveObjectProfileLocation } from "@/lib/db/queries";
+import { canSaveLocation, canViewProfile } from "@/lib/profile-access";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -20,27 +17,6 @@ function isValidCoord(lat: number, lng: number): boolean {
   );
 }
 
-async function requireOwnedObjectProfile(
-  id: string,
-  userId: string,
-): Promise<{ profile: QrProfile } | { error: NextResponse }> {
-  const profile = await findQrProfileById(id);
-  if (!profile || profile.tutor_id !== userId) {
-    return {
-      error: NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 }),
-    };
-  }
-  if (profile.profile_type !== "object") {
-    return {
-      error: NextResponse.json(
-        { error: "Solo aplica a perfiles de objeto" },
-        { status: 400 },
-      ),
-    };
-  }
-  return { profile };
-}
-
 export async function GET(_request: Request, { params }: RouteContext) {
   const session = await getSession();
   if (!session) {
@@ -48,8 +24,17 @@ export async function GET(_request: Request, { params }: RouteContext) {
   }
 
   const { id } = await params;
-  const owned = await requireOwnedObjectProfile(id, session.userId);
-  if ("error" in owned) return owned.error;
+  const access = await requireProfileAccess(id, session.userId);
+  if (access instanceof NextResponse) return access;
+  if (access.profile.profile_type !== "object") {
+    return NextResponse.json(
+      { error: "Solo aplica a perfiles de objeto" },
+      { status: 400 },
+    );
+  }
+  if (!canViewProfile(access) && !canSaveLocation(access)) {
+    return accessDenied("No tenés permiso para ver ubicaciones guardadas");
+  }
 
   const locations = await listObjectSavedLocations(id);
   return NextResponse.json({ locations });
@@ -63,8 +48,17 @@ export async function POST(request: Request, { params }: RouteContext) {
   }
 
   const { id } = await params;
-  const owned = await requireOwnedObjectProfile(id, session.userId);
-  if ("error" in owned) return owned.error;
+  const access = await requireProfileAccess(id, session.userId);
+  if (access instanceof NextResponse) return access;
+  if (access.profile.profile_type !== "object") {
+    return NextResponse.json(
+      { error: "Solo aplica a perfiles de objeto" },
+      { status: 400 },
+    );
+  }
+  if (!canSaveLocation(access)) {
+    return accessDenied("No tenés permiso para guardar ubicación");
+  }
 
   const body = await request.json().catch(() => ({}));
   const { latitude, longitude } = body as {
@@ -84,7 +78,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   }
 
   const result = await saveObjectProfileLocation(
-    owned.profile.slug,
+    access.profile.slug,
     Number(latitude),
     Number(longitude),
   );

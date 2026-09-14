@@ -39,6 +39,12 @@ function EditProfileContent() {
         return;
       }
       const data = await res.json();
+      const share = data.share as { can_edit_profile?: boolean } | null;
+      const allowed = data.access === "owner" || Boolean(share?.can_edit_profile);
+      if (!allowed) {
+        router.push("/dashboard");
+        return;
+      }
       setProfile(data.profile ?? null);
       setLoading(false);
     }

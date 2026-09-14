@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
+import { accessDenied, requireProfileAccess } from "@/lib/api/profile-access";
 import {
   insertVisitByTutor,
+  listPetVetVisits,
   listPetVetVisitsForTutor,
+  listPreventiveItems,
   listPreventiveItemsForTutor,
 } from "@/lib/db/queries-pet-medical";
+import { canEditProfile, canViewHealthBook } from "@/lib/profile-access";
 import { isUuid } from "@/lib/pet-medical";
 import { parseVisitBody } from "@/lib/pet-visit-validate";
 
@@ -22,18 +26,41 @@ export async function GET(_request: Request, { params }: RouteContext) {
     return NextResponse.json({ error: "Perfil inválido" }, { status: 400 });
   }
 
+  const access = await requireProfileAccess(petId, session.userId);
+  if (access instanceof NextResponse) return access;
+  if (access.profile.profile_type !== "pet") {
+    return NextResponse.json(
+      { error: "Perfil de mascota no encontrado" },
+      { status: 404 },
+    );
+  }
+  if (!canViewHealthBook(access)) {
+    return accessDenied("No tenés permiso para ver la libreta sanitaria");
+  }
+
   try {
-    const [visits, preventive] = await Promise.all([
-      listPetVetVisitsForTutor(petId, session.userId),
-      listPreventiveItemsForTutor(petId, session.userId),
-    ]);
+    const [visits, preventive] =
+      access.kind === "owner"
+        ? await Promise.all([
+            listPetVetVisitsForTutor(petId, session.userId),
+            listPreventiveItemsForTutor(petId, session.userId),
+          ])
+        : await Promise.all([
+            listPetVetVisits(petId),
+            listPreventiveItems(petId),
+          ]);
     if (visits === null || preventive === null) {
       return NextResponse.json(
         { error: "Perfil de mascota no encontrado" },
         { status: 404 },
       );
     }
-    return NextResponse.json({ visits, records: visits, preventive });
+    return NextResponse.json({
+      visits,
+      records: visits,
+      preventive,
+      readOnly: access.kind === "shared" && !canEditProfile(access),
+    });
   } catch (error) {
     console.error("[medical-records GET]", error);
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
@@ -62,6 +89,12 @@ export async function POST(request: Request, { params }: RouteContext) {
   const parsed = parseVisitBody(body, { requireVetIdentity: false });
   if (!parsed.ok) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
+
+  const access = await requireProfileAccess(petId, session.userId);
+  if (access instanceof NextResponse) return access;
+  if (!canEditProfile(access)) {
+    return accessDenied("No tenés permiso para editar la libreta sanitaria");
   }
 
   try {

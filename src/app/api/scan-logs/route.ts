@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import {
-  countUnreadScanLogs,
-  listScanLogsByTutor,
-} from "@/lib/db/queries";
+  countUnreadScanLogsForUser,
+  listScanLogsForUser,
+} from "@/lib/db/queries-profile-shares";
 
 export async function GET() {
   const session = await getSession();
@@ -12,8 +12,8 @@ export async function GET() {
   }
 
   const [logs, unreadCount] = await Promise.all([
-    listScanLogsByTutor(session.userId),
-    countUnreadScanLogs(session.userId),
+    listScanLogsForUser(session.userId),
+    countUnreadScanLogsForUser(session.userId),
   ]);
 
   return NextResponse.json({ logs, unreadCount });

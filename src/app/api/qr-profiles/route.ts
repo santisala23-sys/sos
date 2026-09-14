@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import { listQrProfilesByTutor } from "@/lib/db/queries";
+import { listAllProfileSharesForOwnerUser } from "@/lib/db/queries-profile-shares";
+import type { ProfileShareWithUser } from "@/types/database";
 
 export async function GET() {
   const session = await getSession();
@@ -8,8 +10,27 @@ export async function GET() {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const profiles = await listQrProfilesByTutor(session.userId);
-  return NextResponse.json({ profiles });
+  const [profiles, allShares] = await Promise.all([
+    listQrProfilesByTutor(session.userId),
+    listAllProfileSharesForOwnerUser(session.userId),
+  ]);
+
+  const sharesByProfile = allShares.reduce<Record<string, ProfileShareWithUser[]>>(
+    (acc, share) => {
+      const list = acc[share.profile_id] ?? [];
+      list.push(share);
+      acc[share.profile_id] = list;
+      return acc;
+    },
+    {},
+  );
+
+  return NextResponse.json({
+    profiles: profiles.map((profile) => ({
+      ...profile,
+      shares: sharesByProfile[profile.id] ?? [],
+    })),
+  });
 }
 
 export async function POST() {

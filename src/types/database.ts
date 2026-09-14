@@ -79,6 +79,36 @@ export interface QrProfile {
   avatar_mime?: string | null;
 }
 
+export type ProfileSharePermissions = {
+  can_receive_alerts: boolean;
+  can_view_profile: boolean;
+  can_edit_profile: boolean;
+  can_view_health_book: boolean;
+  can_save_location: boolean;
+};
+
+export interface ProfileShare extends ProfileSharePermissions {
+  id: string;
+  profile_id: string;
+  owner_user_id: string;
+  shared_with_user_id: string;
+  expires_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ProfileShareWithUser = ProfileShare & {
+  shared_with_email: string;
+  shared_with_name: string | null;
+};
+
+export type SharedProfileEntry = QrProfile & {
+  share: ProfileShare;
+  owner_email: string;
+  owner_name: string | null;
+};
+
 export interface ObjectSavedLocation {
   id: string;
   profile_id: string;

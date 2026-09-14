@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
+import { accessDenied, requireProfileAccess } from "@/lib/api/profile-access";
 import {
   insertPetWeightEntryForTutor,
+  listPetWeightEntries,
   listPetWeightEntriesForTutor,
 } from "@/lib/db/queries-pet-medical";
+import { canEditProfile, canViewHealthBook } from "@/lib/profile-access";
 import { isUuid } from "@/lib/pet-medical";
 import { parseWeightKg } from "@/lib/pet-weight-validate";
 
@@ -20,8 +23,23 @@ export async function GET(_request: Request, { params }: RouteContext) {
     return NextResponse.json({ error: "Perfil inválido" }, { status: 400 });
   }
 
+  const access = await requireProfileAccess(petId, session.userId);
+  if (access instanceof NextResponse) return access;
+  if (access.profile.profile_type !== "pet") {
+    return NextResponse.json(
+      { error: "Perfil de mascota no encontrado" },
+      { status: 404 },
+    );
+  }
+  if (!canViewHealthBook(access)) {
+    return accessDenied("No tenés permiso para ver la libreta sanitaria");
+  }
+
   try {
-    const entries = await listPetWeightEntriesForTutor(petId, session.userId);
+    const entries =
+      access.kind === "owner"
+        ? await listPetWeightEntriesForTutor(petId, session.userId)
+        : await listPetWeightEntries(petId);
     if (entries === null) {
       return NextResponse.json(
         { error: "Perfil de mascota no encontrado" },
@@ -68,6 +86,12 @@ export async function POST(request: Request, { params }: RouteContext) {
 
   const notes =
     typeof raw.notes === "string" ? raw.notes.trim().slice(0, 500) : "";
+
+  const access = await requireProfileAccess(petId, session.userId);
+  if (access instanceof NextResponse) return access;
+  if (!canEditProfile(access)) {
+    return accessDenied("No tenés permiso para editar la libreta sanitaria");
+  }
 
   try {
     const entry = await insertPetWeightEntryForTutor(petId, session.userId, {

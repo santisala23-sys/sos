@@ -41,7 +41,7 @@ export const POST = withApi(
     });
 
     await notifyTutor({
-      tutorId: profile.tutor_id,
+      profileId: profile.id,
       type: "sos",
       beneficiaryName: profile.beneficiary_name,
       emergencyContactName: profile.emergency_contact_name,

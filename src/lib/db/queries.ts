@@ -718,6 +718,69 @@ export async function updateQrProfile(
   return (rows[0] as QrProfile | undefined) ?? null;
 }
 
+export async function updateQrProfileById(
+  id: string,
+  data: Partial<
+    Pick<
+      QrProfile,
+      | "beneficiary_name"
+      | "profile_type"
+      | "emergency_contact_name"
+      | "emergency_contact_phone"
+      | "secondary_contact_name"
+      | "secondary_contact_phone"
+      | "instructions"
+      | "medical_notes"
+      | "allergies"
+      | "blood_type"
+      | "health_insurance"
+      | "pet_breed"
+      | "pet_birth_date"
+      | "is_active"
+      | "sensitive_data_consent_at"
+      | "sensitive_data_consent_version"
+    >
+  >,
+): Promise<QrProfile | null> {
+  await ensureDeferredMigrations();
+  const sql = getSql();
+  const existing = await findQrProfileById(id);
+  if (!existing) return null;
+
+  const rows = await sql`
+    UPDATE qr_profiles
+    SET
+      beneficiary_name = ${data.beneficiary_name ?? existing.beneficiary_name},
+      profile_type = ${data.profile_type ?? existing.profile_type ?? "person"},
+      emergency_contact_name = ${data.emergency_contact_name ?? existing.emergency_contact_name},
+      emergency_contact_phone = ${data.emergency_contact_phone ?? existing.emergency_contact_phone},
+      secondary_contact_name = ${data.secondary_contact_name !== undefined ? data.secondary_contact_name : existing.secondary_contact_name},
+      secondary_contact_phone = ${data.secondary_contact_phone !== undefined ? data.secondary_contact_phone : existing.secondary_contact_phone},
+      instructions = ${data.instructions ?? existing.instructions},
+      medical_notes = ${data.medical_notes ?? existing.medical_notes ?? ""},
+      allergies = ${data.allergies !== undefined ? data.allergies : existing.allergies ?? ""},
+      blood_type = ${data.blood_type !== undefined ? data.blood_type : existing.blood_type ?? null},
+      health_insurance = ${data.health_insurance !== undefined ? data.health_insurance : existing.health_insurance ?? null},
+      pet_breed = ${data.pet_breed !== undefined ? data.pet_breed : existing.pet_breed ?? null},
+      pet_birth_date = ${data.pet_birth_date !== undefined ? data.pet_birth_date : existing.pet_birth_date ?? null}::date,
+      is_active = ${data.is_active ?? existing.is_active},
+      sensitive_data_consent_at = ${data.sensitive_data_consent_at !== undefined ? data.sensitive_data_consent_at : existing.sensitive_data_consent_at ?? null},
+      sensitive_data_consent_version = ${data.sensitive_data_consent_version !== undefined ? data.sensitive_data_consent_version : existing.sensitive_data_consent_version ?? null}
+    WHERE id = ${id}
+    RETURNING
+      id, tutor_id, slug, profile_type, beneficiary_name,
+      emergency_contact_name, emergency_contact_phone,
+      secondary_contact_name, secondary_contact_phone,
+      instructions, medical_notes, allergies, blood_type, health_insurance,
+      pet_breed, pet_birth_date::text AS pet_birth_date,
+      clinical_pdf_filename, clinical_pdf_uploaded_at,
+      saved_latitude, saved_longitude, saved_location_at,
+      sensitive_data_consent_at, sensitive_data_consent_version,
+      is_active, created_at
+  `;
+  return (rows[0] as QrProfile | undefined) ?? null;
+}
+
 export async function deleteQrProfile(
   id: string,
   tutorId: string,

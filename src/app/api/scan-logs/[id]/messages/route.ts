@@ -5,11 +5,11 @@ import { notifyTutor } from "@/lib/alerts/notify-tutor";
 import { notifyScanner } from "@/lib/alerts/notify-scanner";
 import {
   addScanMessage,
-  findScanLogForTutor,
   getScanLogContextForNotify,
   listScanMessages,
   type ScanMessageMediaInput,
 } from "@/lib/db/queries";
+import { findScanLogForUser } from "@/lib/db/queries-profile-shares";
 import { getScanTokenFromRequest } from "@/lib/security/scan-token";
 import {
   authorizeScannerAccess,
@@ -54,7 +54,7 @@ async function resolveAccess(
 
   const session = await getSession();
   if (session) {
-    const log = await findScanLogForTutor(scanLogId, session.userId);
+    const log = await findScanLogForUser(scanLogId, session.userId);
     if (log) return "tutor";
   }
 
@@ -166,7 +166,7 @@ export const POST = withApi(
           const ctx = await getScanLogContextForNotify(id);
           if (ctx) {
             await notifyTutor({
-              tutorId: ctx.tutor_id,
+              profileId: ctx.profile_id,
               type: "message",
               beneficiaryName: ctx.beneficiary_name,
               emergencyContactName: ctx.emergency_contact_name,
@@ -185,7 +185,7 @@ export const POST = withApi(
         return NextResponse.json({ message: created });
       }
 
-      const log = await findScanLogForTutor(id, (await getSession())!.userId);
+      const log = await findScanLogForUser(id, (await getSession())!.userId);
       if (!log) {
         return NextResponse.json({ error: "No autorizado" }, { status: 403 });
       }

@@ -7,8 +7,14 @@ import {
   Bell,
   CheckCircle2,
   QrCode,
+  Share2,
 } from "lucide-react";
-import type { QrProfile, ScanLogWithProfile } from "@/types/database";
+import type {
+  ProfileShareWithUser,
+  QrProfile,
+  ScanLogWithProfile,
+  SharedProfileEntry,
+} from "@/types/database";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { ActivateProductDialog } from "@/components/activation/ActivateProductDialog";
 import { LegalAcceptanceBanner } from "@/components/dashboard/LegalAcceptanceBanner";
@@ -22,8 +28,11 @@ import {
 import { ObjectSavedLocationsBanner } from "@/components/dashboard/ObjectSavedLocationsBanner";
 import { Button } from "@/components/ui/Button";
 
+type OwnedProfile = QrProfile & { shares?: ProfileShareWithUser[] };
+
 export default function DashboardPage() {
-  const [profiles, setProfiles] = useState<QrProfile[]>([]);
+  const [profiles, setProfiles] = useState<OwnedProfile[]>([]);
+  const [sharedProfiles, setSharedProfiles] = useState<SharedProfileEntry[]>([]);
   const [logs, setLogs] = useState<ScanLogWithProfile[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -44,8 +53,9 @@ export default function DashboardPage() {
   const push = usePushNotifications();
 
   const loadData = useCallback(async () => {
-    const [profilesRes, logsRes, meRes] = await Promise.all([
+    const [profilesRes, sharedRes, logsRes, meRes] = await Promise.all([
       fetch("/api/qr-profiles"),
+      fetch("/api/qr-profiles/shared-with-me"),
       fetch("/api/scan-logs"),
       fetch("/api/auth/me"),
     ]);
@@ -53,6 +63,11 @@ export default function DashboardPage() {
     if (profilesRes.ok) {
       const data = await profilesRes.json();
       setProfiles(data.profiles ?? []);
+    }
+
+    if (sharedRes.ok) {
+      const data = await sharedRes.json();
+      setSharedProfiles(data.profiles ?? []);
     }
 
     if (logsRes.ok) {
@@ -324,6 +339,7 @@ export default function DashboardPage() {
               <ProfileCard
                 key={profile.id}
                 profile={profile}
+                shares={profile.shares ?? []}
                 onRefresh={loadData}
                 defaultShowQr={profile.slug === highlightedSlug}
               />
@@ -331,6 +347,43 @@ export default function DashboardPage() {
           </div>
         )}
       </section>
+
+      {!loading && sharedProfiles.length > 0 && (
+        <section aria-labelledby="shared-profiles-heading">
+          <div className="mb-8">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-sky-600">
+              Co-tutoría
+            </p>
+            <div className="mt-2 flex items-center gap-3">
+              <Share2 className="h-7 w-7 text-sky-600" aria-hidden />
+              <h2
+                id="shared-profiles-heading"
+                className="text-2xl font-black tracking-tight text-neutral-900 sm:text-3xl"
+              >
+                Compartidos conmigo
+              </h2>
+            </div>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-600 sm:text-base">
+              Perfiles que otra cuenta te compartió. Las acciones dependen de los
+              permisos que te dieron.
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            {sharedProfiles.map((entry) => (
+              <ProfileCard
+                key={`shared-${entry.id}`}
+                profile={entry}
+                variant="shared"
+                share={entry.share}
+                ownerName={entry.owner_name}
+                ownerEmail={entry.owner_email}
+                onRefresh={loadData}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {!legalBlocked && <PushDevicesSection push={push} />}
     </main>

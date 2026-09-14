@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import {
-  findScanLogForTutor,
-  markScanLogRead,
-} from "@/lib/db/queries";
+  findScanLogForUser,
+  markScanLogReadForUser,
+} from "@/lib/db/queries-profile-shares";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -14,7 +14,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
   }
 
   const { id } = await params;
-  const log = await findScanLogForTutor(id, session.userId);
+  const log = await findScanLogForUser(id, session.userId);
 
   if (!log) {
     return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
@@ -30,7 +30,7 @@ export async function PATCH(_request: Request, { params }: RouteContext) {
   }
 
   const { id } = await params;
-  const ok = await markScanLogRead(id, session.userId);
+  const ok = await markScanLogReadForUser(id, session.userId);
 
   if (!ok) {
     return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });

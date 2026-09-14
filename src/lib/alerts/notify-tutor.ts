@@ -1,17 +1,17 @@
 import {
   buildAlertMessage,
   buildPushNotification,
-  sendFamilyAlert,
   type AlertPayload,
 } from "@/lib/alerts/send-alert";
 import {
   deletePushSubscription,
   listPushSubscriptionsByUser,
 } from "@/lib/db/queries";
+import { listAlertRecipientUserIds } from "@/lib/db/queries-profile-shares";
 import { sendWebPushToUser } from "@/lib/push/send-web-push";
 
 export type NotifyTutorParams = {
-  tutorId: string;
+  profileId: string;
   type: AlertPayload["type"];
   beneficiaryName: string;
   emergencyContactName: string;
@@ -26,7 +26,7 @@ export type NotifyTutorParams = {
 };
 
 export async function notifyTutor(params: NotifyTutorParams): Promise<void> {
-  const { message, dashboardUrl, mapsUrl } = buildAlertMessage({
+  const { message: _message, dashboardUrl, mapsUrl: _mapsUrl } = buildAlertMessage({
     type: params.type,
     beneficiaryName: params.beneficiaryName,
     scanLogId: params.scanLogId,
@@ -35,21 +35,6 @@ export async function notifyTutor(params: NotifyTutorParams): Promise<void> {
     locationApproximate: params.locationApproximate,
     locationArea: params.locationArea,
     scannerNote: params.scannerNote,
-  });
-
-  await sendFamilyAlert({
-    type: params.type,
-    beneficiaryName: params.beneficiaryName,
-    emergencyContactName: params.emergencyContactName,
-    emergencyContactPhone: params.emergencyContactPhone,
-    scannedAt: params.scannedAt,
-    latitude: params.latitude,
-    longitude: params.longitude,
-    scanLogId: params.scanLogId,
-    scannerNote: params.scannerNote,
-    message,
-    dashboardUrl,
-    mapsUrl,
   });
 
   const push = buildPushNotification({
@@ -61,27 +46,34 @@ export async function notifyTutor(params: NotifyTutorParams): Promise<void> {
     locationArea: params.locationArea,
   });
 
-  const subscriptions = await listPushSubscriptionsByUser(params.tutorId);
-  if (subscriptions.length === 0) {
-    console.warn("[notify-tutor] No push subscriptions for tutor", params.tutorId);
-    return;
-  }
+  const recipientIds = await listAlertRecipientUserIds(params.profileId);
+  const uniqueRecipients = [...new Set(recipientIds)];
 
-  const pushResult = await sendWebPushToUser(
-    subscriptions,
-    {
-      title: push.title,
-      body: push.body,
-      url: dashboardUrl,
-    },
-    (endpoint) => deletePushSubscription(params.tutorId, endpoint),
+  await Promise.all(
+    uniqueRecipients.map(async (userId) => {
+      const subscriptions = await listPushSubscriptionsByUser(userId);
+      if (subscriptions.length === 0) {
+        console.warn("[notify-tutor] No push subscriptions for user", userId);
+        return;
+      }
+
+      const pushResult = await sendWebPushToUser(
+        subscriptions,
+        {
+          title: push.title,
+          body: push.body,
+          url: dashboardUrl,
+        },
+        (endpoint) => deletePushSubscription(userId, endpoint),
+      );
+
+      if (pushResult.sent === 0) {
+        console.error("[notify-tutor] Push delivery failed", {
+          userId,
+          scanLogId: params.scanLogId,
+          ...pushResult,
+        });
+      }
+    }),
   );
-
-  if (pushResult.sent === 0) {
-    console.error("[notify-tutor] Push delivery failed", {
-      tutorId: params.tutorId,
-      scanLogId: params.scanLogId,
-      ...pushResult,
-    });
-  }
 }

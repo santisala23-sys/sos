@@ -30,7 +30,7 @@ export async function PATCH(request: Request) {
     await addScanMessage(scanLogId, "public", note);
 
     await notifyTutor({
-      tutorId: access.tutor_id,
+      profileId: access.profile_id,
       type: "message",
       beneficiaryName: access.beneficiary_name,
       emergencyContactName: "",

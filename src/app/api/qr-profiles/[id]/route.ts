@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
+import { accessDenied, requireProfileAccess } from "@/lib/api/profile-access";
 import {
   clearProfileAvatar,
   deleteQrProfile,
   findQrProfileById,
   setProfileAvatar,
   updateQrProfile,
+  updateQrProfileById,
 } from "@/lib/db/queries";
+import {
+  canAccessProfileDashboard,
+  canDeleteProfile,
+  canEditProfile,
+} from "@/lib/profile-access";
 import { normalizeBloodType } from "@/lib/blood-types";
 import { isProfileType } from "@/lib/profile-types";
 import {
@@ -27,12 +34,17 @@ export async function GET(_request: Request, { params }: RouteContext) {
   }
 
   const { id } = await params;
-  const profile = await findQrProfileById(id);
-  if (!profile || profile.tutor_id !== session.userId) {
-    return NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 });
+  const access = await requireProfileAccess(id, session.userId);
+  if (access instanceof NextResponse) return access;
+  if (!canAccessProfileDashboard(access)) {
+    return accessDenied("No tenés permiso para ver este perfil");
   }
 
-  return NextResponse.json({ profile });
+  return NextResponse.json({
+    profile: access.profile,
+    access: access.kind,
+    share: access.kind === "shared" ? access.share : null,
+  });
 }
 
 export async function PATCH(request: Request, { params }: RouteContext) {
@@ -45,10 +57,12 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
   try {
     const body = await request.json();
-    const existing = await findQrProfileById(id);
-    if (!existing || existing.tutor_id !== session.userId) {
-      return NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 });
+    const access = await requireProfileAccess(id, session.userId);
+    if (access instanceof NextResponse) return access;
+    if (!canEditProfile(access)) {
+      return accessDenied("No tenés permiso para editar este perfil");
     }
+    const existing = access.profile;
 
     // Tutores no pueden cambiar nombre ni tipo una vez creado el perfil.
     if (
@@ -161,7 +175,10 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       }
     }
 
-    const profile = await updateQrProfile(id, session.userId, patch);
+    const profile =
+      access.kind === "owner"
+        ? await updateQrProfile(id, session.userId, patch)
+        : await updateQrProfileById(id, patch);
 
     if (!profile) {
       return NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 });
@@ -169,10 +186,14 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
     const avatar = body.avatar as { mime?: string; data?: string } | null | undefined;
     if (avatar === null) {
-      await clearProfileAvatar(id, session.userId);
+      if (access.kind === "owner") {
+        await clearProfileAvatar(id, session.userId);
+      }
     } else if (avatar?.data && avatar?.mime) {
       try {
-        await setProfileAvatar(id, session.userId, avatar.data, avatar.mime);
+        if (access.kind === "owner") {
+          await setProfileAvatar(id, session.userId, avatar.data, avatar.mime);
+        }
       } catch (avatarError) {
         return NextResponse.json(
           {
@@ -200,6 +221,12 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
   }
 
   const { id } = await params;
+  const access = await requireProfileAccess(id, session.userId);
+  if (access instanceof NextResponse) return access;
+  if (!canDeleteProfile(access)) {
+    return accessDenied("Solo el titular puede eliminar el perfil");
+  }
+
   const deleted = await deleteQrProfile(id, session.userId);
 
   if (!deleted) {

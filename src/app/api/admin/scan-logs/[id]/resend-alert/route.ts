@@ -17,7 +17,7 @@ export const POST = withApi(
 
     try {
       await notifyTutor({
-        tutorId: log.tutor_id,
+        profileId: log.profile_id,
         type: log.alert_type,
         beneficiaryName: log.beneficiary_name,
         emergencyContactName: log.emergency_contact_name,
