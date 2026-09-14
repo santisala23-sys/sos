@@ -313,7 +313,7 @@ export function HelpChatbot() {
       <div className="relative flex flex-col items-end">
         {!open && showTeaser && (
           <div className="pointer-events-none absolute bottom-[calc(100%+0.35rem)] right-0 z-10 w-[min(17rem,calc(100vw-5.5rem))] animate-[helpme-teaser-in_0.45s_ease-out] sm:-translate-x-3">
-            <div className="pointer-events-auto relative rounded-2xl border border-violet-100 bg-white px-4 py-3.5 shadow-xl shadow-violet-500/15 ring-1 ring-violet-100/80">
+            <div className="pointer-events-auto relative rounded-2xl border border-violet-100 bg-white px-5 py-4 shadow-xl shadow-violet-500/15 ring-1 ring-violet-100/80">
               <button
                 type="button"
                 onClick={dismissTeaser}
@@ -322,14 +322,8 @@ export function HelpChatbot() {
               >
                 <X className="h-3 w-3" />
               </button>
-              <p className="pr-3 text-sm font-black leading-snug text-violet-900">
-                ¡Hola! Soy
-              </p>
-              <p className="mt-1">
-                <HelpmeBrand size="teaser" tone="light" />
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-                ¿En qué puedo ayudarte?
+              <p className="px-1 text-center text-sm font-semibold leading-relaxed text-violet-900 sm:text-base">
+                Hola, ¿en qué puedo ayudarte mejor?
               </p>
             </div>
             <span
