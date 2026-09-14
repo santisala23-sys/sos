@@ -1,6 +1,6 @@
 # Términos y Condiciones de Uso — SOSme
 
-**Versión:** 1.3  
+**Versión:** 1.4  
 **Fecha de vigencia:** 14 de septiembre de 2026  
 **Última actualización:** 14 de septiembre de 2026
 
@@ -25,7 +25,6 @@
 17. [Modificaciones y cese del servicio](#17-modificaciones-y-cese-del-servicio)
 18. [Ley aplicable y jurisdicción](#18-ley-aplicable-y-jurisdicción)
 19. [Contacto](#19-contacto)
-20. [No constituye asesoramiento legal](#20-no-constituye-asesoramiento-legal)
 
 ---
 
@@ -286,7 +285,3 @@ Si tenés domicilio en la Ciudad Autónoma de Buenos Aires o en otra jurisdicci�
 Consultas sobre estos Términos: **somososme@gmail.com**
 
 Ejercicio de derechos de protección de datos (ARCO): ver [Política de Privacidad](/privacidad) y [Política de Retención y Eliminación](/retencion-datos).
-
-## 20. No constituye asesoramiento legal
-
-Este documento es un borrador orientativo redactado para el producto SOSme. **No constituye asesoramiento legal.** Recomendamos su revisión por un abogado matriculado en Argentina antes de su publicación definitiva.
