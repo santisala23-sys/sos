@@ -8,12 +8,23 @@ import {
   HELP_SUGGESTED_QUESTIONS,
   bestHelpAnswer,
 } from "@/lib/help/search-help";
+import {
+  buildHelpmeSupportWhatsAppMessage,
+  buildWhatsAppUrl,
+} from "@/lib/utils/contact";
 import { cn } from "@/lib/utils/cn";
 
 type ChatMessage = {
   id: string;
   role: "bot" | "user";
   text: string;
+  offerWhatsApp?: boolean;
+  whatsappQuestion?: string;
+};
+
+type BotReply = {
+  text: string;
+  offerWhatsApp?: boolean;
 };
 
 const WELCOME =
@@ -49,13 +60,16 @@ function HelpmeBrand({
 
 const TEASER_STORAGE_KEY = "sos_helpme_teaser_dismissed";
 
-function buildBotReply(query: string): string {
+function buildBotReply(query: string): BotReply {
   const match = bestHelpAnswer(query);
   if (match) {
-    return match.body;
+    return { text: match.body };
   }
 
-  return "No encontré algo exacto sobre eso en Ayuda. Probá con otras palabras — por ejemplo «activar producto», «libreta sanitaria», «co-tutoría» o «plan Pro» — o entrá al centro de ayuda completo.";
+  return {
+    text: "No encontré algo exacto sobre eso en Ayuda. Probá con otras palabras — por ejemplo «activar producto», «libreta sanitaria», «co-tutoría» o «plan Pro» — o consultá con nuestro equipo por WhatsApp.",
+    offerWhatsApp: true,
+  };
 }
 
 export function HelpChatbot() {
@@ -103,10 +117,19 @@ export function HelpChatbot() {
 
   if (!showOnHome || hideOnPublicProfile) return null;
 
-  function pushMessage(role: ChatMessage["role"], text: string) {
+  function pushMessage(
+    role: ChatMessage["role"],
+    text: string,
+    options?: Pick<ChatMessage, "offerWhatsApp" | "whatsappQuestion">,
+  ) {
     setMessages((current) => [
       ...current,
-      { id: `${role}-${Date.now()}-${Math.random()}`, role, text },
+      {
+        id: `${role}-${Date.now()}-${Math.random()}`,
+        role,
+        text,
+        ...options,
+      },
     ]);
   }
 
@@ -119,7 +142,11 @@ export function HelpChatbot() {
     setTyping(true);
 
     window.setTimeout(() => {
-      pushMessage("bot", buildBotReply(trimmed));
+      const reply = buildBotReply(trimmed);
+      pushMessage("bot", reply.text, {
+        offerWhatsApp: reply.offerWhatsApp,
+        whatsappQuestion: reply.offerWhatsApp ? trimmed : undefined,
+      });
       setTyping(false);
     }, 350);
   }
@@ -185,8 +212,8 @@ export function HelpChatbot() {
               <div
                 key={message.id}
                 className={cn(
-                  "flex",
-                  message.role === "user" ? "justify-end" : "justify-start",
+                  "flex flex-col gap-2",
+                  message.role === "user" ? "items-end" : "items-start",
                 )}
               >
                 <div
@@ -199,6 +226,19 @@ export function HelpChatbot() {
                 >
                   {message.text}
                 </div>
+                {message.offerWhatsApp && (
+                  <a
+                    href={buildWhatsAppUrl(
+                      buildHelpmeSupportWhatsAppMessage(message.whatsappQuestion ?? ""),
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex max-w-[88%] items-center justify-center gap-2 rounded-xl bg-[#25D366] px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1ebe57]"
+                  >
+                    <MessageCircle className="h-4 w-4 shrink-0" />
+                    Consultar por WhatsApp
+                  </a>
+                )}
               </div>
             ))}
 

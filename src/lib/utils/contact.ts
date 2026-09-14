@@ -12,6 +12,19 @@ export function buildWhatsAppUrl(message: string): string {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
+export function buildHelpmeSupportWhatsAppMessage(userQuestion: string): string {
+  const question = userQuestion.trim();
+  return [
+    "Hola SOSme, escribo desde HELPme en la web.",
+    "",
+    question
+      ? `Consulta que no pude resolver:\n${question}`
+      : "Tengo una consulta que HELPme no pudo resolver.",
+    "",
+    "¿Me pueden ayudar? Gracias.",
+  ].join("\n");
+}
+
 export function buildContactInquiryMessage(params: {
   motivoLabel: string;
   nombre?: string;
