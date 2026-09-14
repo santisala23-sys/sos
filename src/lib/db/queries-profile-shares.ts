@@ -383,6 +383,31 @@ export async function countUnreadScanLogsForUser(userId: string): Promise<number
   return (rows[0] as { count: number }).count;
 }
 
+export async function markAllScanLogsReadForUser(userId: string): Promise<number> {
+  await ensureDeferredMigrations();
+  const sql = getSql();
+  const rows = await sql`
+    UPDATE scan_logs sl
+    SET read_at = NOW()
+    FROM qr_profiles qp
+    WHERE sl.profile_id = qp.id
+      AND sl.read_at IS NULL
+      AND (
+        qp.tutor_id = ${userId}
+        OR EXISTS (
+          SELECT 1 FROM profile_shares ps
+          WHERE ps.profile_id = qp.id
+            AND ps.shared_with_user_id = ${userId}
+            AND ps.revoked_at IS NULL
+            AND (ps.expires_at IS NULL OR ps.expires_at > NOW())
+            AND (ps.can_receive_alerts OR ps.can_view_profile OR ps.can_edit_profile)
+        )
+      )
+    RETURNING sl.id
+  `;
+  return rows.length;
+}
+
 export async function markScanLogReadForUser(
   scanLogId: string,
   userId: string,

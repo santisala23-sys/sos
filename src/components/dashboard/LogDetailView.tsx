@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft,
+  CheckCircle2,
   ExternalLink,
   MapPin,
   AlertTriangle,
@@ -23,26 +24,46 @@ type LogDetailViewProps = {
 
 export function LogDetailView({ log }: LogDetailViewProps) {
   const router = useRouter();
+  const [closing, setClosing] = useState(false);
   const hasLocation = log.latitude != null && log.longitude != null;
   const isApproximateLocation = Boolean(log.location_is_approximate);
   const lat = Number(log.latitude);
   const lng = Number(log.longitude);
   const isSos = log.alert_type === "sos";
 
-  useEffect(() => {
-    fetch(`/api/scan-logs/${log.id}`, { method: "PATCH" });
-  }, [log.id]);
+  async function closeAndReturn() {
+    setClosing(true);
+    try {
+      await fetch(`/api/scan-logs/${log.id}`, { method: "PATCH" });
+      router.push("/dashboard/actividad");
+    } finally {
+      setClosing(false);
+    }
+  }
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-      <button
-        type="button"
-        onClick={() => router.push("/dashboard/actividad")}
-        className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-white/80 hover:text-violet-800"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden />
-        Volver a actividad
-      </button>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard/actividad")}
+          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-white/80 hover:text-violet-800"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          Volver a actividad
+        </button>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          disabled={closing}
+          onClick={() => void closeAndReturn()}
+          className="gap-2"
+        >
+          <CheckCircle2 className="h-4 w-4" aria-hidden />
+          {closing ? "Cerrando..." : "Cerrar actividad"}
+        </Button>
+      </div>
 
       <section
         className={`overflow-hidden rounded-[1.75rem] border shadow-xl ${
@@ -173,11 +194,23 @@ export function LogDetailView({ log }: LogDetailViewProps) {
         </section>
       )}
 
-      <Link href="/dashboard/actividad">
-        <Button type="button" variant="secondary" className="w-full sm:w-auto">
-          Volver a actividad
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Link href="/dashboard/actividad" className="sm:flex-1">
+          <Button type="button" variant="secondary" className="w-full">
+            Volver a actividad
+          </Button>
+        </Link>
+        <Button
+          type="button"
+          variant="primary"
+          disabled={closing}
+          onClick={() => void closeAndReturn()}
+          className="w-full gap-2 sm:flex-1"
+        >
+          <CheckCircle2 className="h-4 w-4" aria-hidden />
+          {closing ? "Cerrando..." : "Cerrar actividad"}
         </Button>
-      </Link>
+      </div>
     </main>
   );
 }

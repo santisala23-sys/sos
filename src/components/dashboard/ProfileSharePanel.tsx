@@ -8,6 +8,12 @@ import type {
   ProfileType,
 } from "@/types/database";
 import { Button } from "@/components/ui/Button";
+import {
+  ShareExpiryField,
+  expiryFromMode,
+  modeFromExpiry,
+  type ShareExpiryMode,
+} from "@/components/dashboard/ShareExpiryField";
 import { DEFAULT_SHARE_PERMISSIONS, MAX_PROFILE_SHARES } from "@/lib/profile-access";
 import { cn } from "@/lib/utils/cn";
 
@@ -63,6 +69,14 @@ function toDateInputValue(iso: string | null): string {
   return date.toISOString().slice(0, 10);
 }
 
+function validateExpiry(mode: ShareExpiryMode, dateValue: string): string | null {
+  if (mode === "permanent") return null;
+  if (!dateValue) {
+    return "Elegí la fecha hasta la cual tendrá acceso, o marcá Acceso permanente.";
+  }
+  return null;
+}
+
 function activePermissionLabels(
   share: ProfileSharePermissions,
   profileType: ProfileType,
@@ -87,11 +101,13 @@ export function ProfileSharePanel({
   const [invitePermissions, setInvitePermissions] = useState<ProfileSharePermissions>({
     ...DEFAULT_SHARE_PERMISSIONS,
   });
+  const [inviteExpiryMode, setInviteExpiryMode] = useState<ShareExpiryMode>("permanent");
   const [inviteExpiresAt, setInviteExpiresAt] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPermissions, setEditPermissions] = useState<ProfileSharePermissions>({
     ...DEFAULT_SHARE_PERMISSIONS,
   });
+  const [editExpiryMode, setEditExpiryMode] = useState<ShareExpiryMode>("permanent");
   const [editExpiresAt, setEditExpiresAt] = useState("");
 
   const permissionOptions = PERMISSION_LABELS.filter(
@@ -126,6 +142,12 @@ export function ProfileSharePanel({
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
+    const expiryError = validateExpiry(inviteExpiryMode, inviteExpiresAt);
+    if (expiryError) {
+      setError(expiryError);
+      return;
+    }
+
     setSaving(true);
     setError(null);
     try {
@@ -135,9 +157,7 @@ export function ProfileSharePanel({
         body: JSON.stringify({
           email,
           permissions: invitePermissions,
-          expiresAt: inviteExpiresAt
-            ? new Date(`${inviteExpiresAt}T23:59:59`).toISOString()
-            : null,
+          expiresAt: expiryFromMode(inviteExpiryMode, inviteExpiresAt),
         }),
       });
       const data = await res.json();
@@ -148,6 +168,7 @@ export function ProfileSharePanel({
       setShares(data.shares ?? []);
       setEmail("");
       setInvitePermissions({ ...DEFAULT_SHARE_PERMISSIONS });
+      setInviteExpiryMode("permanent");
       setInviteExpiresAt("");
       showSuccess("Perfil compartido. La persona recibirá un email con los permisos.");
     } catch {
@@ -158,6 +179,12 @@ export function ProfileSharePanel({
   }
 
   async function handleUpdateShare(shareId: string) {
+    const expiryError = validateExpiry(editExpiryMode, editExpiresAt);
+    if (expiryError) {
+      setError(expiryError);
+      return;
+    }
+
     setSaving(true);
     setError(null);
     try {
@@ -166,9 +193,7 @@ export function ProfileSharePanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           permissions: editPermissions,
-          expiresAt: editExpiresAt
-            ? new Date(`${editExpiresAt}T23:59:59`).toISOString()
-            : null,
+          expiresAt: expiryFromMode(editExpiryMode, editExpiresAt),
         }),
       });
       const data = await res.json();
@@ -217,6 +242,7 @@ export function ProfileSharePanel({
       can_view_health_book: share.can_view_health_book,
       can_save_location: share.can_save_location,
     });
+    setEditExpiryMode(modeFromExpiry(share.expires_at));
     setEditExpiresAt(toDateInputValue(share.expires_at));
   }
 
@@ -332,18 +358,13 @@ export function ProfileSharePanel({
                           }))
                         }
                       />
-                      <label className="block text-sm font-semibold text-neutral-800">
-                        Vencimiento
-                        <input
-                          type="date"
-                          value={editExpiresAt}
-                          onChange={(e) => setEditExpiresAt(e.target.value)}
-                          className="mt-2 w-full max-w-xs rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-base"
-                        />
-                        <span className="mt-1 block text-xs font-normal text-neutral-500">
-                          Dejalo vacío para acceso permanente.
-                        </span>
-                      </label>
+                      <ShareExpiryField
+                        idPrefix={`edit-${share.id}`}
+                        mode={editExpiryMode}
+                        dateValue={editExpiresAt}
+                        onModeChange={setEditExpiryMode}
+                        onDateChange={setEditExpiresAt}
+                      />
                       <div className="flex flex-wrap gap-2">
                         <Button
                           type="button"
@@ -409,18 +430,13 @@ export function ProfileSharePanel({
             }
           />
 
-          <label className="block text-sm font-semibold text-neutral-800">
-            Vencimiento (opcional)
-            <input
-              type="date"
-              value={inviteExpiresAt}
-              onChange={(e) => setInviteExpiresAt(e.target.value)}
-              className="mt-2 w-full max-w-xs rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-base"
-            />
-            <span className="mt-1 block text-xs font-normal text-neutral-500">
-              Dejalo vacío para acceso permanente (ideal para co-tutores fijos).
-            </span>
-          </label>
+          <ShareExpiryField
+            idPrefix="invite"
+            mode={inviteExpiryMode}
+            dateValue={inviteExpiresAt}
+            onModeChange={setInviteExpiryMode}
+            onDateChange={setInviteExpiresAt}
+          />
 
           <Button
             type="submit"

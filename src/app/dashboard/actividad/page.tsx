@@ -58,8 +58,9 @@ export default function ActividadPage() {
               Actividad
             </h1>
             <p className="mt-1 text-sm leading-relaxed text-neutral-600 sm:text-base">
-              Tocá un evento para chatear en vivo, ver ubicación y marcarlo como
-              leído.
+              Tocá un evento para chatear en vivo y ver ubicación. Cuando
+              termines, cerralo (o usá &quot;Cerrar todas&quot;) para que los
+              nuevos escaneos queden bien identificados.
             </p>
           </div>
         </div>
@@ -71,7 +72,7 @@ export default function ActividadPage() {
             <div className="h-24 animate-pulse rounded-2xl bg-violet-50" />
           </div>
         ) : (
-          <ScanLogsList logs={logs} />
+          <ScanLogsList logs={logs} onRefresh={loadLogs} />
         )}
       </section>
     </main>
