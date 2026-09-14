@@ -11,6 +11,7 @@ import {
   MessageCircle,
   CheckCircle2,
   X,
+  Archive,
 } from "lucide-react";
 import type { ScanLogWithProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
@@ -20,11 +21,21 @@ import { cn } from "@/lib/utils/cn";
 type ScanLogsListProps = {
   logs: ScanLogWithProfile[];
   onRefresh?: () => void;
+  variant?: "open" | "closed";
 };
 
-export function ScanLogsList({ logs, onRefresh }: ScanLogsListProps) {
+export function ScanLogsList({
+  logs,
+  onRefresh,
+  variant = "open",
+}: ScanLogsListProps) {
   const [closingId, setClosingId] = useState<string | null>(null);
   const [closingAll, setClosingAll] = useState(false);
+
+  const visibleLogs =
+    variant === "closed"
+      ? logs.filter((log) => Boolean(log.read_at))
+      : logs.filter((log) => !log.read_at);
 
   async function closeLog(logId: string) {
     setClosingId(logId);
@@ -46,27 +57,56 @@ export function ScanLogsList({ logs, onRefresh }: ScanLogsListProps) {
     }
   }
 
-  if (logs.length === 0) {
+  if (visibleLogs.length === 0) {
+    if (variant === "closed") {
+      return (
+        <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-6 py-14 text-center">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-600">
+            <Archive className="h-7 w-7" aria-hidden />
+          </span>
+          <p className="mt-4 font-semibold text-neutral-800">
+            No tenés actividades cerradas
+          </p>
+          <p className="mt-1 text-sm text-neutral-500">
+            Cuando cierres un evento en Actividad, aparecerá acá.
+          </p>
+          <Link
+            href="/dashboard/actividad"
+            className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-violet-700 hover:underline"
+          >
+            Volver a actividad abierta
+          </Link>
+        </div>
+      );
+    }
+
+    const closedCount = logs.filter((log) => Boolean(log.read_at)).length;
+
     return (
-      <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/40 px-6 py-14 text-center">
-        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
-          <QrCode className="h-7 w-7" aria-hidden />
-        </span>
-        <p className="mt-4 font-semibold text-neutral-800">
-          Todavía no hubo escaneos
-        </p>
-        <p className="mt-1 text-sm text-neutral-500">
-          Cuando alguien lea tu QR, el evento aparecerá acá al instante.
-        </p>
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/40 px-6 py-14 text-center">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
+            <QrCode className="h-7 w-7" aria-hidden />
+          </span>
+          <p className="mt-4 font-semibold text-neutral-800">
+            No hay actividades abiertas
+          </p>
+          <p className="mt-1 text-sm text-neutral-500">
+            Cuando alguien escanee tu QR, el evento aparecerá acá al instante.
+          </p>
+        </div>
+        {closedCount > 0 && (
+          <ClosedActivitiesLink count={closedCount} />
+        )}
       </div>
     );
   }
 
-  const unreadCount = logs.filter((log) => !log.read_at).length;
+  const unreadCount = visibleLogs.length;
 
   return (
     <div className="space-y-4">
-      {unreadCount > 0 && (
+      {variant === "open" && unreadCount > 0 && (
         <div className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-relaxed text-amber-950">
             Tenés <strong>{unreadCount}</strong>{" "}
@@ -89,11 +129,13 @@ export function ScanLogsList({ logs, onRefresh }: ScanLogsListProps) {
       )}
 
       <ul className="flex flex-col gap-4">
-        {logs.map((log, index) => {
+        {visibleLogs.map((log, index) => {
           const isUnread = !log.read_at;
           const hasNote = Boolean(log.scanner_note?.trim());
           const isLatestUnread =
-            isUnread && index === logs.findIndex((l) => !l.read_at);
+            variant === "open" &&
+            isUnread &&
+            index === visibleLogs.findIndex((l) => !l.read_at);
           const isSos = log.alert_type === "sos";
           const isClosing = closingId === log.id;
 
@@ -118,7 +160,9 @@ export function ScanLogsList({ logs, onRefresh }: ScanLogsListProps) {
                       "mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm",
                       isSos
                         ? "bg-red-600 text-white shadow-red-500/30"
-                        : "bg-violet-100 text-violet-800",
+                        : variant === "closed"
+                          ? "bg-neutral-100 text-neutral-600"
+                          : "bg-violet-100 text-violet-800",
                     )}
                   >
                     {isSos ? (
@@ -130,7 +174,7 @@ export function ScanLogsList({ logs, onRefresh }: ScanLogsListProps) {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-bold text-neutral-900">{log.beneficiary_name}</p>
-                      {isUnread ? (
+                      {variant === "open" ? (
                         <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
                           Abierta
                         </span>
@@ -143,6 +187,11 @@ export function ScanLogsList({ logs, onRefresh }: ScanLogsListProps) {
                     <p className="mt-0.5 text-sm text-neutral-600">
                       {alertTypeLabel(log.alert_type)} · {formatDateTime(log.scanned_at)}
                     </p>
+                    {variant === "closed" && log.read_at && (
+                      <p className="mt-1 text-xs text-neutral-500">
+                        Cerrada el {formatDateTime(log.read_at)}
+                      </p>
+                    )}
                     <div className="mt-2 flex flex-wrap gap-2">
                       {log.latitude != null && log.longitude != null && (
                         <span
@@ -166,9 +215,18 @@ export function ScanLogsList({ logs, onRefresh }: ScanLogsListProps) {
                         </span>
                       )}
                     </div>
-                    <p className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-3 py-2 text-xs font-bold text-white shadow-sm shadow-violet-500/25 sm:text-sm">
+                    <p
+                      className={cn(
+                        "mt-3 inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold shadow-sm sm:text-sm",
+                        variant === "closed"
+                          ? "bg-neutral-100 text-neutral-800"
+                          : "bg-violet-600 text-white shadow-violet-500/25",
+                      )}
+                    >
                       <MessageCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                      Ver chat en vivo y ubicación
+                      {variant === "closed"
+                        ? "Ver historial del evento"
+                        : "Ver chat en vivo y ubicación"}
                     </p>
                   </div>
                   <ChevronRight
@@ -177,7 +235,7 @@ export function ScanLogsList({ logs, onRefresh }: ScanLogsListProps) {
                   />
                 </Link>
 
-                {isUnread && (
+                {variant === "open" && isUnread && (
                   <div className="flex shrink-0 items-start sm:items-center">
                     <Button
                       type="button"
@@ -197,6 +255,29 @@ export function ScanLogsList({ logs, onRefresh }: ScanLogsListProps) {
           );
         })}
       </ul>
+
+      {variant === "open" && logs.some((log) => Boolean(log.read_at)) && (
+        <ClosedActivitiesLink
+          count={logs.filter((log) => Boolean(log.read_at)).length}
+        />
+      )}
+    </div>
+  );
+}
+
+function ClosedActivitiesLink({ count }: { count: number }) {
+  return (
+    <div className="flex justify-center pt-2">
+      <Link
+        href="/dashboard/actividad/cerradas"
+        className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 shadow-sm transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-800"
+      >
+        <Archive className="h-4 w-4" aria-hidden />
+        Ver actividades cerradas
+        <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-bold text-neutral-600">
+          {count}
+        </span>
+      </Link>
     </div>
   );
 }

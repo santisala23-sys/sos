@@ -72,7 +72,7 @@ export default function ActividadPage() {
             <div className="h-24 animate-pulse rounded-2xl bg-violet-50" />
           </div>
         ) : (
-          <ScanLogsList logs={logs} onRefresh={loadLogs} />
+          <ScanLogsList logs={logs} onRefresh={loadLogs} variant="open" />
         )}
       </section>
     </main>
