@@ -269,20 +269,20 @@ export function DashboardNavbar() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 px-3 transition-[padding] duration-200 sm:px-6 lg:px-8",
+        "sticky top-0 z-50 px-4 transition-[padding] duration-200 sm:px-6 md:px-10 lg:px-12",
         scrolled ? "py-2" : "py-4",
       )}
     >
       <div
         className={cn(
-          "mx-auto flex w-full max-w-[96rem] items-center justify-between gap-4 rounded-2xl border px-5 py-3.5 transition-[box-shadow,background-color,border-color] duration-200 sm:px-8 sm:py-4",
+          "mx-auto flex w-full max-w-[88rem] items-center justify-between gap-4 rounded-2xl border px-3 py-2 transition-[box-shadow,background-color,border-color] duration-200 sm:px-5 sm:py-2",
           scrolled
             ? "border-violet-200/70 bg-white/95 shadow-xl shadow-violet-500/10"
             : "border-white/80 bg-white/90 shadow-lg shadow-violet-500/10",
         )}
       >
         <div className="flex min-w-0 items-center gap-4 lg:gap-5">
-          <BrandLogo size="lg" showMark />
+          <BrandLogo size="nav" />
           <Link
             href="/dashboard/perfil"
             className="hidden min-w-0 items-center gap-3 border-l border-neutral-200 pl-5 transition-opacity hover:opacity-90 lg:flex"

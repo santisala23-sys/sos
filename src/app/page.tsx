@@ -1,419 +1,109 @@
-import Image from "next/image";
 import Link from "next/link";
 import { HeroImageCarousel } from "@/components/marketing/HeroImageCarousel";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { HowItWorksSection } from "@/components/marketing/HowItWorksSection";
-import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { PetHealthBookletSection } from "@/components/marketing/PetHealthBookletSection";
-import { SectionHeading } from "@/components/marketing/SectionHeading";
-import { StoreCatalogSection } from "@/components/store/StoreCatalogSection";
-import { USE_CASE_CARDS } from "@/lib/marketing/services";
-import {
-  ArrowRight,
-  Bell,
-  ClipboardList,
-  Eye,
-  MapPin,
-  MessageCircle,
-  Package,
-  QrCode,
-  Shield,
-  Smartphone,
-  Zap,
-} from "lucide-react";
+import { UseCasesSection } from "@/components/marketing/UseCasesSection";
+import { WhatIsSosmeSection } from "@/components/marketing/WhatIsSosmeSection";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-
-const TRUST_PILLS = [
-  { icon: Smartphone, label: "Sin instalar apps" },
-  { icon: Bell, label: "Alerta al instante" },
-  { icon: ClipboardList, label: "Libreta sanitaria" },
-  { icon: Shield, label: "Empezá hoy" },
-] as const;
-
-const INCLUDES = [
-  { icon: QrCode, text: "Perfil online con tus datos de contacto" },
-  { icon: MessageCircle, text: "WhatsApp y llamada al instante" },
-  { icon: MapPin, text: "Ubicación cuando escanean (opcional)" },
-  { icon: Bell, text: "Alerta en tu celular al escanear" },
-  {
-    icon: ClipboardList,
-    text: "Libreta sanitaria para mascotas (vacunas, visitas y acceso al vet)",
-  },
-  { icon: Smartphone, text: "Sin apps: funciona en el navegador" },
-  { icon: Zap, text: "Sin cuotas mensuales" },
-] as const;
 
 export default async function HomePage() {
   return (
-    <MarketingBackground>
+    <>
       <MarketingNavbar />
 
       <main>
         {/* Hero */}
         <section className="mx-auto max-w-[88rem] px-4 pb-24 pt-8 sm:px-6 sm:pt-12 lg:px-8">
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-            <div className="text-center lg:text-left">
-              <h1 className="text-4xl font-black leading-[1.05] tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
-                Si alguien encuentra lo que importa,{" "}
+          <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] md:gap-12 lg:gap-16 xl:gap-20">
+            <div className="text-center md:text-left">
+              <h1 className="text-3xl font-black leading-[1.08] tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
                 <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-700 bg-clip-text text-transparent">
-                  sabe cómo ayudarte
-                </span>
-                .
+                  SOSme:
+                </span>{" "}
+                Escaneo y contacto al instante.
               </h1>
 
-              <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-neutral-600 sm:text-xl lg:mx-0">
-                SOSme vincula un código QR a tu perfil de emergencia. Una
-                persona, mascota u objeto: quien lo escanea te contacta al
-                instante y vos recibís la alerta. En mascotas, sumás la libreta
-                sanitaria: vacunas, visitas e indicaciones del vet.
+              <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-neutral-600 sm:text-xl md:mx-0">
+                Tu perfil de emergencia en un QR para personas, mascotas u
+                objetos. Alertas al instante y, para tu mascota, toda su libreta
+                sanitaria digital.
               </p>
 
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-                <a href="#catalogo">
+              <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center md:justify-start">
+                <Link href="/tienda" className="sm:inline-flex">
                   <Button
-                    size="lg"
-                    className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 px-8 shadow-xl shadow-violet-500/30 hover:from-violet-700 hover:to-indigo-700"
+                    size="md"
+                    className="group w-full gap-2.5 rounded-2xl border border-white/25 px-7 py-3.5 text-base font-semibold shadow-lg shadow-violet-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:from-violet-600 hover:to-indigo-700 hover:shadow-xl hover:shadow-violet-600/28 active:translate-y-0 sm:w-auto"
                   >
                     Ver productos
-                    <ArrowRight className="h-5 w-5" aria-hidden />
+                    <ArrowRight
+                      className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                      aria-hidden
+                    />
                   </Button>
-                </a>
-                <Link href="/activar">
-                  <Button variant="secondary" size="lg" className="gap-2 px-8">
-                    <QrCode className="h-5 w-5" aria-hidden />
+                </Link>
+                <Link href="/activar" className="sm:inline-flex">
+                  <Button
+                    variant="ghost"
+                    size="md"
+                    className="w-full rounded-2xl border border-violet-200/90 bg-white/85 px-7 py-3.5 text-base font-semibold text-violet-950 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-violet-300 hover:bg-white hover:shadow-md active:scale-[0.99] sm:w-auto"
+                  >
                     Activar mi producto
                   </Button>
                 </Link>
               </div>
             </div>
 
-            <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
+            <div className="relative mx-auto w-full max-w-md md:max-w-none md:justify-self-end">
               <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-violet-400/20 via-indigo-300/15 to-rose-300/20 blur-2xl" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-white/90 bg-white/70 p-2 shadow-2xl shadow-violet-500/20 backdrop-blur-sm">
+              <div className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-violet-500/25">
                 <HeroImageCarousel />
               </div>
             </div>
           </div>
-
-          <div className="mx-auto mt-16 grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {TRUST_PILLS.map(({ icon: Icon, label }) => (
-              <div
-                key={label}
-                className="flex items-center justify-center gap-3 rounded-2xl border border-white/90 bg-white/75 px-5 py-4 text-sm font-semibold text-neutral-700 shadow-sm backdrop-blur-sm"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
-                  <Icon className="h-4 w-4" aria-hidden />
-                </span>
-                {label}
-              </div>
-            ))}
-          </div>
         </section>
 
-        {/* Qué es */}
-        <section
-          id="que-es"
-          className="scroll-mt-32 border-y border-violet-100/80 bg-white/70 px-4 py-24 backdrop-blur-sm sm:px-6 lg:px-8"
-        >
-          <div className="mx-auto max-w-[88rem]">
-            <SectionHeading
-              eyebrow="¿Qué es SOSme?"
-              title="Un QR que conecta a quien necesita ayuda con quien puede darla"
-              description="Creás un perfil con tus datos de contacto. Ese perfil tiene un código QR único. Lo imprimís, lo pegás en un collar, credencial o valija — y listo. Cuando alguien lo escanea, ve cómo contactarte y vos recibís una notificación al toque."
-            />
+        <WhatIsSosmeSection />
 
-            <div className="mt-16 grid gap-6 md:grid-cols-3">
-              {[
-                {
-                  step: "01",
-                  title: "Creás tu perfil",
-                  text: "Cargás contactos, instrucciones y lo que quieras que vean en una emergencia.",
-                  icon: QrCode,
-                },
-                {
-                  step: "02",
-                  title: "Pegás o llevás el QR",
-                  text: "En una chapita, collar, tarjeta o sticker. También podés imprimirlo vos mismo.",
-                  icon: Package,
-                },
-                {
-                  step: "03",
-                  title: "Te avisan al escanear",
-                  text: "La persona escanea, te contacta, y vos recibís alerta con ubicación opcional.",
-                  icon: Bell,
-                },
-              ].map(({ step, title, text, icon: Icon }) => (
-                <article
-                  key={step}
-                  className="group relative overflow-hidden rounded-3xl border border-violet-100 bg-gradient-to-b from-white to-violet-50/50 p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-500/10"
-                >
-                  <span className="text-6xl font-black text-violet-100/90">
-                    {step}
-                  </span>
-                  <div className="mt-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/25 transition-transform group-hover:scale-105">
-                    <Icon className="h-7 w-7" aria-hidden />
-                  </div>
-                  <h3 className="mt-6 text-xl font-bold text-neutral-900">
-                    {title}
-                  </h3>
-                  <p className="mt-3 leading-relaxed text-neutral-600">
-                    {text}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Casos de uso */}
-        <section
-          id="casos"
-          className="scroll-mt-32 mx-auto max-w-[88rem] px-4 py-24 sm:px-6 lg:px-8"
-        >
-          <SectionHeading
-            eyebrow="Casos de uso"
-            title="Para lo que más te importa"
-            description="Un mismo sistema, adaptado a personas, mascotas u objetos."
-          />
-
-          <div className="mt-16 grid gap-8 sm:grid-cols-3">
-            {USE_CASE_CARDS.map(
-              ({
-                href,
-                title,
-                description,
-                detail,
-                accent,
-                image,
-                imageAlt,
-              }) => (
-                <Link
-                  key={title}
-                  href={href}
-                  className={`group mx-auto block w-full max-w-[280px] overflow-hidden rounded-[1.75rem] border border-white/90 bg-gradient-to-br ${accent} shadow-lg shadow-violet-500/5 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-500/15 sm:max-w-none`}
-                >
-                  <article>
-                    <div className="relative aspect-[4/5] overflow-hidden bg-white/40">
-                      <Image
-                        src={image}
-                        alt={imageAlt}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, 33vw"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/70 via-neutral-900/10 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                        <h3 className="text-2xl font-black">{title}</h3>
-                        <p className="mt-2 text-sm leading-relaxed text-white/90">
-                          {description}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between gap-2 border-t border-white/50 bg-white/60 px-6 py-4 backdrop-blur-sm">
-                      <p className="text-sm font-medium text-neutral-600">
-                        {detail}
-                      </p>
-                      <span
-                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700 transition-colors group-hover:bg-violet-600 group-hover:text-white"
-                        aria-hidden
-                      >
-                        <Eye className="h-4 w-4" />
-                      </span>
-                    </div>
-                  </article>
-                </Link>
-              ),
-            )}
-          </div>
-        </section>
+        <UseCasesSection />
 
         <HowItWorksSection />
 
         <PetHealthBookletSection />
 
-        <StoreCatalogSection />
-
-        {/* Qué incluye */}
-        <section className="mx-auto max-w-[88rem] px-4 py-24 sm:px-6 lg:px-8">
-          <div className="overflow-hidden rounded-[2.5rem] border border-violet-100/80 bg-gradient-to-br from-white via-white to-violet-50/60 p-8 shadow-2xl shadow-violet-500/8 lg:grid lg:grid-cols-2 lg:items-center lg:gap-16 lg:p-14">
-            <div>
-              <SectionHeading
-                align="left"
-                eyebrow="Todo incluido"
-                title="Lo que necesitás para estar tranquilo"
-                description="Cada perfil SOSme incluye herramientas pensadas para emergencias reales, no solo un QR estático."
-              />
-              <ul className="mt-10 grid gap-4 sm:grid-cols-2">
-                {INCLUDES.map(({ icon: Icon, text }) => (
-                  <li
-                    key={text}
-                    className="flex items-start gap-3 rounded-2xl border border-white/90 bg-white/90 p-4 shadow-sm"
-                  >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
-                      <Icon className="h-5 w-5" aria-hidden />
-                    </span>
-                    <span className="pt-1.5 text-sm font-semibold text-neutral-800">
-                      {text}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="relative mt-12 flex items-center justify-center lg:mt-0">
-              <div className="absolute -inset-8 rounded-full bg-violet-200/40 blur-3xl" />
-              <div className="relative overflow-hidden rounded-[2rem] border-[6px] border-neutral-900 bg-neutral-950 p-2 shadow-2xl shadow-violet-500/20">
-                <Image
-                  src="/images/landing/screenshots/live-chat-map.png"
-                  alt="Panel de SOSme con mapa y chat en vivo"
-                  width={390}
-                  height={844}
-                  className="h-auto w-full max-w-[300px] rounded-[1.25rem]"
-                  sizes="300px"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Elegí cómo empezar */}
-        <section className="mx-auto max-w-[88rem] px-4 py-8 pb-20 sm:px-6 lg:px-8">
-          <SectionHeading
-            eyebrow="Empezá hoy"
-            title="Elegí cómo empezar"
-            description="Comprás un producto listo para usar, o creás tu perfil digital e imprimís el QR vos mismo."
-          />
-
-          <div className="mt-14 grid gap-8 lg:grid-cols-2">
-            <article className="flex flex-col rounded-[2rem] border border-violet-200 bg-white p-9 shadow-xl shadow-violet-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-violet-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-violet-700">
-                <Package className="h-3.5 w-3.5" aria-hidden />
-                Producto físico
-              </p>
-              <h3 className="mt-5 text-2xl font-black text-neutral-900 sm:text-3xl">
-                Comprás y activás una vez
-              </h3>
-              <p className="mt-3 text-neutral-600">
-                Llevate el producto listo para usar con 1 año de funciones premium de regalo.
-              </p>
-              <ol className="mt-8 flex-1 space-y-5 text-neutral-700">
-                {[
-                  "Pedís el collar, colgante o credencial",
-                  "Escaneás el QR una sola vez y te registrás",
-                  "Listo: incluye 1 año de Libreta Sanitaria y red de rescate sin costo de mantenimiento.",
-                ].map((item, i) => (
-                  <li key={item} className="flex gap-4">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-black text-violet-700">
-                      {i + 1}
-                    </span>
-                    <span className="pt-0.5">{item}</span>
-                  </li>
-                ))}
-              </ol>
-              <a href="#catalogo" className="mt-10 block">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  className="w-full gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md hover:from-violet-700 hover:to-indigo-700"
-                >
-                  Ver catálogo
-                  <ArrowRight className="h-5 w-5" aria-hidden />
-                </Button>
-              </a>
-              <p className="mt-4 text-center text-sm text-neutral-500">
-                ¿Ya lo tenés?{" "}
-                <Link
-                  href="/activar"
-                  className="font-semibold text-violet-700 hover:underline"
-                >
-                  Activar producto
-                </Link>
-              </p>
-            </article>
-
-            <article className="flex flex-col rounded-[2rem] border border-neutral-200 bg-white p-9 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-800">
-                <QrCode className="h-3.5 w-3.5" aria-hidden />
-                Ya lo tenés
-              </p>
-              <h3 className="mt-5 text-2xl font-black text-neutral-900 sm:text-3xl">
-                Activá tu producto
-              </h3>
-              <p className="mt-3 text-neutral-600">
-                Si ya compraste una chapita, collar o colgante, escaneá el QR del
-                producto para vincularlo a tu cuenta.
-              </p>
-              <ol className="mt-8 flex-1 space-y-5 text-neutral-700">
-                {[
-                  "Escaneá el QR del producto con la cámara del celular.",
-                  "Si te pide cuenta, iniciá sesión o registrate.",
-                  "Completá los datos o vinculá un perfil que ya tengas. El mismo QR queda activo.",
-                ].map((item, i) => (
-                  <li key={item} className="flex gap-4">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-sm font-black text-emerald-700">
-                      {i + 1}
-                    </span>
-                    <span className="pt-0.5">{item}</span>
-                  </li>
-                ))}
-              </ol>
-              <Link href="/activar" className="mt-10 block">
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="w-full bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-                >
-                  Activar mi producto
-                </Button>
-              </Link>
-              <p className="mt-4 text-center text-sm text-neutral-500">
-                ¿Todavía no tenés uno?{" "}
-                <a
-                  href="#catalogo"
-                  className="font-semibold text-violet-700 hover:underline"
-                >
-                  Ver catálogo
-                </a>
-              </p>
-            </article>
-          </div>
-        </section>
-
         {/* CTA final */}
         <section className="mx-auto max-w-[88rem] px-4 pb-28 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-violet-600 via-indigo-600 to-violet-900 px-6 py-20 text-center shadow-2xl shadow-violet-500/35 sm:px-14">
-            <div
-              className="pointer-events-none absolute inset-0 opacity-25"
-              aria-hidden
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
-                backgroundSize: "28px 28px",
-              }}
-            />
-            <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-indigo-400/20 blur-3xl" />
-            <h2 className="relative text-3xl font-black text-white sm:text-5xl">
+          <div className="relative overflow-hidden rounded-[2rem] bg-[#e4e9f7] px-6 py-16 text-center sm:rounded-[2.5rem] sm:px-12 sm:py-20">
+            <div className="pointer-events-none absolute inset-0" aria-hidden>
+              <span className="absolute -right-2 top-6 h-28 w-11 rotate-[38deg] rounded-full border-2 border-violet-400/35" />
+              <span className="absolute right-14 top-2 h-20 w-9 rotate-[38deg] rounded-full border-2 border-violet-400/30" />
+              <span className="absolute bottom-4 left-6 h-24 w-10 -rotate-[36deg] rounded-full border-2 border-violet-400/35" />
+              <span className="absolute bottom-10 left-20 h-16 w-8 -rotate-[36deg] rounded-full border-2 border-violet-400/28" />
+            </div>
+
+            <h2 className="relative mx-auto max-w-3xl text-2xl font-black leading-tight tracking-tight text-neutral-900 sm:text-4xl">
               Protegé lo que más importa hoy
             </h2>
-            <p className="relative mx-auto mt-5 max-w-2xl text-lg text-violet-100 sm:text-xl">
+            <p className="relative mx-auto mt-4 max-w-xl text-base leading-relaxed text-neutral-700 sm:text-lg">
               Elegí un producto con QR o activá el que ya compraste.
             </p>
-            <div className="relative mt-10 flex flex-wrap justify-center gap-4">
-              <a href="#catalogo">
+            <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10">
+              <Link href="/tienda">
                 <Button
-                  size="lg"
-                  className="bg-white px-8 text-violet-700 shadow-xl hover:bg-violet-50"
+                  size="md"
+                  className="rounded-xl bg-neutral-900 px-7 font-semibold text-white shadow-sm hover:bg-neutral-800"
                 >
                   Ver productos
                 </Button>
-              </a>
+              </Link>
               <Link href="/activar">
                 <Button
-                  size="lg"
-                  variant="secondary"
-                  className="border-white/30 bg-white/10 px-8 text-white hover:bg-white/20"
+                  variant="ghost"
+                  size="md"
+                  className="rounded-xl border border-neutral-900/15 bg-white/50 px-7 font-semibold text-neutral-900 backdrop-blur-sm hover:bg-white/80"
                 >
                   Activar producto
                 </Button>
@@ -424,6 +114,6 @@ export default async function HomePage() {
       </main>
 
       <MarketingFooter />
-    </MarketingBackground>
+    </>
   );
 }

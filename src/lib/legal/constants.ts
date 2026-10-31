@@ -35,7 +35,7 @@ export const LEGAL_DOCUMENTS = {
 export type LegalDocumentSlug = keyof typeof LEGAL_DOCUMENTS;
 
 export const LEGAL_FOOTER_LINKS: { href: string; label: string }[] = [
-  { href: "/#catalogo", label: "Tienda" },
+  { href: "/tienda", label: "Tienda" },
   { href: "/contacto", label: "Contacto" },
   { href: "/terminos", label: "Términos" },
   { href: "/privacidad", label: "Privacidad" },

@@ -1,4 +1,3 @@
-import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { ContactoPageContent } from "@/components/marketing/ContactoPageContent";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { DashboardNavbar } from "@/components/dashboard/DashboardNavbar";
@@ -9,10 +8,10 @@ export default async function ContactoPage() {
   const loggedIn = Boolean(session);
 
   return (
-    <MarketingBackground>
+    <>
       {loggedIn ? <DashboardNavbar /> : null}
       <ContactoPageContent loggedIn={loggedIn} />
       {!loggedIn && <MarketingFooter />}
-    </MarketingBackground>
+    </>
   );
 }

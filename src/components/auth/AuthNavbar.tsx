@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 
 const NAV_LINKS = [
   { href: "/", label: "Inicio" },
-  { href: "/#catalogo", label: "Tienda" },
+  { href: "/tienda", label: "Tienda" },
 ] as const;
 
 type AuthNavbarProps = {
@@ -21,9 +21,9 @@ export function AuthNavbar({ mode }: AuthNavbarProps) {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 px-3 py-4 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-[96rem] items-center justify-between gap-6 rounded-2xl border border-white/80 bg-white/90 px-5 py-3.5 shadow-lg shadow-violet-500/10 sm:px-8 sm:py-4">
-        <BrandLogo size="lg" showMark />
+    <header className="sticky top-0 z-50 px-4 py-4 sm:px-6 md:px-10 lg:px-12">
+      <div className="mx-auto flex w-full max-w-[88rem] items-center justify-between gap-6 rounded-2xl border border-white/80 bg-white/90 px-4 py-3 shadow-lg shadow-violet-500/10 sm:px-6 sm:py-3.5">
+        <BrandLogo size="nav" />
 
         <nav
           className="hidden items-center gap-1 sm:gap-2 lg:flex"

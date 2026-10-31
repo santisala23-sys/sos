@@ -3,8 +3,6 @@ import { Bell, QrCode, Shield, Sparkles } from "lucide-react";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { AuthNavbar } from "@/components/auth/AuthNavbar";
 import { LegalFooter } from "@/components/legal/LegalFooter";
-import { MarketingBackground } from "@/components/marketing/MarketingBackground";
-
 type AuthPageShellProps = {
   mode: "login" | "register";
   error?: string | null;
@@ -21,7 +19,7 @@ export function AuthPageShell({ mode, error, redirectTo }: AuthPageShellProps) {
   const isLogin = mode === "login";
 
   return (
-    <MarketingBackground>
+    <>
       <AuthNavbar mode={mode} />
 
       <main className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6 sm:py-12">
@@ -95,6 +93,6 @@ export function AuthPageShell({ mode, error, redirectTo }: AuthPageShellProps) {
       </main>
 
       <LegalFooter compact />
-    </MarketingBackground>
+    </>
   );
 }

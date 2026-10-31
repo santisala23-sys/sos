@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { HelpPageContent } from "@/components/help/HelpPageContent";
-import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { getSession } from "@/lib/auth/session";
 
@@ -14,9 +13,9 @@ export default async function AyudaPage() {
   const session = await getSession();
 
   return (
-    <MarketingBackground>
+    <>
       <HelpPageContent loggedIn={Boolean(session)} />
       <MarketingFooter />
-    </MarketingBackground>
+    </>
   );
 }

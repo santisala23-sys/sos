@@ -1,17 +1,5 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  Bell,
-  Mail,
-  MapPin,
-  MessageCircle,
-  QrCode,
-  Shield,
-} from "lucide-react";
-import { BrandLogo } from "@/components/shared/BrandLogo";
-import { Button } from "@/components/ui/Button";
 import { getSession } from "@/lib/auth/session";
-import { LEGAL_FOOTER_LINKS } from "@/lib/legal/constants";
 import { getActivateCodeHref } from "@/lib/marketing/activate-link";
 import {
   CONTACT_EMAIL,
@@ -19,38 +7,87 @@ import {
   getInstagramUrl,
   getTikTokUrl,
   INSTAGRAM_HANDLE,
-  TIKTOK_HANDLE,
 } from "@/lib/utils/brand";
 import { buildWhatsAppUrl } from "@/lib/utils/contact";
+import { cn } from "@/lib/utils/cn";
 
-const PRODUCT_LINKS = [
-  { href: "/#que-es", label: "Qué es SOSme" },
-  { href: "/#como-funciona", label: "Cómo funciona" },
-  { href: "/#casos", label: "Casos de uso" },
-  { href: "/servicios/personas", label: "Personas" },
-  { href: "/servicios/mascotas", label: "Mascotas" },
-  { href: "/servicios/objetos", label: "Objetos y valijas" },
-  { href: "/#catalogo", label: "Tienda" },
-] as const;
-
-const ACCOUNT_LINKS = [
-  { href: "/register", label: "Crear cuenta" },
-  { href: "/login", label: "Iniciar sesión" },
+const NAV_LINKS = [
+  { href: "/tienda", label: "Productos" },
   { href: "/ayuda", label: "Ayuda" },
   { href: "/contacto", label: "Contacto" },
 ] as const;
 
-const LEGAL_LINKS = LEGAL_FOOTER_LINKS.filter((l) =>
-  ["/terminos", "/privacidad", "/cookies", "/retencion-datos", "/aviso-emergencia"].includes(
-    l.href,
-  ),
-);
-
-const TRUST_ITEMS = [
-  { icon: QrCode, text: "Sin instalar apps" },
-  { icon: Bell, text: "Alertas al instante" },
-  { icon: Shield, text: "Datos protegidos" },
+const LEGAL_LINKS = [
+  { href: "/terminos", label: "Términos" },
+  { href: "/privacidad", label: "Privacidad" },
+  { href: "/aviso-emergencia", label: "Emergencias" },
 ] as const;
+
+type FooterLinkItem = {
+  href: string;
+  label: string;
+  external?: boolean;
+  emphasize?: boolean;
+};
+
+function FooterInlineLinks({
+  items,
+  className,
+  linkClassName,
+}: {
+  items: FooterLinkItem[];
+  className?: string;
+  linkClassName?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-wrap items-center justify-center gap-y-2",
+        className,
+      )}
+    >
+      {items.map((item, index) => {
+        const classes = cn(
+          "transition-colors duration-200",
+          item.emphasize
+            ? "font-semibold text-neutral-200 hover:text-white"
+            : "text-neutral-400 hover:text-violet-200",
+          linkClassName,
+        );
+
+        return (
+          <span
+            key={`${item.href}-${item.label}`}
+            className="inline-flex items-center"
+          >
+            {index > 0 ? (
+              <span
+                className="mx-3 select-none text-neutral-700 sm:mx-4"
+                aria-hidden
+              >
+                ·
+              </span>
+            ) : null}
+            {item.external ? (
+              <a
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={classes}
+              >
+                {item.label}
+              </a>
+            ) : (
+              <Link href={item.href} className={classes}>
+                {item.label}
+              </Link>
+            )}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
 type MarketingFooterProps = {
   className?: string;
@@ -60,184 +97,80 @@ export async function MarketingFooter({ className = "" }: MarketingFooterProps) 
   const session = await getSession();
   const activateHref = getActivateCodeHref(Boolean(session));
 
+  const mainLinks: FooterLinkItem[] = [
+    ...NAV_LINKS.map((link) => ({ ...link })),
+    { href: activateHref, label: "Activar producto", emphasize: true },
+    ...(!session ? [{ href: "/login", label: "Ingresar" }] : []),
+  ];
+
+  const contactLinks: FooterLinkItem[] = [
+    { href: getContactMailtoUrl(), label: CONTACT_EMAIL },
+    {
+      href: buildWhatsAppUrl("Hola SOSme"),
+      label: "WhatsApp",
+      external: true,
+    },
+    {
+      href: getInstagramUrl(),
+      label: `@${INSTAGRAM_HANDLE}`,
+      external: true,
+    },
+    { href: getTikTokUrl(), label: "TikTok", external: true },
+  ];
+
   return (
-    <footer className={`border-t border-violet-100/80 bg-neutral-950 text-neutral-300 ${className}`}>
-      <div className="mx-auto max-w-[88rem] px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
-          <div className="lg:col-span-4">
-            <BrandLogo
-              size="lg"
-              showMark
-              href=""
-              className="[&_.text-neutral-900]:text-white"
-            />
-            <p className="mt-5 max-w-sm text-sm leading-relaxed text-neutral-400">
-              SOSme vincula un código QR a tu perfil de emergencia. Una persona,
-              mascota u objeto — quien lo escanea sabe cómo contactarte y vos
-              recibís la alerta al instante.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {TRUST_ITEMS.map(({ icon: Icon, text }) => (
-                <span
-                  key={text}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-neutral-300"
-                >
-                  <Icon className="h-3.5 w-3.5 text-violet-400" aria-hidden />
-                  {text}
-                </span>
-              ))}
-            </div>
-            <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-neutral-400">
-              <a
-                href={getContactMailtoUrl()}
-                className="inline-flex items-center gap-1.5 transition-colors hover:text-violet-300"
-              >
-                <Mail className="h-4 w-4" aria-hidden />
-                {CONTACT_EMAIL}
-              </a>
-              <a
-                href={buildWhatsAppUrl("Hola SOSme")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 transition-colors hover:text-violet-300"
-              >
-                <MessageCircle className="h-4 w-4" aria-hidden />
-                WhatsApp
-              </a>
-              <a
-                href={getInstagramUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors hover:text-violet-300"
-              >
-                Instagram @{INSTAGRAM_HANDLE}
-              </a>
-              <a
-                href={getTikTokUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors hover:text-violet-300"
-              >
-                TikTok @{TIKTOK_HANDLE}
-              </a>
-            </div>
-            <Link href="/#catalogo" className="mt-8 inline-block">
-              <Button
-                size="lg"
-                className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/30 hover:from-violet-700 hover:to-indigo-700"
-              >
-                Ver productos
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </Button>
-            </Link>
-          </div>
+    <footer
+      className={cn(
+        "relative isolate mt-8 overflow-hidden rounded-t-[1.75rem] bg-neutral-950 sm:mt-10 sm:rounded-t-[2.25rem]",
+        className,
+      )}
+    >
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_50%_0%,rgba(139,92,246,0.14),transparent_60%)]"
+        aria-hidden
+      />
 
-          <div className="grid gap-10 sm:grid-cols-3 lg:col-span-8">
-            <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                Producto
-              </h3>
-              <ul className="mt-4 space-y-2.5">
-                {PRODUCT_LINKS.map(({ href, label }) => (
-                  <li key={href}>
-                    <Link
-                      href={href}
-                      className="text-sm text-neutral-400 transition-colors hover:text-violet-300"
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                Cuenta
-              </h3>
-              <ul className="mt-4 space-y-2.5">
-                {ACCOUNT_LINKS.map(({ href, label }) => (
-                  <li key={href}>
-                    <Link
-                      href={href}
-                      className="text-sm text-neutral-400 transition-colors hover:text-violet-300"
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-                <li>
-                  <Link
-                    href={activateHref}
-                    className="text-sm text-neutral-400 transition-colors hover:text-violet-300"
-                  >
-                    Activar producto
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                Legal
-              </h3>
-              <ul className="mt-4 space-y-2.5">
-                {LEGAL_LINKS.map(({ href, label }) => (
-                  <li key={href}>
-                    <Link
-                      href={href}
-                      className="text-sm text-neutral-400 transition-colors hover:text-violet-300"
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-14 rounded-2xl border border-white/10 bg-white/5 p-6 sm:flex sm:items-center sm:justify-between sm:gap-6">
-          <div>
-            <p className="font-semibold text-white">¿Necesitás ayuda?</p>
-            <p className="mt-1 text-sm text-neutral-400">
-              Escribinos por contacto o activá un producto que ya compraste.
-            </p>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2 sm:mt-0">
-            <Link href="/contacto">
-              <Button
-                variant="secondary"
-                size="sm"
-                className="gap-2 border-white/20 bg-white/10 text-white hover:bg-white/15"
-              >
-                <Mail className="h-4 w-4" aria-hidden />
-                Contacto
-              </Button>
-            </Link>
-            <Link href={activateHref}>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="gap-2 border-white/20 bg-white/10 text-white hover:bg-white/15"
-              >
-                <QrCode className="h-4 w-4" aria-hidden />
-                Activar producto
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-[88rem] flex-col items-center justify-between gap-3 px-4 py-6 text-center text-xs text-neutral-500 sm:flex-row sm:px-6 lg:px-8 sm:text-left">
-          <p>© {new Date().getFullYear()} SOSme. Argentina.</p>
-          <p className="flex items-center gap-1.5 text-neutral-500">
-            <MapPin className="h-3.5 w-3.5" aria-hidden />
-            Contacto de emergencia por QR ·{" "}
-            <MessageCircle className="mx-0.5 inline h-3.5 w-3.5" aria-hidden />
-            WhatsApp y alertas incluidas
+      <div className="relative mx-auto max-w-[88rem] px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+        <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+          <Link
+            href="/"
+            className="text-lg font-bold tracking-tight text-white/90 transition-opacity hover:opacity-80"
+          >
+            SOSme
+          </Link>
+          <p className="mt-3 max-w-md text-sm leading-relaxed tracking-wide text-neutral-500">
+            Contacto de emergencia por QR
+            <span className="text-neutral-600"> · </span>
+            alertas al instante
           </p>
+
+          <nav className="mt-9 w-full sm:mt-10" aria-label="Pie de página">
+            <FooterInlineLinks
+              items={mainLinks}
+              linkClassName="text-sm sm:text-[0.9375rem]"
+            />
+          </nav>
+
+          <div className="mt-8 w-full sm:mt-9">
+            <FooterInlineLinks
+              items={contactLinks}
+              linkClassName="text-xs sm:text-sm"
+            />
+          </div>
+        </div>
+
+        <div className="mx-auto mt-12 max-w-2xl border-t border-white/[0.07] pt-8 sm:mt-14">
+          <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
+            <p className="text-xs text-neutral-600">
+              © {new Date().getFullYear()} SOSme · Argentina
+            </p>
+            <nav aria-label="Legal">
+              <FooterInlineLinks
+                items={LEGAL_LINKS.map((link) => ({ ...link }))}
+                linkClassName="text-xs text-neutral-600 hover:text-neutral-400"
+              />
+            </nav>
+          </div>
         </div>
       </div>
     </footer>

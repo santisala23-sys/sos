@@ -47,10 +47,12 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
     heroHeadline: "Todo lo necesario cuando alguien necesita ayuda ya",
     heroSupport:
       "Un QR con contactos de emergencia, alergias, medicación e instrucciones. Ideal si se pierde un niño, un adulto mayor o una persona con discapacidad.",
-    image: "/images/landing/use-case-personas.png",
-    imageAlt: "Tarjeta con código QR guardada en el bolsillo de una chaqueta",
-    heroImage: "/images/landing/use-case-personas.png",
-    heroImageAlt: "Tarjeta con código QR guardada en el bolsillo de una chaqueta",
+    image: "/images/landing/use-case-personas-photo.png",
+    imageAlt:
+      "Adulta mayor sonriendo con credencial y código QR SOSme colgando del cuello",
+    heroImage: "/images/landing/use-case-personas-photo.png",
+    heroImageAlt:
+      "Adulta mayor sonriendo con credencial y código QR SOSme colgando del cuello",
     accentFrom: "from-rose-600",
     accentTo: "to-orange-700",
     featuresTitle: "Lo que ve quien quiere ayudar",
@@ -96,10 +98,12 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
     heroHeadline: "Si se pierde, te encuentran. Y su historial va con ella",
     heroSupport:
       "Chapita o collar con QR de emergencia, más libreta sanitaria digital: vacunas, visitas, indicaciones y acceso temporal para el veterinario.",
-    image: "/images/landing/use-case-mascotas.png",
-    imageAlt: "Perro con collar y chapita que muestra un código QR",
-    heroImage: "/images/landing/use-case-mascotas.png",
-    heroImageAlt: "Perro con collar y chapita que muestra un código QR",
+    image: "/images/landing/use-case-mascotas.jpg",
+    imageAlt:
+      "Golden retriever con collar y chapita SOSme con código QR en un parque",
+    heroImage: "/images/landing/use-case-mascotas.jpg",
+    heroImageAlt:
+      "Golden retriever con collar y chapita SOSme con código QR en un parque",
     accentFrom: "from-teal-600",
     accentTo: "to-emerald-800",
     featuresTitle: "Doble protección: emergencia + libreta",
@@ -146,10 +150,12 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
       "Si se pierde tu notebook, celular o valija, que te puedan devolver",
     heroSupport:
       "Un QR en lo que más usás: notebooks, celulares, valijas, mochilas o llaves. Quien lo encuentra sabe cómo contactarte sin ver tus datos privados.",
-    image: "/images/landing/use-case-valijas.png",
-    imageAlt: "Valija de viaje con un sticker de código QR en el aeropuerto",
-    heroImage: "/images/landing/use-case-valijas.png",
-    heroImageAlt: "Valija de viaje con un sticker de código QR en el aeropuerto",
+    image: "/images/landing/use-case-valijas.jpg",
+    imageAlt:
+      "Valija negra en un aeropuerto con sticker circular SOSme y código QR",
+    heroImage: "/images/landing/use-case-valijas.jpg",
+    heroImageAlt:
+      "Valija negra en un aeropuerto con sticker circular SOSme y código QR",
     accentFrom: "from-sky-600",
     accentTo: "to-indigo-800",
     featuresTitle: "Para lo que se pierde en viajes y el día a día",
@@ -196,23 +202,26 @@ export const USE_CASE_CARDS = [
     slug: "personas" as const,
     href: SERVICES.personas.href,
     title: "Personas",
-    description:
-      "Contacto de emergencia, alergias e instrucciones si hace falta ayuda.",
+    description: "Contacto de emergencia, alergias e instrucciones.",
     detail: "Niños, adultos mayores o personas con discapacidad.",
     accent: "from-rose-500/20 to-orange-500/10",
     image: SERVICES.personas.image,
     imageAlt: SERVICES.personas.imageAlt,
+    imageWidth: 1024,
+    imageHeight: 687,
   },
   {
     slug: "mascotas" as const,
     href: SERVICES.mascotas.href,
     title: "Mascotas",
     description:
-      "Si se pierde te encuentran — y su libreta sanitaria va con ella.",
-    detail: "Vacunas, visitas, indicaciones y QR temporal para el vet.",
+      "Si se pierde la encuentran y su libreta sanitaria va con ella.",
+    detail: "Vacunas, visitas, indicaciones y QR temporal para el veterinario.",
     accent: "from-amber-500/20 to-yellow-500/10",
     image: SERVICES.mascotas.image,
     imageAlt: SERVICES.mascotas.imageAlt,
+    imageWidth: 686,
+    imageHeight: 1024,
   },
   {
     slug: "objetos" as const,
@@ -220,9 +229,11 @@ export const USE_CASE_CARDS = [
     title: "Objetos y valijas",
     description:
       "Notebooks, celulares, valijas, mochilas y llaves con contacto seguro.",
-    detail: "Quien lo encuentra sabe cómo devolverte.",
+    detail: "",
     accent: "from-sky-500/20 to-indigo-500/10",
     image: SERVICES.objetos.image,
     imageAlt: SERVICES.objetos.imageAlt,
+    imageWidth: 686,
+    imageHeight: 1024,
   },
 ] as const;

@@ -3,8 +3,6 @@ import { Sparkles } from "lucide-react";
 import { AuthNavbar } from "@/components/auth/AuthNavbar";
 import { VerifyEmailView } from "@/components/auth/VerifyEmailView";
 import { LegalFooter } from "@/components/legal/LegalFooter";
-import { MarketingBackground } from "@/components/marketing/MarketingBackground";
-
 export const metadata: Metadata = {
   title: "Verificá tu email",
   description: "Confirmá tu correo para activar tu cuenta de SOSme.",
@@ -14,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export default function VerifyEmailPage() {
   return (
-    <MarketingBackground>
+    <>
       <AuthNavbar mode="login" />
 
       <main className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6 sm:py-12">
@@ -43,6 +41,6 @@ export default function VerifyEmailPage() {
       </main>
 
       <LegalFooter compact />
-    </MarketingBackground>
+    </>
   );
 }

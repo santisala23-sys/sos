@@ -1,12 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Bell,
-  QrCode,
-  Stethoscope,
-} from "lucide-react";
-import { SectionHeading } from "@/components/marketing/SectionHeading";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 const MEDIA_BASE = "/images/landing/libreta-sanitaria";
@@ -30,14 +24,12 @@ const STEPS: ReadonlyArray<{
   step: string;
   title: string;
   text: string;
-  icon: typeof QrCode;
   media: StepMedia;
 }> = [
   {
     step: "01",
     title: "Abrís la libreta y compartís el QR",
     text: "Desde el panel de tu mascota ves vacunas, próximas dosis e historial. Generás un acceso temporal de 24 h para el veterinario.",
-    icon: QrCode,
     media: {
       kind: "video",
       src: `${MEDIA_BASE}/demo-tutor-libreta.mp4`,
@@ -47,9 +39,8 @@ const STEPS: ReadonlyArray<{
   },
   {
     step: "02",
-    title: "El vet ve el historial y carga la visita",
+    title: "El veterinario ve el historial y carga la visita",
     text: "Con el enlace temporal consulta el historial, elige el tipo de control y registra qué hizo e indicaciones para el hogar.",
-    icon: Stethoscope,
     media: {
       kind: "video",
       src: `${MEDIA_BASE}/demo-veterinario.mp4`,
@@ -61,7 +52,6 @@ const STEPS: ReadonlyArray<{
     step: "03",
     title: "Te avisamos y queda guardado",
     text: "Recibís una notificación al instante. Tocás y volvés a la libreta con la visita ya cargada y verificada.",
-    icon: Bell,
     media: {
       kind: "image",
       src: `${MEDIA_BASE}/notificacion-visita.png`,
@@ -73,14 +63,13 @@ const STEPS: ReadonlyArray<{
 ];
 
 type PetHealthBookletSectionProps = {
-  /** En la página de servicio no enlazamos otra vez a /servicios/mascotas */
   showServiceLink?: boolean;
 };
 
-function StepMediaFrame({ media }: { media: StepMedia }) {
+function StepMedia({ media }: { media: StepMedia }) {
   if (media.kind === "video") {
     return (
-      <div className="relative mx-auto mt-8 w-full max-w-[16rem] overflow-hidden rounded-[2.5rem] border-[6px] border-neutral-900 bg-neutral-950 shadow-2xl shadow-teal-500/20">
+      <div className="mx-auto w-full max-w-[12.5rem] overflow-hidden rounded-2xl shadow-md shadow-violet-500/10">
         <video
           autoPlay
           loop
@@ -88,7 +77,7 @@ function StepMediaFrame({ media }: { media: StepMedia }) {
           playsInline
           preload="metadata"
           poster={media.poster}
-          className="h-auto w-full rounded-[2rem] object-cover"
+          className="h-auto w-full"
           aria-label={media.alt}
         >
           <source src={media.src} type="video/mp4" />
@@ -98,29 +87,15 @@ function StepMediaFrame({ media }: { media: StepMedia }) {
   }
 
   return (
-    <div className="relative mx-auto mt-8 w-full max-w-[16rem] aspect-[9/19] overflow-hidden rounded-[2.5rem] border-[6px] border-neutral-900 bg-neutral-950 shadow-2xl shadow-teal-500/20">
+    <div className="mx-auto w-full max-w-[14rem]">
       <Image
-        src="/images/landing/hero-golden-retriever-2.jpg"
-        alt=""
-        fill
-        className="object-cover"
-        sizes="256px"
-        aria-hidden
+        src={media.src}
+        alt={media.alt}
+        width={media.width}
+        height={media.height}
+        className="h-auto w-full rounded-2xl shadow-md shadow-violet-500/10"
+        sizes="(max-width: 640px) 224px, 256px"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/55" />
-      <div className="absolute left-1/2 top-14 -translate-x-1/2 text-center text-white">
-        <p className="text-4xl font-black tracking-tight">11:11</p>
-      </div>
-      <div className="absolute top-1/3 w-full px-4">
-        <Image
-          src={media.src}
-          alt={media.alt}
-          width={media.width}
-          height={media.height}
-          className="h-auto w-full rounded-2xl shadow-xl"
-          sizes="(max-width: 640px) 256px, 256px"
-        />
-      </div>
     </div>
   );
 }
@@ -131,61 +106,77 @@ export function PetHealthBookletSection({
   return (
     <section
       id="libreta-sanitaria"
-      className="scroll-mt-32 border-y border-violet-100/80 bg-white/70 px-4 py-24 backdrop-blur-sm sm:px-6 lg:px-8"
+      className="scroll-mt-32 px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24"
     >
       <div className="mx-auto max-w-[88rem]">
-        <SectionHeading
-          eyebrow="Libreta sanitaria digital"
-          title="El veterinario escanea, carga la visita y vos tenés el historial"
-          description="Capturas y videos reales del flujo completo: la libreta del tutor, la carga del profesional y la alerta en tu celular."
-        />
-
-        <div className="mt-14 grid gap-8 md:grid-cols-3 md:gap-6">
-          {STEPS.map(({ step, title, text, icon: Icon, media }) => (
-            <article
-              key={step}
-              className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-teal-100/80 bg-gradient-to-b from-white to-teal-50/40 p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-teal-500/10"
-            >
-              <span className="text-6xl font-black text-teal-100/90">
-                {step}
-              </span>
-              <div className="mt-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-emerald-700 text-white shadow-lg shadow-teal-500/25 transition-transform group-hover:scale-105">
-                <Icon className="h-7 w-7" aria-hidden />
-              </div>
-              <h3 className="mt-6 text-xl font-bold text-neutral-900">
-                {title}
-              </h3>
-              <p className="mt-3 flex-1 leading-relaxed text-neutral-600">
-                {text}
-              </p>
-              <StepMediaFrame media={media} />
-            </article>
-          ))}
+        <div className="max-w-2xl">
+          <h2 className="text-3xl font-black leading-[1.08] tracking-tight text-neutral-900 sm:text-4xl lg:text-[2.75rem]">
+            Libreta sanitaria{" "}
+            <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-700 bg-clip-text text-transparent">
+              digital
+            </span>
+          </h2>
+          <p className="mt-3 text-lg font-medium leading-snug text-neutral-600 sm:text-xl">
+            El veterinario escanea, carga la visita y{" "}
+            <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-700 bg-clip-text font-semibold text-transparent">
+              vos tenés el historial
+            </span>
+          </p>
         </div>
 
-        <div className="mt-12 text-center">
-          {showServiceLink ? (
+        <div className="mt-12 rounded-[2rem] border border-violet-200/70 bg-white/55 p-5 shadow-sm shadow-violet-500/5 backdrop-blur-sm sm:mt-14 sm:rounded-[2.5rem] sm:p-8 lg:p-10">
+          <div className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+            {STEPS.map(({ step, title, text, media }) => (
+              <article
+                key={step}
+                className="flex h-full flex-col rounded-2xl border border-violet-100/90 bg-white/80 p-5 shadow-sm sm:p-6"
+              >
+                <div className="flex min-h-[14rem] flex-1 items-center justify-center sm:min-h-[15.5rem]">
+                  <StepMedia media={media} />
+                </div>
+                <div className="pt-2">
+                  <span className="text-3xl font-black tabular-nums leading-none text-violet-600">
+                    {step}
+                  </span>
+                  <h3 className="mt-3 text-lg font-bold leading-snug text-neutral-900">
+                    {title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                    {text}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        {showServiceLink ? (
+          <div className="mt-10 flex justify-center sm:mt-12">
             <Link href="/servicios/mascotas">
               <Button
+                variant="ghost"
                 size="lg"
-                className="gap-2 !from-teal-600 !to-emerald-700 hover:!from-teal-700 hover:!to-emerald-800"
+                className="gap-2 rounded-2xl border border-violet-200/90 bg-white/90 px-8 font-semibold text-violet-900 shadow-sm backdrop-blur-sm transition-all hover:border-violet-300 hover:bg-white hover:shadow-md"
               >
                 Ver servicio para mascotas
                 <ArrowRight className="h-5 w-5" aria-hidden />
               </Button>
             </Link>
-          ) : (
+          </div>
+        ) : (
+          <div className="mt-10 flex justify-center sm:mt-12">
             <Link href="/register">
               <Button
+                variant="ghost"
                 size="lg"
-                className="gap-2 !from-teal-600 !to-emerald-700 hover:!from-teal-700 hover:!to-emerald-800"
+                className="gap-2 rounded-2xl border border-violet-200/90 bg-white/90 px-8 font-semibold text-violet-900 shadow-sm backdrop-blur-sm transition-all hover:border-violet-300 hover:bg-white hover:shadow-md"
               >
                 Activar libreta de mi mascota
                 <ArrowRight className="h-5 w-5" aria-hidden />
               </Button>
             </Link>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import type { ReactNode } from "react";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
-import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { SectionHeading } from "@/components/marketing/SectionHeading";
 import { Button } from "@/components/ui/Button";
@@ -18,7 +17,7 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
   const others = SERVICE_LIST.filter((s) => s.slug !== service.slug);
 
   return (
-    <MarketingBackground>
+    <>
       <MarketingNavbar variant="subpage" activeService={service.slug} />
 
       <main>
@@ -57,7 +56,7 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
                   <ArrowRight className="h-5 w-5" aria-hidden />
                 </Button>
               </Link>
-              <Link href="/#catalogo">
+              <Link href="/tienda">
                 <Button
                   size="lg"
                   variant="secondary"
@@ -97,7 +96,7 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
         {bookletSlot}
 
         {/* Scenarios */}
-        <section className="border-y border-violet-100/80 bg-white/70 px-4 py-24 backdrop-blur-sm sm:px-6 lg:px-8">
+        <section className="px-4 py-24 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-[88rem]">
             <SectionHeading
               eyebrow="Para qué sirve"
@@ -165,7 +164,7 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
               {service.ctaText}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/#catalogo">
+              <Link href="/tienda">
                 <Button
                   size="lg"
                   className="bg-white px-8 text-neutral-900 hover:bg-white/95"
@@ -188,6 +187,6 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
       </main>
 
       <MarketingFooter />
-    </MarketingBackground>
+    </>
   );
 }

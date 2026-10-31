@@ -58,13 +58,13 @@ export default async function ActivarPage({ params }: ActivarPageProps) {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[#faf9fc]">
+    <div className="flex min-h-dvh flex-col">
       <header className="border-b border-neutral-200/80 bg-white/90 px-4 py-4 backdrop-blur-sm">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-4">
           <Link href="/">
             <BrandLogo size="sm" />
           </Link>
-          <Link href="/#catalogo" className="text-sm font-medium text-violet-700 hover:underline">
+          <Link href="/tienda" className="text-sm font-medium text-violet-700 hover:underline">
             Tienda
           </Link>
         </div>

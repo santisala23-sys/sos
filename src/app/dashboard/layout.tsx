@@ -1,4 +1,3 @@
-import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 import { DashboardNavbar } from "@/components/dashboard/DashboardNavbar";
 
 export default function DashboardLayout({
@@ -7,9 +6,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <MarketingBackground>
+    <>
       <DashboardNavbar />
       {children}
-    </MarketingBackground>
+    </>
   );
 }

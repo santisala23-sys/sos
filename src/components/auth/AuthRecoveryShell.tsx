@@ -2,8 +2,6 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { AuthNavbar } from "@/components/auth/AuthNavbar";
 import { LegalFooter } from "@/components/legal/LegalFooter";
-import { MarketingBackground } from "@/components/marketing/MarketingBackground";
-
 type AuthRecoveryShellProps = {
   icon: LucideIcon;
   eyebrow: string;
@@ -22,7 +20,7 @@ export function AuthRecoveryShell({
   footer,
 }: AuthRecoveryShellProps) {
   return (
-    <MarketingBackground>
+    <>
       <AuthNavbar mode="login" />
 
       <main className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6 sm:py-14">
@@ -60,6 +58,6 @@ export function AuthRecoveryShell({
       </main>
 
       <LegalFooter compact />
-    </MarketingBackground>
+    </>
   );
 }

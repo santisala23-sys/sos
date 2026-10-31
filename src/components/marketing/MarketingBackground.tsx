@@ -4,7 +4,7 @@ type MarketingBackgroundProps = {
 
 export function MarketingBackground({ children }: MarketingBackgroundProps) {
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-[#f6f4fb] text-neutral-900">
+    <div className="relative flex min-h-dvh flex-1 flex-col overflow-hidden bg-background text-neutral-900">
       <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
         <div className="absolute -left-48 top-0 h-[32rem] w-[32rem] rounded-full bg-violet-300/35 blur-3xl" />
         <div className="absolute right-0 top-1/4 h-[28rem] w-[28rem] rounded-full bg-indigo-200/45 blur-3xl" />

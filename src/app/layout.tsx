@@ -1,11 +1,18 @@
 import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+});
 import { GoogleTagManager } from "@/components/analytics/GoogleTagManager";
 import { getAppUrl } from "@/lib/utils/app-url";
 import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
-import { HelpChatbot } from "@/components/marketing/HelpChatbot";
 import { FloatingWhatsAppButton } from "@/components/shared/FloatingWhatsAppButton";
 import { MobileNavigationLoading } from "@/components/shared/MobileNavigationLoading";
+import { MarketingBackground } from "@/components/marketing/MarketingBackground";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getAppUrl()),
@@ -52,7 +59,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#7c3aed",
+  themeColor: "#f6f4fb",
 };
 
 export default function RootLayout({
@@ -61,14 +68,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="h-full">
-      <body className="min-h-full flex flex-col antialiased">
-        <GoogleTagManager />
-        {children}
-        <MobileNavigationLoading />
-        <HelpChatbot />
-        <FloatingWhatsAppButton />
-        <CookieConsentBanner />
+    <html lang="es" className={`h-full ${plusJakarta.variable}`}>
+      <body className="min-h-full flex flex-col bg-background font-sans text-foreground antialiased">
+        <MarketingBackground>
+          <GoogleTagManager />
+          {children}
+          <MobileNavigationLoading />
+          <FloatingWhatsAppButton />
+          <CookieConsentBanner />
+        </MarketingBackground>
       </body>
     </html>
   );

@@ -19,7 +19,7 @@ const NAV_LINKS = [
   { href: "#que-es", label: "Qué es" },
   { href: "#como-funciona", label: "Cómo funciona" },
   { href: "#casos", label: "Casos de uso" },
-  { href: "/#catalogo", label: "Tienda" },
+  { href: "/tienda", label: "Tienda" },
   { href: "/ayuda", label: "Ayuda" },
 ] as const;
 
@@ -229,20 +229,20 @@ export function MarketingNavbar({
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 px-3 transition-[padding] duration-200 sm:px-6 lg:px-8",
+        "sticky top-0 z-50 px-4 transition-[padding] duration-200 sm:px-6 md:px-10 lg:px-12",
         scrolled ? "py-2" : "py-4",
       )}
     >
       <div
         className={cn(
-          "mx-auto flex w-full max-w-[96rem] items-center justify-between gap-6 rounded-2xl border px-5 py-3.5 transition-[box-shadow,background-color,border-color] duration-200 sm:px-8 sm:py-4",
+          "mx-auto flex w-full max-w-[88rem] items-center justify-between gap-4 rounded-2xl border px-3 py-2 transition-[box-shadow,background-color,border-color] duration-200 sm:gap-6 sm:px-5 sm:py-2",
           scrolled
             ? "border-violet-200/70 bg-white/95 shadow-xl shadow-violet-500/10"
             : "border-white/80 bg-white/90 shadow-lg shadow-violet-500/10",
         )}
       >
         <div className="flex min-w-0 items-center gap-4 lg:gap-5">
-          <BrandLogo size="lg" showMark />
+          <BrandLogo size="nav" />
           <span className="hidden border-l border-neutral-200 pl-5 text-sm leading-snug text-neutral-500 2xl:block">
             Contacto de emergencia
             <br />
@@ -288,16 +288,21 @@ export function MarketingNavbar({
           })}
         </nav>
 
-        <div className="hidden items-center gap-3 xl:flex">
+        <div className="hidden items-center gap-2.5 xl:flex">
           <Link href={authRedirect}>
-            <Button variant="ghost" size="md" className="px-5 text-base">
+            <Button
+              variant="secondary"
+              size="md"
+              className="rounded-xl border-neutral-200/90 bg-white/90 px-5 text-base font-semibold shadow-sm backdrop-blur-sm hover:bg-neutral-50"
+            >
               Ingresar
             </Button>
           </Link>
           <Link href={registerRedirect}>
             <Button
+              variant="dark"
               size="md"
-              className="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 text-base shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-indigo-700"
+              className="rounded-xl px-6 text-base font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-neutral-900/25 active:translate-y-0"
             >
               Empezar
             </Button>
@@ -362,15 +367,16 @@ export function MarketingNavbar({
 
         <div className="mt-6 flex flex-col gap-2.5 border-t border-neutral-100 pt-6">
           <Link href={authRedirect} onClick={() => setOpen(false)}>
-            <Button variant="secondary" size="lg" className="w-full">
+            <Button
+              variant="secondary"
+              size="lg"
+              className="w-full rounded-2xl border-neutral-200/90 bg-white font-semibold shadow-sm hover:bg-neutral-50"
+            >
               Ingresar
             </Button>
           </Link>
           <Link href={registerRedirect} onClick={() => setOpen(false)}>
-            <Button
-              size="lg"
-              className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
-            >
+            <Button variant="dark" size="lg" className="w-full rounded-2xl font-semibold">
               Empezar
             </Button>
           </Link>
