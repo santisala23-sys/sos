@@ -32,6 +32,10 @@ export const STORE_PRODUCT_GALLERY_BY_SLUG: Record<string, readonly string[]> = 
     "/images/products/collar-patita-celeste-frente.jpg",
     "/images/products/collar-patita-celeste-qr.jpg",
   ],
+  "collar-con-qr-patita-rosa": [
+    "/images/products/collar-patita-rosa-frente.jpg",
+    "/images/products/collar-patita-rosa-qr.jpg",
+  ],
   "chapita-qr-mascotas": [
     "/images/products/chapita-qr-mascotas-qr.jpg",
     "/images/products/chapita-qr-mascotas-front.jpg",
