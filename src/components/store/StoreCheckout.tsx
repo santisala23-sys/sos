@@ -33,8 +33,9 @@ type StoreCheckoutProps = {
 };
 
 const AUTO_ADVANCE_MS = 4800;
-const CARD_GAP_PX = 20;
+const CARD_GAP_PX = 16;
 const LOOP_COPIES = 3;
+const MAX_CARD_WIDTH_PX = 288;
 
 function productIcon(type: string): string {
   return STORE_PRODUCT_TYPES.find((t) => t.value === type)?.icon ?? "📦";
@@ -87,8 +88,8 @@ function ProductCard({
           {variantLabel}
         </span>
       </div>
-      <div className="flex flex-1 flex-col p-4 sm:p-5">
-        <h2 className="text-lg font-bold leading-snug text-neutral-900">
+      <div className="flex flex-1 flex-col p-3.5 sm:p-4">
+        <h2 className="text-base font-bold leading-snug text-neutral-900 sm:text-lg">
           {product.name}
         </h2>
         <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-neutral-600">
@@ -204,13 +205,15 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
     const viewport = viewportRef.current;
     if (!viewport) return;
     const width = viewport.offsetWidth;
+    let next = MAX_CARD_WIDTH_PX;
     if (cardsVisible >= 3) {
-      setCardWidth((width - CARD_GAP_PX * 2) / 2.85);
+      next = (width - CARD_GAP_PX * 2) / 3.15;
     } else if (cardsVisible === 2) {
-      setCardWidth((width - CARD_GAP_PX) / 1.92);
+      next = (width - CARD_GAP_PX) / 2.35;
     } else {
-      setCardWidth(Math.min(width * 0.88, 380));
+      next = Math.min(width * 0.72, MAX_CARD_WIDTH_PX);
     }
+    setCardWidth(Math.min(next, MAX_CARD_WIDTH_PX));
   }, [cardsVisible]);
 
   useEffect(() => {
@@ -218,7 +221,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
     const lgMq = window.matchMedia("(min-width: 1024px)");
 
     const update = () => {
-      if (lgMq.matches) setCardsVisible(Math.min(2, products.length));
+      if (lgMq.matches) setCardsVisible(Math.min(3, products.length));
       else if (smMq.matches) setCardsVisible(Math.min(2, products.length));
       else setCardsVisible(1);
     };
@@ -325,7 +328,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
   const showControls = products.length > 1;
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-4xl">
       <div
         className="relative"
         onMouseEnter={() => setPaused(true)}
