@@ -1,25 +1,58 @@
 import type { StoreProductRow } from "@/lib/db/queries-store";
 
-/** Catálogo mínimo si la DB no devuelve productos (local / demo). */
-export const CHAPITA_QR_MASCOTAS_FALLBACK: StoreProductRow = {
-  id: "00000000-0000-4000-a000-000000000038",
-  name: "Chapita QR SOSme",
-  slug: "chapita-qr-mascotas",
+const ts = new Date(0).toISOString();
+
+export const COLLAR_QR_HUESO_FALLBACK: StoreProductRow = {
+  id: "00000000-0000-4000-a000-000000000039",
+  name: "Collar QR Hueso",
+  slug: "collar-qr-hueso",
   product_type: "collar",
   description:
-    "Chapita circular resistente con mosquetón para collar. QR de alta legibilidad y diseño «Escaneame» con huella. Incluye activación de perfil SOSme para tu mascota.",
+    "Chapita circular celeste con mosquetón. QR en el frente e identificación «Escaneame» con diseño hueso. Resistente al agua.",
   price_cents: null,
   price_label: "Consultar",
   image_url: "/images/products/chapita-qr-mascotas-qr.jpg",
   sort_order: 1,
   is_active: true,
-  created_at: new Date(0).toISOString(),
-  updated_at: new Date(0).toISOString(),
+  created_at: ts,
+  updated_at: ts,
 };
+
+export const COLLAR_QR_PATITA_FALLBACK: StoreProductRow = {
+  id: "00000000-0000-4000-a000-000000000040",
+  name: "Collar QR Patita",
+  slug: "collar-qr-patita",
+  product_type: "collar",
+  description:
+    "Chapita circular celeste con mosquetón. QR en el frente e identificación «Escaneame» con huella. Resistente al agua.",
+  price_cents: null,
+  price_label: "Consultar",
+  image_url: "/images/products/chapita-qr-mascotas-front.jpg",
+  sort_order: 2,
+  is_active: true,
+  created_at: ts,
+  updated_at: ts,
+};
+
+export const STORE_CATALOG_FALLBACK: StoreProductRow[] = [
+  COLLAR_QR_HUESO_FALLBACK,
+  COLLAR_QR_PATITA_FALLBACK,
+];
+
+const FEATURED_SLUGS = ["collar-qr-hueso", "collar-qr-patita"] as const;
 
 export function withStoreCatalogFallback(
   products: StoreProductRow[],
 ): StoreProductRow[] {
-  if (products.length > 0) return products;
-  return [CHAPITA_QR_MASCOTAS_FALLBACK];
+  const featured = FEATURED_SLUGS.map((slug) =>
+    products.find((p) => p.slug === slug && p.is_active),
+  ).filter((p): p is StoreProductRow => Boolean(p));
+
+  if (featured.length > 0) return featured;
+
+  if (products.length > 0) {
+    return [...products].sort((a, b) => a.sort_order - b.sort_order);
+  }
+
+  return STORE_CATALOG_FALLBACK;
 }
