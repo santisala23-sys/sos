@@ -1,10 +1,10 @@
 import Image from "next/image";
 
 const HERO_IMAGE = {
-  src: "/images/landing/hero-lanzamiento-promo.jpg",
+  src: "/images/landing/hero-lanzamiento-promo.png",
   alt: "Promo lanzamiento SOSme: 50% off en productos. Cachorro con chapita QR; QRs de mascota con 1 año premium y libreta sanitaria.",
-  width: 1024,
-  height: 1024,
+  width: 512,
+  height: 512,
 } as const;
 
 export function HeroImageCarousel() {

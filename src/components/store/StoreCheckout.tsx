@@ -89,6 +89,17 @@ function ProductCard({
         <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-violet-800 shadow-sm backdrop-blur-sm">
           {variantLabel}
         </span>
+        {(product.discount_percent ?? 0) > 0 ? (
+          <span
+            className="absolute right-3 top-3 z-10 flex h-11 w-11 flex-col items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-rose-600 text-white shadow-md ring-2 ring-white/90"
+            aria-label={`${product.discount_percent} por ciento de descuento`}
+          >
+            <span className="text-[9px] font-bold leading-none">−</span>
+            <span className="text-xs font-black leading-none tabular-nums">
+              {product.discount_percent}%
+            </span>
+          </span>
+        ) : null}
       </div>
       <div className="flex flex-1 flex-col p-3.5 sm:p-4">
         <h2 className="text-base font-bold leading-snug text-neutral-900 sm:text-lg">

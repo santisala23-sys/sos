@@ -50,9 +50,6 @@ export function StoreProductPrice({
         <span className={cn(saleClass, "text-violet-800")}>
           {formatCentsAsPesos(pricing.saleCents!)}
         </span>
-        <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-700">
-          −{pricing.discountPercent}%
-        </span>
       </div>
     );
   }
