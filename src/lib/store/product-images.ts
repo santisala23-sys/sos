@@ -1,3 +1,15 @@
+/**
+ * Imágenes del catálogo (tienda en home):
+ *
+ * 1. Archivos en `public/images/products/` (jpg/png).
+ * 2. Mapeo por slug en `STORE_PRODUCT_IMAGES_BY_SLUG` (una foto) o
+ *    `STORE_PRODUCT_GALLERY_BY_SLUG` (varias fotos en la card).
+ * 3. Con base de datos: campo `image_url` del producto (admin tienda) o migraciones
+ *    en `db/migrations/` (p. ej. 039_collar_qr_hueso_patita.sql).
+ * 4. Sin DB / demo local: `src/lib/store/catalog-fallback.ts` (`image_url` por producto).
+ *
+ * Slugs actuales collares: `collar-qr-hueso`, `collar-qr-patita`.
+ */
 import type { StoreProductType } from "@/lib/store/product-types";
 
 export const STORE_PRODUCT_IMAGES_BY_SLUG: Record<string, string> = {

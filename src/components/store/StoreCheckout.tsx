@@ -205,11 +205,11 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
     if (!viewport) return;
     const width = viewport.offsetWidth;
     if (cardsVisible >= 3) {
-      setCardWidth((width - CARD_GAP_PX * 2) / 3.05);
+      setCardWidth((width - CARD_GAP_PX * 2) / 2.85);
     } else if (cardsVisible === 2) {
-      setCardWidth((width - CARD_GAP_PX) / 2.08);
+      setCardWidth((width - CARD_GAP_PX) / 1.92);
     } else {
-      setCardWidth(Math.min(width * 0.78, 320));
+      setCardWidth(Math.min(width * 0.88, 380));
     }
   }, [cardsVisible]);
 
@@ -218,7 +218,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
     const lgMq = window.matchMedia("(min-width: 1024px)");
 
     const update = () => {
-      if (lgMq.matches) setCardsVisible(Math.min(3, products.length));
+      if (lgMq.matches) setCardsVisible(Math.min(2, products.length));
       else if (smMq.matches) setCardsVisible(Math.min(2, products.length));
       else setCardsVisible(1);
     };
@@ -325,7 +325,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
   const showControls = products.length > 1;
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-6xl">
       <div
         className="relative"
         onMouseEnter={() => setPaused(true)}
@@ -337,15 +337,6 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
           }
         }}
       >
-        <div
-          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-[var(--background)] to-transparent sm:w-16"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-[var(--background)] to-transparent sm:w-16"
-          aria-hidden
-        />
-
         {showControls && (
           <>
             <button

@@ -43,7 +43,7 @@ export async function StoreCatalogSection() {
           </Link>
         </div>
 
-        <div className="relative mt-10 overflow-hidden rounded-[2rem] border border-violet-100/90 bg-white/50 px-2 py-8 shadow-sm shadow-violet-500/5 backdrop-blur-sm sm:mt-12 sm:px-4 sm:py-10 lg:rounded-[2.5rem]">
+        <div className="mt-10 sm:mt-12">
           <StoreCheckout products={products} />
         </div>
       </div>
