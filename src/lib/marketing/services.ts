@@ -202,6 +202,12 @@ export const USE_CASE_PERSONAS_CARD_IMAGES = [
   "/images/landing/personas-moto-qr.jpeg",
 ] as const;
 
+/** Card Mascotas (home): rotación automática. */
+export const USE_CASE_MASCOTAS_CARD_IMAGES = [
+  "/images/landing/use-case-mascotas.jpg",
+  "/images/landing/perro2.jpeg",
+] as const;
+
 /** Cards del home (casos de uso). */
 export const USE_CASE_CARDS = [
   {
@@ -227,6 +233,7 @@ export const USE_CASE_CARDS = [
     accent: "from-amber-500/20 to-yellow-500/10",
     image: SERVICES.mascotas.image,
     imageAlt: SERVICES.mascotas.imageAlt,
+    images: USE_CASE_MASCOTAS_CARD_IMAGES,
     imageWidth: 686,
     imageHeight: 1024,
   },
