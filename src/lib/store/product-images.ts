@@ -20,7 +20,8 @@ export const STORE_PRODUCT_IMAGES_BY_SLUG: Record<string, string> = {
   "collar-qr": "/images/products/collar-qr.png",
   "colgante-qr": "/images/products/colgante-qr-lanyard.jpg",
   "iman-qr": "/images/products/iman-qr.png",
-  "credencial-plastificada": "/images/products/colgante-qr-lanyard.jpg",
+  "credencial-plastificada": "/images/products/tarjeta-credencial-qr-tarjeta.jpg",
+  "tarjeta-credencial-qr": "/images/products/tarjeta-credencial-qr-tarjeta.jpg",
   "sticker-qr": "/images/products/sticker-qr.jpg",
 };
 
@@ -44,6 +45,16 @@ export const STORE_PRODUCT_GALLERY_BY_SLUG: Record<string, readonly string[]> = 
     "/images/landing/hero-golden-retriever.jpg",
     "/images/landing/hero-golden-retriever-2.jpg",
   ],
+  "tarjeta-credencial-qr": [
+    "/images/products/tarjeta-credencial-qr-tarjeta.jpg",
+    "/images/landing/use-case-personas-photo.png",
+    "/images/products/tarjeta-credencial-qr-uso.jpg",
+  ],
+  "credencial-plastificada": [
+    "/images/products/tarjeta-credencial-qr-tarjeta.jpg",
+    "/images/landing/use-case-personas-photo.png",
+    "/images/products/tarjeta-credencial-qr-uso.jpg",
+  ],
 };
 
 export const STORE_PRODUCT_IMAGES_BY_TYPE: Record<
@@ -53,7 +64,7 @@ export const STORE_PRODUCT_IMAGES_BY_TYPE: Record<
   collar: "/images/products/collar-qr.png",
   colgante: "/images/products/colgante-qr-lanyard.jpg",
   iman: "/images/products/iman-qr.png",
-  credencial: "/images/products/colgante-qr-lanyard.jpg",
+  credencial: "/images/products/tarjeta-credencial-qr-tarjeta.jpg",
   sticker: "/images/products/sticker-qr.jpg",
 };
 
