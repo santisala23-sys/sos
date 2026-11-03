@@ -142,7 +142,7 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
     eyebrow: "Mascotas",
     heroHeadline: "Si se pierde, te enterás vos.",
     heroSupport:
-      "Quien escanea la chapita te contacta y te llega la ubicación. La libreta no se abre con ese QR: vacunas y veterinario quedan en tu panel, con un acceso aparte de 24 horas.",
+      "Quien escanea la chapita te contacta y te llega la ubicación. La libreta no se abre con ese QR: vacunas y veterinario quedan en tu panel, con un acceso aparte para el veterinario de 24 horas.",
     image: "/images/landing/use-case-mascotas.jpg",
     imageAlt:
       "Golden retriever con collar y chapita SOSme con código QR en un parque",
