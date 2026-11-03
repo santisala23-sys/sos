@@ -208,6 +208,12 @@ export const USE_CASE_MASCOTAS_CARD_IMAGES = [
   "/images/landing/perro2.jpeg",
 ] as const;
 
+/** Card Objetos (home): valija y notebook del catálogo. */
+export const USE_CASE_OBJETOS_CARD_IMAGES = [
+  "/images/landing/use-case-valijas.jpg",
+  "/images/products/sticker-qr-laptop.jpg",
+] as const;
+
 /** Cards del home (casos de uso). */
 export const USE_CASE_CARDS = [
   {
@@ -240,13 +246,14 @@ export const USE_CASE_CARDS = [
   {
     slug: "objetos" as const,
     href: SERVICES.objetos.href,
-    title: "Objetos y valijas",
+    title: "Objetos",
     description:
       "Notebooks, celulares, valijas, mochilas y llaves con contacto seguro.",
     detail: "",
     accent: "from-sky-500/20 to-indigo-500/10",
     image: SERVICES.objetos.image,
     imageAlt: SERVICES.objetos.imageAlt,
+    images: USE_CASE_OBJETOS_CARD_IMAGES,
     imageWidth: 686,
     imageHeight: 1024,
   },
