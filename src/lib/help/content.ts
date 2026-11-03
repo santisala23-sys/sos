@@ -125,7 +125,7 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-plan-pro",
     question: "¿Qué es el Plan Pro y qué pasa después de los 6 meses?",
     answer:
-      "Al activar un producto SOSme incluís Plan Pro sin cargo por el plazo que figura en el producto. En la promo actual de la tienda son 12 meses: en mascotas incluye libreta sanitaria y co-tutoría; en personas, co-tutoría. Si el producto no indica otro plazo, son 6 meses. Pasado ese período, el Plan Base sigue activo para siempre: tu QR de emergencia, alertas, ubicación y chat no se cortan. Si querés mantener las funciones Pro, podés renovarlo cuando te lo ofrezcamos desde el panel o por contacto.",
+      "Al activar un producto SOSme incluís Plan Pro sin cargo por el plazo que figura en el producto. En la promo actual de la tienda son 12 meses: en mascotas incluye libreta sanitaria y hasta 4 tutores; en personas, hasta 4 tutores. Si el producto no indica otro plazo, son 6 meses. Pasado ese período, el Plan Base sigue activo para siempre: tu QR de emergencia, alertas, ubicación y chat no se cortan. Si querés mantener las funciones Pro, podés renovarlo cuando te lo ofrezcamos desde el panel o por contacto.",
   },
   {
     id: "faq-ubicacion",
@@ -645,7 +645,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         title: "Pro incluido al activar",
         paragraphs: [
           "Al activar un producto físico SOSme recibís Plan Pro sin cargo por el plazo que figura en ese producto.",
-          "En la promo actual de la tienda son 12 meses. En mascotas incluye libreta sanitaria y co-tutoría. En personas, co-tutoría.",
+          "En la promo actual de la tienda son 12 meses. En mascotas incluye libreta sanitaria y hasta 4 tutores. En personas, hasta 4 tutores.",
           "Si el producto no indica otro plazo, son 6 meses. El contador empieza cuando activás el producto en tu cuenta.",
         ],
       },

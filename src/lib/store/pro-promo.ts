@@ -7,7 +7,7 @@ export function getStoreProPromoLabel(product: {
   const slug = product.slug;
 
   if (slug.startsWith("collar") || name.includes("collar")) {
-    return "1 año Pro (libreta sanitaria + tutoría)";
+    return "1 año Pro (libreta sanitaria + hasta 4 tutores)";
   }
 
   if (
@@ -18,7 +18,7 @@ export function getStoreProPromoLabel(product: {
     name.includes("credencial") ||
     name.includes("sticker")
   ) {
-    return "1 año Pro (tutoría)";
+    return "1 año Pro (hasta 4 tutores)";
   }
 
   return null;
