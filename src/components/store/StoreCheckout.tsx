@@ -5,11 +5,9 @@ import Link from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
-  MessageCircle,
   Minus,
   Plus,
   ShoppingCart,
-  X,
 } from "lucide-react";
 import type { StoreProductRow } from "@/lib/db/queries-store";
 import {
@@ -18,7 +16,12 @@ import {
 } from "@/lib/store/product-types";
 import { getStoreProductImages } from "@/lib/store/product-images";
 import { StoreProductPrice } from "@/components/store/StoreProductPrice";
-import { formatStorePriceForOrder } from "@/lib/store/store-pricing";
+import {
+  formatCentsAsPesos,
+  formatStorePriceForOrder,
+  resolveStoreProductPricing,
+} from "@/lib/store/store-pricing";
+import { StoreCartDrawer } from "@/components/store/StoreCartDrawer";
 import { ProductImageCarousel } from "@/components/store/ProductImageCarousel";
 import {
   buildStoreCartWhatsAppMessage,
@@ -168,7 +171,6 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const cartPanelRef = useRef<HTMLDivElement>(null);
 
   const loopProducts = useMemo(
     () =>
@@ -180,9 +182,19 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
 
   const cartItems = products
     .filter((p) => (cart[p.id] ?? 0) > 0)
-    .map((p) => ({ product: p, quantity: cart[p.id] }));
+    .map((p) => ({ product: p, quantity: cart[p.id] ?? 0 }));
 
   const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
+  const cartTotalCents = cartItems.reduce<number | null>((sum, item) => {
+    if (sum == null) return null;
+    const pricing = resolveStoreProductPricing(item.product);
+    if (!pricing.hasNumericPrice || pricing.saleCents == null) return null;
+    return sum + pricing.saleCents * item.quantity;
+  }, 0);
+  const cartTotalLabel =
+    cartCount > 0 && cartTotalCents != null
+      ? formatCentsAsPesos(cartTotalCents)
+      : null;
 
   const canLoop = products.length > 0;
   const activeDot =
@@ -204,6 +216,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
                 discount_percent: product.discount_percent,
               }),
             })),
+            totalLabel: cartTotalLabel,
           }),
         )
       : null;
@@ -316,9 +329,6 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
   function addToCart(productId: string) {
     setQty(productId, (cart[productId] ?? 0) + 1);
     setCartOpen(true);
-    window.requestAnimationFrame(() => {
-      cartPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
   }
 
   function goPrev() {
@@ -397,13 +407,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
                   qty={cart[product.id] ?? 0}
                   onAdd={() => addToCart(product.id)}
                   onSetQty={(qty) => setQty(product.id, qty)}
-                  onOpenCart={() => {
-                    setCartOpen(true);
-                    cartPanelRef.current?.scrollIntoView({
-                      behavior: "smooth",
-                      block: "nearest",
-                    });
-                  }}
+                  onOpenCart={() => setCartOpen(true)}
                 />
               </div>
             ))}
@@ -430,109 +434,15 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
         )}
       </div>
 
-      {cartCount > 0 && !cartOpen && (
-        <button
-          type="button"
-          onClick={() => setCartOpen(true)}
-          className="mx-auto mt-8 flex items-center gap-2 rounded-full border border-violet-200 bg-white px-6 py-3 text-sm font-semibold text-violet-800 shadow-lg shadow-violet-500/10 transition hover:bg-violet-50"
-        >
-          <ShoppingCart className="h-4 w-4" aria-hidden />
-          Ver carrito ({cartCount})
-        </button>
-      )}
-
-      <div
-        ref={cartPanelRef}
-        className={cn(
-          "mx-auto mt-8 max-w-md overflow-hidden transition-all duration-300 ease-out",
-          cartOpen && cartCount > 0
-            ? "max-h-[32rem] opacity-100"
-            : "pointer-events-none max-h-0 opacity-0",
-        )}
-        aria-hidden={!cartOpen || cartCount === 0}
-      >
-        <div className="overflow-hidden rounded-2xl border border-violet-100 bg-white shadow-xl shadow-violet-500/10">
-          <div className="flex items-center justify-between gap-3 border-b border-violet-100 bg-violet-50/60 px-4 py-3">
-            <div className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-600 text-white">
-                <ShoppingCart className="h-4 w-4" aria-hidden />
-              </span>
-              <div>
-                <p className="text-sm font-bold text-neutral-900">Tu carrito</p>
-                <p className="text-xs text-neutral-500">
-                  {cartCount} {cartCount === 1 ? "producto" : "productos"}
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setCartOpen(false)}
-              className="rounded-lg p-2 text-neutral-500 hover:bg-white/80"
-              aria-label="Cerrar carrito"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          <ul className="max-h-64 space-y-0 divide-y divide-neutral-100 overflow-y-auto px-4">
-            {cartItems.map(({ product, quantity }) => (
-              <li
-                key={product.id}
-                className="flex items-start justify-between gap-3 py-3"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-neutral-900">
-                    {product.name}
-                  </p>
-                  <p className="text-xs text-neutral-500">
-                    <StoreProductPrice
-                      price_cents={product.price_cents}
-                      price_label={product.price_label}
-                      discount_percent={product.discount_percent}
-                      size="sm"
-                    />
-                  </p>
-                </div>
-                <div className="flex items-center rounded-lg border border-neutral-200">
-                  <button
-                    type="button"
-                    onClick={() => setQty(product.id, quantity - 1)}
-                    className="px-2 py-1"
-                    aria-label={`Quitar uno de ${product.name}`}
-                  >
-                    <Minus className="h-3.5 w-3.5" />
-                  </button>
-                  <span className="min-w-[1.75rem] text-center text-sm font-semibold tabular-nums">
-                    {quantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setQty(product.id, quantity + 1)}
-                    className="px-2 py-1"
-                    aria-label={`Agregar uno de ${product.name}`}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-
-          <div className="border-t border-violet-100 bg-neutral-50/80 px-4 py-4">
-            {whatsappUrl && (
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                <Button size="lg" className="w-full gap-2 bg-[#25D366] hover:bg-[#20bd5a]">
-                  <MessageCircle className="h-5 w-5" aria-hidden />
-                  Pedir por WhatsApp
-                </Button>
-              </a>
-            )}
-            <p className="mt-2 text-center text-xs text-neutral-500">
-              Coordinamos pago y envío por chat.
-            </p>
-          </div>
-        </div>
-      </div>
+      <StoreCartDrawer
+        open={cartOpen}
+        items={cartItems}
+        whatsappUrl={whatsappUrl}
+        totalLabel={cartTotalLabel}
+        onClose={() => setCartOpen(false)}
+        onOpen={() => setCartOpen(true)}
+        onSetQty={setQty}
+      />
 
       <p className="mt-10 text-center text-sm text-neutral-500">
         ¿Ya tenés tu QR?{" "}

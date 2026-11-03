@@ -75,6 +75,7 @@ export function buildPartnerInquiryMessage(params: {
 
 export function buildStoreCartWhatsAppMessage(params: {
   items: { product_name: string; quantity: number; unit_price_label: string }[];
+  totalLabel?: string | null;
 }): string {
   const itemLines = params.items.map(
     (i) => `• ${i.quantity}x ${i.product_name} (${i.unit_price_label})`,
@@ -83,6 +84,7 @@ export function buildStoreCartWhatsAppMessage(params: {
     "Hola SOSme, quiero consultar por estos productos de la tienda:",
     "",
     ...itemLines,
+    ...(params.totalLabel ? ["", `Total: ${params.totalLabel}`] : []),
     "",
     "¿Me pasás info de pago y envío? Gracias.",
   ];
