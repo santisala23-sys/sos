@@ -19,8 +19,8 @@ export const PROFILE_TYPES: {
   },
   {
     value: "object",
-    label: "Objeto / valija / equipo",
-    description: "Valija, notebook u otro. Solo contacto e instrucciones básicas.",
+    label: "Objeto / equipo",
+    description: "Auto, equipo u otro. Solo contacto e instrucciones básicas.",
   },
 ];
 
@@ -156,7 +156,7 @@ export function getActivationTypeCopy(
   if (resolved === "object") {
     return {
       title: "Activar QR de objeto",
-      subtitle: "Este código es para un objeto, valija o equipo.",
+      subtitle: "Este código es para un objeto o equipo.",
       formTitle: "Datos del objeto",
       formHint: "Completá cómo contactarte si lo encuentran.",
       loginTitle: "Activá el QR de tu objeto",

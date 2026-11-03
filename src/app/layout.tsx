@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: "%s | SOSme",
   },
   description:
-    "Creá perfiles QR para personas, mascotas u objetos. Alertas push, ubicación y contacto directo cuando alguien escanea.",
+    "Creá perfiles QR para personas y mascotas. Alertas push, ubicación y contacto directo cuando alguien escanea.",
   applicationName: "SOSme",
   manifest: "/manifest.json",
   icons: {

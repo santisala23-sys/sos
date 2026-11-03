@@ -3,9 +3,6 @@ import {
   Bell,
   ClipboardList,
   HeartPulse,
-  KeyRound,
-  Laptop,
-  Luggage,
   MessageCircle,
   PawPrint,
   Phone,
@@ -13,7 +10,7 @@ import {
   Syringe,
 } from "lucide-react";
 
-export type ServiceSlug = "personas" | "mascotas" | "objetos";
+export type ServiceSlug = "personas" | "mascotas";
 
 export type ServiceContent = {
   slug: ServiceSlug;
@@ -140,58 +137,6 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
     ctaText:
       "Creá el perfil, cargá vacunas y compartí el acceso con el veterinario cuando haga falta.",
   },
-  objetos: {
-    slug: "objetos",
-    href: "/servicios/objetos",
-    navLabel: "Objetos",
-    title: "SOSme para objetos y valijas",
-    eyebrow: "Objetos y valijas",
-    heroHeadline:
-      "Si se pierde tu notebook, celular o valija, que te puedan devolver",
-    heroSupport:
-      "Un QR en lo que más usás: notebooks, celulares, valijas, mochilas o llaves. Quien lo encuentra sabe cómo contactarte sin ver tus datos privados.",
-    image: "/images/landing/use-case-valijas.jpg",
-    imageAlt:
-      "Valija negra en un aeropuerto con sticker circular SOSme y código QR",
-    heroImage: "/images/landing/use-case-valijas.jpg",
-    heroImageAlt:
-      "Valija negra en un aeropuerto con sticker circular SOSme y código QR",
-    accentFrom: "from-sky-600",
-    accentTo: "to-indigo-800",
-    featuresTitle: "Para lo que se pierde en viajes y el día a día",
-    features: [
-      {
-        icon: Laptop,
-        title: "Notebooks y tablets",
-        text: "Un sticker discreto para que te devuelvan el equipo.",
-      },
-      {
-        icon: Phone,
-        title: "Celulares",
-        text: "Fundas, stickers o chapitas: un canal de contacto seguro.",
-      },
-      {
-        icon: Luggage,
-        title: "Valijas y bolsos",
-        text: "En aeropuertos, colectivos o hoteles, te encuentran más fácil.",
-      },
-      {
-        icon: KeyRound,
-        title: "Llaves y mochilas",
-        text: "También para llaveros, riñoneras y mochilas de estudio o trabajo.",
-      },
-    ],
-    scenariosTitle: "Ideal si viajás o te movés mucho",
-    scenarios: [
-      "Valijas en aeropuertos y viajes largos",
-      "Notebooks en cafés, cowork o facultad",
-      "Mochilas y bolsos en transporte público",
-      "Llaveros o estuches que se pierden fácil",
-    ],
-    ctaTitle: "Etiquetá lo que no querés perder",
-    ctaText:
-      "Creá un perfil de objeto, descargá el QR o comprá stickers listos para pegar.",
-  },
 };
 
 export const SERVICE_LIST = Object.values(SERVICES);
@@ -206,12 +151,6 @@ export const USE_CASE_PERSONAS_CARD_IMAGES = [
 export const USE_CASE_MASCOTAS_CARD_IMAGES = [
   "/images/landing/use-case-mascotas.jpg",
   "/images/landing/perro2.jpeg",
-] as const;
-
-/** Card Objetos (home): valija y notebook del catálogo. */
-export const USE_CASE_OBJETOS_CARD_IMAGES = [
-  "/images/landing/use-case-valijas.jpg",
-  "/images/products/sticker-qr-laptop.jpg",
 ] as const;
 
 /** Cards del home (casos de uso). */
@@ -240,20 +179,6 @@ export const USE_CASE_CARDS = [
     image: SERVICES.mascotas.image,
     imageAlt: SERVICES.mascotas.imageAlt,
     images: USE_CASE_MASCOTAS_CARD_IMAGES,
-    imageWidth: 686,
-    imageHeight: 1024,
-  },
-  {
-    slug: "objetos" as const,
-    href: SERVICES.objetos.href,
-    title: "Objetos",
-    description:
-      "Notebooks, celulares, valijas, mochilas y llaves con contacto seguro.",
-    detail: "",
-    accent: "from-sky-500/20 to-indigo-500/10",
-    image: SERVICES.objetos.image,
-    imageAlt: SERVICES.objetos.imageAlt,
-    images: USE_CASE_OBJETOS_CARD_IMAGES,
     imageWidth: 686,
     imageHeight: 1024,
   },

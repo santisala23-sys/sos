@@ -18,7 +18,7 @@ export const PLANS: Record<PlanTier, PlanDefinition> = {
     id: "extended",
     name: "Ampliado",
     maxProfiles: 99,
-    description: "Varios perfiles QR para familia, mascotas y objetos.",
+    description: "Varios perfiles QR para familia y mascotas.",
   },
   partner: {
     id: "partner",

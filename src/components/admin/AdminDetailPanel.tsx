@@ -405,7 +405,6 @@ export function AdminDetailPanel({
                       "llavero",
                       "sticker",
                       "credencial",
-                      "valija",
                     ] as const
                   ).map((tpl) => (
                     <a

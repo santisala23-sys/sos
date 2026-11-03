@@ -123,7 +123,7 @@ export async function MarketingFooter({ className = "" }: MarketingFooterProps) 
               className="h-16 sm:h-[4.5rem] md:h-[5.25rem]"
             />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-neutral-600">
-              QR de emergencia para personas, mascotas y objetos. Alertas al
+              QR de emergencia para personas y mascotas. Alertas al
               instante, sin apps.
             </p>
             <Link

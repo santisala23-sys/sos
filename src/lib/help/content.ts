@@ -47,7 +47,7 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-objeto-ubicacion",
     question: "¿Cómo funciona el QR de objeto y guardar ubicación?",
     answer:
-      "Comprá un producto SOSme para objetos (valijas, autos, etc.), activá el QR desde el panel y completá los datos del dueño. Quien lo encuentre puede contactarte y guardar la ubicación del hallazgo. Vos también podés tocar Guardar ubicación en la tarjeta del objeto desde el panel (por ejemplo si estacionás el auto). Las ubicaciones se ven en el perfil del objeto y con un aviso en el panel principal.",
+      "Activá el QR desde el panel y completá los datos del dueño. Quien lo encuentre puede contactarte y guardar la ubicación del hallazgo. Vos también podés tocar Guardar ubicación en la tarjeta del objeto desde el panel (por ejemplo si estacionás el auto). Las ubicaciones se ven en el perfil del objeto y con un aviso en el panel principal.",
   },
   {
     id: "faq-alertas",
@@ -244,7 +244,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         ],
         bullets: [
           "Personas (rosa): familiares o vos mismo. Contactos, datos de salud en texto (sangre, alergias, medicación, obra social) y SOS.",
-          "Objetos (celeste): valijas, autos, equipos. Contacto del dueño + opción de guardar ubicación.",
+          "Objetos (celeste): autos y equipos. Contacto del dueño + opción de guardar ubicación.",
           "Mascotas (verde): libreta sanitaria + QR de emergencia (contacto del dueño e instrucciones) para si se pierde.",
         ],
       },
@@ -487,13 +487,13 @@ export const HELP_MANUAL: HelpManualChapter[] = [
   {
     id: "objetos",
     title: "9. Perfiles de Objetos",
-    summary: "Valijas, autos y equipos con QR de recuperación y guardado de ubicación.",
+    summary: "Autos y equipos con QR de recuperación y guardado de ubicación.",
     subsections: [
       {
         id: "objetos-funcion",
         title: "Para qué sirven",
         paragraphs: [
-          "Un perfil de Objeto es un QR para valijas, autos, notebooks u otros bienes.",
+          "Un perfil de Objeto es un QR para autos, equipos u otros bienes.",
           "Si alguien lo encuentra y escanea, ve cómo contactarte y puede guardar la ubicación del hallazgo.",
           "Vos también podés guardar ubicación desde el panel (útil, por ejemplo, al estacionar el auto).",
         ],

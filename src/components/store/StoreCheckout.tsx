@@ -95,7 +95,9 @@ function ProductCard({
           {product.name}
         </h2>
         <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-neutral-600">
-          {product.description}
+          {product.slug === "sticker-qr" || product.product_type === "sticker"
+            ? "Sticker vinílico resistente para cascos. QR de alta legibilidad."
+            : product.description}
         </p>
 
         <div className="mt-4 border-t border-violet-100/80 pt-4">

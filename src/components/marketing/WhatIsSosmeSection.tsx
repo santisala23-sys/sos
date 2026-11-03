@@ -38,8 +38,8 @@ export function WhatIsSosmeSection() {
               Un QR que conecta a quien necesita ayuda con quien puede darla
             </p>
             <p className="mt-4 text-base leading-relaxed text-neutral-600 sm:text-[1.05rem]">
-              Un QR único ligado a tu perfil: lo pegás en collar, credencial o
-              valija. Al escanearlo, te contactan y vos recibís la alerta al
+              Un QR único ligado a tu perfil: lo pegás en collar o credencial.
+              Al escanearlo, te contactan y vos recibís la alerta al
               toque.
             </p>
           </div>

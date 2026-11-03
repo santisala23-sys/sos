@@ -99,7 +99,7 @@ export function LocationPrompt({
               <strong className={isLight ? "text-amber-950" : "text-white"}>
                 {beneficiaryName}
               </strong>{" "}
-              para encontrarlo después (auto, valija, etc.). Si lo encontraste
+              para encontrarlo después (auto u otro objeto). Si lo encontraste
               perdido, también podés avisar al dueño.
             </>
           ) : (

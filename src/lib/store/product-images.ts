@@ -22,7 +22,7 @@ export const STORE_PRODUCT_IMAGES_BY_SLUG: Record<string, string> = {
   "iman-qr": "/images/products/iman-qr.png",
   "credencial-plastificada": "/images/products/tarjeta-credencial-qr-tarjeta.jpg",
   "tarjeta-credencial-qr": "/images/products/tarjeta-credencial-qr-tarjeta.jpg",
-  "sticker-qr": "/images/products/sticker-qr.jpg",
+  "sticker-qr": "/images/products/sticker-qr-casco.jpg",
 };
 
 /** Slug → multiple images (carousel). Takes precedence over image_url. */
@@ -59,6 +59,7 @@ export const STORE_PRODUCT_GALLERY_BY_SLUG: Record<string, readonly string[]> = 
     "/images/landing/use-case-personas-photo.png",
     "/images/products/tarjeta-credencial-qr-uso.jpg",
   ],
+  "sticker-qr": ["/images/products/sticker-qr-casco.jpg"],
 };
 
 export const STORE_PRODUCT_IMAGES_BY_TYPE: Record<
@@ -69,14 +70,22 @@ export const STORE_PRODUCT_IMAGES_BY_TYPE: Record<
   colgante: "/images/products/colgante-qr-lanyard.jpg",
   iman: "/images/products/iman-qr.png",
   credencial: "/images/products/tarjeta-credencial-qr-tarjeta.jpg",
-  sticker: "/images/products/sticker-qr.jpg",
+  sticker: "/images/products/sticker-qr-casco.jpg",
 };
+
+const STICKER_HELMET_IMAGE = "/images/products/sticker-qr-casco.jpg";
+
+function isStickerProduct(product: { slug: string; product_type: string }) {
+  return product.slug === "sticker-qr" || product.product_type === "sticker";
+}
 
 export function getStoreProductImage(product: {
   slug: string;
   product_type: string;
   image_url?: string | null;
 }): string | null {
+  if (isStickerProduct(product)) return STICKER_HELMET_IMAGE;
+
   const bySlug = STORE_PRODUCT_IMAGES_BY_SLUG[product.slug];
   if (bySlug) return bySlug;
 
@@ -98,8 +107,15 @@ export function getStoreProductImages(product: {
   image_url?: string | null;
   gallery_urls?: unknown;
 }): string[] {
+  if (isStickerProduct(product)) return [STICKER_HELMET_IMAGE];
+
   const fromDb = normalizeGalleryUrls(product.gallery_urls);
-  if (fromDb.length > 0) return fromDb;
+  if (fromDb.length > 0) {
+    return fromDb.filter(
+      (url) =>
+        !url.includes("sticker-qr-laptop") && !url.includes("use-case-valijas"),
+    );
+  }
 
   const gallery = STORE_PRODUCT_GALLERY_BY_SLUG[product.slug];
   if (gallery?.length) {

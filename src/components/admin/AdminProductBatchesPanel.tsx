@@ -319,7 +319,7 @@ export function AdminProductBatchesPanel() {
                     {option.value === "pet"
                       ? "Chapita, collar o libreta de mascota"
                       : option.value === "object"
-                        ? "Valija, notebook u otro objeto"
+                        ? "Auto, equipo u otro objeto"
                         : "Perfil de emergencia personal"}
                   </span>
                   <input

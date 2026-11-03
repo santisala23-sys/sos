@@ -30,7 +30,7 @@ const MOTIVES = [
   {
     id: "mas-perfiles",
     label: "Quiero más perfiles QR",
-    hint: "Ampliá tu cuenta para familia, mascotas u objetos.",
+    hint: "Ampliá tu cuenta para familia y mascotas.",
     icon: Users,
   },
   {

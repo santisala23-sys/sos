@@ -91,7 +91,7 @@ function UseCaseNavMenu({
           </Link>
         </div>
 
-        <div className="mt-3 grid grid-cols-3 gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-2">
           {SERVICE_LIST.map((service) => {
             const isActive = service.slug === activeService;
             return (
@@ -187,7 +187,7 @@ export function MarketingNavbar({
   activeService,
 }: MarketingNavbarProps) {
   const pathname = usePathname();
-  const detectedService = pathname.match(/^\/servicios\/(personas|mascotas|objetos)/)?.[1] as
+  const detectedService = pathname.match(/^\/servicios\/(personas|mascotas)/)?.[1] as
     | ServiceSlug
     | undefined;
   const currentService = activeService ?? detectedService;

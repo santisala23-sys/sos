@@ -25,7 +25,7 @@ export function UseCasesSection() {
           </p>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-5 sm:mt-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+        <div className="mt-10 grid grid-cols-1 gap-5 sm:mt-12 sm:grid-cols-2 lg:gap-6">
           {USE_CASE_CARDS.map((card) => {
             const { href, title, description, detail, image, imageAlt } = card;
             const carouselImages =
