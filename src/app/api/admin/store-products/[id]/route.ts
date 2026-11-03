@@ -6,6 +6,7 @@ import {
   updateStoreProduct,
 } from "@/lib/db/queries-store";
 import { isStoreProductType } from "@/lib/store/product-types";
+import { resolveStoreProductMedia } from "@/lib/store/gallery-urls";
 
 export const PATCH = withApi(
   { requireAdmin: true, rateLimit: "admin" },
@@ -23,6 +24,7 @@ export const PATCH = withApi(
       price_cents?: number | null;
       price_label?: string;
       image_url?: string | null;
+      gallery_urls_text?: string;
       sort_order?: number;
       is_active?: boolean;
     };
@@ -37,6 +39,14 @@ export const PATCH = withApi(
       return NextResponse.json({ error: "Tipo de producto inválido" }, { status: 400 });
     }
 
+    const media =
+      body.gallery_urls_text !== undefined || body.image_url !== undefined
+        ? resolveStoreProductMedia({
+            image_url: body.image_url,
+            gallery_urls_text: body.gallery_urls_text,
+          })
+        : null;
+
     const product = await updateStoreProduct(id, {
       ...(body.name !== undefined ? { name: body.name } : {}),
       ...(body.product_type && isStoreProductType(body.product_type)
@@ -45,7 +55,9 @@ export const PATCH = withApi(
       ...(body.description !== undefined ? { description: body.description } : {}),
       ...(body.price_cents !== undefined ? { price_cents: body.price_cents } : {}),
       ...(body.price_label !== undefined ? { price_label: body.price_label } : {}),
-      ...(body.image_url !== undefined ? { image_url: body.image_url } : {}),
+      ...(media
+        ? { image_url: media.image_url, gallery_urls: media.gallery_urls }
+        : {}),
       ...(body.sort_order !== undefined ? { sort_order: body.sort_order } : {}),
       ...(body.is_active !== undefined ? { is_active: body.is_active } : {}),
     });

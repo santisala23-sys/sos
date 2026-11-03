@@ -12,6 +12,7 @@ export const COLLAR_QR_HUESO_FALLBACK: StoreProductRow = {
   price_cents: null,
   price_label: "Consultar",
   image_url: "/images/products/collar-qr-hueso.jpg",
+  gallery_urls: [],
   sort_order: 1,
   is_active: true,
   created_at: ts,
@@ -28,6 +29,10 @@ export const COLLAR_QR_PATITA_FALLBACK: StoreProductRow = {
   price_cents: null,
   price_label: "Consultar",
   image_url: "/images/products/collar-qr-patita.jpg",
+  gallery_urls: [
+    "/images/products/collar-patita-celeste-frente.jpg",
+    "/images/products/collar-patita-celeste-qr.jpg",
+  ],
   sort_order: 2,
   is_active: true,
   created_at: ts,

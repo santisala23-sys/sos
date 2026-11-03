@@ -7,6 +7,7 @@ import {
   updateStoreProduct,
 } from "@/lib/db/queries-store";
 import { isStoreProductType } from "@/lib/store/product-types";
+import { resolveStoreProductMedia } from "@/lib/store/gallery-urls";
 
 export const GET = withApi(
   { requireAdmin: true, rateLimit: "admin" },
@@ -26,6 +27,7 @@ export const POST = withApi(
       price_cents?: number | null;
       price_label?: string;
       image_url?: string | null;
+      gallery_urls_text?: string;
       sort_order?: number;
       is_active?: boolean;
     };
@@ -46,6 +48,11 @@ export const POST = withApi(
       return NextResponse.json({ error: "Tipo de producto inválido" }, { status: 400 });
     }
 
+    const media = resolveStoreProductMedia({
+      image_url: body.image_url,
+      gallery_urls_text: body.gallery_urls_text,
+    });
+
     try {
       const product = await createStoreProduct({
         name,
@@ -53,7 +60,8 @@ export const POST = withApi(
         description: body.description,
         price_cents: body.price_cents,
         price_label: body.price_label,
-        image_url: body.image_url,
+        image_url: media.image_url,
+        gallery_urls: media.gallery_urls,
         sort_order: body.sort_order,
         is_active: body.is_active,
       });

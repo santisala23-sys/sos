@@ -13,6 +13,7 @@ import {
 import { formatDateTime } from "@/lib/utils/format";
 import { AdminLoading, AdminSubTabs } from "@/components/admin/AdminUiParts";
 import { adminUi } from "@/components/admin/adminUi";
+import { productGalleryUrlsForForm } from "@/lib/store/gallery-urls";
 
 type StoreSubTab = "products" | "orders";
 
@@ -22,7 +23,7 @@ const emptyProductForm = {
   description: "",
   price_cents: "",
   price_label: "Consultar",
-  image_url: "",
+  gallery_urls_text: "",
   sort_order: "0",
   is_active: true,
 };
@@ -70,7 +71,7 @@ export function AdminStorePanel() {
       description: product.description,
       price_cents: product.price_cents != null ? String(product.price_cents) : "",
       price_label: product.price_label,
-      image_url: product.image_url ?? "",
+      gallery_urls_text: productGalleryUrlsForForm(product),
       sort_order: String(product.sort_order),
       is_active: product.is_active,
     });
@@ -87,7 +88,7 @@ export function AdminStorePanel() {
       description: form.description,
       price_cents: form.price_cents ? Number(form.price_cents) : null,
       price_label: form.price_label || "Consultar",
-      image_url: form.image_url || null,
+      gallery_urls_text: form.gallery_urls_text,
       sort_order: Number(form.sort_order) || 0,
       is_active: form.is_active,
     };
@@ -214,13 +215,20 @@ export function AdminStorePanel() {
                 />
               </label>
               <label className={`${adminUi.label} sm:col-span-2`}>
-                URL de imagen (opcional)
-                <input
-                  value={form.image_url}
-                  onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                  placeholder="https://..."
-                  className={`mt-1.5 w-full ${adminUi.inputPlain}`}
+                Imágenes del producto (una URL por línea)
+                <textarea
+                  rows={3}
+                  value={form.gallery_urls_text}
+                  onChange={(e) =>
+                    setForm({ ...form, gallery_urls_text: e.target.value })
+                  }
+                  placeholder={"/images/products/collar-patita-celeste-frente.jpg\n/images/products/collar-patita-celeste-qr.jpg"}
+                  className={`mt-1.5 w-full font-mono text-sm ${adminUi.inputPlain}`}
                 />
+                <span className="mt-1 block text-xs font-normal text-neutral-500">
+                  Rutas relativas (desde public/) o URLs completas. La primera es la
+                  miniatura principal; todas aparecen en el carrusel de la tienda.
+                </span>
               </label>
               <label className={`${adminUi.label} sm:col-span-2`}>
                 Descripción

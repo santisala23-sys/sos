@@ -11,6 +11,7 @@
  * Slugs actuales collares: `collar-qr-hueso`, `collar-qr-patita`.
  */
 import type { StoreProductType } from "@/lib/store/product-types";
+import { normalizeGalleryUrls } from "@/lib/store/gallery-urls";
 
 export const STORE_PRODUCT_IMAGES_BY_SLUG: Record<string, string> = {
   "collar-qr-hueso": "/images/products/collar-qr-hueso.jpg",
@@ -27,6 +28,10 @@ export const STORE_PRODUCT_IMAGES_BY_SLUG: Record<string, string> = {
 export const STORE_PRODUCT_GALLERY_BY_SLUG: Record<string, readonly string[]> = {
   "collar-qr-hueso": ["/images/products/collar-qr-hueso.jpg"],
   "collar-qr-patita": ["/images/products/collar-qr-patita.jpg"],
+  "collar-con-qr-patita-celeste": [
+    "/images/products/collar-patita-celeste-frente.jpg",
+    "/images/products/collar-patita-celeste-qr.jpg",
+  ],
   "chapita-qr-mascotas": [
     "/images/products/chapita-qr-mascotas-qr.jpg",
     "/images/products/chapita-qr-mascotas-front.jpg",
@@ -72,7 +77,11 @@ export function getStoreProductImages(product: {
   slug: string;
   product_type: string;
   image_url?: string | null;
+  gallery_urls?: unknown;
 }): string[] {
+  const fromDb = normalizeGalleryUrls(product.gallery_urls);
+  if (fromDb.length > 0) return fromDb;
+
   const gallery = STORE_PRODUCT_GALLERY_BY_SLUG[product.slug];
   if (gallery?.length) {
     return [...gallery];
