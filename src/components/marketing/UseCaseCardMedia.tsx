@@ -19,7 +19,7 @@ export function UseCaseCardMedia({
     images && images.length > 0 ? [...images] : [image];
 
   return (
-    <div className="relative aspect-[686/1024] w-full shrink-0 overflow-hidden">
+    <div className="relative aspect-square w-full shrink-0 overflow-hidden">
       {slides.length > 1 ? (
         <ProductImageCarousel
           images={slides}
@@ -32,7 +32,7 @@ export function UseCaseCardMedia({
           alt={imageAlt}
           fill
           className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          sizes="(max-width: 640px) 90vw, 28rem"
         />
       )}
     </div>
