@@ -22,6 +22,7 @@ import { CardActionPill } from "@/components/dashboard/ProfileCardActions";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
 import { Button } from "@/components/ui/Button";
 import { getProfileCardTheme } from "@/lib/dashboard/profile-card-theme";
+import { offlineQrFromProfile } from "@/lib/qr/offline-payload";
 import { getTutorPublicPreviewUrl } from "@/lib/utils/slug";
 import {
   geolocationErrorMessage,
@@ -431,7 +432,11 @@ export function ProfileCard({
 
         {showQr && canView && (
           <div className={cn("border-t px-5 py-5 sm:px-6", theme.qrPanel)}>
-            <QrCodeDisplay slug={profile.slug} beneficiaryName={profile.beneficiary_name} />
+            <QrCodeDisplay
+              slug={profile.slug}
+              beneficiaryName={profile.beneficiary_name}
+              offline={offlineQrFromProfile(profile)}
+            />
           </div>
         )}
 

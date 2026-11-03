@@ -5,6 +5,7 @@ import { Pencil, Trash2, QrCode } from "lucide-react";
 import type { QrProfile } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
+import { offlineQrFromProfile } from "@/lib/qr/offline-payload";
 import { QrProfileForm } from "@/components/dashboard/QrProfileForm";
 
 type QrProfileListProps = {
@@ -97,6 +98,7 @@ export function QrProfileList({ profiles, onRefresh }: QrProfileListProps) {
               <QrCodeDisplay
                 slug={profile.slug}
                 beneficiaryName={profile.beneficiary_name}
+                offline={offlineQrFromProfile(profile)}
               />
             </div>
           )}
