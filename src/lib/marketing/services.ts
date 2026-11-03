@@ -47,10 +47,10 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
     heroHeadline: "Todo lo necesario cuando alguien necesita ayuda ya",
     heroSupport:
       "Un QR con contactos de emergencia, alergias, medicación e instrucciones. Ideal si se pierde un niño, un adulto mayor o una persona con discapacidad.",
-    image: "/images/landing/use-case-personas-photo.png",
+    image: "/images/landing/viejita.jpeg",
     imageAlt:
       "Adulta mayor sonriendo con credencial y código QR SOSme colgando del cuello",
-    heroImage: "/images/landing/use-case-personas-photo.png",
+    heroImage: "/images/landing/viejita.jpeg",
     heroImageAlt:
       "Adulta mayor sonriendo con credencial y código QR SOSme colgando del cuello",
     accentFrom: "from-rose-600",
@@ -196,13 +196,10 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
 
 export const SERVICE_LIST = Object.values(SERVICES);
 
-/**
- * Imágenes de la card Personas (home). La 2ª va en:
- * `public/images/landing/use-case-personas-2.jpg` (vertical ~686×1024).
- */
+/** Card Personas (home): rotación automática entre estas dos fotos. */
 export const USE_CASE_PERSONAS_CARD_IMAGES = [
-  "/images/landing/use-case-personas-photo.png",
-  "/images/landing/use-case-personas-2.jpg",
+  "/images/landing/viejita.jpeg",
+  "/images/landing/personas-moto-qr.jpeg",
 ] as const;
 
 /** Cards del home (casos de uso). */
