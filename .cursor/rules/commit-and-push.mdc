@@ -1,0 +1,13 @@
+---
+description: Commit and push finished work on this repo
+alwaysApply: true
+---
+
+# Commit y push
+
+Cuando termines un cambio que el usuario pidió, hacé commit y push a la rama actual sin esperar otro pedido.
+
+- No incluyas secretos ni `tmp/`.
+- No hagas commit vacío si no hay cambios.
+- No uses `--no-verify`, `--force` ni amend salvo que el usuario lo pida.
+- El mensaje sigue el estilo del repo: una frase en inglés que diga por qué.
