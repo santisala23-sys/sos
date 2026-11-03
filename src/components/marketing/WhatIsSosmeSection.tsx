@@ -7,7 +7,7 @@ const STEPS = [
   {
     step: "02",
     title: "Pegás o llevás el QR",
-    text: "En una chapita, collar, tarjeta o sticker. También podés imprimirlo vos mismo.",
+    text: "En una chapita, collar, tarjeta o sticker en un casco.",
   },
   {
     step: "03",
