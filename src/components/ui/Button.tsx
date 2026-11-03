@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils/cn";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "dark" | "danger" | "ghost";
+  variant?: "primary" | "secondary" | "dark" | "accent" | "danger" | "ghost";
   size?: "sm" | "md" | "lg" | "xl";
 };
 
@@ -11,6 +11,8 @@ const variants = {
   secondary:
     "bg-neutral-100 text-neutral-900 hover:bg-neutral-200 focus-visible:ring-neutral-400 border border-neutral-300",
   dark: "border border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-800 focus-visible:ring-neutral-600 shadow-sm shadow-neutral-900/20",
+  accent:
+    "border border-teal-800 bg-teal-800 text-white hover:bg-teal-900 focus-visible:ring-teal-600 shadow-sm shadow-teal-900/20",
   danger: "bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-600",
   ghost: "bg-transparent text-neutral-700 hover:bg-neutral-100",
 };

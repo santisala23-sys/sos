@@ -1,4 +1,7 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { getSession } from "@/lib/auth/session";
 import { getActivateCodeHref } from "@/lib/marketing/activate-link";
 import {
@@ -11,81 +14,72 @@ import {
 import { buildWhatsAppUrl } from "@/lib/utils/contact";
 import { cn } from "@/lib/utils/cn";
 
-const NAV_LINKS = [
+const SITE_LINKS = [
   { href: "/tienda", label: "Productos" },
   { href: "/ayuda", label: "Ayuda" },
   { href: "/contacto", label: "Contacto" },
+  { href: "/#que-es", label: "Qué es SOSme" },
 ] as const;
 
 const LEGAL_LINKS = [
   { href: "/terminos", label: "Términos" },
   { href: "/privacidad", label: "Privacidad" },
-  { href: "/aviso-emergencia", label: "Emergencias" },
+  { href: "/cookies", label: "Cookies" },
+  { href: "/aviso-emergencia", label: "Aviso de emergencia" },
 ] as const;
 
-type FooterLinkItem = {
-  href: string;
-  label: string;
-  external?: boolean;
-  emphasize?: boolean;
-};
-
-function FooterInlineLinks({
-  items,
+function FooterColumn({
+  title,
+  children,
   className,
-  linkClassName,
 }: {
-  items: FooterLinkItem[];
+  title: string;
+  children: ReactNode;
   className?: string;
-  linkClassName?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex flex-wrap items-center justify-center gap-y-2",
-        className,
-      )}
-    >
-      {items.map((item, index) => {
-        const classes = cn(
-          "transition-colors duration-200",
-          item.emphasize
-            ? "font-semibold text-neutral-200 hover:text-white"
-            : "text-neutral-400 hover:text-violet-200",
-          linkClassName,
-        );
-
-        return (
-          <span
-            key={`${item.href}-${item.label}`}
-            className="inline-flex items-center"
-          >
-            {index > 0 ? (
-              <span
-                className="mx-3 select-none text-neutral-700 sm:mx-4"
-                aria-hidden
-              >
-                ·
-              </span>
-            ) : null}
-            {item.external ? (
-              <a
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={classes}
-              >
-                {item.label}
-              </a>
-            ) : (
-              <Link href={item.href} className={classes}>
-                {item.label}
-              </Link>
-            )}
-          </span>
-        );
-      })}
+    <div className={cn("min-w-0", className)}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-400">
+        {title}
+      </p>
+      <div className="mt-4">{children}</div>
     </div>
+  );
+}
+
+function FooterList({
+  items,
+}: {
+  items: ReadonlyArray<{ href: string; label: string; external?: boolean }>;
+}) {
+  return (
+    <ul className="space-y-2.5">
+      {items.map(({ href, label, external }) => (
+        <li key={`${href}-${label}`}>
+          {external ? (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-1 text-sm text-neutral-700 transition-colors hover:text-violet-700"
+            >
+              {label}
+              <ArrowUpRight
+                className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-70"
+                aria-hidden
+              />
+            </a>
+          ) : (
+            <Link
+              href={href}
+              className="text-sm text-neutral-700 transition-colors hover:text-violet-700"
+            >
+              {label}
+            </Link>
+          )}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -97,14 +91,14 @@ export async function MarketingFooter({ className = "" }: MarketingFooterProps) 
   const session = await getSession();
   const activateHref = getActivateCodeHref(Boolean(session));
 
-  const mainLinks: FooterLinkItem[] = [
-    ...NAV_LINKS.map((link) => ({ ...link })),
-    { href: activateHref, label: "Activar producto", emphasize: true },
+  const accountLinks = [
+    { href: activateHref, label: "Activar producto" },
     ...(!session ? [{ href: "/login", label: "Ingresar" }] : []),
+    ...(!session ? [{ href: "/register", label: "Crear cuenta" }] : []),
   ];
 
-  const contactLinks: FooterLinkItem[] = [
-    { href: getContactMailtoUrl(), label: CONTACT_EMAIL },
+  const contactLinks = [
+    { href: getContactMailtoUrl(), label: CONTACT_EMAIL, external: false },
     {
       href: buildWhatsAppUrl("Hola SOSme"),
       label: "WhatsApp",
@@ -119,58 +113,51 @@ export async function MarketingFooter({ className = "" }: MarketingFooterProps) 
   ];
 
   return (
-    <footer
-      className={cn(
-        "relative isolate mt-8 overflow-hidden rounded-t-[1.75rem] bg-neutral-950 sm:mt-10 sm:rounded-t-[2.25rem]",
-        className,
-      )}
-    >
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_50%_0%,rgba(139,92,246,0.14),transparent_60%)]"
-        aria-hidden
-      />
-
-      <div className="relative mx-auto max-w-[88rem] px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
-        <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-          <Link
-            href="/"
-            className="text-lg font-bold tracking-tight text-white/90 transition-opacity hover:opacity-80"
-          >
-            SOSme
-          </Link>
-          <p className="mt-3 max-w-md text-sm leading-relaxed tracking-wide text-neutral-500">
-            Contacto de emergencia por QR
-            <span className="text-neutral-600"> · </span>
-            alertas al instante
-          </p>
-
-          <nav className="mt-9 w-full sm:mt-10" aria-label="Pie de página">
-            <FooterInlineLinks
-              items={mainLinks}
-              linkClassName="text-sm sm:text-[0.9375rem]"
+    <footer className={cn("mt-16 border-t border-violet-200/80 sm:mt-20", className)}>
+      <div className="mx-auto max-w-[88rem] px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8 xl:gap-12">
+          <div className="sm:col-span-2 lg:col-span-4 xl:col-span-5">
+            <BrandLogo
+              size="nav"
+              href="/"
+              className="h-16 sm:h-[4.5rem] md:h-[5.25rem]"
             />
-          </nav>
-
-          <div className="mt-8 w-full sm:mt-9">
-            <FooterInlineLinks
-              items={contactLinks}
-              linkClassName="text-xs sm:text-sm"
-            />
-          </div>
-        </div>
-
-        <div className="mx-auto mt-12 max-w-2xl border-t border-white/[0.07] pt-8 sm:mt-14">
-          <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
-            <p className="text-xs text-neutral-600">
-              © {new Date().getFullYear()} SOSme · Argentina
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-neutral-600">
+              QR de emergencia para personas, mascotas y objetos. Alertas al
+              instante, sin apps.
             </p>
-            <nav aria-label="Legal">
-              <FooterInlineLinks
-                items={LEGAL_LINKS.map((link) => ({ ...link }))}
-                linkClassName="text-xs text-neutral-600 hover:text-neutral-400"
-              />
-            </nav>
+            <Link
+              href="/tienda"
+              className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800"
+            >
+              Ver productos
+              <ArrowUpRight className="h-4 w-4" aria-hidden />
+            </Link>
           </div>
+
+          <FooterColumn title="Sitio" className="lg:col-span-2">
+            <FooterList items={[...SITE_LINKS, ...accountLinks]} />
+          </FooterColumn>
+
+          <FooterColumn title="Legal" className="lg:col-span-2">
+            <FooterList items={LEGAL_LINKS} />
+          </FooterColumn>
+
+          <FooterColumn title="Contacto" className="sm:col-span-2 lg:col-span-4 xl:col-span-3">
+            <FooterList items={contactLinks} />
+            <p className="mt-5 text-xs leading-relaxed text-neutral-500">
+              Argentina · respondemos por mail o WhatsApp
+            </p>
+          </FooterColumn>
+        </div>
+      </div>
+
+      <div className="border-t border-violet-200/60 bg-neutral-900">
+        <div className="mx-auto flex max-w-[88rem] flex-col gap-2 px-4 py-4 text-xs text-neutral-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+          <p>© {new Date().getFullYear()} SOSme</p>
+          <p className="text-neutral-600">
+            Contacto de emergencia por QR · WhatsApp y alertas incluidas
+          </p>
         </div>
       </div>
     </footer>

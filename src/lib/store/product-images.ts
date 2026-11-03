@@ -1,6 +1,7 @@
 import type { StoreProductType } from "@/lib/store/product-types";
 
 export const STORE_PRODUCT_IMAGES_BY_SLUG: Record<string, string> = {
+  "chapita-qr-mascotas": "/images/products/chapita-qr-mascotas-qr.jpg",
   "collar-qr": "/images/products/collar-qr.png",
   "colgante-qr": "/images/products/colgante-qr-lanyard.jpg",
   "iman-qr": "/images/products/iman-qr.png",
@@ -10,6 +11,10 @@ export const STORE_PRODUCT_IMAGES_BY_SLUG: Record<string, string> = {
 
 /** Slug → multiple images (carousel). Takes precedence over image_url. */
 export const STORE_PRODUCT_GALLERY_BY_SLUG: Record<string, readonly string[]> = {
+  "chapita-qr-mascotas": [
+    "/images/products/chapita-qr-mascotas-qr.jpg",
+    "/images/products/chapita-qr-mascotas-front.jpg",
+  ],
   "collar-qr": [
     "/images/landing/hero-golden-retriever.jpg",
     "/images/landing/hero-golden-retriever-2.jpg",

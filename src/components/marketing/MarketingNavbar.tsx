@@ -300,9 +300,9 @@ export function MarketingNavbar({
           </Link>
           <Link href={registerRedirect}>
             <Button
-              variant="dark"
+              variant="accent"
               size="md"
-              className="rounded-xl px-6 text-base font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-neutral-900/25 active:translate-y-0"
+              className="rounded-xl px-6 text-base font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-teal-900/25 active:translate-y-0"
             >
               Empezar
             </Button>
@@ -376,7 +376,11 @@ export function MarketingNavbar({
             </Button>
           </Link>
           <Link href={registerRedirect} onClick={() => setOpen(false)}>
-            <Button variant="dark" size="lg" className="w-full rounded-2xl font-semibold">
+            <Button
+              variant="accent"
+              size="lg"
+              className="w-full rounded-2xl font-semibold"
+            >
               Empezar
             </Button>
           </Link>
