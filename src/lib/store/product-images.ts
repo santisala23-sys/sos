@@ -13,8 +13,8 @@
 import type { StoreProductType } from "@/lib/store/product-types";
 
 export const STORE_PRODUCT_IMAGES_BY_SLUG: Record<string, string> = {
-  "collar-qr-hueso": "/images/products/chapita-qr-mascotas-qr.jpg",
-  "collar-qr-patita": "/images/products/chapita-qr-mascotas-front.jpg",
+  "collar-qr-hueso": "/images/products/collar-qr-hueso.jpg",
+  "collar-qr-patita": "/images/products/collar-qr-patita.jpg",
   "chapita-qr-mascotas": "/images/products/chapita-qr-mascotas-qr.jpg",
   "collar-qr": "/images/products/collar-qr.png",
   "colgante-qr": "/images/products/colgante-qr-lanyard.jpg",
@@ -25,14 +25,8 @@ export const STORE_PRODUCT_IMAGES_BY_SLUG: Record<string, string> = {
 
 /** Slug → multiple images (carousel). Takes precedence over image_url. */
 export const STORE_PRODUCT_GALLERY_BY_SLUG: Record<string, readonly string[]> = {
-  "collar-qr-hueso": [
-    "/images/products/chapita-qr-mascotas-qr.jpg",
-    "/images/products/chapita-qr-mascotas-front.jpg",
-  ],
-  "collar-qr-patita": [
-    "/images/products/chapita-qr-mascotas-front.jpg",
-    "/images/products/chapita-qr-mascotas-qr.jpg",
-  ],
+  "collar-qr-hueso": ["/images/products/collar-qr-hueso.jpg"],
+  "collar-qr-patita": ["/images/products/collar-qr-patita.jpg"],
   "chapita-qr-mascotas": [
     "/images/products/chapita-qr-mascotas-qr.jpg",
     "/images/products/chapita-qr-mascotas-front.jpg",

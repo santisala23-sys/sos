@@ -19,31 +19,33 @@ export async function StoreCatalogSection() {
   return (
     <section
       id="catalogo"
-      className="scroll-mt-32 px-4 pb-20 pt-4 sm:px-6 sm:pb-24 lg:px-8"
+      className="scroll-mt-32 px-4 pb-24 pt-6 sm:px-6 sm:pb-28 lg:px-8"
     >
-      <div className="mx-auto max-w-[88rem]">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-600/90">
-            Tienda
-          </p>
-          <h2 className="mt-3 text-2xl font-black tracking-tight text-neutral-900 sm:text-3xl lg:text-4xl">
-            Collares con{" "}
-            <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-700 bg-clip-text text-transparent">
-              QR
-            </span>
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-neutral-600 sm:text-base">
-            Elegí diseño hueso o patita, sumá al carrito y pedí por WhatsApp.
-          </p>
+      <div className="mx-auto w-full max-w-[88rem]">
+        <div className="flex flex-col gap-4 border-b border-violet-200/70 pb-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-xl lg:text-left">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-600/90">
+              Tienda
+            </p>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-neutral-900 sm:text-3xl lg:text-4xl">
+              Collares con{" "}
+              <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-700 bg-clip-text text-transparent">
+                QR
+              </span>
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-neutral-600 sm:text-base">
+              Hueso o patita — agregá al carrito y pedí por WhatsApp.
+            </p>
+          </div>
           <Link
             href={activateHref}
-            className="mt-4 inline-block text-sm font-semibold text-violet-700 hover:text-violet-900 hover:underline"
+            className="shrink-0 text-sm font-semibold text-violet-700 hover:text-violet-900 hover:underline lg:pb-1"
           >
-            ¿Ya compraste? Activá tu producto
+            ¿Ya compraste? Activá tu producto →
           </Link>
         </div>
 
-        <div className="mt-10 sm:mt-12">
+        <div className="mt-8 w-full sm:mt-10">
           <StoreCheckout products={products} />
         </div>
       </div>
