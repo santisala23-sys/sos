@@ -336,9 +336,8 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
 
   return (
     <div className="w-full">
-      <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_min(100%,20rem)] xl:gap-10">
-        <div
-          className="relative min-w-0 -mx-1 sm:-mx-2"
+      <div
+        className="relative min-w-0 -mx-1 sm:-mx-2"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onFocusCapture={() => setPaused(true)}
@@ -423,30 +422,29 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
             ))}
           </div>
         )}
-        </div>
+      </div>
 
-        <aside className="xl:sticky xl:top-28">
-          {cartCount > 0 && !cartOpen && (
-            <button
-              type="button"
-              onClick={() => setCartOpen(true)}
-              className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-violet-200 bg-white px-5 py-3 text-sm font-semibold text-violet-800 shadow-md transition hover:bg-violet-50 xl:hidden"
-            >
-              <ShoppingCart className="h-4 w-4" aria-hidden />
-              Ver carrito ({cartCount})
-            </button>
-          )}
+      {cartCount > 0 && !cartOpen && (
+        <button
+          type="button"
+          onClick={() => setCartOpen(true)}
+          className="mx-auto mt-8 flex items-center gap-2 rounded-full border border-violet-200 bg-white px-6 py-3 text-sm font-semibold text-violet-800 shadow-lg shadow-violet-500/10 transition hover:bg-violet-50"
+        >
+          <ShoppingCart className="h-4 w-4" aria-hidden />
+          Ver carrito ({cartCount})
+        </button>
+      )}
 
-          <div
-            ref={cartPanelRef}
-            className={cn(
-              "overflow-hidden transition-all duration-300 ease-out",
-              cartOpen || cartCount > 0
-                ? "max-h-[32rem] opacity-100"
-                : "pointer-events-none max-h-0 opacity-0",
-              "xl:pointer-events-auto xl:max-h-none xl:opacity-100",
-            )}
-          >
+      <div
+        ref={cartPanelRef}
+        className={cn(
+          "mx-auto mt-8 max-w-md overflow-hidden transition-all duration-300 ease-out",
+          cartOpen && cartCount > 0
+            ? "max-h-[32rem] opacity-100"
+            : "pointer-events-none max-h-0 opacity-0",
+        )}
+        aria-hidden={!cartOpen || cartCount === 0}
+      >
         <div className="overflow-hidden rounded-2xl border border-violet-100 bg-white shadow-xl shadow-violet-500/10">
           <div className="flex items-center justify-between gap-3 border-b border-violet-100 bg-violet-50/60 px-4 py-3">
             <div className="flex items-center gap-2">
@@ -463,18 +461,13 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
             <button
               type="button"
               onClick={() => setCartOpen(false)}
-              className="rounded-lg p-2 text-neutral-500 hover:bg-white/80 xl:hidden"
+              className="rounded-lg p-2 text-neutral-500 hover:bg-white/80"
               aria-label="Cerrar carrito"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
 
-          {cartCount === 0 ? (
-            <p className="px-4 py-10 text-center text-sm text-neutral-500">
-              Agregá un collar desde el carrusel.
-            </p>
-          ) : (
           <ul className="max-h-64 space-y-0 divide-y divide-neutral-100 overflow-y-auto px-4">
             {cartItems.map(({ product, quantity }) => (
               <li
@@ -513,28 +506,21 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
               </li>
             ))}
           </ul>
-          )}
 
           <div className="border-t border-violet-100 bg-neutral-50/80 px-4 py-4">
-            {whatsappUrl ? (
+            {whatsappUrl && (
               <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
                 <Button size="lg" className="w-full gap-2 bg-[#25D366] hover:bg-[#20bd5a]">
                   <MessageCircle className="h-5 w-5" aria-hidden />
                   Pedir por WhatsApp
                 </Button>
               </a>
-            ) : (
-              <p className="text-center text-xs text-neutral-500">
-                El carrito vacío se llena al agregar productos.
-              </p>
             )}
             <p className="mt-2 text-center text-xs text-neutral-500">
               Coordinamos pago y envío por chat.
             </p>
           </div>
         </div>
-          </div>
-        </aside>
       </div>
 
       <p className="mt-10 text-center text-sm text-neutral-500">
