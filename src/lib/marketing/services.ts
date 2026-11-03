@@ -196,6 +196,15 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
 
 export const SERVICE_LIST = Object.values(SERVICES);
 
+/**
+ * Imágenes de la card Personas (home). La 2ª va en:
+ * `public/images/landing/use-case-personas-2.jpg` (vertical ~686×1024).
+ */
+export const USE_CASE_PERSONAS_CARD_IMAGES = [
+  "/images/landing/use-case-personas-photo.png",
+  "/images/landing/use-case-personas-2.jpg",
+] as const;
+
 /** Cards del home (casos de uso). */
 export const USE_CASE_CARDS = [
   {
@@ -207,6 +216,7 @@ export const USE_CASE_CARDS = [
     accent: "from-rose-500/20 to-orange-500/10",
     image: SERVICES.personas.image,
     imageAlt: SERVICES.personas.imageAlt,
+    images: USE_CASE_PERSONAS_CARD_IMAGES,
     imageWidth: 1024,
     imageHeight: 687,
   },

@@ -1,10 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { UseCaseCardMedia } from "@/components/marketing/UseCaseCardMedia";
 import { USE_CASE_CARDS } from "@/lib/marketing/services";
-
-/** Misma proporción en las tres cards (referencia mascotas / objetos). */
-const CARD_IMAGE_ASPECT = "aspect-[686/1024]";
 
 export function UseCasesSection() {
   return (
@@ -29,31 +26,22 @@ export function UseCasesSection() {
         </div>
 
         <div className="mt-10 grid grid-cols-1 gap-5 sm:mt-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-          {USE_CASE_CARDS.map(
-            ({
-              href,
-              title,
-              description,
-              detail,
-              image,
-              imageAlt,
-            }) => (
+          {USE_CASE_CARDS.map((card) => {
+            const { href, title, description, detail, image, imageAlt } = card;
+            const carouselImages =
+              "images" in card ? card.images : undefined;
+
+            return (
               <Link
                 key={title}
                 href={href}
                 className="group flex h-full flex-col overflow-hidden rounded-2xl border border-violet-100/90 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-lg hover:shadow-violet-500/10"
               >
-                <div
-                  className={`relative ${CARD_IMAGE_ASPECT} w-full shrink-0 overflow-hidden`}
-                >
-                  <Image
-                    src={image}
-                    alt={imageAlt}
-                    fill
-                    className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                </div>
+                <UseCaseCardMedia
+                  image={image}
+                  imageAlt={imageAlt}
+                  images={carouselImages}
+                />
                 <div className="flex flex-1 flex-col p-5 sm:p-6">
                   <h3 className="text-xl font-bold text-neutral-900">{title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-neutral-600">
@@ -73,8 +61,8 @@ export function UseCasesSection() {
                   </span>
                 </div>
               </Link>
-            ),
-          )}
+            );
+          })}
         </div>
       </div>
     </section>
