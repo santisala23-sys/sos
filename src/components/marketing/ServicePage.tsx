@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { SectionHeading } from "@/components/marketing/SectionHeading";
+import { ServiceHeroMedia } from "@/components/marketing/ServiceHeroMedia";
 import { Button } from "@/components/ui/Button";
 import { SERVICE_LIST, type ServiceContent } from "@/lib/marketing/services";
 
@@ -15,6 +16,10 @@ type ServicePageProps = {
 
 export function ServicePage({ service, bookletSlot }: ServicePageProps) {
   const others = SERVICE_LIST.filter((s) => s.slug !== service.slug);
+  const heroSlides =
+    service.heroSlides && service.heroSlides.length > 0
+      ? service.heroSlides
+      : [{ src: service.heroImage, alt: service.heroImageAlt }];
 
   return (
     <>
@@ -23,18 +28,19 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
       <main>
         {/* Hero full-bleed */}
         <section className="relative min-h-[78vh] overflow-hidden">
-          <Image
-            src={service.heroImage}
-            alt={service.heroImageAlt}
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
+          <ServiceHeroMedia slides={heroSlides} />
+          <div
+            className={`absolute inset-0 bg-gradient-to-t ${service.accentFrom} ${service.accentTo} ${
+              heroSlides.length > 1 ? "opacity-45" : "opacity-80"
+            }`}
           />
           <div
-            className={`absolute inset-0 bg-gradient-to-t ${service.accentFrom} ${service.accentTo} opacity-80`}
+            className={`absolute inset-0 bg-gradient-to-t ${
+              heroSlides.length > 1
+                ? "from-neutral-950/85 via-neutral-950/35 to-transparent"
+                : "from-neutral-950/70 via-neutral-950/25 to-neutral-950/10"
+            }`}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-neutral-950/25 to-neutral-950/10" />
 
           <div className="relative mx-auto flex min-h-[78vh] max-w-[88rem] flex-col justify-end px-4 pb-16 pt-28 sm:px-6 sm:pb-20 lg:px-8">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-white/85">
@@ -69,6 +75,30 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
           </div>
         </section>
 
+        {service.steps && service.steps.length > 0 ? (
+          <section className="mx-auto max-w-[88rem] px-4 py-24 sm:px-6 lg:px-8">
+            <SectionHeading eyebrow="Cómo funciona" title="Del perfil al aviso" />
+            <ol className="mt-14 grid gap-6 md:grid-cols-3">
+              {service.steps.map((step, index) => (
+                <li
+                  key={step.title}
+                  className="rounded-3xl border border-violet-100 bg-white/90 p-7 shadow-lg shadow-violet-500/5"
+                >
+                  <span className="text-sm font-black tracking-[0.18em] text-violet-600">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <h2 className="mt-4 text-xl font-bold text-neutral-900">
+                    {step.title}
+                  </h2>
+                  <p className="mt-2 leading-relaxed text-neutral-600">
+                    {step.text}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
+
         {/* Features */}
         <section className="mx-auto max-w-[88rem] px-4 py-24 sm:px-6 lg:px-8">
           <SectionHeading
@@ -91,6 +121,20 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
               </article>
             ))}
           </div>
+
+          {service.share ? (
+            <div className="mt-10 rounded-[2rem] border border-violet-100 bg-gradient-to-br from-violet-50 to-white px-6 py-10 shadow-lg shadow-violet-500/5 sm:px-12">
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-violet-600">
+                {service.share.eyebrow}
+              </p>
+              <h2 className="mt-3 max-w-3xl text-2xl font-black tracking-tight text-neutral-900 sm:text-3xl">
+                {service.share.title}
+              </h2>
+              <p className="mt-4 max-w-2xl text-lg leading-relaxed text-neutral-600">
+                {service.share.text}
+              </p>
+            </div>
+          ) : null}
         </section>
 
         {bookletSlot}
