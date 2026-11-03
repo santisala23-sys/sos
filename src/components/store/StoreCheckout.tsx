@@ -35,8 +35,8 @@ type StoreCheckoutProps = {
 const AUTO_ADVANCE_MS = 4800;
 const CARD_GAP_PX = 24;
 const LOOP_COPIES = 3;
-const MIN_CARD_WIDTH_PX = 280;
-const MAX_CARD_WIDTH_PX = 380;
+const MIN_CARD_WIDTH_PX = 300;
+const MAX_CARD_WIDTH_PX = 420;
 
 function productIcon(type: string): string {
   return STORE_PRODUCT_TYPES.find((t) => t.value === type)?.icon ?? "📦";
@@ -208,11 +208,11 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
     const width = viewport.offsetWidth;
     let next = MAX_CARD_WIDTH_PX;
     if (cardsVisible >= 3) {
-      next = (width - CARD_GAP_PX * 2) / 2.65;
+      next = (width - CARD_GAP_PX * 2) / 2.45;
     } else if (cardsVisible === 2) {
-      next = (width - CARD_GAP_PX) / 1.85;
+      next = (width - CARD_GAP_PX) / 1.72;
     } else {
-      next = width * 0.86;
+      next = width * 0.9;
     }
     next = Math.min(MAX_CARD_WIDTH_PX, Math.max(MIN_CARD_WIDTH_PX, next));
     setCardWidth(next);
