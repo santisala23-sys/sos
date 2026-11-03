@@ -6,6 +6,7 @@ import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { PetHealthBookletSection } from "@/components/marketing/PetHealthBookletSection";
 import { UseCasesSection } from "@/components/marketing/UseCasesSection";
 import { WhatIsSosmeSection } from "@/components/marketing/WhatIsSosmeSection";
+import { LaunchPromoBanner } from "@/components/marketing/LaunchPromoBanner";
 import { StoreCatalogSection } from "@/components/store/StoreCatalogSection";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -65,6 +66,8 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
+
+          <LaunchPromoBanner />
         </section>
 
         <WhatIsSosmeSection />
