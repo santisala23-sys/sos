@@ -36,8 +36,8 @@ export default async function HomePage() {
 
               <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-neutral-600 sm:text-xl md:mx-0">
                 Tu perfil de emergencia en un QR para personas y mascotas.
-                Alertas al instante y, para tu mascota, toda su libreta
-                sanitaria digital.
+                La alerta llega cuando comparten la ubicación y, para tu
+                mascota, toda su libreta sanitaria digital.
               </p>
 
               <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center md:justify-start">

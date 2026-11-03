@@ -135,7 +135,7 @@ export function buildPushNotification(params: {
       return {
         title: `📍 Ubicación — ${beneficiaryName}`,
         body: hasLocation
-          ? "Compartieron dónde están. Tocá para ver en el mapa."
+          ? "Compartieron la ubicación exacta. Tocá para ver en el mapa."
           : "Hay una actualización de ubicación.",
       };
     case "message":

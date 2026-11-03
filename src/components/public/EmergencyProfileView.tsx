@@ -132,19 +132,16 @@ export function EmergencyProfileView({
               setScanToken(scanTokenRef.current);
               setScanLogId(data.scanLogId);
 
-              const hasServerCoords =
-                data.latitude != null && data.longitude != null;
-              if (hasServerCoords) {
+              const hasExactCoords =
+                data.latitude != null &&
+                data.longitude != null &&
+                data.locationIsApproximate !== true;
+              if (hasExactCoords) {
                 setCoords({
                   latitude: data.latitude,
                   longitude: data.longitude,
                 });
                 setGeoPhase("granted");
-              } else if (
-                stored.geoPhase === "granted" ||
-                stored.geoPhase === "skipped"
-              ) {
-                setGeoPhase(stored.geoPhase);
               } else {
                 setGeoPhase("skipped");
               }
@@ -192,16 +189,21 @@ export function EmergencyProfileView({
     longitude: number;
   }) {
     const token = scanTokenRef.current;
-    if (!token) return;
+    if (!token) return false;
 
-    await fetch("/api/alerts/location", {
-      method: "PATCH",
-      headers: scannerAuthHeaders(token),
-      body: JSON.stringify({
-        latitude: location.latitude,
-        longitude: location.longitude,
-      }),
-    });
+    try {
+      const res = await fetch("/api/alerts/location", {
+        method: "PATCH",
+        headers: scannerAuthHeaders(token),
+        body: JSON.stringify({
+          latitude: location.latitude,
+          longitude: location.longitude,
+        }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
   }
 
   async function handleShareLocation() {
@@ -213,16 +215,17 @@ export function EmergencyProfileView({
       return;
     }
 
-    setCoords(result);
-
     for (let attempt = 0; attempt < 8 && !scanTokenRef.current; attempt++) {
       await new Promise((resolve) => setTimeout(resolve, 400));
     }
 
-    if (scanTokenRef.current) {
-      await sendLocationToServer(result);
+    const sent = await sendLocationToServer(result);
+    if (!sent) {
+      setGeoPhase("denied");
+      return;
     }
 
+    setCoords(result);
     setGeoPhase("granted");
   }
 
@@ -299,8 +302,13 @@ export function EmergencyProfileView({
       }
     }
 
+    let locationSent = false;
     if (location && scanTokenRef.current) {
-      await sendLocationToServer(location);
+      locationSent = await sendLocationToServer(location);
+      if (locationSent) {
+        setCoords(location);
+        setGeoPhase("granted");
+      }
     }
 
     try {
@@ -323,7 +331,7 @@ export function EmergencyProfileView({
         storeScanSession(profile.slug, {
           scanToken: data.scanToken,
           scanLogId: data.scanLogId,
-          geoPhase: location ? "granted" : "skipped",
+          geoPhase: locationSent ? "granted" : "skipped",
         });
       }
       setSosSent(true);
@@ -385,7 +393,7 @@ export function EmergencyProfileView({
           </>
         ) : (
           <>
-            Al abrir este QR se notifica al tutor. En emergencia grave llamá al{" "}
+            Si compartís la ubicación exacta, se avisa al tutor. En emergencia grave llamá al{" "}
             <strong className={t.stripStrong}>911</strong>.{" "}
             <Link href="/aviso-escaneadores-publicos" className={t.stripLink}>
               Qué datos se registran
@@ -503,8 +511,8 @@ export function EmergencyProfileView({
                 ) : (
                   <div className="space-y-3">
                     {geoPhase === "denied" && (
-                      <p className={`text-sm ${isLight ? "text-amber-900" : "text-amber-200"}`}>
-                        No pudimos obtener tu ubicación. Podés intentarlo de nuevo cuando quieras.
+                      <p className={`text-sm ${isLight ? "text-amber-900" : "text-amber-200"}`} role="alert">
+                        No pudimos enviar tu ubicación exacta a la familia. Podés intentarlo de nuevo.
                       </p>
                     )}
                     <div className="flex flex-col gap-2 sm:flex-row">

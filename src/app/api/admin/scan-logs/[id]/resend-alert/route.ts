@@ -26,6 +26,7 @@ export const POST = withApi(
         scanLogId: log.id,
         latitude: log.latitude != null ? Number(log.latitude) : null,
         longitude: log.longitude != null ? Number(log.longitude) : null,
+        locationApproximate: Boolean(log.location_is_approximate),
         scannerNote: log.scanner_note,
       });
     } catch (error) {

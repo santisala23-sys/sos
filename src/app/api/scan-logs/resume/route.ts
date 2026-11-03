@@ -52,6 +52,7 @@ export const GET = withApi(
       scannedAt: log.scanned_at,
       latitude: log.latitude != null ? Number(log.latitude) : null,
       longitude: log.longitude != null ? Number(log.longitude) : null,
+      locationIsApproximate: Boolean(log.location_is_approximate),
       alertType: log.alert_type,
     });
   },

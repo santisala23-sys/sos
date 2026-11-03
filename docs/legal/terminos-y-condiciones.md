@@ -1,6 +1,6 @@
 # Términos y Condiciones de Uso — SOSme
 
-**Versión:** 1.5  
+**Versión:** 1.6  
 **Fecha de vigencia:** 3 de noviembre de 2026  
 **Última actualización:** 3 de noviembre de 2026
 
@@ -154,9 +154,9 @@ El Operador trata estos datos únicamente para las finalidades descritas en la P
 Quien escanee un QR (**Escáner**) sin crear cuenta:
 
 - Genera un registro de escaneo (`scan_log`) con User-Agent del navegador
-- Puede quedar registrada una **zona aproximada** (ciudad o región) inferida de la conexión, si el servicio de hosting la informa. No es GPS, puede faltar y puede ser imprecisa
-- Puede compartir **ubicación GPS** de forma opcional, solo si toca el botón y el dispositivo la autoriza. Si el GPS falla, está apagado o lo rechaza, la alerta de escaneo igual se envía, con la zona aproximada si hubo o sin mapa
-- Puede enviar alertas SOS, notas y mensajes en un chat vinculado al evento
+- Puede quedar registrada una **zona aproximada** (ciudad o región) inferida de la conexión, si el servicio de hosting la informa. No es GPS, puede faltar y puede ser imprecisa. El Tutor la ve en el panel marcada como aproximada. Si no se informa, el registro queda sin mapa. Esa zona no genera una notificación push
+- Puede compartir **ubicación GPS exacta** de forma opcional, solo si toca el botón y el dispositivo la autoriza. Ese envío es el que notifica al Tutor. Si el GPS falla, está apagado o lo rechaza, se le avisa que la ubicación exacta no se envió. El registro sigue en el panel, con la zona aproximada si hubo o sin mapa, y sin esa notificación
+- Puede enviar alertas SOS, notas y mensajes en un chat vinculado al evento. Esos avisos sí se envían aunque no haya GPS
 - Recibe un token de sesión de escaneo (48 h) almacenado en localStorage y cookie
 
 El Escáner debe usar el Servicio de buena fe, sin acoso, spam ni suplantación. El Tutor puede ver los mensajes y datos compartidos en su panel.

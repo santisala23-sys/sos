@@ -279,7 +279,7 @@ export function ProfileCard({
               )}
               {alertsOnly && (
                 <p className="mt-2 text-sm leading-snug text-neutral-500">
-                  Recibís alertas push cuando alguien escanea este QR.
+                  Recibís una alerta push cuando comparten la ubicación exacta.
                 </p>
               )}
             </div>

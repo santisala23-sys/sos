@@ -1,7 +1,7 @@
 # Descargo de Responsabilidad de Emergencia — SOSme
 
-**Versión:** 1.0  
-**Fecha de vigencia:** 30 de junio de 2026
+**Versión:** 1.1  
+**Fecha de vigencia:** 3 de noviembre de 2026
 
 ---
 
@@ -30,8 +30,8 @@ Si vos o alguien más está en **peligro de vida**, sufrís una **emergencia mé
 ### SOSme puede ayudar a:
 
 - Mostrar contactos e instrucciones a quien escanea un QR
-- Notificar al Tutor o familia que alguien escaneó el perfil
-- Avisar al Tutor que el QR fue escaneado, a veces con una zona aproximada y, si quien escanea lo autoriza, con la ubicación GPS del celular. Las dos pueden faltar o ser imprecisas
+- Mostrar en el panel del Tutor que alguien escaneó el perfil, a veces con una zona aproximada marcada como tal
+- Avisar al Tutor cuando quien escanea comparte la ubicación GPS exacta, y también ante un SOS o un mensaje. La ubicación puede faltar o ser imprecisa
 - Facilitar comunicación por chat durante un evento de escaneo
 
 ### SOSme NO garantiza:

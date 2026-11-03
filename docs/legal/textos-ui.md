@@ -68,7 +68,7 @@ Mostrar cuando el usuario complete al menos uno de: alergias, notas médicas / c
 
 **Cuerpo:**
 
-> Al abrir este QR se notifica al tutor. En emergencia grave llamá al **911**. [Qué datos se registran](/aviso-escaneadores-publicos)
+> Si compartís la ubicación exacta, se avisa al tutor. En emergencia grave llamá al **911**. [Qué datos se registran](/aviso-escaneadores-publicos)
 
 ---
 
@@ -134,7 +134,7 @@ Si un usuario entró por Google antes de implementar checkboxes:
 
 ## 9. Push notifications — consentimiento Tutor
 
-> Activá alertas para enterarte al instante cuando alguien escanea un QR. Podés desactivarlas cuando quieras.
+> Activá alertas para enterarte cuando comparten la ubicación exacta. Podés desactivarlas cuando quieras.
 
 ---
 

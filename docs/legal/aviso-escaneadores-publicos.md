@@ -1,6 +1,6 @@
 # Aviso para Escáneres Públicos — SOSme
 
-**Versión:** 1.1  
+**Versión:** 1.2  
 **Fecha de vigencia:** 3 de noviembre de 2026
 
 > **Texto corto para mostrar en la vista `/p/{slug}`** (ver también [textos-ui.md](./textos-ui.md))
@@ -11,14 +11,14 @@
 
 Gracias por ayudar. Al abrir este perfil:
 
-SOSme registra que el QR fue escaneado y **notifica al tutor o familia** responsable.
+SOSme registra que el QR fue escaneado. El tutor recibe una **notificación cuando compartís la ubicación exacta**.
 
 ### Qué datos se generan o comparten
 
 | Acción | Qué ocurre |
 |--------|------------|
-| Abrir el perfil | Se crea un registro de escaneo con la fecha/hora y datos técnicos del navegador (User-Agent). El tutor recibe una alerta. Puede incluirse una zona aproximada según la conexión (ciudad o región). No es la ubicación exacta del celular y a veces no está. |
-| Compartir ubicación | Si tocás «Compartir mi ubicación» y el celular lo permite, enviamos el GPS al tutor. Si lo rechazás o no funciona, la alerta igual se envía. |
+| Abrir el perfil | Se crea un registro de escaneo con la fecha/hora y datos técnicos del navegador (User-Agent). Puede guardarse una zona aproximada para el panel del tutor. No es el GPS del celular y a veces no está. Abrir el perfil no le manda una notificación. |
+| Compartir ubicación | Si tocás «Compartir mi ubicación» y el celular lo permite, enviamos el GPS exacto y el tutor recibe una notificación. Si lo rechazás o no funciona, te avisamos que la ubicación exacta no se envió. |
 | Botón SOS | Se envía una alerta de urgencia al tutor. **No reemplaza al 911 ni al 107.** |
 | Chat / mensajes | Los mensajes que escribas pueden ser leídos por el tutor. |
 | Notificaciones push | Si las activás, podemos enviarte respuestas del tutor. Podés ignorar este paso. |

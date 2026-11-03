@@ -86,8 +86,8 @@ export function LocationPrompt({
         >
           {denied ? (
             <>
-              El GPS puede estar bloqueado en este dispositivo. Igual podés ver los
-              contactos de{" "}
+              No pudimos enviar tu ubicación exacta. Podés intentar de nuevo o ver
+              los contactos de{" "}
               <strong className={isLight ? "text-amber-950" : "text-white"}>
                 {beneficiaryName}
               </strong>

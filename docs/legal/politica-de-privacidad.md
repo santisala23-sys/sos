@@ -1,6 +1,6 @@
 # Política de Privacidad — SOSme
 
-**Versión:** 1.2  
+**Versión:** 1.3  
 **Fecha de vigencia:** 3 de noviembre de 2026  
 **Última actualización:** 3 de noviembre de 2026
 
@@ -68,7 +68,7 @@ Tratamos datos con licitud, lealtad, finalidad determinada, proporcionalidad, ca
 | **Perfil QR — asistencia** | Instrucciones de ayuda | Beneficiario / Tutor | Vista pública | Ejecución | Igual que perfil | Escáneres |
 | **Datos sensibles de salud (persona)** | Alergias, condiciones/medicación, tipo de sangre, obra social / prepaga (solo texto) | Beneficiario | Emergencia, información médica | **Consentimiento expreso** | Igual que perfil | Escáneres; Tutor; admin autorizado |
 | **Libreta sanitaria (mascota)** | Vacunas, visitas, preventivos, adjuntos de visita | Tutor / dueño | Historial veterinario privado | Ejecución del servicio | Igual que perfil | Tutor; veterinario con enlace temporal |
-| **Escaneo (`scan_log`)** | Fecha/hora, tipo scan/SOS, User-Agent, zona aproximada por IP si el hosting la informa, GPS solo si quien escanea lo autoriza, nota escáner | Escáner (indirecto) | Alertas, historial Tutor, seguridad | Interés legítimo (zona aproximada); consentimiento (GPS) | **24 meses** desde el evento (ver retención) | Tutor; admin; webhook |
+| **Escaneo (`scan_log`)** | Fecha/hora, tipo scan/SOS, User-Agent, zona aproximada por IP si el hosting la informa (visible en el panel, marcada como aproximada; no dispara push), GPS solo si quien escanea lo autoriza (ese envío sí notifica al Tutor), nota escáner | Escáner (indirecto) | Historial Tutor y notificación al compartir GPS, seguridad | Interés legítimo (zona aproximada); consentimiento (GPS) | **24 meses** desde el evento (ver retención) | Tutor; admin; webhook |
 | **Chat (`scan_messages`)** | Mensajes público ↔ tutor por evento | Escáner / Tutor | Comunicación durante incidente | Ejecución del servicio | **24 meses** o hasta eliminación del scan_log | Tutor; Escáner con sesión |
 | **Sesión escaneo** | JWT 48h en localStorage + cookie por slug | Escáner | Autorizar chat y push escáner | Ejecución | **48 horas** | Solo dispositivo del escáner |
 | **Push Tutor** | Endpoint, claves p256dh/auth | Tutor | Notificaciones de alertas | Consentimiento (navegador) | Hasta desuscripción o baja cuenta | Proveedor push del navegador |

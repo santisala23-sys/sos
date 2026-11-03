@@ -36,7 +36,7 @@ const PERMISSION_LABELS: {
   {
     key: "can_receive_alerts",
     label: "Recibir alertas",
-    description: "Push cuando escanean el QR o hay actividad.",
+    description: "Push cuando comparten la ubicación exacta, hay un SOS o un mensaje.",
   },
   {
     key: "can_view_profile",

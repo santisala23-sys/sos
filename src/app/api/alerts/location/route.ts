@@ -56,19 +56,23 @@ export const PATCH = withApi(
       return NextResponse.json({ ok: true });
     }
 
-    await notifyTutor({
-      profileId: profile.id,
-      type: "location",
-      beneficiaryName: result.beneficiary_name,
-      emergencyContactName: result.emergency_contact_name,
-      emergencyContactPhone: result.emergency_contact_phone,
-      scannedAt: result.scanned_at,
-      scanLogId: access.scanLogId,
-      latitude,
-      longitude,
-      locationApproximate: false,
-      scannerNote: fullLog?.scanner_note,
-    });
+    try {
+      await notifyTutor({
+        profileId: profile.id,
+        type: "location",
+        beneficiaryName: result.beneficiary_name,
+        emergencyContactName: result.emergency_contact_name,
+        emergencyContactPhone: result.emergency_contact_phone,
+        scannedAt: result.scanned_at,
+        scanLogId: access.scanLogId,
+        latitude,
+        longitude,
+        locationApproximate: false,
+        scannerNote: fullLog?.scanner_note,
+      });
+    } catch (error) {
+      console.error("[alerts/location] notifyTutor failed", error);
+    }
 
     return NextResponse.json({ ok: true });
   },

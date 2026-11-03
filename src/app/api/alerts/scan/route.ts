@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { withApi } from "@/lib/api/with-api";
-import { notifyTutor } from "@/lib/alerts/notify-tutor";
 import { createScanLog, findQrProfileBySlug } from "@/lib/db/queries";
-import {
-  formatApproximateArea,
-  getApproximateGeoFromRequest,
-} from "@/lib/security/request-geo";
+import { getApproximateGeoFromRequest } from "@/lib/security/request-geo";
 import { createScanToken } from "@/lib/security/scan-token";
 
 export const POST = withApi(
@@ -44,24 +40,6 @@ export const POST = withApi(
       scanLogId: scanLog.id,
       slug: profile.slug,
     });
-
-    try {
-      await notifyTutor({
-        profileId: profile.id,
-        type: "scan",
-        beneficiaryName: profile.beneficiary_name,
-        emergencyContactName: profile.emergency_contact_name,
-        emergencyContactPhone: profile.emergency_contact_phone,
-        scannedAt: scanLog.scanned_at,
-        scanLogId: scanLog.id,
-        latitude: approxGeo?.latitude ?? null,
-        longitude: approxGeo?.longitude ?? null,
-        locationApproximate: approxGeo != null,
-        locationArea: approxGeo ? formatApproximateArea(approxGeo) : null,
-      });
-    } catch (error) {
-      console.error("[alerts/scan] notifyTutor failed", error);
-    }
 
     return NextResponse.json({ scanLogId: scanLog.id, scanToken });
   },

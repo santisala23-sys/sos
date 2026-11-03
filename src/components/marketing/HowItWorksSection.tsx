@@ -11,9 +11,9 @@ const STEPS = [
   {
     step: "02",
     title: "Vos recibís la alerta",
-    text: "Al abrir el enlace se notifica al tutor. El perfil muestra foto, nombre y datos clave.",
+    text: "La notificación llega cuando comparten la ubicación exacta. El perfil muestra foto, nombre y datos clave.",
     image: "/images/landing/screenshots/step-02-profile.png",
-    imageAlt: "Perfil público SOSme con foto de mascota y aviso al tutor",
+    imageAlt: "Perfil público SOSme con foto de mascota y datos para contactar al tutor",
   },
   {
     step: "03",

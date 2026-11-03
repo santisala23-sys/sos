@@ -528,7 +528,7 @@ export function PushNotificationPanel({ push }: PushProps) {
                   ? "En iPhone/iPad Safari no permite push desde una pestaña. Instalá la app en inicio y abrila desde el ícono."
                   : hasAccountDevices
                     ? "Tu cuenta ya recibe alertas en otros dispositivos. Podés sumar este también."
-                    : "Recibí avisos al instante cuando escaneen el QR, haya SOS o un mensaje nuevo."}
+                    : "Recibí avisos cuando compartan la ubicación exacta, haya un SOS o un mensaje nuevo."}
               </p>
             </div>
           </div>

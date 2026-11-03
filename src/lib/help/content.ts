@@ -47,7 +47,7 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-alertas",
     question: "¿Cuándo recibo una alerta?",
     answer:
-      "Cuando alguien escanea tu QR de emergencia y abre el perfil público. También recibís aviso si presionan el botón SOS o si un veterinario carga una visita en la libreta. Activá las notificaciones push desde el panel para enterarte al instante.",
+      "Cuando quien escanea comparte la ubicación exacta del celular. El escaneo igual queda en Actividad: si hubo zona aproximada, la ves marcada como aproximada; si no se pudo calcular, queda sin mapa y sin aviso. También recibís aviso si presionan SOS, escriben en el chat o un veterinario carga una visita. Activá las notificaciones push desde el panel.",
   },
   {
     id: "faq-perfiles-tipos",
@@ -113,7 +113,7 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-co-tutoria",
     question: "¿Qué es la co-tutoría?",
     answer:
-      "Es compartir un perfil QR con otra cuenta SOSme (hasta 4 por perfil). La otra persona puede recibir alertas cuando escanean el QR, ver o editar el perfil y, en mascotas, consultar la libreta sanitaria, según los permisos que vos elijas. Los perfiles compartidos aparecen en su panel en «Compartidos conmigo».",
+      "Es compartir un perfil QR con otra cuenta SOSme (hasta 4 por perfil). La otra persona puede recibir alertas cuando comparten la ubicación exacta, hay un SOS o un mensaje, ver o editar el perfil y, en mascotas, consultar la libreta sanitaria, según los permisos que vos elijas. Los perfiles compartidos aparecen en su panel en «Compartidos conmigo».",
   },
   {
     id: "faq-co-tutoria-invitar",
@@ -131,7 +131,7 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-ubicacion",
     question: "¿Siempre llega la ubicación exacta?",
     answer:
-      "No. Al abrir el perfil puede llegar una zona aproximada (ciudad o región) según la conexión de quien escanea. La ubicación del celular llega solo si toca Compartir mi ubicación y el navegador la permite. Puede fallar, estar desactivada o rechazarla: en ese caso igual te llega la alerta, con la zona aproximada si hubo, o sin mapa.",
+      "No. En Actividad puede aparecer una zona aproximada, marcada como tal, según la conexión de quien escanea. Si esa zona no se puede calcular, el escaneo queda sin mapa. La notificación del celular llega cuando tocan Compartir mi ubicación y el navegador permite el GPS. Si falla o lo rechazan, a esa persona le avisamos que la ubicación exacta no se envió y vos no recibís ese aviso.",
   },
   {
     id: "faq-plan-base-siempre",
@@ -151,7 +151,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         id: "intro-que-es",
         title: "Qué es SOSme",
         paragraphs: [
-          "SOSme vincula un código QR a un perfil de emergencia. Cuando alguien lo escanea, ve cómo contactarte y vos recibís una alerta.",
+          "SOSme vincula un código QR a un perfil de emergencia. Cuando alguien lo escanea, ve cómo contactarte. La notificación te llega cuando comparte la ubicación exacta; el escaneo queda en tu panel.",
           "Como tutor tenés un panel privado en sosme.com.ar donde configurás perfiles, descargás QRs, revisás alertas y —si tenés mascotas— gestionás la libreta sanitaria.",
         ],
       },
@@ -232,7 +232,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         title: "Alertas y notificaciones push",
         paragraphs: [
           "Si hay alertas sin leer, aparece un banner destacado que te lleva directo al último evento.",
-          "Más abajo podés activar las notificaciones push del navegador. Recomendamos hacerlo para enterarte al instante cuando escanean un QR o cargan una visita veterinaria.",
+          "Más abajo podés activar las notificaciones push del navegador. Recomendamos hacerlo para enterarte al instante cuando comparten la ubicación exacta, hay un SOS o cargan una visita veterinaria.",
           "En iPhone, puede que necesites agregar SOSme a la pantalla de inicio para que las push funcionen bien.",
         ],
       },
@@ -291,7 +291,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
           "Botones para llamar o escribir por WhatsApp a los contactos de emergencia (el número no se muestra en texto plano).",
           "En Personas: tipo de sangre, alergias, condiciones/medicación y obra social, si los cargaste.",
           "En Mascotas: contacto del dueño e instrucciones. No la libreta ni el historial del veterinario.",
-          "Al abrir el perfil puede registrarse una zona aproximada. La ubicación del celular llega solo si quien escanea acepta compartirla.",
+          "Si comparte la ubicación exacta, el tutor recibe una notificación. Si falla, se le avisa en esa pantalla. En el panel puede quedar una zona aproximada, marcada como tal, o ninguna.",
           "Botón SOS / Necesito ayuda en perfiles de persona.",
           "Chat en vivo para coordinar con la familia.",
         ],
@@ -502,7 +502,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
           "En el detalle podés:",
         ],
         bullets: [
-          "Ver mapa con la ubicación compartida (si la hay).",
+          "Ver el mapa: ubicación exacta si la compartieron, o una zona aproximada marcada como tal. Si no hubo zona, no hay mapa.",
           "Chatear en vivo con quien escaneó.",
           "Identificar si fue un SOS.",
           "Marcar como leído al revisarlo.",
@@ -599,7 +599,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
           "Al invitar elegís qué puede hacer cada co-tutor:",
         ],
         bullets: [
-          "Recibir alertas: push cuando escanean el QR o hay actividad (viene activado por defecto).",
+          "Recibir alertas: push cuando comparten la ubicación exacta, hay un SOS o un mensaje (viene activado por defecto).",
           "Ver perfil: acceder al detalle y actividad del perfil en el panel.",
           "Editar perfil: modificar contactos, instrucciones y foto.",
           "Ver libreta sanitaria: solo en perfiles de Mascota.",

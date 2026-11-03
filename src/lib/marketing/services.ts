@@ -62,7 +62,7 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
     eyebrow: "Personas",
     heroHeadline: "La llevan puesta. Si pasa algo, te enterás vos.",
     heroSupport:
-      "Armás el perfil de un niño, un adulto mayor, una persona con discapacidad o alguien que sale a la calle. Quien escanea ve a quién llamar y los datos importantes. A vos te llega la notificación y la ubicación.",
+      "Armás el perfil de un niño, un adulto mayor, una persona con discapacidad o alguien que sale a la calle. Quien escanea ve a quién llamar y los datos importantes. Si comparte la ubicación exacta, te llega la notificación.",
     image: "/images/landing/viejita.jpeg",
     imageAlt:
       "Adulta mayor sonriendo con credencial y código QR SOSme colgando del cuello",
@@ -91,8 +91,8 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
         text: "En el cuello, la mochila, la credencial o el casco.",
       },
       {
-        title: "Si lo escanean, te llega",
-        text: "Notificación, ubicación, y pueden llamarte o escribirte por WhatsApp.",
+        title: "Si comparten la ubicación, te llega",
+        text: "La notificación sale cuando habilitan el GPS exacto. Igual pueden llamarte o escribirte por WhatsApp.",
       },
     ],
     featuresTitle: "Qué pasa cuando escanean",
@@ -100,7 +100,7 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
       {
         icon: Bell,
         title: "Te llega la alerta",
-        text: "Notificación en el momento, con la ubicación.",
+        text: "Cuando comparten la ubicación exacta.",
       },
       {
         icon: Phone,
@@ -121,7 +121,7 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
     share: {
       eyebrow: "Plan Pro",
       title: "Compartí el perfil con quien también tiene que enterarse",
-      text: "Con Plan Pro invitás a otra persona de la familia. Si escanean el QR, la alerta y la ubicación les llegan a los dos.",
+      text: "Con Plan Pro invitás a otra persona de la familia. Si comparten la ubicación exacta, la alerta les llega a los dos.",
     },
     scenariosTitle: "Pensado para momentos reales",
     scenarios: [
@@ -142,7 +142,7 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
     eyebrow: "Mascotas",
     heroHeadline: "Si se pierde, te enterás vos.",
     heroSupport:
-      "Quien escanea la chapita te contacta y te llega la ubicación. La libreta no se abre con ese QR: vacunas y veterinario quedan en tu panel, con un acceso aparte para el veterinario de 24 horas.",
+      "Quien escanea la chapita te contacta y, si comparte la ubicación exacta, te llega la notificación. La libreta no se abre con ese QR: vacunas y veterinario quedan en tu panel, con un acceso aparte para el veterinario de 24 horas.",
     image: "/images/landing/use-case-mascotas.jpg",
     imageAlt:
       "Golden retriever con collar y chapita SOSme con código QR en un parque",
@@ -171,8 +171,8 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
         text: "En el collar. Quien lo escanea no ve vacunas ni el historial del veterinario.",
       },
       {
-        title: "Si lo escanean, te llega",
-        text: "Notificación, ubicación, y pueden llamarte o escribirte por WhatsApp.",
+        title: "Si comparten la ubicación, te llega",
+        text: "La notificación sale cuando habilitan el GPS exacto. Igual pueden llamarte o escribirte por WhatsApp.",
       },
     ],
     featuresTitle: "Qué pasa cuando escanean la chapita",
@@ -180,7 +180,7 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
       {
         icon: Bell,
         title: "Te llega la alerta",
-        text: "Notificación en el momento, con la ubicación.",
+        text: "Cuando comparten la ubicación exacta.",
       },
       {
         icon: Phone,
@@ -201,7 +201,7 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
     share: {
       eyebrow: "Plan Pro",
       title: "Compartí el perfil con quien también tiene que enterarse",
-      text: "Con Plan Pro invitás a otra persona de la familia. Si escanean el QR, la alerta y la ubicación les llegan a los dos.",
+      text: "Con Plan Pro invitás a otra persona de la familia. Si comparten la ubicación exacta, la alerta les llega a los dos.",
     },
     scenariosTitle: "Pensado para cuando no estás",
     scenarios: [
@@ -251,7 +251,7 @@ export const USE_CASE_CARDS = [
     href: SERVICES.mascotas.href,
     title: "Mascotas",
     description: "Si se pierde, te enterás vos.",
-    detail: "El QR de la chapita avisa. La libreta y el veterinario quedan aparte.",
+    detail: "Si comparten la ubicación, te llega el aviso. La libreta y el veterinario quedan aparte.",
     accent: "from-amber-500/20 to-yellow-500/10",
     image: SERVICES.mascotas.image,
     imageAlt: SERVICES.mascotas.imageAlt,

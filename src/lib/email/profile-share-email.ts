@@ -142,7 +142,7 @@ export function profileShareEmail(
 
               <p style="margin:0;color:#737373;font-size:13px;line-height:1.6;">
                 En tu panel vas a encontrar este perfil en la sección <strong>Compartidos conmigo</strong>.
-                ${params.permissions.can_receive_alerts ? " Si tenés notificaciones activadas, también recibirás alertas push cuando escaneen el QR." : ""}
+                ${params.permissions.can_receive_alerts ? " Si tenés notificaciones activadas, también recibirás alertas push cuando compartan la ubicación exacta, haya un SOS o un mensaje." : ""}
               </p>
             </td>
           </tr>
