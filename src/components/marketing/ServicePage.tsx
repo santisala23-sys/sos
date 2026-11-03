@@ -56,7 +56,7 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
                   <ArrowRight className="h-5 w-5" aria-hidden />
                 </Button>
               </Link>
-              <Link href="/tienda">
+              <Link href="/#catalogo">
                 <Button
                   size="lg"
                   variant="secondary"
@@ -164,7 +164,7 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
               {service.ctaText}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/tienda">
+              <Link href="/#catalogo">
                 <Button
                   size="lg"
                   className="bg-white px-8 text-neutral-900 hover:bg-white/95"

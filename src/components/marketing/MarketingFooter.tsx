@@ -15,7 +15,7 @@ import { buildWhatsAppUrl } from "@/lib/utils/contact";
 import { cn } from "@/lib/utils/cn";
 
 const SITE_LINKS = [
-  { href: "/tienda", label: "Productos" },
+  { href: "/#catalogo", label: "Productos" },
   { href: "/ayuda", label: "Ayuda" },
   { href: "/contacto", label: "Contacto" },
   { href: "/#que-es", label: "Qué es SOSme" },
@@ -127,7 +127,7 @@ export async function MarketingFooter({ className = "" }: MarketingFooterProps) 
               instante, sin apps.
             </p>
             <Link
-              href="/tienda"
+              href="/#catalogo"
               className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800"
             >
               Ver productos

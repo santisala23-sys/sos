@@ -24,7 +24,10 @@ export async function StoreCatalogSection() {
   );
 
   return (
-    <section className="scroll-mt-28 px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-8">
+    <section
+      id="catalogo"
+      className="scroll-mt-32 px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-8"
+    >
       <div className="mx-auto max-w-6xl">
         <header className="border-b border-neutral-200/90 pb-6">
           <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">

@@ -6,6 +6,7 @@ import { MarketingNavbar } from "@/components/marketing/MarketingNavbar";
 import { PetHealthBookletSection } from "@/components/marketing/PetHealthBookletSection";
 import { UseCasesSection } from "@/components/marketing/UseCasesSection";
 import { WhatIsSosmeSection } from "@/components/marketing/WhatIsSosmeSection";
+import { StoreCatalogSection } from "@/components/store/StoreCatalogSection";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -33,7 +34,7 @@ export default async function HomePage() {
               </p>
 
               <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center md:justify-start">
-                <Link href="/tienda" className="sm:inline-flex">
+                <a href="#catalogo" className="sm:inline-flex">
                   <Button
                     size="md"
                     className="group w-full gap-2.5 rounded-2xl border border-white/25 px-7 py-3.5 text-base font-semibold shadow-lg shadow-violet-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:from-violet-600 hover:to-indigo-700 hover:shadow-xl hover:shadow-violet-600/28 active:translate-y-0 sm:w-auto"
@@ -44,7 +45,7 @@ export default async function HomePage() {
                       aria-hidden
                     />
                   </Button>
-                </Link>
+                </a>
                 <Link href="/activar" className="sm:inline-flex">
                   <Button
                     variant="ghost"
@@ -74,43 +75,7 @@ export default async function HomePage() {
 
         <PetHealthBookletSection />
 
-        {/* CTA final */}
-        <section className="mx-auto max-w-[88rem] px-4 pb-28 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-[2rem] bg-[#e4e9f7] px-6 py-16 text-center sm:rounded-[2.5rem] sm:px-12 sm:py-20">
-            <div className="pointer-events-none absolute inset-0" aria-hidden>
-              <span className="absolute -right-2 top-6 h-28 w-11 rotate-[38deg] rounded-full border-2 border-violet-400/35" />
-              <span className="absolute right-14 top-2 h-20 w-9 rotate-[38deg] rounded-full border-2 border-violet-400/30" />
-              <span className="absolute bottom-4 left-6 h-24 w-10 -rotate-[36deg] rounded-full border-2 border-violet-400/35" />
-              <span className="absolute bottom-10 left-20 h-16 w-8 -rotate-[36deg] rounded-full border-2 border-violet-400/28" />
-            </div>
-
-            <h2 className="relative mx-auto max-w-3xl text-2xl font-black leading-tight tracking-tight text-neutral-900 sm:text-4xl">
-              Protegé lo que más importa hoy
-            </h2>
-            <p className="relative mx-auto mt-4 max-w-xl text-base leading-relaxed text-neutral-700 sm:text-lg">
-              Elegí un producto con QR o activá el que ya compraste.
-            </p>
-            <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10">
-              <Link href="/tienda">
-                <Button
-                  size="md"
-                  className="rounded-xl bg-neutral-900 px-7 font-semibold text-white shadow-sm hover:bg-neutral-800"
-                >
-                  Ver productos
-                </Button>
-              </Link>
-              <Link href="/activar">
-                <Button
-                  variant="ghost"
-                  size="md"
-                  className="rounded-xl border border-neutral-900/15 bg-white/50 px-7 font-semibold text-neutral-900 backdrop-blur-sm hover:bg-white/80"
-                >
-                  Activar producto
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
+        <StoreCatalogSection />
       </main>
 
       <MarketingFooter />
