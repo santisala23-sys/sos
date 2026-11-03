@@ -12,9 +12,15 @@ import { SERVICE_LIST, type ServiceContent } from "@/lib/marketing/services";
 type ServicePageProps = {
   service: ServiceContent;
   bookletSlot?: ReactNode;
+  /** Productos de tienda, arriba de otros casos de uso. Si está, no se muestra el cierre. */
+  productSlot?: ReactNode;
 };
 
-export function ServicePage({ service, bookletSlot }: ServicePageProps) {
+export function ServicePage({
+  service,
+  bookletSlot,
+  productSlot,
+}: ServicePageProps) {
   const others = SERVICE_LIST.filter((s) => s.slug !== service.slug);
   const heroSlides =
     service.heroSlides && service.heroSlides.length > 0
@@ -162,6 +168,8 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
           </div>
         </section>
 
+        {productSlot}
+
         {/* Other services */}
         <section className="mx-auto max-w-[88rem] px-4 py-20 sm:px-6 lg:px-8">
           <SectionHeading
@@ -196,38 +204,39 @@ export function ServicePage({ service, bookletSlot }: ServicePageProps) {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="mx-auto max-w-[88rem] px-4 pb-28 sm:px-6 lg:px-8">
-          <div
-            className={`relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br ${service.accentFrom} ${service.accentTo} px-6 py-16 text-center shadow-2xl sm:px-14`}
-          >
-            <h2 className="text-3xl font-black text-white sm:text-4xl">
-              {service.ctaTitle}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-white/90">
-              {service.ctaText}
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/#catalogo">
-                <Button
-                  size="lg"
-                  className="bg-white px-8 text-neutral-900 hover:bg-white/95"
-                >
-                  Ver productos
-                </Button>
-              </Link>
-              <Link href="/#casos">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="border-white/30 bg-white/10 px-8 text-white hover:bg-white/20"
-                >
-                  Ver todos los casos
-                </Button>
-              </Link>
+        {productSlot ? null : (
+          <section className="mx-auto max-w-[88rem] px-4 pb-28 sm:px-6 lg:px-8">
+            <div
+              className={`relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br ${service.accentFrom} ${service.accentTo} px-6 py-16 text-center shadow-2xl sm:px-14`}
+            >
+              <h2 className="text-3xl font-black text-white sm:text-4xl">
+                {service.ctaTitle}
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-lg text-white/90">
+                {service.ctaText}
+              </p>
+              <div className="mt-8 flex flex-wrap justify-center gap-3">
+                <Link href="/#catalogo">
+                  <Button
+                    size="lg"
+                    className="bg-white px-8 text-neutral-900 hover:bg-white/95"
+                  >
+                    Ver productos
+                  </Button>
+                </Link>
+                <Link href="/#casos">
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    className="border-white/30 bg-white/10 px-8 text-white hover:bg-white/20"
+                  >
+                    Ver todos los casos
+                  </Button>
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
 
       <MarketingFooter />

@@ -34,6 +34,8 @@ type CartLine = Record<string, number>;
 
 type StoreCheckoutProps = {
   products: StoreProductRow[];
+  layout?: "carousel" | "grid";
+  showActivateLink?: boolean;
 };
 
 const AUTO_ADVANCE_MS = 4800;
@@ -160,7 +162,11 @@ function ProductCard({
   );
 }
 
-export function StoreCheckout({ products }: StoreCheckoutProps) {
+export function StoreCheckout({
+  products,
+  layout = "carousel",
+  showActivateLink = true,
+}: StoreCheckoutProps) {
   const [cart, setCart] = useState<CartLine>({});
   const [cartOpen, setCartOpen] = useState(false);
   const [slideIndex, setSlideIndex] = useState(products.length);
@@ -275,7 +281,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
   }, [products.length]);
 
   useEffect(() => {
-    if (paused || !canLoop || products.length < 2) return;
+    if (layout === "grid" || paused || !canLoop || products.length < 2) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
 
@@ -285,7 +291,7 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
     }, AUTO_ADVANCE_MS);
 
     return () => window.clearInterval(id);
-  }, [paused, canLoop, products.length]);
+  }, [layout, paused, canLoop, products.length]);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -349,6 +355,34 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
   const slideOffset = slideIndex * (cardWidth + CARD_GAP_PX);
   const translateX = -slideOffset;
   const showControls = products.length > 1;
+
+  if (layout === "grid") {
+    return (
+      <div className="w-full">
+        <div className="grid gap-6 sm:grid-cols-2">
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              qty={cart[product.id] ?? 0}
+              onAdd={() => addToCart(product.id)}
+              onSetQty={(qty) => setQty(product.id, qty)}
+              onOpenCart={() => setCartOpen(true)}
+            />
+          ))}
+        </div>
+        <StoreCartDrawer
+          open={cartOpen}
+          items={cartItems}
+          whatsappUrl={whatsappUrl}
+          totalLabel={cartTotalLabel}
+          onClose={() => setCartOpen(false)}
+          onOpen={() => setCartOpen(true)}
+          onSetQty={setQty}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
@@ -444,12 +478,14 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
         onSetQty={setQty}
       />
 
-      <p className="mt-10 text-center text-sm text-neutral-500">
-        ¿Ya tenés tu QR?{" "}
-        <Link href="/activar" className="font-semibold text-neutral-800 hover:underline">
-          Activá tu producto
-        </Link>
-      </p>
+      {showActivateLink ? (
+        <p className="mt-10 text-center text-sm text-neutral-500">
+          ¿Ya tenés tu QR?{" "}
+          <Link href="/activar" className="font-semibold text-neutral-800 hover:underline">
+            Activá tu producto
+          </Link>
+        </p>
+      ) : null}
     </div>
   );
 }
