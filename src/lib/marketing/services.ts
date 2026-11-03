@@ -160,7 +160,8 @@ export const USE_CASE_CARDS = [
     href: SERVICES.personas.href,
     title: "Personas",
     description: "Contacto de emergencia, alergias e instrucciones.",
-    detail: "Niños, adultos mayores o personas con discapacidad.",
+    detail:
+      "Niños, adultos mayores, personas con discapacidad, personas que andan en moto.",
     accent: "from-rose-500/20 to-orange-500/10",
     image: SERVICES.personas.image,
     imageAlt: SERVICES.personas.imageAlt,
