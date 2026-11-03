@@ -45,10 +45,27 @@ export function AdminStorePanel() {
     try {
       if (subTab === "products") {
         const res = await fetch("/api/admin/store-products");
-        if (res.ok) setProducts((await res.json()).products ?? []);
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          setProducts(data.products ?? []);
+          setError(null);
+        } else {
+          setProducts([]);
+          setError(
+            data.error ??
+              "No se pudieron cargar los productos. Si acabás de actualizar el sitio, ejecutá las migraciones 041 y 042 en la base de datos.",
+          );
+        }
       } else {
         const res = await fetch("/api/admin/store-orders");
-        if (res.ok) setOrders((await res.json()).orders ?? []);
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          setOrders(data.orders ?? []);
+          setError(null);
+        } else {
+          setOrders([]);
+          setError(data.error ?? "No se pudieron cargar los pedidos.");
+        }
       }
     } finally {
       setLoading(false);
@@ -297,6 +314,12 @@ export function AdminStorePanel() {
           {loading ? (
             <AdminLoading label="Cargando productos..." />
           ) : (
+            <>
+              {error && (
+                <p className={`mb-4 ${adminUi.alertError}`} role="alert">
+                  {error}
+                </p>
+              )}
             <div className={adminUi.tableWrap}>
               <table className="w-full min-w-[720px] text-left text-sm">
                 <thead className={adminUi.tableHead}>
@@ -358,6 +381,7 @@ export function AdminStorePanel() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </>
       )}

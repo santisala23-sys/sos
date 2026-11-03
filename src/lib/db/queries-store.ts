@@ -47,44 +47,118 @@ export type StoreOrderRow = {
   user_email?: string | null;
 };
 
-export async function listActiveStoreProducts(): Promise<StoreProductRow[]> {
+function isMissingStoreProductColumnError(error: unknown): boolean {
+  const msg = error instanceof Error ? error.message : String(error);
+  return (
+    msg.includes("gallery_urls") ||
+    msg.includes("discount_percent") ||
+    msg.includes("does not exist")
+  );
+}
+
+function normalizeStoreProductRow(row: Record<string, unknown>): StoreProductRow {
+  const gallery = row.gallery_urls;
+  let gallery_urls: string[] = [];
+  if (Array.isArray(gallery)) {
+    gallery_urls = gallery.filter((u): u is string => typeof u === "string");
+  }
+
+  const discount =
+    typeof row.discount_percent === "number" && Number.isFinite(row.discount_percent)
+      ? row.discount_percent
+      : 0;
+
+  return { ...row, gallery_urls, discount_percent: discount } as StoreProductRow;
+}
+
+async function selectStoreProducts(
+  options: { activeOnly?: boolean; id?: string },
+): Promise<StoreProductRow[]> {
   const sql = getSql();
-  const rows = await sql`
-    SELECT
-      id, name, slug, product_type, description, price_cents, price_label,
-      image_url, gallery_urls, discount_percent, sort_order, is_active, created_at, updated_at
-    FROM store_products
-    WHERE is_active = TRUE
-    ORDER BY sort_order ASC, name ASC
-  `;
-  return rows as StoreProductRow[];
+
+  const runModern = async () => {
+    if (options.id) {
+      return sql`
+        SELECT
+          id, name, slug, product_type, description, price_cents, price_label,
+          image_url, gallery_urls, discount_percent, sort_order, is_active, created_at, updated_at
+        FROM store_products
+        WHERE id = ${options.id}
+        LIMIT 1
+      `;
+    }
+    if (options.activeOnly) {
+      return sql`
+        SELECT
+          id, name, slug, product_type, description, price_cents, price_label,
+          image_url, gallery_urls, discount_percent, sort_order, is_active, created_at, updated_at
+        FROM store_products
+        WHERE is_active = TRUE
+        ORDER BY sort_order ASC, name ASC
+      `;
+    }
+    return sql`
+      SELECT
+        id, name, slug, product_type, description, price_cents, price_label,
+        image_url, gallery_urls, discount_percent, sort_order, is_active, created_at, updated_at
+      FROM store_products
+      ORDER BY sort_order ASC, name ASC
+    `;
+  };
+
+  const runLegacy = async () => {
+    if (options.id) {
+      return sql`
+        SELECT
+          id, name, slug, product_type, description, price_cents, price_label,
+          image_url, sort_order, is_active, created_at, updated_at
+        FROM store_products
+        WHERE id = ${options.id}
+        LIMIT 1
+      `;
+    }
+    if (options.activeOnly) {
+      return sql`
+        SELECT
+          id, name, slug, product_type, description, price_cents, price_label,
+          image_url, sort_order, is_active, created_at, updated_at
+        FROM store_products
+        WHERE is_active = TRUE
+        ORDER BY sort_order ASC, name ASC
+      `;
+    }
+    return sql`
+      SELECT
+        id, name, slug, product_type, description, price_cents, price_label,
+        image_url, sort_order, is_active, created_at, updated_at
+      FROM store_products
+      ORDER BY sort_order ASC, name ASC
+    `;
+  };
+
+  try {
+    const rows = await runModern();
+    return (rows as Record<string, unknown>[]).map(normalizeStoreProductRow);
+  } catch (error) {
+    if (!isMissingStoreProductColumnError(error)) throw error;
+    const rows = await runLegacy();
+    return (rows as Record<string, unknown>[]).map(normalizeStoreProductRow);
+  }
+}
+
+export async function listActiveStoreProducts(): Promise<StoreProductRow[]> {
+  return selectStoreProducts({ activeOnly: true });
 }
 
 export async function listAllStoreProducts(): Promise<StoreProductRow[]> {
-  const sql = getSql();
-  const rows = await sql`
-    SELECT
-      id, name, slug, product_type, description, price_cents, price_label,
-      image_url, gallery_urls, discount_percent, sort_order, is_active, created_at, updated_at
-    FROM store_products
-    ORDER BY sort_order ASC, name ASC
-  `;
-  return rows as StoreProductRow[];
+  return selectStoreProducts({});
 }
 
 export async function findStoreProductById(
   id: string,
 ): Promise<StoreProductRow | null> {
-  const sql = getSql();
-  const rows = await sql`
-    SELECT
-      id, name, slug, product_type, description, price_cents, price_label,
-      image_url, gallery_urls, discount_percent, sort_order, is_active, created_at, updated_at
-    FROM store_products
-    WHERE id = ${id}
-    LIMIT 1
-  `;
-  return (rows[0] as StoreProductRow | undefined) ?? null;
+  const rows = await selectStoreProducts({ id });
+  return rows[0] ?? null;
 }
 
 export async function createStoreProduct(input: {
