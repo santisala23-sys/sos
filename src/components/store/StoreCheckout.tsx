@@ -16,6 +16,7 @@ import {
 } from "@/lib/store/product-types";
 import { getStoreProductImages } from "@/lib/store/product-images";
 import { StoreProductPrice } from "@/components/store/StoreProductPrice";
+import { getStoreProPromoLabel } from "@/lib/store/pro-promo";
 import {
   formatCentsAsPesos,
   formatStorePriceForOrder,
@@ -110,6 +111,7 @@ function ProductCard({
             price_cents={product.price_cents}
             price_label={product.price_label}
             discount_percent={product.discount_percent}
+            promoLabel={getStoreProPromoLabel(product)}
           />
 
           {qty === 0 ? (

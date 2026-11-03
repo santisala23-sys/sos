@@ -1,8 +1,8 @@
 # Términos y Condiciones de Uso — SOSme
 
-**Versión:** 1.4  
-**Fecha de vigencia:** 14 de septiembre de 2026  
-**Última actualización:** 14 de septiembre de 2026
+**Versión:** 1.5  
+**Fecha de vigencia:** 3 de noviembre de 2026  
+**Última actualización:** 3 de noviembre de 2026
 
 ## Índice
 
@@ -154,7 +154,8 @@ El Operador trata estos datos únicamente para las finalidades descritas en la P
 Quien escanee un QR (**Escáner**) sin crear cuenta:
 
 - Genera un registro de escaneo (`scan_log`) con User-Agent del navegador
-- Puede compartir **ubicación GPS** de forma opcional, sujeta al consentimiento del dispositivo/navegador en el momento del escaneo
+- Puede quedar registrada una **zona aproximada** (ciudad o región) inferida de la conexión, si el servicio de hosting la informa. No es GPS, puede faltar y puede ser imprecisa
+- Puede compartir **ubicación GPS** de forma opcional, solo si toca el botón y el dispositivo la autoriza. Si el GPS falla, está apagado o lo rechaza, la alerta de escaneo igual se envía, con la zona aproximada si hubo o sin mapa
 - Puede enviar alertas SOS, notas y mensajes en un chat vinculado al evento
 - Recibe un token de sesión de escaneo (48 h) almacenado en localStorage y cookie
 

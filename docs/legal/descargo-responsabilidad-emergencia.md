@@ -31,7 +31,7 @@ Si vos o alguien más está en **peligro de vida**, sufrís una **emergencia mé
 
 - Mostrar contactos e instrucciones a quien escanea un QR
 - Notificar al Tutor o familia que alguien escaneó el perfil
-- Compartir ubicación aproximada si el escáner lo autoriza
+- Avisar al Tutor que el QR fue escaneado, a veces con una zona aproximada y, si quien escanea lo autoriza, con la ubicación GPS del celular. Las dos pueden faltar o ser imprecisas
 - Facilitar comunicación por chat durante un evento de escaneo
 
 ### SOSme NO garantiza:

@@ -44,12 +44,6 @@ export const HELP_FAQ: HelpFaqItem[] = [
       "Creá tu cuenta o iniciá sesión en sosme.com.ar. Después, con la cámara del celular, escaneá el QR del producto que compraste. Completá contactos e instrucciones — o vinculá un perfil que ya tengas. Cada producto SOSme tiene su propio QR; no se crea uno paralelo.",
   },
   {
-    id: "faq-objeto-ubicacion",
-    question: "¿Cómo funciona el QR de objeto y guardar ubicación?",
-    answer:
-      "Activá el QR desde el panel y completá los datos del dueño. Quien lo encuentre puede contactarte y guardar la ubicación del hallazgo. Vos también podés tocar Guardar ubicación en la tarjeta del objeto desde el panel (por ejemplo si estacionás el auto). Las ubicaciones se ven en el perfil del objeto y con un aviso en el panel principal.",
-  },
-  {
     id: "faq-alertas",
     question: "¿Cuándo recibo una alerta?",
     answer:
@@ -57,9 +51,9 @@ export const HELP_FAQ: HelpFaqItem[] = [
   },
   {
     id: "faq-perfiles-tipos",
-    question: "¿Qué diferencia hay entre Personas, Mascotas y Objetos?",
+    question: "¿Qué diferencia hay entre Personas y Mascotas?",
     answer:
-      "Son tres secciones del mismo panel, cada una con perfiles QR de emergencia adaptados al caso. Personas muestra en emergencia datos de salud en texto (tipo de sangre, alergias, condiciones/medicación, obra social) y SOS. Mascotas suma libreta sanitaria (privada) y QR de emergencia con contacto del dueño. Objetos permite que quien encuentre el bien guarde ubicación y te contacte.",
+      "Son dos secciones del mismo panel. Personas muestra en emergencia datos de salud en texto (tipo de sangre, alergias, condiciones/medicación, obra social) y SOS. Mascotas tiene un QR de emergencia con contacto del dueño y, aparte, la libreta sanitaria privada.",
   },
   {
     id: "faq-persona-sin-pdf",
@@ -113,13 +107,13 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-cambiar-nombre-tipo",
     question: "¿Puedo cambiar el nombre o el tipo de un QR después de crearlo?",
     answer:
-      "No desde el panel: podés editar contactos, instrucciones y el resto de la información, pero no el nombre ni el tipo (Persona, Mascota u Objeto). Si te equivocaste al crearlos, escribinos por los canales de contacto indicando la razón del cambio y a qué valor querés pasar el nombre o el tipo.",
+      "No desde el panel: podés editar contactos, instrucciones y el resto de la información, pero no el nombre ni el tipo (Persona o Mascota). Si te equivocaste al crearlos, escribinos por los canales de contacto indicando la razón del cambio y a qué valor querés pasar el nombre o el tipo.",
   },
   {
     id: "faq-co-tutoria",
     question: "¿Qué es la co-tutoría?",
     answer:
-      "Es compartir un perfil QR con otra cuenta SOSme (hasta 4 por perfil). La otra persona puede recibir alertas cuando escanean el QR, ver o editar el perfil, consultar la libreta sanitaria (mascotas) o guardar ubicación (objetos), según los permisos que vos elijas. Los perfiles compartidos aparecen en su panel en «Compartidos conmigo».",
+      "Es compartir un perfil QR con otra cuenta SOSme (hasta 4 por perfil). La otra persona puede recibir alertas cuando escanean el QR, ver o editar el perfil y, en mascotas, consultar la libreta sanitaria, según los permisos que vos elijas. Los perfiles compartidos aparecen en su panel en «Compartidos conmigo».",
   },
   {
     id: "faq-co-tutoria-invitar",
@@ -131,7 +125,13 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-plan-pro",
     question: "¿Qué es el Plan Pro y qué pasa después de los 6 meses?",
     answer:
-      "Al activar un producto SOSme incluís 6 meses de Plan Pro sin cargo. El Pro suma funciones como co-tutoría y libreta sanitaria completa. Pasados esos 6 meses, el Plan Base sigue activo para siempre: tu QR de emergencia, alertas, ubicación y chat no se cortan. Si querés mantener las funciones Pro, podés renovarlo cuando te lo ofrezcamos desde el panel o por contacto.",
+      "Al activar un producto SOSme incluís Plan Pro sin cargo por el plazo que figura en el producto. En la promo actual de la tienda son 12 meses: en mascotas incluye libreta sanitaria y co-tutoría; en personas, co-tutoría. Si el producto no indica otro plazo, son 6 meses. Pasado ese período, el Plan Base sigue activo para siempre: tu QR de emergencia, alertas, ubicación y chat no se cortan. Si querés mantener las funciones Pro, podés renovarlo cuando te lo ofrezcamos desde el panel o por contacto.",
+  },
+  {
+    id: "faq-ubicacion",
+    question: "¿Siempre llega la ubicación exacta?",
+    answer:
+      "No. Al abrir el perfil puede llegar una zona aproximada (ciudad o región) según la conexión de quien escanea. La ubicación del celular llega solo si toca Compartir mi ubicación y el navegador la permite. Puede fallar, estar desactivada o rechazarla: en ese caso igual te llega la alerta, con la zona aproximada si hubo, o sin mapa.",
   },
   {
     id: "faq-plan-base-siempre",
@@ -238,21 +238,20 @@ export const HELP_MANUAL: HelpManualChapter[] = [
       },
       {
         id: "panel-secciones",
-        title: "Secciones Personas, Objetos y Mascotas",
+        title: "Secciones Personas y Mascotas",
         paragraphs: [
-          "El panel está dividido en tres bloques colapsables. Cada uno agrupa perfiles del mismo tipo:",
+          "El panel está dividido en dos bloques colapsables. Cada uno agrupa perfiles del mismo tipo:",
         ],
         bullets: [
           "Personas (rosa): familiares o vos mismo. Contactos, datos de salud en texto (sangre, alergias, medicación, obra social) y SOS.",
-          "Objetos (celeste): autos y equipos. Contacto del dueño + opción de guardar ubicación.",
-          "Mascotas (verde): libreta sanitaria + QR de emergencia (contacto del dueño e instrucciones) para si se pierde.",
+          "Mascotas (verde): QR de emergencia para si se pierde, y libreta sanitaria aparte.",
         ],
       },
       {
         id: "panel-vacio",
         title: "Secciones vacías",
         paragraphs: [
-          "Personas, Objetos y Mascotas siempre aparecen en el panel, aunque estén vacías.",
+          "Personas y Mascotas siempre aparecen en el panel, aunque estén vacías.",
           "En cada sección vacía hay un botón + que te recuerda activar un producto nuevo con la cámara del celular.",
         ],
       },
@@ -288,12 +287,11 @@ export const HELP_MANUAL: HelpManualChapter[] = [
           "La persona que escanea ve una página de ayuda con:",
         ],
         bullets: [
-          "Foto y nombre del beneficiario (persona, mascota u objeto).",
+          "Foto y nombre del beneficiario (persona o mascota).",
           "Botones para llamar o escribir por WhatsApp a los contactos de emergencia (el número no se muestra en texto plano).",
           "En Personas: tipo de sangre, alergias, condiciones/medicación y obra social, si los cargaste.",
-          "En Mascotas: contacto del dueño e instrucciones.",
-          "En Objetos: opción de guardar ubicación del hallazgo.",
-          "Opción de compartir ubicación del escaneo (si acepta).",
+          "En Mascotas: contacto del dueño e instrucciones. No la libreta ni el historial del veterinario.",
+          "Al abrir el perfil puede registrarse una zona aproximada. La ubicación del celular llega solo si quien escanea acepta compartirla.",
           "Botón SOS / Necesito ayuda en perfiles de persona.",
           "Chat en vivo para coordinar con la familia.",
         ],
@@ -311,7 +309,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         title: "Editar un perfil: qué sí y qué no",
         paragraphs: [
           "Desde Editar perfil podés actualizar contactos, instrucciones, foto, datos de salud (en Personas) y activar o desactivar el perfil.",
-          "El nombre del beneficiario y el tipo de QR (Persona, Mascota u Objeto) quedan fijos después de crearlo. No se pueden cambiar desde el panel.",
+          "El nombre del beneficiario y el tipo de QR (Persona o Mascota) quedan fijos después de crearlo. No se pueden cambiar desde el panel.",
           "Si te equivocaste al cargar el nombre o el tipo, escribinos por los canales de contacto con el requerimiento: indicá la razón del cambio y a qué valor querés pasarlo (nombre nuevo y/o tipo correcto).",
         ],
       },
@@ -485,52 +483,8 @@ export const HELP_MANUAL: HelpManualChapter[] = [
     ],
   },
   {
-    id: "objetos",
-    title: "9. Perfiles de Objetos",
-    summary: "Autos y equipos con QR de recuperación y guardado de ubicación.",
-    subsections: [
-      {
-        id: "objetos-funcion",
-        title: "Para qué sirven",
-        paragraphs: [
-          "Un perfil de Objeto es un QR para autos, equipos u otros bienes.",
-          "Si alguien lo encuentra y escanea, ve cómo contactarte y puede guardar la ubicación del hallazgo.",
-          "Vos también podés guardar ubicación desde el panel (útil, por ejemplo, al estacionar el auto).",
-        ],
-      },
-      {
-        id: "objetos-crear",
-        title: "Crear, imprimir y pegar el QR",
-        paragraphs: [
-          "Panel → sección Objetos → tocá + y escaneá el QR del producto.",
-          "Completá nombre o descripción, contacto e instrucciones (qué hacer si lo encuentran).",
-          "Guardá, tocá Ver QR, descargá PNG o PDF e imprimilo o pegalo en el objeto.",
-        ],
-      },
-      {
-        id: "objetos-ubicacion",
-        title: "Guardar ubicación",
-        paragraphs: [
-          "Hay dos formas de registrar un punto en el mapa:",
-        ],
-        bullets: [
-          "Desde el panel: en la tarjeta del objeto tocá Guardar ubicación (usa el GPS de tu dispositivo).",
-          "Desde el QR público: quien encuentra el objeto puede guardar la ubicación del hallazgo al escanear.",
-        ],
-      },
-      {
-        id: "objetos-ver-ubicaciones",
-        title: "Dónde ves las ubicaciones",
-        paragraphs: [
-          "Cuando hay ubicaciones guardadas, aparece un aviso en el panel principal.",
-          "Entrá al perfil del objeto para ver el mapa, el historial de puntos y la última posición registrada.",
-        ],
-      },
-    ],
-  },
-  {
     id: "actividad",
-    title: "10. Actividad y alertas",
+    title: "9. Actividad y alertas",
     summary: "Cómo revisar escaneos, responder y marcar eventos como leídos.",
     subsections: [
       {
@@ -558,7 +512,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
   },
   {
     id: "activar-producto",
-    title: "11. Activar un producto físico",
+    title: "10. Activar un producto físico",
     summary: "Vincular una chapita o collar comprado a tu cuenta.",
     subsections: [
       {
@@ -583,7 +537,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
   },
   {
     id: "cuenta",
-    title: "12. Mi cuenta y soporte",
+    title: "11. Mi cuenta y soporte",
     summary: "Perfil de usuario, límites del plan y dónde pedir ayuda.",
     subsections: [
       {
@@ -600,7 +554,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         paragraphs: [
           "El contador X/Y QR activos en el menú indica cuántos perfiles tenés respecto al plan.",
           "Si intentás crear más y llegaste al tope, aparece un aviso con enlace a contacto para ampliar.",
-          "Con el Plan Base tenés las funciones esenciales de emergencia. El Plan Pro amplía capacidades (ver capítulo 14).",
+          "Con el Plan Base tenés las funciones esenciales de emergencia. El Plan Pro amplía capacidades (ver capítulo 13).",
         ],
       },
       {
@@ -615,7 +569,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
   },
   {
     id: "co-tutoria",
-    title: "13. Co-tutoría",
+    title: "12. Co-tutoría",
     summary: "Compartí un perfil con familiares u otras cuentas SOSme.",
     subsections: [
       {
@@ -649,7 +603,6 @@ export const HELP_MANUAL: HelpManualChapter[] = [
           "Ver perfil: acceder al detalle y actividad del perfil en el panel.",
           "Editar perfil: modificar contactos, instrucciones y foto.",
           "Ver libreta sanitaria: solo en perfiles de Mascota.",
-          "Guardar ubicación: solo en perfiles de Objeto.",
         ],
       },
       {
@@ -673,8 +626,8 @@ export const HELP_MANUAL: HelpManualChapter[] = [
   },
   {
     id: "planes",
-    title: "14. Plan Base y Plan Pro",
-    summary: "Qué incluye cada plan y qué pasa al terminar los 6 meses de Pro bonificado.",
+    title: "13. Plan Base y Plan Pro",
+    summary: "Qué incluye cada plan y qué pasa cuando termina el Pro bonificado.",
     subsections: [
       {
         id: "planes-resumen",
@@ -689,15 +642,16 @@ export const HELP_MANUAL: HelpManualChapter[] = [
       },
       {
         id: "planes-seis-meses",
-        title: "6 meses de Pro incluidos",
+        title: "Pro incluido al activar",
         paragraphs: [
-          "Al activar un producto físico SOSme (chapita, collar, sticker, etc.), recibís 6 meses de Plan Pro sin cargo adicional.",
-          "El contador empieza cuando activás el producto en tu cuenta. Durante ese período tenés acceso a todas las funciones Pro.",
+          "Al activar un producto físico SOSme recibís Plan Pro sin cargo por el plazo que figura en ese producto.",
+          "En la promo actual de la tienda son 12 meses. En mascotas incluye libreta sanitaria y co-tutoría. En personas, co-tutoría.",
+          "Si el producto no indica otro plazo, son 6 meses. El contador empieza cuando activás el producto en tu cuenta.",
         ],
       },
       {
         id: "planes-despues-pro",
-        title: "Después de los 6 meses",
+        title: "Cuando termina el Pro bonificado",
         paragraphs: [
           "Cuando termina el período bonificado de Pro, tu cuenta pasa automáticamente al Plan Base.",
           "Lo esencial de emergencia no se interrumpe: el QR sigue funcionando, recibís alertas y podés usar el chat.",

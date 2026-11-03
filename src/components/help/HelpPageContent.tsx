@@ -67,7 +67,7 @@ const TOPIC_CHIPS = [
   { label: "Libreta sanitaria", query: "libreta" },
   { label: "Alertas push", query: "alertas" },
   { label: "Google / contraseña", query: "google" },
-  { label: "Objetos y ubicación", query: "objeto" },
+  { label: "Ubicación", query: "ubicación" },
   { label: "Veterinario", query: "veterinario" },
 ] as const;
 

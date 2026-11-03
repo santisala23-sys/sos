@@ -8,6 +8,7 @@ type StoreProductPriceProps = {
   price_cents: number | null;
   price_label: string;
   discount_percent?: number | null;
+  promoLabel?: string | null;
   className?: string;
   size?: "sm" | "md";
 };
@@ -16,6 +17,7 @@ export function StoreProductPrice({
   price_cents,
   price_label,
   discount_percent,
+  promoLabel,
   className,
   size = "md",
 }: StoreProductPriceProps) {
@@ -52,24 +54,51 @@ export function StoreProductPrice({
             {formatCentsAsPesos(pricing.saleCents!)}
           </span>
         </div>
-        <span
-          className={cn(
-            "inline-block rounded-full bg-gradient-to-r from-rose-500 to-rose-600 font-bold uppercase tracking-wide text-white shadow-sm",
-            size === "sm"
-              ? "px-2.5 py-0.5 text-[10px]"
-              : "px-3 py-1 text-xs",
-          )}
-          aria-label={`${pricing.discountPercent} por ciento de descuento`}
-        >
-          {pricing.discountPercent}% OFF
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={cn(
+              "inline-block rounded-full bg-gradient-to-r from-rose-500 to-rose-600 font-bold uppercase tracking-wide text-white shadow-sm",
+              size === "sm"
+                ? "px-2.5 py-0.5 text-[10px]"
+                : "px-3 py-1 text-xs",
+            )}
+            aria-label={`${pricing.discountPercent} por ciento de descuento`}
+          >
+            {pricing.discountPercent}% OFF
+          </span>
+          {promoLabel ? <ProPromoPill label={promoLabel} size={size} /> : null}
+        </div>
       </div>
     );
   }
 
   return (
-    <p className={cn(saleClass, "text-neutral-900", className)}>
-      {pricing.displayLabel}
-    </p>
+    <div className={className}>
+      <p className={cn(saleClass, "text-neutral-900")}>{pricing.displayLabel}</p>
+      {promoLabel ? (
+        <div className="mt-2">
+          <ProPromoPill label={promoLabel} size={size} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ProPromoPill({
+  label,
+  size,
+}: {
+  label: string;
+  size: "sm" | "md";
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-block rounded-full bg-violet-600 font-bold text-white shadow-sm",
+        size === "sm" ? "px-2.5 py-0.5 text-[10px]" : "px-3 py-1 text-xs",
+      )}
+    >
+      {label}
+    </span>
   );
 }
