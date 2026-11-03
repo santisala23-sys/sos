@@ -2,6 +2,7 @@ import { getSql } from "@/lib/db/index";
 import { slugify } from "@/lib/utils/slug";
 import type { StoreOrderStatus, StoreProductType } from "@/lib/store/product-types";
 import { isStoreOrderStatus, isStoreProductType } from "@/lib/store/product-types";
+import { formatStorePriceForOrder } from "@/lib/store/store-pricing";
 
 export type StoreProductRow = {
   id: string;
@@ -11,6 +12,7 @@ export type StoreProductRow = {
   description: string;
   price_cents: number | null;
   price_label: string;
+  discount_percent: number;
   image_url: string | null;
   gallery_urls: string[];
   sort_order: number;
@@ -50,7 +52,7 @@ export async function listActiveStoreProducts(): Promise<StoreProductRow[]> {
   const rows = await sql`
     SELECT
       id, name, slug, product_type, description, price_cents, price_label,
-      image_url, gallery_urls, sort_order, is_active, created_at, updated_at
+      image_url, gallery_urls, discount_percent, sort_order, is_active, created_at, updated_at
     FROM store_products
     WHERE is_active = TRUE
     ORDER BY sort_order ASC, name ASC
@@ -63,7 +65,7 @@ export async function listAllStoreProducts(): Promise<StoreProductRow[]> {
   const rows = await sql`
     SELECT
       id, name, slug, product_type, description, price_cents, price_label,
-      image_url, gallery_urls, sort_order, is_active, created_at, updated_at
+      image_url, gallery_urls, discount_percent, sort_order, is_active, created_at, updated_at
     FROM store_products
     ORDER BY sort_order ASC, name ASC
   `;
@@ -77,7 +79,7 @@ export async function findStoreProductById(
   const rows = await sql`
     SELECT
       id, name, slug, product_type, description, price_cents, price_label,
-      image_url, gallery_urls, sort_order, is_active, created_at, updated_at
+      image_url, gallery_urls, discount_percent, sort_order, is_active, created_at, updated_at
     FROM store_products
     WHERE id = ${id}
     LIMIT 1
@@ -93,6 +95,7 @@ export async function createStoreProduct(input: {
   price_label?: string;
   image_url?: string | null;
   gallery_urls?: string[];
+  discount_percent?: number;
   sort_order?: number;
   is_active?: boolean;
 }): Promise<StoreProductRow> {
@@ -106,7 +109,7 @@ export async function createStoreProduct(input: {
       const rows = await sql`
         INSERT INTO store_products (
           name, slug, product_type, description, price_cents, price_label,
-          image_url, gallery_urls, sort_order, is_active
+          image_url, gallery_urls, discount_percent, sort_order, is_active
         )
         VALUES (
           ${input.name.trim()},
@@ -117,12 +120,13 @@ export async function createStoreProduct(input: {
           ${input.price_label?.trim() || "Consultar"},
           ${input.image_url?.trim() || null},
           ${JSON.stringify(input.gallery_urls ?? [])},
+          ${input.discount_percent ?? 0},
           ${input.sort_order ?? 0},
           ${input.is_active ?? true}
         )
         RETURNING
           id, name, slug, product_type, description, price_cents, price_label,
-          image_url, gallery_urls, sort_order, is_active, created_at, updated_at
+          image_url, gallery_urls, discount_percent, sort_order, is_active, created_at, updated_at
       `;
       return rows[0] as StoreProductRow;
     } catch (error) {
@@ -145,6 +149,7 @@ export async function updateStoreProduct(
     price_label: string;
     image_url: string | null;
     gallery_urls: string[];
+    discount_percent: number;
     sort_order: number;
     is_active: boolean;
   }>,
@@ -167,13 +172,14 @@ export async function updateStoreProduct(
           ? input.gallery_urls
           : existing.gallery_urls ?? [],
       )},
+      discount_percent = ${input.discount_percent ?? existing.discount_percent},
       sort_order = ${input.sort_order ?? existing.sort_order},
       is_active = ${input.is_active ?? existing.is_active},
       updated_at = NOW()
     WHERE id = ${id}
     RETURNING
       id, name, slug, product_type, description, price_cents, price_label,
-      image_url, gallery_urls, sort_order, is_active, created_at, updated_at
+      image_url, gallery_urls, discount_percent, sort_order, is_active, created_at, updated_at
   `;
   return (rows[0] as StoreProductRow | undefined) ?? null;
 }
@@ -311,9 +317,11 @@ export async function createStoreOrder(input: {
         ${product.name},
         ${product.product_type},
         ${qty},
-        ${product.price_cents != null && product.price_cents > 0
-          ? `$${(product.price_cents / 100).toLocaleString("es-AR")}`
-          : product.price_label}
+        ${formatStorePriceForOrder({
+          price_cents: product.price_cents,
+          price_label: product.price_label,
+          discount_percent: product.discount_percent,
+        })}
       )
     `;
   }

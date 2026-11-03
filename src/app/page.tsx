@@ -18,7 +18,14 @@ export default async function HomePage() {
       <main>
         {/* Hero */}
         <section className="mx-auto max-w-[88rem] px-4 pb-24 pt-8 sm:px-6 sm:pt-12 lg:px-8">
-          <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] md:gap-12 lg:gap-16 xl:gap-20">
+          <div className="grid items-center gap-10 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1fr)] md:gap-12 lg:gap-16 xl:gap-20">
+            <div className="relative mx-auto w-full max-w-md md:max-w-none md:justify-self-start">
+              <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-violet-400/20 via-indigo-300/15 to-rose-300/20 blur-2xl" />
+              <div className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-violet-500/25">
+                <HeroImageCarousel />
+              </div>
+            </div>
+
             <div className="text-center md:text-left">
               <h1 className="text-3xl font-black leading-[1.08] tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
                 <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-700 bg-clip-text text-transparent">
@@ -55,13 +62,6 @@ export default async function HomePage() {
                     Activar mi producto
                   </Button>
                 </Link>
-              </div>
-            </div>
-
-            <div className="relative mx-auto w-full max-w-md md:max-w-none md:justify-self-end">
-              <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-violet-400/20 via-indigo-300/15 to-rose-300/20 blur-2xl" />
-              <div className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-violet-500/25">
-                <HeroImageCarousel />
               </div>
             </div>
           </div>

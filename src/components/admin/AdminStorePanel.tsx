@@ -14,6 +14,7 @@ import { formatDateTime } from "@/lib/utils/format";
 import { AdminLoading, AdminSubTabs } from "@/components/admin/AdminUiParts";
 import { adminUi } from "@/components/admin/adminUi";
 import { productGalleryUrlsForForm } from "@/lib/store/gallery-urls";
+import { centsToPesosInput } from "@/lib/store/store-pricing";
 
 type StoreSubTab = "products" | "orders";
 
@@ -21,7 +22,8 @@ const emptyProductForm = {
   name: "",
   product_type: "colgante",
   description: "",
-  price_cents: "",
+  price_pesos: "",
+  discount_percent: "",
   price_label: "Consultar",
   gallery_urls_text: "",
   sort_order: "0",
@@ -69,7 +71,11 @@ export function AdminStorePanel() {
       name: product.name,
       product_type: product.product_type,
       description: product.description,
-      price_cents: product.price_cents != null ? String(product.price_cents) : "",
+      price_pesos: centsToPesosInput(product.price_cents),
+      discount_percent:
+        (product.discount_percent ?? 0) > 0
+          ? String(product.discount_percent)
+          : "",
       price_label: product.price_label,
       gallery_urls_text: productGalleryUrlsForForm(product),
       sort_order: String(product.sort_order),
@@ -86,7 +92,10 @@ export function AdminStorePanel() {
       name: form.name,
       product_type: form.product_type,
       description: form.description,
-      price_cents: form.price_cents ? Number(form.price_cents) : null,
+      price_pesos: form.price_pesos,
+      discount_percent: form.discount_percent
+        ? Number(form.discount_percent)
+        : 0,
       price_label: form.price_label || "Consultar",
       gallery_urls_text: form.gallery_urls_text,
       sort_order: Number(form.sort_order) || 0,
@@ -195,18 +204,39 @@ export function AdminStorePanel() {
                 />
               </label>
               <label className={adminUi.label}>
-                Precio (centavos ARS, opcional)
+                Precio en pesos (opcional)
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={form.price_pesos}
+                  onChange={(e) => setForm({ ...form, price_pesos: e.target.value })}
+                  placeholder="Ej. 24.000"
+                  className={`mt-1.5 w-full ${adminUi.inputPlain}`}
+                />
+                <span className="mt-1 block text-xs font-normal text-neutral-500">
+                  Podés usar punto de miles: 24.000 o 24000.
+                </span>
+              </label>
+              <label className={adminUi.label}>
+                Descuento (%)
                 <input
                   type="number"
                   min={0}
-                  value={form.price_cents}
-                  onChange={(e) => setForm({ ...form, price_cents: e.target.value })}
-                  placeholder="Ej. 450000 = $4500"
+                  max={100}
+                  value={form.discount_percent}
+                  onChange={(e) =>
+                    setForm({ ...form, discount_percent: e.target.value })
+                  }
+                  placeholder="Ej. 50"
                   className={`mt-1.5 w-full ${adminUi.inputPlain}`}
                 />
+                <span className="mt-1 block text-xs font-normal text-neutral-500">
+                  En la tienda se tacha el precio y se muestra el final con el
+                  descuento.
+                </span>
               </label>
-              <label className={adminUi.label}>
-                Etiqueta de precio
+              <label className={`${adminUi.label} sm:col-span-2`}>
+                Etiqueta si no hay precio numérico
                 <input
                   value={form.price_label}
                   onChange={(e) => setForm({ ...form, price_label: e.target.value })}
@@ -287,7 +317,11 @@ export function AdminStorePanel() {
                         {getStoreProductTypeLabel(p.product_type)}
                       </td>
                       <td className={adminUi.tableCell}>
-                        {formatStorePrice(p.price_cents, p.price_label)}
+                        {formatStorePrice(
+                          p.price_cents,
+                          p.price_label,
+                          p.discount_percent,
+                        )}
                       </td>
                       <td className={`${adminUi.tableCell} tabular-nums`}>{p.sort_order}</td>
                       <td className={adminUi.tableCell}>

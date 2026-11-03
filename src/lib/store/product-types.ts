@@ -1,3 +1,5 @@
+import { resolveStoreProductPricing } from "@/lib/store/store-pricing";
+
 export type StoreProductType =
   | "collar"
   | "colgante"
@@ -56,9 +58,11 @@ export function getStoreOrderStatusLabel(status: StoreOrderStatus | string): str
 export function formatStorePrice(
   priceCents: number | null | undefined,
   priceLabel: string,
+  discountPercent?: number | null,
 ): string {
-  if (priceCents != null && priceCents > 0) {
-    return `$${(priceCents / 100).toLocaleString("es-AR")}`;
-  }
-  return priceLabel || "Consultar";
+  return resolveStoreProductPricing({
+    price_cents: priceCents,
+    price_label: priceLabel,
+    discount_percent: discountPercent,
+  }).displayLabel;
 }

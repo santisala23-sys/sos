@@ -11,6 +11,7 @@ export const COLLAR_QR_HUESO_FALLBACK: StoreProductRow = {
     "Chapita circular celeste con mosquetón. QR en el frente e identificación «Escaneame» con diseño hueso. Resistente al agua.",
   price_cents: null,
   price_label: "Consultar",
+  discount_percent: 0,
   image_url: "/images/products/collar-qr-hueso.jpg",
   gallery_urls: [],
   sort_order: 1,
@@ -28,6 +29,7 @@ export const COLLAR_QR_PATITA_FALLBACK: StoreProductRow = {
     "Chapita circular celeste con mosquetón. QR en el frente e identificación «Escaneame» con huella. Resistente al agua.",
   price_cents: null,
   price_label: "Consultar",
+  discount_percent: 0,
   image_url: "/images/products/collar-qr-patita.jpg",
   gallery_urls: [
     "/images/products/collar-patita-celeste-frente.jpg",

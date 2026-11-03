@@ -14,10 +14,11 @@ import {
 import type { StoreProductRow } from "@/lib/db/queries-store";
 import {
   STORE_PRODUCT_TYPES,
-  formatStorePrice,
   getStoreProductTypeLabel,
 } from "@/lib/store/product-types";
 import { getStoreProductImages } from "@/lib/store/product-images";
+import { StoreProductPrice } from "@/components/store/StoreProductPrice";
+import { formatStorePriceForOrder } from "@/lib/store/store-pricing";
 import { ProductImageCarousel } from "@/components/store/ProductImageCarousel";
 import {
   buildStoreCartWhatsAppMessage,
@@ -98,9 +99,11 @@ function ProductCard({
         </p>
 
         <div className="mt-4 border-t border-violet-100/80 pt-4">
-          <p className="text-lg font-bold tabular-nums text-neutral-900">
-            {formatStorePrice(product.price_cents, product.price_label)}
-          </p>
+          <StoreProductPrice
+            price_cents={product.price_cents}
+            price_label={product.price_label}
+            discount_percent={product.discount_percent}
+          />
 
           {qty === 0 ? (
             <Button
@@ -193,10 +196,11 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
             items: cartItems.map(({ product, quantity }) => ({
               product_name: product.name,
               quantity,
-              unit_price_label: formatStorePrice(
-                product.price_cents,
-                product.price_label,
-              ),
+              unit_price_label: formatStorePriceForOrder({
+                price_cents: product.price_cents,
+                price_label: product.price_label,
+                discount_percent: product.discount_percent,
+              }),
             })),
           }),
         )
@@ -479,7 +483,12 @@ export function StoreCheckout({ products }: StoreCheckoutProps) {
                     {product.name}
                   </p>
                   <p className="text-xs text-neutral-500">
-                    {formatStorePrice(product.price_cents, product.price_label)}
+                    <StoreProductPrice
+                      price_cents={product.price_cents}
+                      price_label={product.price_label}
+                      discount_percent={product.discount_percent}
+                      size="sm"
+                    />
                   </p>
                 </div>
                 <div className="flex items-center rounded-lg border border-neutral-200">

@@ -7,6 +7,7 @@ import {
 } from "@/lib/db/queries-store";
 import { isStoreProductType } from "@/lib/store/product-types";
 import { resolveStoreProductMedia } from "@/lib/store/gallery-urls";
+import { parseStoreProductPricePayload } from "@/lib/store/store-pricing";
 
 export const PATCH = withApi(
   { requireAdmin: true, rateLimit: "admin" },
@@ -22,7 +23,9 @@ export const PATCH = withApi(
       product_type?: string;
       description?: string;
       price_cents?: number | null;
+      price_pesos?: string;
       price_label?: string;
+      discount_percent?: number | null;
       image_url?: string | null;
       gallery_urls_text?: string;
       sort_order?: number;
@@ -47,14 +50,35 @@ export const PATCH = withApi(
           })
         : null;
 
+    let pricePatch: Partial<ReturnType<typeof parseStoreProductPricePayload>> = {};
+    if (
+      body.price_pesos !== undefined ||
+      body.price_cents !== undefined ||
+      body.price_label !== undefined ||
+      body.discount_percent !== undefined
+    ) {
+      try {
+        pricePatch = parseStoreProductPricePayload(body);
+      } catch {
+        return NextResponse.json({ error: "Precio inválido" }, { status: 400 });
+      }
+    }
+
     const product = await updateStoreProduct(id, {
       ...(body.name !== undefined ? { name: body.name } : {}),
       ...(body.product_type && isStoreProductType(body.product_type)
         ? { product_type: body.product_type }
         : {}),
       ...(body.description !== undefined ? { description: body.description } : {}),
-      ...(body.price_cents !== undefined ? { price_cents: body.price_cents } : {}),
-      ...(body.price_label !== undefined ? { price_label: body.price_label } : {}),
+      ...(pricePatch.price_cents !== undefined
+        ? { price_cents: pricePatch.price_cents }
+        : {}),
+      ...(pricePatch.price_label !== undefined
+        ? { price_label: pricePatch.price_label }
+        : {}),
+      ...(pricePatch.discount_percent !== undefined
+        ? { discount_percent: pricePatch.discount_percent }
+        : {}),
       ...(media
         ? { image_url: media.image_url, gallery_urls: media.gallery_urls }
         : {}),
