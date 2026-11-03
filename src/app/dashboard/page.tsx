@@ -271,7 +271,7 @@ export default function DashboardPage() {
               listo.
               {activatedProfile.profile_type === "pet"
                 ? " Abrilo desde tus perfiles para ver la libreta sanitaria."
-                : ' En "Ver QR" descargá el código de la página y el de datos sin internet.'}
+                : ' Descargá el PNG con "Ver QR".'}
             </p>
           </div>
         </div>

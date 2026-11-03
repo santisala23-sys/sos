@@ -10,7 +10,6 @@ import { ObjectSavedLocationsHistory } from "@/components/dashboard/ObjectSavedL
 import { SavedLocationPanel } from "@/components/dashboard/SavedLocationPanel";
 import { dashboardHashForProfileType } from "@/lib/dashboard/profile-section-order";
 import { PROFILE_TYPES } from "@/lib/profile-types";
-import { offlineQrFromProfile } from "@/lib/qr/offline-payload";
 import { getTutorPublicPreviewUrl } from "@/lib/utils/slug";
 import {
   getGoogleMapsEmbedUrl,
@@ -264,7 +263,6 @@ export default function ProfileDetailPage() {
             <PublicQrButton
               slug={profile.slug}
               beneficiaryName={profile.beneficiary_name}
-              offline={offlineQrFromProfile(profile)}
               className="w-full"
             />
           </div>

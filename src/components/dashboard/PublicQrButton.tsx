@@ -5,19 +5,16 @@ import { createPortal } from "react-dom";
 import { QrCode, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { QrCodeDisplay } from "@/components/dashboard/QrCodeDisplay";
-import type { OfflineQrInput } from "@/lib/qr/offline-payload";
 
 type PublicQrButtonProps = {
   slug: string;
   beneficiaryName: string;
-  offline: OfflineQrInput;
   className?: string;
 };
 
 export function PublicQrButton({
   slug,
   beneficiaryName,
-  offline,
   className,
 }: PublicQrButtonProps) {
   const [open, setOpen] = useState(false);
@@ -66,7 +63,7 @@ export function PublicQrButton({
                 aria-label="Cerrar"
                 onClick={() => setOpen(false)}
               />
-              <div className="relative my-auto w-full max-w-lg overflow-hidden rounded-3xl border border-violet-100 bg-white shadow-2xl shadow-violet-500/20">
+              <div className="relative my-auto w-full max-w-md overflow-hidden rounded-3xl border border-violet-100 bg-white shadow-2xl shadow-violet-500/20">
                 <div className="flex items-start justify-between gap-3 bg-gradient-to-br from-violet-600 to-indigo-600 px-6 py-5 text-white">
                   <div>
                     <h2 id="public-qr-title" className="text-xl font-black">
@@ -90,7 +87,6 @@ export function PublicQrButton({
                   <QrCodeDisplay
                     slug={slug}
                     beneficiaryName={beneficiaryName}
-                    offline={offline}
                   />
                 </div>
               </div>

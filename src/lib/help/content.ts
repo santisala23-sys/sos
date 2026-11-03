@@ -89,7 +89,7 @@ export const HELP_FAQ: HelpFaqItem[] = [
     id: "faq-qr-descargar",
     question: "¿Cómo descargo o imprimo mi QR?",
     answer:
-      "En la tarjeta del perfil, tocá Ver QR. Ahí hay dos códigos: uno abre la página pública (necesita internet) y otro, «Sin internet», trae nombre, teléfonos y datos críticos en el propio código. Descargá el PNG o imprimí el PDF y llevá el segundo junto a la chapita o la credencial. Si cambiás un teléfono o un dato de salud, volvé a imprimirlo.",
+      "En la tarjeta del perfil, tocá Ver QR. Ahí podés descargar PNG o PDF. Ese QR apunta siempre al perfil público de emergencia.",
   },
   {
     id: "faq-perfil-inactivo",
@@ -299,16 +299,6 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         ],
       },
       {
-        id: "qr-sin-internet",
-        title: "Si no hay internet",
-        paragraphs: [
-          "El QR de la chapita, el collar o el sticker abre la página del perfil. Sin internet esa página no carga y no se ve el teléfono ni los datos de salud.",
-          "En Ver QR hay un segundo código, «Sin internet». El celular lee el texto del código sin abrir una página: nombre, teléfonos y, en personas, sangre, alergias y una nota corta. Con eso se puede llamar si hay señal de teléfono, aunque no haya datos móviles.",
-          "Ese segundo código se imprime o se descarga aparte y se lleva junto al producto (etiqueta, credencial, casco o cartera). El QR de fábrica no se actualiza solo.",
-          "Si cambiás un teléfono o un dato de salud, volvé a imprimir el código sin conexión. El número queda visible para quien lo escanea. En la página pública el teléfono sigue oculto detrás del botón de llamar.",
-        ],
-      },
-      {
         id: "qr-preview",
         title: "Vista previa vs perfil público real",
         paragraphs: [
@@ -395,7 +385,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
           "Abrir libreta sanitaria: entra al historial clínico completo.",
           "Ver perfil público: vista previa del QR de emergencia (contacto del dueño).",
           "Editar datos: foto, contactos e instrucciones del perfil QR (no el nombre ni el tipo).",
-          "Ver QR: el código que abre la página y otro para leer nombre y teléfonos sin internet.",
+          "Ver QR: descarga del QR de emergencia para la chapita.",
         ],
       },
       {
@@ -514,7 +504,7 @@ export const HELP_MANUAL: HelpManualChapter[] = [
         paragraphs: [
           "Panel → sección Objetos → tocá + y escaneá el QR del producto.",
           "Completá nombre o descripción, contacto e instrucciones (qué hacer si lo encuentran).",
-          "Guardá, tocá Ver QR, descargá el PNG o el PDF e imprimilo. El código «Sin internet» se puede pegar junto al QR del producto para que se vean los datos aunque no haya señal.",
+          "Guardá, tocá Ver QR, descargá PNG o PDF e imprimilo o pegalo en el objeto.",
         ],
       },
       {
