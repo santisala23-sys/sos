@@ -29,7 +29,7 @@ const STEPS: ReadonlyArray<{
   {
     step: "01",
     title: "Abrís la libreta y compartís el QR",
-    text: "Desde el panel de tu mascota ves vacunas, próximas dosis e historial. Generás un acceso temporal de 24 h para el veterinario.",
+    text: "Desde el panel ves vacunas, próximas dosis e historial. El acceso del veterinario es otro QR, distinto al de la chapita, y dura 24 horas.",
     media: {
       kind: "video",
       src: `${MEDIA_BASE}/demo-tutor-libreta.mp4`,
@@ -117,9 +117,9 @@ export function PetHealthBookletSection({
             </span>
           </h2>
           <p className="mt-3 text-lg font-medium leading-snug text-neutral-600 sm:text-xl">
-            El veterinario escanea, carga la visita y{" "}
+            No es el QR de la chapita. Generás un acceso de 24 horas para que{" "}
             <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-700 bg-clip-text font-semibold text-transparent">
-              vos tenés el historial
+              el veterinario cargue la visita
             </span>
           </p>
         </div>

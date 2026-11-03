@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PetHealthBookletSection } from "@/components/marketing/PetHealthBookletSection";
 import { ServicePage } from "@/components/marketing/ServicePage";
+import { MascotaStoreProducts } from "@/components/store/MascotaStoreProducts";
 import { SERVICES } from "@/lib/marketing/services";
 
 const service = SERVICES.mascotas;
@@ -15,6 +16,7 @@ export default function MascotasServicePage() {
     <ServicePage
       service={service}
       bookletSlot={<PetHealthBookletSection showServiceLink={false} />}
+      productSlot={<MascotaStoreProducts />}
     />
   );
 }

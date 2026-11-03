@@ -1,13 +1,10 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Bell,
-  ClipboardList,
   HeartPulse,
   MessageCircle,
   PawPrint,
   Phone,
-  Stethoscope,
-  Syringe,
 } from "lucide-react";
 
 export type ServiceSlug = "personas" | "mascotas";
@@ -143,46 +140,75 @@ export const SERVICES: Record<ServiceSlug, ServiceContent> = {
     navLabel: "Mascotas",
     title: "SOSme para mascotas",
     eyebrow: "Mascotas",
-    heroHeadline: "Si se pierde, te encuentran. Y su historial va con ella",
+    heroHeadline: "Si se pierde, te enterás vos.",
     heroSupport:
-      "Chapita o collar con QR de emergencia, más libreta sanitaria digital: vacunas, visitas, indicaciones y acceso temporal para el veterinario.",
+      "Quien escanea la chapita te contacta y te llega la ubicación. La libreta no se abre con ese QR: vacunas y veterinario quedan en tu panel, con un acceso aparte de 24 horas.",
     image: "/images/landing/use-case-mascotas.jpg",
     imageAlt:
       "Golden retriever con collar y chapita SOSme con código QR en un parque",
     heroImage: "/images/landing/use-case-mascotas.jpg",
     heroImageAlt:
       "Golden retriever con collar y chapita SOSme con código QR en un parque",
-    accentFrom: "from-teal-600",
-    accentTo: "to-emerald-800",
-    featuresTitle: "Doble protección: emergencia + libreta",
-    features: [
+    heroSlides: [
       {
-        icon: PawPrint,
-        title: "Si se pierde, te contactan",
-        text: "Quien encuentra a tu mascota ve cómo avisarte al toque.",
+        src: "/images/landing/use-case-mascotas.jpg",
+        alt: "Golden retriever con collar y chapita SOSme con código QR en un parque",
       },
       {
-        icon: ClipboardList,
-        title: "Libreta sanitaria digital",
-        text: "Vacunas, desparasitaciones, visitas e indicaciones en un solo lugar.",
-      },
-      {
-        icon: Stethoscope,
-        title: "QR temporal para el veterinario",
-        text: "Compartís acceso por 24 horas: ve el historial y carga la visita.",
-      },
-      {
-        icon: Syringe,
-        title: "Próximas dosis a la vista",
-        text: "Sabés qué está aplicada y cuándo toca la próxima.",
+        src: "/images/landing/perro2.jpeg",
+        alt: "Perro con collar y chapita celeste SOSme en un parque",
       },
     ],
-    scenariosTitle: "Para el día a día y la clínica",
+    accentFrom: "from-teal-600",
+    accentTo: "to-emerald-800",
+    steps: [
+      {
+        title: "Creás el perfil",
+        text: "Foto, a quién llamar e instrucciones si la encuentran. Vos quedás como responsable: en SOSme, el tutor.",
+      },
+      {
+        title: "El QR va en la chapita",
+        text: "En el collar. Quien lo escanea no ve vacunas ni el historial del veterinario.",
+      },
+      {
+        title: "Si lo escanean, te llega",
+        text: "Notificación, ubicación, y pueden llamarte o escribirte por WhatsApp.",
+      },
+    ],
+    featuresTitle: "Qué pasa cuando escanean la chapita",
+    features: [
+      {
+        icon: Bell,
+        title: "Te llega la alerta",
+        text: "Notificación en el momento, con la ubicación.",
+      },
+      {
+        icon: Phone,
+        title: "Contacto al toque",
+        text: "Pueden llamarte o escribirte por WhatsApp, sin instalar nada.",
+      },
+      {
+        icon: PawPrint,
+        title: "Solo lo necesario para encontrarla",
+        text: "Ven el nombre, cómo acercarse y a quién avisar. La libreta no está en ese QR.",
+      },
+      {
+        icon: MessageCircle,
+        title: "Chat en vivo",
+        text: "Podés seguir la conversación con quien la encontró, sin perder el hilo.",
+      },
+    ],
+    share: {
+      eyebrow: "Plan Pro",
+      title: "Compartí el perfil con quien también tiene que enterarse",
+      text: "Con Plan Pro invitás a otra persona de la familia. Si escanean el QR, la alerta y la ubicación les llegan a los dos.",
+    },
+    scenariosTitle: "Pensado para cuando no estás",
     scenarios: [
-      "Chapita o collar si se escapa o se pierde en un paseo",
-      "Control de vacunas y desparasitaciones en casa",
-      "Visita al vet con historial completo en el celular",
-      "Indicaciones del profesional guardadas para el hogar",
+      "Si se escapa en un paseo o en la calle",
+      "En la guardería, un viaje o la casa de alguien",
+      "Cuando la encuentra una persona que no te conoce",
+      "Si hay que avisar al toque y vos no estás ahí",
     ],
     ctaTitle: "Activá la libreta de tu mascota",
     ctaText:
@@ -224,9 +250,8 @@ export const USE_CASE_CARDS = [
     slug: "mascotas" as const,
     href: SERVICES.mascotas.href,
     title: "Mascotas",
-    description:
-      "Si se pierde la encuentran y su libreta sanitaria va con ella.",
-    detail: "Vacunas, visitas, indicaciones y QR temporal para el veterinario.",
+    description: "Si se pierde, te enterás vos.",
+    detail: "El QR de la chapita avisa. La libreta y el veterinario quedan aparte.",
     accent: "from-amber-500/20 to-yellow-500/10",
     image: SERVICES.mascotas.image,
     imageAlt: SERVICES.mascotas.imageAlt,

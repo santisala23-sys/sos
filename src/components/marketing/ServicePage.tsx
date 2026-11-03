@@ -143,8 +143,6 @@ export function ServicePage({
           ) : null}
         </section>
 
-        {bookletSlot}
-
         {/* Scenarios */}
         <section className="px-4 py-24 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-[88rem]">
@@ -167,6 +165,8 @@ export function ServicePage({
             </ul>
           </div>
         </section>
+
+        {bookletSlot}
 
         {productSlot}
 
