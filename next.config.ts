@@ -66,6 +66,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // QA builds into its own folder so it never clobbers the dev server's `.next`.
+  ...(process.env.NEXT_DIST_DIR
+    ? { distDir: process.env.NEXT_DIST_DIR, typescript: { tsconfigPath: "tsconfig.qa.json" } }
+    : {}),
   serverExternalPackages: ["pdfkit"],
   async redirects() {
     return [

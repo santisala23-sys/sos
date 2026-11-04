@@ -15,7 +15,11 @@
 
 # next.js
 /.next/
+/.next-qa/
 /out/
+
+# QA local (resultados crudos, logs del servidor)
+/.qa-runs/
 
 # production
 /build

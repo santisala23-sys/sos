@@ -1,4 +1,9 @@
-import { neon } from "@neondatabase/serverless";
+import { neon, neonConfig } from "@neondatabase/serverless";
+
+// Local Neon HTTP proxy (e.g. scripts/qa). Unset in production.
+if (process.env.NEON_HTTP_ENDPOINT) {
+  neonConfig.fetchEndpoint = process.env.NEON_HTTP_ENDPOINT;
+}
 
 export function getSql() {
   const url = process.env.DATABASE_URL;

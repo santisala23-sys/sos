@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:security": "node --test scripts/verify-slug-security.test.mjs",
+    "qa": "node scripts/qa/run.mjs",
     "db:migrate": "node scripts/migrate.mjs",
     "db:migrate:002": "node scripts/migrate-002.mjs",
     "db:migrate:003": "node scripts/migrate-003.mjs",
@@ -58,6 +59,7 @@
     "ws": "^8.21.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.15",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
